@@ -71,18 +71,18 @@
   #printView .pempty{text-align:center;padding:40px;color:#666;font-size:18px;column-span:all}
 
   @media print {
-    @page { size: A4; margin: 8mm; }
+    @page { size: A4; margin: 6mm; }
     body > *:not(#printView) { display:none !important; }
     #printView{position:static;padding:0;display:block !important}
     #printView .pclose, #printView .phelp{display:none !important}
-    #printView .ptop{border-bottom:1.5pt solid #111;padding-bottom:4pt;margin-bottom:6pt}
-    #printView h2{font-size:16pt}
-    #printView .pcols{column-count:3;column-gap:6mm}
-    #printView .pc{line-height:1.55;padding:2px 0;margin-bottom:3px}
-    #printView .pc .pflag{font-size:10.5pt}
-    #printView .pc .pname{font-size:12pt}
-    #printView .pc .pnums{font-size:10pt}
-    #printView .pc .pn{font-size:9pt;padding:0 3pt;border-color:#000}
+    #printView .ptop{border-bottom:1pt solid #111;padding-bottom:2pt;margin-bottom:3pt}
+    #printView h2{font-size:13pt}
+    #printView .pcols{column-count:3;column-gap:4mm}
+    #printView .pc{line-height:1.35;padding:0;margin-bottom:1px}
+    #printView .pc .pflag{font-size:8pt}
+    #printView .pc .pname{font-size:9.5pt}
+    #printView .pc .pnums{font-size:7.5pt}
+    #printView .pc .pn{font-size:7pt;padding:0 1.5pt;margin:0 1px 1px 0;border-color:#000;border-width:.5pt;border-radius:1pt}
   }
 </style>
 </head>

@@ -63,22 +63,26 @@
   #printView .pclose{background:#111;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;cursor:pointer}
   #printView .phelp{font-size:12px;color:#555;margin:0 0 12px}
   #printView .pcols{column-count:3;column-gap:10px}
-  #printView .pc{break-inside:avoid;margin:0 0 2px;padding:2px 0;line-height:1.35}
-  #printView .pc .pflag{font-size:11px;margin-right:4px}
-  #printView .pc .pname{font-family:'Bebas Neue',sans-serif;font-size:11.5px;letter-spacing:.3px;color:#0a4f9c;margin-right:5px}
-  #printView .pc .pnums{font-size:11px;font-weight:600;color:#111;letter-spacing:.3px}
+  #printView .pc{break-inside:avoid;margin:0 0 4px;padding:2px 0;line-height:1.55}
+  #printView .pc .pflag{font-size:11px;margin-right:4px;vertical-align:middle}
+  #printView .pc .pname{font-family:'Bebas Neue',sans-serif;font-size:11.5px;letter-spacing:.3px;color:#0a4f9c;margin-right:5px;vertical-align:middle}
+  #printView .pc .pnums{font-size:10.5px;color:#111}
+  #printView .pc .pn{display:inline-block;border:1px solid #333;border-radius:2px;padding:0 3px;margin:0 2px 2px 0;font-weight:700;font-family:Menlo,monospace;letter-spacing:.2px;line-height:1.2;white-space:nowrap}
   #printView .pempty{text-align:center;padding:40px;color:#666;font-size:18px;column-span:all}
 
   @media print {
     @page { size: A4; margin: 8mm; }
     body > *:not(#printView) { display:none !important; }
     #printView{position:static;padding:0;display:block !important}
-    #printView .ptop, #printView .pclose, #printView .phelp{display:none !important}
+    #printView .pclose, #printView .phelp{display:none !important}
+    #printView .ptop{border-bottom:1.5pt solid #111;padding-bottom:4pt;margin-bottom:6pt}
+    #printView h2{font-size:16pt}
     #printView .pcols{column-count:3;column-gap:6mm}
-    #printView .pc{line-height:1.4;padding:2px 0;margin-bottom:2px}
+    #printView .pc{line-height:1.55;padding:2px 0;margin-bottom:3px}
     #printView .pc .pflag{font-size:10.5pt}
     #printView .pc .pname{font-size:12pt}
-    #printView .pc .pnums{font-size:11pt;letter-spacing:.5px}
+    #printView .pc .pnums{font-size:10pt}
+    #printView .pc .pn{font-size:9pt;padding:0 3pt;border-color:#000}
   }
 </style>
 </head>
@@ -305,7 +309,7 @@ function buildPrintBody(){
   for(const c of DATA){
     const missing = c.ids.filter(id => !state[id]);
     if(!missing.length) continue;
-    const nums = missing.map(id => id.replace(c.code,'') || id).join(' ');
+    const nums = missing.map(id => `<span class="pn">${id}</span>`).join('');
     blocks.push(`<div class="pc"><span class="pflag">${c.flag}</span><span class="pname">${c.name.toUpperCase()}</span><span class="pnums">${nums}</span></div>`);
   }
   $pBody.innerHTML = blocks.length ? blocks.join('') : `<div class="pempty">🎉 Alle Sticker gesammelt!</div>`;

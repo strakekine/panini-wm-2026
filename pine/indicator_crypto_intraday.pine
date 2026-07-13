@@ -65,10 +65,11 @@ strongThreshold = input.float(80, "Strong Signal Score", group=grpScore)
 normalThreshold = input.float(50, "Normal Signal Score (Minimum fuer Signal)", group=grpScore)
 
 grpRisk = "Risk Management"
-atrStopMult = input.float(1.5, "ATR Stop Multiplier", group=grpRisk)
-tp1R        = input.float(2.0, "TP1 (R Multiple)", group=grpRisk)
-tp2R        = input.float(3.0, "TP2 (R Multiple)", group=grpRisk)
-slTpBarsFwd = input.int(20, "SL/TP Linien: Bars nach rechts", group=grpRisk)
+atrStopMult         = input.float(1.5, "ATR Stop Multiplier", group=grpRisk)
+tp1R                = input.float(2.0, "TP1 (R Multiple, 50% Teilgewinn)", group=grpRisk)
+tp2R                = input.float(3.0, "TP2 (R Multiple, nur informativ/Plot)", group=grpRisk)
+reentryCooldownBars = input.int(10, "Cooldown nach Exit (Bars) bis neue Entry gleicher Richtung", group=grpRisk)
+slTpBarsFwd         = input.int(20, "SL/TP Linien: Bars nach rechts", group=grpRisk)
 
 grpExit = "Exit Method"
 exitMethod       = input.string("ATR Trailing", "Exit Method", options=["ATR Trailing", "EMA20 Close", "Momentum Flip", "Supertrend"], group=grpExit)
@@ -200,8 +201,13 @@ shortRaw = (trendDown ? wTrend : 0.0) + (momDown ? wMom : 0.0) + (volOk ? wVol :
 longScore  = trendUp ? f_normScore(longRaw, maxApplicable) : 0.0
 shortScore = trendDown ? f_normScore(shortRaw, maxApplicable) : 0.0
 
-longSignal  = adxGateOk and trendUp and longScore >= normalThreshold and longScore >= shortScore
-shortSignal = adxGateOk and trendDown and shortScore >= normalThreshold and shortScore > longScore
+var int lastLongExitBar  = na
+var int lastShortExitBar = na
+longCooldownOk  = na(lastLongExitBar) or bar_index - lastLongExitBar >= reentryCooldownBars
+shortCooldownOk = na(lastShortExitBar) or bar_index - lastShortExitBar >= reentryCooldownBars
+
+longSignal  = adxGateOk and trendUp and longScore >= normalThreshold and longScore >= shortScore and longCooldownOk
+shortSignal = adxGateOk and trendDown and shortScore >= normalThreshold and shortScore > longScore and shortCooldownOk
 
 longStrong  = longSignal and longScore >= strongThreshold
 shortStrong = shortSignal and shortScore >= strongThreshold
@@ -293,13 +299,17 @@ if shortSignal and activePos != "short"
     tp2LineObj := line.new(bar_index, activeTP2, bar_index + slTpBarsFwd, activeTP2, color=color.new(color.green, 0), width=2)
     sigLabel   := label.new(bar_index, high, (shortStrong ? "SHORT (stark) " : "SHORT ") + str.tostring(math.round(shortScore)), style=label.style_label_down, color=color.new(color.red, 0), textcolor=color.white, size=shortStrong ? size.normal : size.small)
 
-exitLongAlert  = activePos == "long"  and (exitLongTrigger  or low  <= activeSL or high >= activeTP2)
-exitShortAlert = activePos == "short" and (exitShortTrigger or high >= activeSL or low  <= activeTP2)
+// TP2 schliesst NICHT mehr die komplette Position (nur informativ) -- sonst wird ein starker
+// Trend an TP2 zwangsweise "beendet" und sofort danach neu signalisiert (Recycling-Effekt).
+exitLongAlert  = activePos == "long"  and (exitLongTrigger  or low  <= activeSL)
+exitShortAlert = activePos == "short" and (exitShortTrigger or high >= activeSL)
 
 if exitLongAlert
     activePos := na
+    lastLongExitBar := bar_index
 if exitShortAlert
     activePos := na
+    lastShortExitBar := bar_index
 
 // ===================== PLOTS =====================
 plot(emaFast, "EMA Fast", color=color.new(color.blue, 0))

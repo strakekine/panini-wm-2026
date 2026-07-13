@@ -74,6 +74,24 @@ Trade-off: deutlich frühere Einstiege, aber mehr Fehlsignale in Seitwärts-/Cho
 ADX-Gate und die Volatilitäts-/Volumen-Filter fangen einen Teil davon ab, aber nicht alles).
 Wer es konservativer will: EMA-Paar zurück auf z.B. 50/200, Schwelle zurück auf 60-70.
 
+### Fix: "jede Kerze ein Signal" (v1.2)
+
+Nach der Beschleunigung in v1.1 wirkte es auf dem Chart, als würde in starken Trends fast
+jede Kerze ein Signal auslösen. Ursache war **nicht** der Score selbst (neue Entries sind
+über `strategy.position_size <= 0` bereits gesperrt, solange man in Position ist), sondern:
+**TP2 (3R) hat die komplette Restposition zwangsweise geschlossen.** In einem starken, glatten
+Trend wird 3R schnell erreicht → Position komplett zu → Trend meist noch intakt → sofortige
+Neu-Entry im nächsten qualifizierenden Bar. Das erzeugte einen schnellen
+Enter-Exit-Enter-Exit-Zyklus, der wie Dauerfeuer aussah.
+
+Behoben durch:
+- **TP2 schließt nicht mehr hart.** Nach dem 50%-Teilgewinn bei TP1 läuft der Rest nur noch
+  gegen den Stop oder bis die gewählte Exit-Methode (ATR-Trailing/EMA20/Momentum/Supertrend)
+  greift. TP2 bleibt nur als informative Ziellinie im Chart.
+- **Cooldown nach jedem Exit** (`Cooldown nach Exit (Bars)`, Default 10 Bars, Gruppe "Risk
+  Management"): Nach einem vollständigen Exit (Stop oder Exit-Methode) muss diese Anzahl
+  Bars vergehen, bevor in dieselbe Richtung erneut ein Signal ausgelöst werden darf.
+
 ## Funding Rate & Open Interest — wichtiger Hinweis
 
 TradingView listet Funding-Rate- und Open-Interest-Daten für Perpetual Futures als **eigene,

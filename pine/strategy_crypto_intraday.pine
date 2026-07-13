@@ -69,9 +69,10 @@ strongThreshold = input.float(80, "Strong Signal Score", group=grpScore)
 normalThreshold = input.float(50, "Normal Signal Score (Minimum fuer Signal)", group=grpScore)
 
 grpRisk = "Risk Management"
-atrStopMult = input.float(1.5, "ATR Stop Multiplier", group=grpRisk)
-tp1R        = input.float(2.0, "TP1 (R Multiple)", group=grpRisk)
-tp2R        = input.float(3.0, "TP2 (R Multiple)", group=grpRisk)
+atrStopMult        = input.float(1.5, "ATR Stop Multiplier", group=grpRisk)
+tp1R               = input.float(2.0, "TP1 (R Multiple, 50% Teilgewinn)", group=grpRisk)
+tp2R               = input.float(3.0, "TP2 (R Multiple, nur informativ/Plot)", group=grpRisk)
+reentryCooldownBars = input.int(10, "Cooldown nach Exit (Bars) bis neue Entry gleicher Richtung", group=grpRisk)
 
 grpExit = "Exit Method"
 exitMethod       = input.string("ATR Trailing", "Exit Method", options=["ATR Trailing", "EMA20 Close", "Momentum Flip", "Supertrend"], group=grpExit)
@@ -200,8 +201,13 @@ shortRaw = (trendDown ? wTrend : 0.0) + (momDown ? wMom : 0.0) + (volOk ? wVol :
 longScore  = trendUp ? f_normScore(longRaw, maxApplicable) : 0.0
 shortScore = trendDown ? f_normScore(shortRaw, maxApplicable) : 0.0
 
-longSignal  = adxGateOk and trendUp and longScore >= normalThreshold and longScore >= shortScore
-shortSignal = adxGateOk and trendDown and shortScore >= normalThreshold and shortScore > longScore
+var int lastLongExitBar  = na
+var int lastShortExitBar = na
+longCooldownOk  = na(lastLongExitBar) or bar_index - lastLongExitBar >= reentryCooldownBars
+shortCooldownOk = na(lastShortExitBar) or bar_index - lastShortExitBar >= reentryCooldownBars
+
+longSignal  = adxGateOk and trendUp and longScore >= normalThreshold and longScore >= shortScore and longCooldownOk
+shortSignal = adxGateOk and trendDown and shortScore >= normalThreshold and shortScore > longScore and shortCooldownOk
 
 // ===================== SL / TP =====================
 atrStopLong  = close - atrStopMult * atrVal
@@ -268,18 +274,27 @@ if shortSignal and strategy.position_size >= 0
     entryShortTP1 := tp1Short
     entryShortTP2 := tp2Short
 
-// 50% Teilgewinn bei TP1 (2R), Rest laeuft bis TP2 (3R) oder bis die gewaehlte Exit-Methode/der Stop greift.
+// 50% Teilgewinn bei TP1 (2R). Der Rest laeuft NICHT gegen ein hartes TP2, sondern nur gegen den
+// Stop bzw. bis die gewaehlte Exit-Methode greift -- verhindert, dass ein starker Trend an TP2
+// zwangsweise komplett geschlossen und direkt danach wieder neu eroeffnet wird (Recycling).
 if strategy.position_size > 0
     strategy.exit("Long TP1", "Long", stop=entryLongSL, limit=entryLongTP1, qty_percent=50)
-    strategy.exit("Long TP2", "Long", stop=entryLongSL, limit=entryLongTP2)
+    strategy.exit("Long Stop", "Long", stop=entryLongSL)
     if exitLongTrigger
         strategy.close("Long", comment="Exit: " + exitMethod)
 
 if strategy.position_size < 0
     strategy.exit("Short TP1", "Short", stop=entryShortSL, limit=entryShortTP1, qty_percent=50)
-    strategy.exit("Short TP2", "Short", stop=entryShortSL, limit=entryShortTP2)
+    strategy.exit("Short Stop", "Short", stop=entryShortSL)
     if exitShortTrigger
         strategy.close("Short", comment="Exit: " + exitMethod)
+
+// Cooldown-Tracking: Uebergang von "in Position" zu "flach" markieren, egal ob durch Stop,
+// Exit-Methode oder manuellen Close ausgeloest.
+if strategy.position_size[1] > 0 and strategy.position_size <= 0
+    lastLongExitBar := bar_index
+if strategy.position_size[1] < 0 and strategy.position_size >= 0
+    lastShortExitBar := bar_index
 
 // ===================== PLOTS =====================
 plot(emaFast, "EMA Fast", color=color.new(color.blue, 0))

@@ -1,12 +1,15 @@
 //@version=6
+// Commission/slippage/initial capital must be const in strategy(); adjust them
+// live in the Strategy Tester's "Properties" tab (Depth of Book / Commission /
+// Slippage), no recompile needed.
 strategy("Crypto Trend Continuation Strategy [15m]", shorttitle="CTC Strategy",
      overlay=true,
      initial_capital=10000,
      default_qty_type=strategy.percent_of_equity,
      default_qty_value=100,
      commission_type=strategy.commission.percent,
-     commission_value=input.float(0.04, "Commission %", group="Execution", tooltip="Round-turn commission per side, e.g. 0.04 for 0.04%"),
-     slippage=input.int(1, "Slippage (Ticks)", group="Execution", minval=0),
+     commission_value=0.04,
+     slippage=1,
      pyramiding=0,
      calc_on_order_fills=false,
      calc_on_every_tick=false,

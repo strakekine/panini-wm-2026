@@ -1,0 +1,177 @@
+//@version=6
+strategy("Crypto Trend Continuation Strategy [15m]", shorttitle="CTC Strategy",
+     overlay=true,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity,
+     default_qty_value=100,
+     commission_type=strategy.commission.percent,
+     commission_value=input.float(0.04, "Commission %", group="Execution", tooltip="Round-turn commission per side, e.g. 0.04 for 0.04%"),
+     slippage=input.int(1, "Slippage (Ticks)", group="Execution", minval=0),
+     pyramiding=0,
+     calc_on_order_fills=false,
+     calc_on_every_tick=false,
+     process_orders_on_close=false)
+
+// =============================================================================
+// INPUTS
+// =============================================================================
+
+// --- Trend Filter (EMA) ---
+emaFastLen = input.int(20, "EMA Fast", minval=1, group="Trend Filter (EMA)")
+emaMidLen  = input.int(50, "EMA Mid", minval=1, group="Trend Filter (EMA)")
+emaSlowLen = input.int(200, "EMA Slow", minval=1, group="Trend Filter (EMA)")
+
+// --- RSI Filter ---
+rsiLen      = input.int(14, "RSI Length", minval=1, group="RSI Filter")
+rsiLongTh   = input.float(50.0, "RSI Long Threshold (>)", group="RSI Filter")
+rsiShortTh  = input.float(50.0, "RSI Short Threshold (<)", group="RSI Filter")
+
+// --- Volume Filter ---
+useVolumeFilter = input.bool(true, "Use Volume Filter", group="Volume Filter")
+volSmaLen       = input.int(20, "Volume SMA Length", minval=1, group="Volume Filter")
+
+// --- Entry Type ---
+entryType        = input.string("Pullback", "Entry Type", options=["Pullback", "Breakout"], group="Entry Type")
+breakoutLookback = input.int(20, "Breakout Lookback (Bars)", minval=1, group="Entry Type")
+
+// --- Chop Filter (optional) ---
+useChopFilter  = input.bool(false, "Use Chop Filter", group="Chop Filter")
+chopMethod     = input.string("EMA Distance", "Chop Filter Method", options=["EMA Distance", "ATR Volatility"], group="Chop Filter")
+minEmaDistPct  = input.float(0.10, "Min EMA20/50 Distance %", minval=0.0, step=0.01, group="Chop Filter")
+minAtrPct      = input.float(0.15, "Min ATR % of Price", minval=0.0, step=0.01, group="Chop Filter")
+
+// --- Risk Management ---
+slType          = input.string("Swing Structure", "Stop Loss Type", options=["Swing Structure", "ATR"], group="Risk Management")
+swingLookback   = input.int(10, "Swing Lookback (Bars)", minval=1, group="Risk Management")
+atrLen          = input.int(14, "ATR Length", minval=1, group="Risk Management")
+atrMult         = input.float(1.5, "ATR Multiplier", minval=0.1, step=0.1, group="Risk Management")
+rrRatio         = input.float(2.0, "Risk:Reward Ratio", minval=0.1, step=0.1, group="Risk Management")
+useTrailingStop = input.bool(false, "Use ATR Trailing Stop", group="Risk Management")
+
+// --- Trade Direction ---
+allowLong  = input.bool(true, "Allow Long Trades", group="Trade Direction")
+allowShort = input.bool(true, "Allow Short Trades", group="Trade Direction")
+
+// --- Visualization ---
+showBiasBackground = input.bool(true, "Show Bias Background", group="Visualization")
+
+// =============================================================================
+// INDICATOR CALCULATIONS
+// =============================================================================
+
+emaFast = ta.ema(close, emaFastLen)
+emaMid  = ta.ema(close, emaMidLen)
+emaSlow = ta.ema(close, emaSlowLen)
+
+vwapValue = ta.vwap(hlc3)
+
+rsiValue = ta.rsi(close, rsiLen)
+
+volSma    = ta.sma(volume, volSmaLen)
+volumeOk  = not useVolumeFilter or volume > volSma
+
+atrValue = ta.atr(atrLen)
+
+// =============================================================================
+// FILTERS
+// =============================================================================
+
+// Trend bias
+bullishBias = close > emaSlow and emaFast > emaMid
+bearishBias = close < emaSlow and emaFast < emaMid
+
+// VWAP location
+longVwapOk  = close > vwapValue
+shortVwapOk = close < vwapValue
+
+// RSI direction
+rsiLongOk  = rsiValue > rsiLongTh
+rsiShortOk = rsiValue < rsiShortTh
+
+// Chop filter (optional, disabled by default)
+emaDistPct = math.abs(emaFast - emaMid) / emaMid * 100
+atrPct     = atrValue / close * 100
+chopOk     = not useChopFilter or (chopMethod == "EMA Distance" ? emaDistPct > minEmaDistPct : atrPct > minAtrPct)
+
+// Entry trigger: pullback (re-cross of EMA fast) or breakout (new high/low over lookback)
+longTrigger  = entryType == "Pullback" ? ta.crossover(close, emaFast)  : close > ta.highest(high, breakoutLookback)[1]
+shortTrigger = entryType == "Pullback" ? ta.crossunder(close, emaFast) : close < ta.lowest(low, breakoutLookback)[1]
+
+// =============================================================================
+// ENTRY CONDITIONS
+// =============================================================================
+
+longCondition  = allowLong  and bullishBias and longVwapOk  and rsiLongOk  and volumeOk and chopOk and longTrigger
+shortCondition = allowShort and bearishBias and shortVwapOk and rsiShortOk and volumeOk and chopOk and shortTrigger
+
+// =============================================================================
+// RISK MANAGEMENT / ORDER EXECUTION
+// =============================================================================
+
+var float longStop  = na
+var float longTp    = na
+var float longTrail = na
+
+var float shortStop  = na
+var float shortTp    = na
+var float shortTrail = na
+
+if longCondition and strategy.position_size <= 0
+    swingLow = ta.lowest(low, swingLookback)[1]
+    slPrice  = slType == "Swing Structure" ? swingLow : close - atrValue * atrMult
+    riskDist = close - slPrice
+    if riskDist > 0
+        longStop  := slPrice
+        longTp    := close + riskDist * rrRatio
+        longTrail := slPrice
+        strategy.entry("Long", strategy.long)
+
+if shortCondition and strategy.position_size >= 0
+    swingHigh = ta.highest(high, swingLookback)[1]
+    slPrice   = slType == "Swing Structure" ? swingHigh : close + atrValue * atrMult
+    riskDist  = slPrice - close
+    if riskDist > 0
+        shortStop  := slPrice
+        shortTp    := close - riskDist * rrRatio
+        shortTrail := slPrice
+        strategy.entry("Short", strategy.short)
+
+// ATR trailing stop: only ratchets in the favorable direction, never loosens
+if strategy.position_size > 0 and useTrailingStop
+    longTrail := math.max(longTrail, close - atrValue * atrMult)
+
+if strategy.position_size < 0 and useTrailingStop
+    shortTrail := math.min(shortTrail, close + atrValue * atrMult)
+
+longExitStop  = useTrailingStop ? longTrail  : longStop
+shortExitStop = useTrailingStop ? shortTrail : shortStop
+
+if strategy.position_size > 0
+    strategy.exit("Long Exit", from_entry="Long", stop=longExitStop, limit=longTp)
+
+if strategy.position_size < 0
+    strategy.exit("Short Exit", from_entry="Short", stop=shortExitStop, limit=shortTp)
+
+if strategy.position_size == 0
+    longStop  := na
+    longTp    := na
+    longTrail := na
+    shortStop  := na
+    shortTp    := na
+    shortTrail := na
+
+// =============================================================================
+// VISUALIZATION
+// =============================================================================
+
+plot(emaFast, "EMA Fast", color=color.new(color.blue, 0))
+plot(emaMid,  "EMA Mid",  color=color.new(color.orange, 0))
+plot(emaSlow, "EMA Slow", color=color.new(color.red, 0))
+plot(vwapValue, "VWAP", color=color.new(color.purple, 0), linewidth=2)
+
+bgcolor(showBiasBackground ? (bullishBias ? color.new(color.green, 90) : bearishBias ? color.new(color.red, 90) : na) : na)
+
+plot(strategy.position_size > 0 ? longExitStop  : na, "Long Stop",  color=color.new(color.red, 0),   style=plot.style_linebr)
+plot(strategy.position_size > 0 ? longTp        : na, "Long TP",    color=color.new(color.green, 0), style=plot.style_linebr)
+plot(strategy.position_size < 0 ? shortExitStop : na, "Short Stop", color=color.new(color.red, 0),   style=plot.style_linebr)
+plot(strategy.position_size < 0 ? shortTp       : na, "Short TP",   color=color.new(color.green, 0), style=plot.style_linebr)

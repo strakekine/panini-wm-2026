@@ -1,152 +1,65 @@
-# Crypto Intraday Long/Short Score Engine (Pine Script v6)
+# Crypto Intraday Trend Indicator (Pine Script v6) — Simple
 
-Zwei TradingView-Scripts für Krypto-Intraday-Trading (15M–4H), basierend auf einer
-Score-Engine (0–100) statt einem einzelnen Trigger: Ein Long-/Short-Signal entsteht erst,
-wenn mehrere unabhängige Faktoren gleichzeitig dafür sprechen (Trend, Momentum, Volumen,
-Volatilität, Marktstruktur, Pullback, Candle-Pattern, ADX, Higher-Timeframe-Bestätigung,
-Funding Rate/Open Interest).
+Einfache Trendfolge-Scripts für Krypto-Intraday-Trading (15M–4H): Long/Short-Signal, wenn
+**vier klare Bedingungen gleichzeitig zutreffen** — keine Score-Gewichtung, kein HTF/Funding/OI,
+keine Marktstruktur-Pivots, kein Pullback/Candle-Pattern-Kram. Absichtlich schlank.
 
-- `strategy_crypto_intraday.pine` — backtestbare Version (`strategy()`), damit die
-  Score-Gewichte und Schwellenwerte auf historischen Daten validiert werden können.
+- `strategy_crypto_intraday.pine` — backtestbare Version (`strategy()`).
 - `indicator_crypto_intraday.pine` — Live-Version (`indicator()`) mit Signal-Plots,
-  automatisch gezeichnetem Entry/SL/TP1/TP2 und Alerts (auch für Webhook/Bot geeignet).
+  automatisch gezeichnetem Entry/Stop und Alerts (JSON-Message für Webhook/Bot).
 
-Beide Scripts enthalten **dieselbe Score-Engine-Logik**, bewusst redundant statt über eine
-Pine-Library importiert (siehe Abschnitt "Warum keine Library" unten). Wer die Logik ändert
-(z.B. neue Gewichte, neuer Score-Baustein), sollte die Änderung in beiden Dateien im
-Abschnitt `// ===== SCORE ENGINE =====` spiegeln.
+Beide Scripts enthalten dieselbe Logik redundant (kein Pine-Library-Import, um den
+Publish-Test-Republish-Zyklus zu vermeiden — siehe unten).
+
+## Die vier Bedingungen (alle per UND verknüpft)
+
+| Bedingung | Logik |
+|---|---|
+| **Trend** | EMA20 > EMA50 (bzw. umgekehrt für Short) & Preis auf der Trendseite der EMA20 |
+| **Momentum** | MACD-Histogramm auf der Trendseite der Nulllinie und steigend (fallend für Short) |
+| **Volumen** | aktuelles Volumen > 20er-EMA des Volumens (abschaltbar) |
+| **ADX** | ADX ≥ Mindestwert (Default 20) — filtert Seitwärtsphasen |
+
+Kein Score, keine Gewichte: entweder alle vier Bedingungen stimmen, oder es gibt kein Signal.
+
+## Exit: nur ATR-Trailing-Stop
+
+Bei Entry wird sofort ein initialer Stop gesetzt (`atrStopMult × ATR`, Default 2×). Ab dann
+zieht ein Chandelier-Trailing-Stop (`Trailing ATR Length` / `Trailing ATR Mult`, Default 22/3)
+kontinuierlich nach — der Stop kann sich nur in Richtung Gewinn bewegen, nie zurück. Kein
+Take-Profit, kein Teilgewinn, keine zweite Exit-Methode zur Auswahl: der Trade läuft, bis der
+Trailing-Stop greift oder die Trendbedingung selbst kippt.
 
 ## Setup
 
-1. Beide `.pine`-Dateien öffnen, Inhalt kopieren.
-2. In TradingView: Pine Editor → "New" → Inhalt einfügen → "Add to Chart".
-3. Empfohlener Start-Chart: BTCUSDT Perp (z.B. `BINANCE:BTCUSDT.P`), Timeframe 1H.
-
-## Empfohlener Ablauf: erst Strategy, dann Indicator
-
-1. **Strategy-Script laden**, im "Strategy Tester"-Tab Win-Rate/Profit-Factor/Max-Drawdown/
-   Trade-Anzahl über mehrere Marktphasen prüfen (Bull, Bear, Chop — nicht nur einen Bullrun).
-2. `commission_value` (Default 0.05 %) und `slippage` realistisch für die eigene Exchange
-   einstellen, sonst rechnet sich der Backtest schön.
-3. Score-Gewichte und Schwellenwerte (`Signal Thresholds`-Gruppe) so lange tunen, bis das
-   Ergebnis über mehrere Symbole/Zeiträume stabil ist — nicht nur auf ein Symbol optimieren
-   (Overfitting-Gefahr).
-4. Stichprobenartig einzelne Trades im Chart nachvollziehen (macht der Stop/TP/Exit-Trigger
-   Sinn an dieser Stelle?).
-5. Erst danach das **Indicator-Script** live schalten und die Signale gegen die
-   Strategy-Trades gegenprüfen (sollten auf denselben Bars auftreten).
+1. Beide `.pine`-Dateien in TradingView → Pine Editor → New → einfügen → "Add to Chart".
+2. Strategy-Script zuerst über mehrere Marktphasen (Bull/Bear/Chop) backtesten, Gewichte/
+   Schwellen (EMA-Längen, ADX-Minimum, ATR-Multiplikatoren) darüber tunen.
+3. Erst danach das Indicator-Script live schalten, Signale gegen die Strategy-Trades
+   gegenprüfen.
 
 Ich kann diese Validierung in dieser Umgebung nicht selbst ausführen (kein
 TradingView-/Pine-Compiler-Zugriff) — die Freigabe nach Backtest liegt beim Nutzer.
 
-## Score-Bausteine (Standard-Gewichte, alle per Input änderbar)
-
-| Baustein | Gewicht | Kurzlogik |
-|---|---|---|
-| Trend (EMA20/EMA50) | 20 | Hard-Gate: Long nur wenn EMA20>EMA50 & Preis>EMA20 |
-| Momentum (MACD-Histogramm) | 15 | Histogramm positiv/negativ und steigend/fallend |
-| Volumen | 10 | Relative Volume > 1.3 (konfigurierbar) |
-| Volatilität | 10 | Bollinger-Band-Width > eigener Durchschnitt |
-| Marktstruktur | 15 | Bestätigte HH/HL bzw. LH/LL via `ta.pivothigh/low` |
-| Pullback | 10 | Abstand zur EMA20 in ATR-Einheiten, verhindert Chasing |
-| Candle-Pattern | 5 | Engulfing / Hammer / Shooting Star / Outside Bar |
-| ADX | Hard-Gate + 10 Bonus | kein Signal unter Mindest-ADX, Bonus ab starkem ADX |
-| HTF-Bestätigung | 15 | höhere Timeframe (Default 4H) muss Richtung bestätigen |
-| Funding/OI (optional) | 10 | siehe unten |
-
-Score wird auf die Summe der **tatsächlich anwendbaren** Gewichte normalisiert (0–100), damit
-z.B. ein fehlendes Funding-Symbol den Score nicht künstlich drückt. Signal ab Score ≥ 50
-("normal"), ab ≥ 80 als "stark" markiert.
-
-### Tuning-Historie: "deutlich schneller" (v1.1)
-
-Ursprünglich lief der Trend-Gate auf EMA50/EMA200 (1H) mit demselben Paar auch auf der 4H-HTF
-— das führte auf 1H zu spürbarem Lag (EMA200 = über 8 Tage Rückblick, HTF-EMA200 auf 4H sogar
-über 33 Tage), Signale kamen erst lange nach Trendstart. Angepasst auf:
-
-- Trend-EMA-Paar: **20/50** statt 50/200 (eigene Inputs, Gruppe "Trend Filter")
-- HTF bekommt **eigene, unabhängige EMA-Längen** (20/50 statt 50/200, Gruppe "Higher
-  Timeframe") statt die trägen Haupt-EMA-Längen wiederzuverwenden
-- Pivot-Bestätigung: **3/3** statt 5/5 Bars (Gruppe "Market Structure")
-- Score-Schwelle: **50** statt 60 (Gruppe "Signal Thresholds")
-
-Trade-off: deutlich frühere Einstiege, aber mehr Fehlsignale in Seitwärts-/Chop-Phasen (der
-ADX-Gate und die Volatilitäts-/Volumen-Filter fangen einen Teil davon ab, aber nicht alles).
-Wer es konservativer will: EMA-Paar zurück auf z.B. 50/200, Schwelle zurück auf 60-70.
-
-### Fix: "jede Kerze ein Signal" (v1.2)
-
-Nach der Beschleunigung in v1.1 wirkte es auf dem Chart, als würde in starken Trends fast
-jede Kerze ein Signal auslösen. Ursache war **nicht** der Score selbst (neue Entries sind
-über `strategy.position_size <= 0` bereits gesperrt, solange man in Position ist), sondern:
-**TP2 (3R) hat die komplette Restposition zwangsweise geschlossen.** In einem starken, glatten
-Trend wird 3R schnell erreicht → Position komplett zu → Trend meist noch intakt → sofortige
-Neu-Entry im nächsten qualifizierenden Bar. Das erzeugte einen schnellen
-Enter-Exit-Enter-Exit-Zyklus, der wie Dauerfeuer aussah.
-
-Behoben durch:
-- **TP2 schließt nicht mehr hart.** Nach dem 50%-Teilgewinn bei TP1 läuft der Rest nur noch
-  gegen den Stop oder bis die gewählte Exit-Methode (ATR-Trailing/EMA20/Momentum/Supertrend)
-  greift. TP2 bleibt nur als informative Ziellinie im Chart.
-- **Cooldown nach jedem Exit** (`Cooldown nach Exit (Bars)`, Default 10 Bars, Gruppe "Risk
-  Management"): Nach einem vollständigen Exit (Stop oder Exit-Methode) muss diese Anzahl
-  Bars vergehen, bevor in dieselbe Richtung erneut ein Signal ausgelöst werden darf.
-
-## Funding Rate & Open Interest — wichtiger Hinweis
-
-TradingView listet Funding-Rate- und Open-Interest-Daten für Perpetual Futures als **eigene,
-separat suchbare Symbole** (je nach Exchange unterschiedlich benannt, z.B. beim Filtern der
-Symbolsuche nach Instrumententyp "Funding Rate" / "Open Interest"). Da sich diese Symbolnamen
-je nach Exchange/Pair unterscheiden und ich das nicht ohne TradingView-Zugriff verifizieren
-kann, sind beide als **freie Symbol-Inputs** ausgelegt:
-
-- `Funding Rate Symbol` und `Open Interest Symbol` (Gruppe "Funding / Open Interest") —
-  leer lassen = Baustein wird deaktiviert und automatisch aus der Score-Normalisierung
-  herausgerechnet (kein Nachteil für den Score).
-- Zum Befüllen: In der TradingView-Symbolsuche nach z.B. "BTCUSDT Funding" oder "BTCUSDT Open
-  Interest" suchen, passendes Symbol der genutzten Exchange auswählen und in den Input
-  eintragen.
-
-## Repainting — was bewusst in Kauf genommen wird
-
-- **Marktstruktur**: `ta.pivothigh`/`ta.pivotlow` bestätigen einen Swing erst nach
-  `pivotRight` weiteren Bars (Default 5). Das ist eine echte, unvermeidbare Verzögerung —
-  kein Trick dagegen, ohne dass es repaintet.
-- **HTF-Bestätigung & Funding/OI**: Alle `request.security()`-Aufrufe verwenden ein
-  `[1]`-Shift auf den angeforderten Wert plus `lookahead=barmerge.lookahead_off`, damit der
-  Wert der laufenden (unfertigen) HTF-Kerze nie ins aktuelle Chart durchsickert. Dadurch
-  stimmen Backtest- und Live-Werte überein.
-
-## Exit-Logik
-
-Bei jedem Signal werden sofort Entry/SL/TP1 (2R, 50 % Teilgewinn)/TP2 (3R) gezeichnet bzw. im
-Strategy-Script als Orders gesetzt. Zusätzlich läuft unabhängig davon eine der vier wählbaren
-Exit-Methoden (Dropdown `Exit Method`):
-
-1. **ATR Trailing** (Chandelier Exit)
-2. **EMA20 Close** (Schlusskurs kreuzt EMA20 gegen die Position)
-3. **Momentum Flip** (MACD-Histogramm kreuzt zurück durch die Nulllinie)
-4. **Supertrend**-Flip
-
-Im Indicator-Script gibt es dafür keine echten Orders (ein reiner Indikator kann das nicht),
-sondern `alertcondition()`-Events für Long/Short-Entry und Exit-Long/Exit-Short — inkl.
-JSON-Alert-Messages (`{{ticker}}`, `{{close}}`), direkt für Webhook/Bot-Anbindung nutzbar.
-
 ## Alerts einrichten (Indicator-Script)
 
 1. Indicator zum Chart hinzufügen.
-2. "Alert erstellen" (Uhr-Symbol) → Bedingung: das Indicator wählen → eine der vier
+2. "Alert erstellen" → Bedingung: das Indicator wählen → eine der vier
    `alertcondition`-Optionen (Long Signal / Short Signal / Exit Long / Exit Short).
-3. Optional: unter "Webhook URL" die eigene Bot-/Automatisierungs-Endpoint eintragen — die
-   Message ist bereits als JSON vorformatiert.
+3. Optional: Webhook-URL eintragen — Message ist bereits als JSON vorformatiert.
 
-## Warum keine Pine-Library in V1
+## Vorgeschichte: warum so schlank
 
-Eine Pine-Library muss erst auf TradingView veröffentlicht werden, bevor sie per
-`import username/lib/version` in einem anderen Script nutzbar ist. Das erzeugt einen
-Publish → Test → Republish-Zyklus, der ohne direkten TradingView-Zugriff in dieser Umgebung
-nur Reibung erzeugt. Deshalb sind beide Scripts aktuell eigenständig (mit bewusst
-redundanter Score-Engine). Wer die Logik dauerhaft an einer Stelle halten will, kann sie
-später in eine echte Pine-Library auslagern — beide Scripts wurden so strukturiert
-(klar abgegrenzter `SCORE ENGINE`-Abschnitt), dass sich das leicht nachträglich extrahieren
-lässt.
+Frühere Versionen hatten eine 0–100-Score-Engine mit 9 Bausteinen (Trend, Momentum, Volumen,
+Volatilität, Marktstruktur, Pullback, Candle-Pattern, ADX, HTF-Bestätigung, Funding/OI), dazu
+TP1/TP2, 4 wählbare Exit-Methoden und einen Re-Entry-Cooldown. Das führte zu zwei Problemen:
+
+1. Die vielen trägen Filter (v.a. EMA200 auf 1H und HTF auf 4H mit denselben Längen) haben
+   Signale weit hinter den eigentlichen Trendstart verzögert.
+2. Nach dem Verschlanken der Filter hat ein hartes TP2 (volle Positionsschließung bei 3R)
+   in starken Trends zu einem Enter-Exit-Enter-Zyklus geführt, der wie ein Signal auf fast
+   jeder Kerze aussah.
+
+Statt weiter an Parametern zu drehen, wurde das System auf diese 4-Bedingungen-Logik mit
+einem einzigen Exit-Verfahren reduziert. Wer die Score-Engine-Variante mit HTF/Funding-OI/
+Marktstruktur wieder braucht, findet sie in der Git-Historie dieses Branches.

@@ -37,7 +37,11 @@ emaSlowLn = input.int(200, "HTF EMA langsam",  minval = 5,          group = grpB
 
 grpReg    = "2 | Regime-Filter (ADX)"
 adxLen    = input.int(14, "ADX / DMI Länge",   minval = 2,          group = grpReg)
-adxThresh = input.float(22.0, "ADX-Schwelle (Trend ab)", minval = 5, group = grpReg)
+adxThresh = input.float(20.0, "ADX-Schwelle (Trend ab)", minval = 5, group = grpReg)
+// Regime getrennt schaltbar -> saubere Isolation im Backtest.
+// Default: Range AUS (Diagnose: negativer Vorteil), Trend AN.
+enableTrend = input.bool(true,  "Trend-Trades aktiv", group = grpReg)
+enableRange = input.bool(false, "Range-Trades aktiv", group = grpReg)
 
 grpTrend  = "3a | Trend-Entry (Pullback)"
 ltfEmaLn  = input.int(21, "Pullback-EMA (LTF)", minval = 2,         group = grpTrend)
@@ -112,12 +116,12 @@ macdOkShort = not useMacdEntry or macdBear
 // -- Trend / Pullback ------------------------------------------------------
 pulledBackLong  = ta.lowest(rsi, 3) < pbLong        // kürzlicher RSI-Dip
 pulledBackShort = ta.highest(rsi, 3) > pbShort
-trendLong  = trending and biasLong  and pulledBackLong  and ta.crossover(close, ltfEma)
-trendShort = trending and biasShort and pulledBackShort and ta.crossunder(close, ltfEma)
+trendLong  = enableTrend and trending and biasLong  and pulledBackLong  and ta.crossover(close, ltfEma)
+trendShort = enableTrend and trending and biasShort and pulledBackShort and ta.crossunder(close, ltfEma)
 
 // -- Range / Mean-Reversion ------------------------------------------------
-rangeLong  = ranging and ta.crossover(rsi, rsiOS) and (not rangeBias or biasLong)
-rangeShort = ranging and ta.crossunder(rsi, rsiOB) and (not rangeBias or biasShort)
+rangeLong  = enableRange and ranging and ta.crossover(rsi, rsiOS) and (not rangeBias or biasLong)
+rangeShort = enableRange and ranging and ta.crossunder(rsi, rsiOB) and (not rangeBias or biasShort)
 
 goLong  = allowLong  and (trendLong  or rangeLong)  and macdOkLong  and strategy.position_size == 0
 goShort = allowShort and (trendShort or rangeShort) and macdOkShort and strategy.position_size == 0

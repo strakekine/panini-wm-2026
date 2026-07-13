@@ -57,6 +57,13 @@ rMult     = input.float(2.0, "Take-Profit (R-Vielfaches)", minval = 0.5, group =
 atrLen    = input.int(14, "ATR Länge", minval = 2,                  group = grpRisk)
 useTrail  = input.bool(true, "Trailing-Exit nach 1R aktiv", group = grpRisk)
 
+grpMacd   = "5 | MACD (optional, zum A/B-Testen)"
+useMacdEntry = input.bool(true,  "MACD als Entry-Filter",  group = grpMacd)
+useMacdExit  = input.bool(true,  "MACD-Dreh als Exit",     group = grpMacd)
+macdFast  = input.int(12, "MACD schnell", minval = 1, group = grpMacd)
+macdSlow  = input.int(26, "MACD langsam", minval = 2, group = grpMacd)
+macdSig   = input.int(9,  "MACD Signal",  minval = 1, group = grpMacd)
+
 grpSide   = "Richtung"
 allowLong  = input.bool(true, "Longs erlauben",  group = grpSide)
 allowShort = input.bool(true, "Shorts erlauben", group = grpSide)
@@ -89,6 +96,14 @@ ltfEma = ta.ema(close, ltfEmaLn)
 rsi    = ta.rsi(close, rsiLen)
 atr    = ta.atr(atrLen)
 
+// MACD — misst Momentum; hier NUR als optionaler Filter/Exit, nicht als Kern-Trigger
+[macdLine, macdSignal, macdHist] = ta.macd(close, macdFast, macdSlow, macdSig)
+macdBull = macdLine > macdSignal        // Momentum aufwärts
+macdBear = macdLine < macdSignal        // Momentum abwärts
+// Entry-Filter: wenn abgeschaltet, immer 'true' (kein Einfluss)
+macdOkLong  = not useMacdEntry or macdBull
+macdOkShort = not useMacdEntry or macdBear
+
 // ---------------------------------------------------------------------------
 //  3 | ENTRY-Trigger
 //     Trend  -> Pullback in Richtung Bias (RSI dippt, dreht, Preis über/unter EMA)
@@ -104,8 +119,8 @@ trendShort = trending and biasShort and pulledBackShort and ta.crossunder(close,
 rangeLong  = ranging and ta.crossover(rsi, rsiOS) and (not rangeBias or biasLong)
 rangeShort = ranging and ta.crossunder(rsi, rsiOB) and (not rangeBias or biasShort)
 
-goLong  = allowLong  and (trendLong  or rangeLong)  and strategy.position_size == 0
-goShort = allowShort and (trendShort or rangeShort) and strategy.position_size == 0
+goLong  = allowLong  and (trendLong  or rangeLong)  and macdOkLong  and strategy.position_size == 0
+goShort = allowShort and (trendShort or rangeShort) and macdOkShort and strategy.position_size == 0
 
 // ---------------------------------------------------------------------------
 //  Struktur — letztes bestätigtes Swing-Hoch/-Tief (Pivots)
@@ -166,6 +181,14 @@ if useTrail and strategy.position_size < 0 and not na(entryPx)
         slPx := newStop
         strategy.exit("Short-X", from_entry = "Short", stop = slPx, limit = tpPx)
 
+// -- MACD-Exit: dreht das Momentum gegen die offene Position, sofort schließen --
+macdExitLong  = useMacdExit and strategy.position_size > 0 and ta.crossunder(macdLine, macdSignal)
+macdExitShort = useMacdExit and strategy.position_size < 0 and ta.crossover(macdLine, macdSignal)
+if macdExitLong and barstate.isconfirmed
+    strategy.close("Long",  comment = "MACD-Exit")
+if macdExitShort and barstate.isconfirmed
+    strategy.close("Short", comment = "MACD-Exit")
+
 // Position flat -> Levels zurücksetzen
 if strategy.position_size == 0
     entryPx := na
@@ -194,5 +217,8 @@ plot(strategy.position_size != 0 ? entryPx : na, "Entry",       color.new(color.
 // ---------------------------------------------------------------------------
 //  ALERTS
 // ---------------------------------------------------------------------------
+plotshape(macdExitLong or macdExitShort, "MACD-Exit", shape.xcross, location.abovebar, color.new(color.yellow, 0), size = size.tiny)
+
 alertcondition(longRiskOK,  "LONG Entry",  "Regime-Adaptive: LONG-Signal")
 alertcondition(shortRiskOK, "SHORT Entry", "Regime-Adaptive: SHORT-Signal")
+alertcondition(macdExitLong or macdExitShort, "MACD Exit", "Regime-Adaptive: MACD-Exit-Signal")

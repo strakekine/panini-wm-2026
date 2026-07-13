@@ -7,8 +7,8 @@ indicator("Crypto Intraday Long/Short Score Engine", shorttitle="CIS-Engine", ov
 
 // ===================== INPUTS =====================
 grpTrend = "Trend Filter"
-emaFastLen = input.int(50, "EMA Fast", group=grpTrend)
-emaSlowLen = input.int(200, "EMA Slow", group=grpTrend)
+emaFastLen = input.int(20, "EMA Fast", group=grpTrend)
+emaSlowLen = input.int(50, "EMA Slow", group=grpTrend)
 wTrend     = input.float(20, "Weight: Trend", group=grpTrend)
 
 grpMom = "Momentum"
@@ -30,8 +30,8 @@ volaSmaLen = input.int(20, "Volatility Avg Length", group=grpVola)
 wVola      = input.float(10, "Weight: Volatility", group=grpVola)
 
 grpStruct = "Market Structure"
-pivotLeft  = input.int(5, "Pivot Left Bars", group=grpStruct)
-pivotRight = input.int(5, "Pivot Right Bars (Bestaetigungsverzoegerung)", group=grpStruct)
+pivotLeft  = input.int(3, "Pivot Left Bars", group=grpStruct)
+pivotRight = input.int(3, "Pivot Right Bars (Bestaetigungsverzoegerung)", group=grpStruct)
 wStruct    = input.float(15, "Weight: Structure", group=grpStruct)
 
 grpPB = "Pullback"
@@ -49,8 +49,10 @@ adxStrong = input.float(25, "Strong-ADX Bonus Threshold", group=grpADX)
 wADX      = input.float(10, "Weight: ADX Bonus", group=grpADX)
 
 grpHTF = "Higher Timeframe"
-htfInput = input.timeframe("240", "HTF (Trend Filter)", group=grpHTF)
-wHTF     = input.float(15, "Weight: HTF Confirmation", group=grpHTF)
+htfInput      = input.timeframe("240", "HTF (Trend Filter)", group=grpHTF)
+htfEmaFastLen = input.int(20, "HTF EMA Fast", group=grpHTF)
+htfEmaSlowLen = input.int(50, "HTF EMA Slow", group=grpHTF)
+wHTF          = input.float(15, "Weight: HTF Confirmation", group=grpHTF)
 
 grpFund = "Funding / Open Interest (optional)"
 fundingSymbol   = input.symbol("", "Funding Rate Symbol (leer = deaktiviert)", group=grpFund)
@@ -60,7 +62,7 @@ wFund           = input.float(10, "Weight: Funding/OI", group=grpFund)
 
 grpScore = "Signal Thresholds"
 strongThreshold = input.float(80, "Strong Signal Score", group=grpScore)
-normalThreshold = input.float(60, "Normal Signal Score (Minimum fuer Signal)", group=grpScore)
+normalThreshold = input.float(50, "Normal Signal Score (Minimum fuer Signal)", group=grpScore)
 
 grpRisk = "Risk Management"
 atrStopMult = input.float(1.5, "ATR Stop Multiplier", group=grpRisk)
@@ -154,8 +156,8 @@ adxGateOk = adxMin <= 0 or adxVal >= adxMin
 adxBonus  = adxVal >= adxStrong
 
 // --- HTF Bestaetigung (repaint-sicher: [1]-Shift + lookahead_off) ---
-htfEmaFast = request.security(syminfo.tickerid, htfInput, ta.ema(close, emaFastLen)[1], lookahead=barmerge.lookahead_off)
-htfEmaSlow = request.security(syminfo.tickerid, htfInput, ta.ema(close, emaSlowLen)[1], lookahead=barmerge.lookahead_off)
+htfEmaFast = request.security(syminfo.tickerid, htfInput, ta.ema(close, htfEmaFastLen)[1], lookahead=barmerge.lookahead_off)
+htfEmaSlow = request.security(syminfo.tickerid, htfInput, ta.ema(close, htfEmaSlowLen)[1], lookahead=barmerge.lookahead_off)
 htfClose   = request.security(syminfo.tickerid, htfInput, close[1], lookahead=barmerge.lookahead_off)
 
 htfTrendUp   = htfEmaFast > htfEmaSlow and htfClose > htfEmaFast

@@ -43,7 +43,7 @@ TradingView-/Pine-Compiler-Zugriff) — die Freigabe nach Backtest liegt beim Nu
 
 | Baustein | Gewicht | Kurzlogik |
 |---|---|---|
-| Trend (EMA50/EMA200) | 20 | Hard-Gate: Long nur wenn EMA50>EMA200 & Preis>EMA50 |
+| Trend (EMA20/EMA50) | 20 | Hard-Gate: Long nur wenn EMA20>EMA50 & Preis>EMA20 |
 | Momentum (MACD-Histogramm) | 15 | Histogramm positiv/negativ und steigend/fallend |
 | Volumen | 10 | Relative Volume > 1.3 (konfigurierbar) |
 | Volatilität | 10 | Bollinger-Band-Width > eigener Durchschnitt |
@@ -55,8 +55,24 @@ TradingView-/Pine-Compiler-Zugriff) — die Freigabe nach Backtest liegt beim Nu
 | Funding/OI (optional) | 10 | siehe unten |
 
 Score wird auf die Summe der **tatsächlich anwendbaren** Gewichte normalisiert (0–100), damit
-z.B. ein fehlendes Funding-Symbol den Score nicht künstlich drückt. Signal ab Score ≥ 60
+z.B. ein fehlendes Funding-Symbol den Score nicht künstlich drückt. Signal ab Score ≥ 50
 ("normal"), ab ≥ 80 als "stark" markiert.
+
+### Tuning-Historie: "deutlich schneller" (v1.1)
+
+Ursprünglich lief der Trend-Gate auf EMA50/EMA200 (1H) mit demselben Paar auch auf der 4H-HTF
+— das führte auf 1H zu spürbarem Lag (EMA200 = über 8 Tage Rückblick, HTF-EMA200 auf 4H sogar
+über 33 Tage), Signale kamen erst lange nach Trendstart. Angepasst auf:
+
+- Trend-EMA-Paar: **20/50** statt 50/200 (eigene Inputs, Gruppe "Trend Filter")
+- HTF bekommt **eigene, unabhängige EMA-Längen** (20/50 statt 50/200, Gruppe "Higher
+  Timeframe") statt die trägen Haupt-EMA-Längen wiederzuverwenden
+- Pivot-Bestätigung: **3/3** statt 5/5 Bars (Gruppe "Market Structure")
+- Score-Schwelle: **50** statt 60 (Gruppe "Signal Thresholds")
+
+Trade-off: deutlich frühere Einstiege, aber mehr Fehlsignale in Seitwärts-/Chop-Phasen (der
+ADX-Gate und die Volatilitäts-/Volumen-Filter fangen einen Teil davon ab, aber nicht alles).
+Wer es konservativer will: EMA-Paar zurück auf z.B. 50/200, Schwelle zurück auf 60-70.
 
 ## Funding Rate & Open Interest — wichtiger Hinweis
 

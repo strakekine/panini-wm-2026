@@ -1,0 +1,293 @@
+//@version=6
+// Crypto Intraday Long/Short Score Engine — STRATEGY (Backtest)
+// Backtestbares Gegenstueck zu indicator_crypto_intraday.pine.
+// Die Score-Engine (Abschnitt "SCORE ENGINE") ist in beiden Scripts bewusst
+// identisch gehalten -- siehe pine/README.md fuer den Grund (kein Library-Import in V1).
+strategy("Crypto Intraday Long/Short Score Engine [Strategy]", shorttitle="CIS-Engine [Strat]",
+     overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=10,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     slippage=2, calc_on_every_tick=false, pyramiding=0)
+
+// ===================== INPUTS =====================
+grpTrend = "Trend Filter"
+emaFastLen = input.int(50, "EMA Fast", group=grpTrend)
+emaSlowLen = input.int(200, "EMA Slow", group=grpTrend)
+wTrend     = input.float(20, "Weight: Trend", group=grpTrend)
+
+grpMom = "Momentum"
+macdFastLen = input.int(12, "MACD Fast", group=grpMom)
+macdSlowLen = input.int(26, "MACD Slow", group=grpMom)
+macdSigLen  = input.int(9, "MACD Signal", group=grpMom)
+wMom        = input.float(15, "Weight: Momentum", group=grpMom)
+
+grpVol = "Volume"
+volEmaLen = input.int(20, "Volume EMA Length", group=grpVol)
+rvolMin   = input.float(1.3, "Min Relative Volume", group=grpVol)
+wVol      = input.float(10, "Weight: Volume", group=grpVol)
+
+grpVola = "Volatility"
+atrLen     = input.int(14, "ATR Length", group=grpVola)
+bbLen      = input.int(20, "BB Length", group=grpVola)
+bbMult     = input.float(2.0, "BB Mult", group=grpVola)
+volaSmaLen = input.int(20, "Volatility Avg Length", group=grpVola)
+wVola      = input.float(10, "Weight: Volatility", group=grpVola)
+
+grpStruct = "Market Structure"
+pivotLeft  = input.int(5, "Pivot Left Bars", group=grpStruct)
+pivotRight = input.int(5, "Pivot Right Bars (Bestaetigungsverzoegerung)", group=grpStruct)
+wStruct    = input.float(15, "Weight: Structure", group=grpStruct)
+
+grpPB = "Pullback"
+emaPullbackLen  = input.int(20, "Pullback EMA", group=grpPB)
+pullbackMaxATR  = input.float(1.5, "Max Distance (x ATR)", group=grpPB)
+wPB             = input.float(10, "Weight: Pullback", group=grpPB)
+
+grpCandle = "Candle Pattern"
+wCandle = input.float(5, "Weight: Candle Pattern", group=grpCandle)
+
+grpADX = "ADX Filter"
+adxLen    = input.int(14, "ADX/DMI Length", group=grpADX)
+adxMin    = input.float(18, "Min ADX (Hard Gate, 0 = aus)", group=grpADX)
+adxStrong = input.float(25, "Strong-ADX Bonus Threshold", group=grpADX)
+wADX      = input.float(10, "Weight: ADX Bonus", group=grpADX)
+
+grpHTF = "Higher Timeframe"
+htfInput = input.timeframe("240", "HTF (Trend Filter)", group=grpHTF)
+wHTF     = input.float(15, "Weight: HTF Confirmation", group=grpHTF)
+
+grpFund = "Funding / Open Interest (optional)"
+fundingSymbol   = input.symbol("", "Funding Rate Symbol (leer = deaktiviert)", group=grpFund)
+oiSymbol        = input.symbol("", "Open Interest Symbol (leer = deaktiviert)", group=grpFund)
+fundingExtreme  = input.float(0.01, "Funding Extreme Threshold (%)", group=grpFund)
+wFund           = input.float(10, "Weight: Funding/OI", group=grpFund)
+
+grpScore = "Signal Thresholds"
+strongThreshold = input.float(80, "Strong Signal Score", group=grpScore)
+normalThreshold = input.float(60, "Normal Signal Score (Minimum fuer Signal)", group=grpScore)
+
+grpRisk = "Risk Management"
+atrStopMult = input.float(1.5, "ATR Stop Multiplier", group=grpRisk)
+tp1R        = input.float(2.0, "TP1 (R Multiple)", group=grpRisk)
+tp2R        = input.float(3.0, "TP2 (R Multiple)", group=grpRisk)
+
+grpExit = "Exit Method"
+exitMethod       = input.string("ATR Trailing", "Exit Method", options=["ATR Trailing", "EMA20 Close", "Momentum Flip", "Supertrend"], group=grpExit)
+emaExitLen       = input.int(20, "EMA Exit Length", group=grpExit)
+chandelierLen    = input.int(22, "Chandelier ATR Length", group=grpExit)
+chandelierMult   = input.float(3.0, "Chandelier ATR Mult", group=grpExit)
+stExitFactor     = input.float(3.0, "Supertrend Factor", group=grpExit)
+stExitATRLen     = input.int(10, "Supertrend ATR Length", group=grpExit)
+
+// ===================== SCORE ENGINE =====================
+f_normScore(achieved, maxApplicable) =>
+    maxApplicable > 0 ? math.min(100.0, 100.0 * achieved / maxApplicable) : 0.0
+
+// --- Trend (Hard Gate fuer Richtung) ---
+emaFast = ta.ema(close, emaFastLen)
+emaSlow = ta.ema(close, emaSlowLen)
+trendUp   = emaFast > emaSlow and close > emaFast
+trendDown = emaFast < emaSlow and close < emaFast
+
+// --- Momentum ---
+[macdLine, signalLine, histLine] = ta.macd(close, macdFastLen, macdSlowLen, macdSigLen)
+momUp   = histLine > 0 and histLine > histLine[1]
+momDown = histLine < 0 and histLine < histLine[1]
+
+// --- Volume ---
+volEma = ta.ema(volume, volEmaLen)
+rvol   = volEma > 0 ? volume / volEma : 0.0
+volOk  = rvol > rvolMin
+
+// --- Volatility ---
+atrVal      = ta.atr(atrLen)
+bbBasis     = ta.sma(close, bbLen)
+bbDev       = bbMult * ta.stdev(close, bbLen)
+bbWidth     = bbBasis != 0 ? (2 * bbDev) / bbBasis : 0.0
+bbWidthAvg  = ta.sma(bbWidth, volaSmaLen)
+volaOk      = bbWidth > bbWidthAvg
+
+// --- Market Structure (bestaetigte Pivots, dadurch inhaerente Verzoegerung) ---
+ph = ta.pivothigh(high, pivotLeft, pivotRight)
+pl = ta.pivotlow(low, pivotLeft, pivotRight)
+
+var float lastPH = na
+var float prevPH = na
+var float lastPL = na
+var float prevPL = na
+
+if not na(ph)
+    prevPH := lastPH
+    lastPH := ph
+if not na(pl)
+    prevPL := lastPL
+    lastPL := pl
+
+structUp   = not na(lastPH) and not na(prevPH) and not na(lastPL) and not na(prevPL) and lastPH > prevPH and lastPL > prevPL
+structDown = not na(lastPH) and not na(prevPH) and not na(lastPL) and not na(prevPL) and lastPH < prevPH and lastPL < prevPL
+
+// --- Pullback (richtungsunabhaengig: Naehe zur EMA statt ueberdehnter Kerze) ---
+emaPB      = ta.ema(close, emaPullbackLen)
+distATR    = atrVal > 0 ? math.abs(close - emaPB) / atrVal : 999.0
+pullbackOk = distATR <= pullbackMaxATR
+
+// --- Candle Patterns ---
+bodyHi    = math.max(open, close)
+bodyLo    = math.min(open, close)
+bodySize  = bodyHi - bodyLo
+rangeVal  = high - low
+upperWick = high - bodyHi
+lowerWick = bodyLo - low
+
+bullEngulf   = close > open and close[1] < open[1] and close > open[1] and open < close[1]
+bearEngulf   = close < open and close[1] > open[1] and close < open[1] and open > close[1]
+hammer       = rangeVal > 0 and lowerWick > bodySize * 2 and upperWick < bodySize
+shootingStar = rangeVal > 0 and upperWick > bodySize * 2 and lowerWick < bodySize
+outsideBar   = high > high[1] and low < low[1]
+
+candleBull = bullEngulf or hammer or (outsideBar and close > open)
+candleBear = bearEngulf or shootingStar or (outsideBar and close < open)
+
+// --- ADX (Hard Gate + Bonus) ---
+[diPlus, diMinus, adxVal] = ta.dmi(adxLen, adxLen)
+adxGateOk = adxMin <= 0 or adxVal >= adxMin
+adxBonus  = adxVal >= adxStrong
+
+// --- HTF Bestaetigung (repaint-sicher: [1]-Shift + lookahead_off) ---
+htfEmaFast = request.security(syminfo.tickerid, htfInput, ta.ema(close, emaFastLen)[1], lookahead=barmerge.lookahead_off)
+htfEmaSlow = request.security(syminfo.tickerid, htfInput, ta.ema(close, emaSlowLen)[1], lookahead=barmerge.lookahead_off)
+htfClose   = request.security(syminfo.tickerid, htfInput, close[1], lookahead=barmerge.lookahead_off)
+
+htfTrendUp   = htfEmaFast > htfEmaSlow and htfClose > htfEmaFast
+htfTrendDown = htfEmaFast < htfEmaSlow and htfClose < htfEmaFast
+
+// --- Funding Rate / Open Interest (optional, na-sicher) ---
+fundingAvailable = fundingSymbol != ""
+fundingRaw = fundingAvailable ? request.security(fundingSymbol, timeframe.period, close[1], ignore_invalid_symbol=true, lookahead=barmerge.lookahead_off) : na
+fundingOk  = not na(fundingRaw)
+
+oiAvailable = oiSymbol != ""
+oiRaw     = oiAvailable ? request.security(oiSymbol, timeframe.period, close[1], ignore_invalid_symbol=true, lookahead=barmerge.lookahead_off) : na
+oiRawPrev = oiAvailable ? request.security(oiSymbol, timeframe.period, close[2], ignore_invalid_symbol=true, lookahead=barmerge.lookahead_off) : na
+oiRising  = oiAvailable and not na(oiRaw) and not na(oiRawPrev) and oiRaw > oiRawPrev
+
+fundingExtremePos = fundingOk and fundingRaw > fundingExtreme
+fundingExtremeNeg = fundingOk and fundingRaw < -fundingExtreme
+
+priceUp   = close > close[1]
+priceDown = close < close[1]
+oiConfirmLong  = oiAvailable and oiRising and priceUp
+oiConfirmShort = oiAvailable and oiRising and priceDown
+
+fundLongPts  = (fundingExtremeNeg ? 0.5 : 0.0) + (oiConfirmLong ? 0.5 : 0.0)
+fundShortPts = (fundingExtremePos ? 0.5 : 0.0) + (oiConfirmShort ? 0.5 : 0.0)
+
+fundApplicable = fundingAvailable or oiAvailable
+
+// --- Score Aggregation (normalisiert auf tatsaechlich anwendbare Gewichte) ---
+maxApplicable = wTrend + wMom + wVol + wVola + wStruct + wPB + wCandle + wADX + wHTF + (fundApplicable ? wFund : 0.0)
+
+longRaw = (trendUp ? wTrend : 0.0) + (momUp ? wMom : 0.0) + (volOk ? wVol : 0.0) + (volaOk ? wVola : 0.0) +
+     (structUp ? wStruct : 0.0) + (pullbackOk ? wPB : 0.0) + (candleBull ? wCandle : 0.0) +
+     (adxBonus ? wADX : 0.0) + (htfTrendUp ? wHTF : 0.0) + (fundLongPts * wFund)
+
+shortRaw = (trendDown ? wTrend : 0.0) + (momDown ? wMom : 0.0) + (volOk ? wVol : 0.0) + (volaOk ? wVola : 0.0) +
+     (structDown ? wStruct : 0.0) + (pullbackOk ? wPB : 0.0) + (candleBear ? wCandle : 0.0) +
+     (adxBonus ? wADX : 0.0) + (htfTrendDown ? wHTF : 0.0) + (fundShortPts * wFund)
+
+longScore  = trendUp ? f_normScore(longRaw, maxApplicable) : 0.0
+shortScore = trendDown ? f_normScore(shortRaw, maxApplicable) : 0.0
+
+longSignal  = adxGateOk and trendUp and longScore >= normalThreshold and longScore >= shortScore
+shortSignal = adxGateOk and trendDown and shortScore >= normalThreshold and shortScore > longScore
+
+// ===================== SL / TP =====================
+atrStopLong  = close - atrStopMult * atrVal
+atrStopShort = close + atrStopMult * atrVal
+structStopLong  = not na(lastPL) ? lastPL : atrStopLong
+structStopShort = not na(lastPH) ? lastPH : atrStopShort
+
+slLong  = math.min(atrStopLong, structStopLong)
+slShort = math.max(atrStopShort, structStopShort)
+
+rLong  = close - slLong
+rShort = slShort - close
+
+tp1Long  = close + tp1R * rLong
+tp2Long  = close + tp2R * rLong
+tp1Short = close - tp1R * rShort
+tp2Short = close - tp2R * rShort
+
+// ===================== EXIT METHODEN =====================
+chATR      = ta.atr(chandelierLen)
+chLongStop  = ta.highest(high, chandelierLen) - chandelierMult * chATR
+chShortStop = ta.lowest(low, chandelierLen) + chandelierMult * chATR
+
+emaExitLine = ta.ema(close, emaExitLen)
+
+momFlipExitLong  = ta.crossunder(histLine, 0)
+momFlipExitShort = ta.crossover(histLine, 0)
+
+[stLine, stDir] = ta.supertrend(stExitFactor, stExitATRLen)
+stFlipToDown = stDir == 1 and stDir[1] == -1
+stFlipToUp   = stDir == -1 and stDir[1] == 1
+
+exitLongTrigger = switch exitMethod
+    "ATR Trailing"   => low < chLongStop
+    "EMA20 Close"    => close < emaExitLine
+    "Momentum Flip"  => momFlipExitLong
+    "Supertrend"     => stFlipToDown
+    => false
+
+exitShortTrigger = switch exitMethod
+    "ATR Trailing"   => high > chShortStop
+    "EMA20 Close"    => close > emaExitLine
+    "Momentum Flip"  => momFlipExitShort
+    "Supertrend"     => stFlipToUp
+    => false
+
+// ===================== STRATEGY EXECUTION =====================
+var float entryLongSL   = na
+var float entryLongTP1  = na
+var float entryLongTP2  = na
+var float entryShortSL  = na
+var float entryShortTP1 = na
+var float entryShortTP2 = na
+
+if longSignal and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+    entryLongSL  := slLong
+    entryLongTP1 := tp1Long
+    entryLongTP2 := tp2Long
+
+if shortSignal and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+    entryShortSL  := slShort
+    entryShortTP1 := tp1Short
+    entryShortTP2 := tp2Short
+
+// 50% Teilgewinn bei TP1 (2R), Rest laeuft bis TP2 (3R) oder bis die gewaehlte Exit-Methode/der Stop greift.
+if strategy.position_size > 0
+    strategy.exit("Long TP1", "Long", stop=entryLongSL, limit=entryLongTP1, qty_percent=50)
+    strategy.exit("Long TP2", "Long", stop=entryLongSL, limit=entryLongTP2)
+    if exitLongTrigger
+        strategy.close("Long", comment="Exit: " + exitMethod)
+
+if strategy.position_size < 0
+    strategy.exit("Short TP1", "Short", stop=entryShortSL, limit=entryShortTP1, qty_percent=50)
+    strategy.exit("Short TP2", "Short", stop=entryShortSL, limit=entryShortTP2)
+    if exitShortTrigger
+        strategy.close("Short", comment="Exit: " + exitMethod)
+
+// ===================== PLOTS =====================
+plot(emaFast, "EMA Fast", color=color.new(color.blue, 0))
+plot(emaSlow, "EMA Slow", color=color.new(color.orange, 0))
+plotshape(longSignal, "Long Signal", shape.triangleup, location.belowbar, color=color.new(color.lime, 0), size=size.small)
+plotshape(shortSignal, "Short Signal", shape.triangledown, location.abovebar, color=color.new(color.red, 0), size=size.small)
+
+plot(strategy.position_size > 0 ? entryLongSL : na, "Long SL", color=color.new(color.red, 0), style=plot.style_circles)
+plot(strategy.position_size > 0 ? entryLongTP1 : na, "Long TP1 (50%)", color=color.new(color.teal, 0), style=plot.style_circles)
+plot(strategy.position_size > 0 ? entryLongTP2 : na, "Long TP2", color=color.new(color.green, 0), style=plot.style_circles)
+plot(strategy.position_size < 0 ? entryShortSL : na, "Short SL", color=color.new(color.red, 0), style=plot.style_circles)
+plot(strategy.position_size < 0 ? entryShortTP1 : na, "Short TP1 (50%)", color=color.new(color.teal, 0), style=plot.style_circles)
+plot(strategy.position_size < 0 ? entryShortTP2 : na, "Short TP2", color=color.new(color.green, 0), style=plot.style_circles)

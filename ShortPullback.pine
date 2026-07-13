@@ -1,0 +1,167 @@
+//@version=6
+// =============================================================================
+//  Short-only Intraday Pullback Strategy  (v1)
+//  -------------------------------------------------------------------------
+//  Modell: "Pullback Short in aktivem intraday Abwärtsimpuls".
+//   Kein MTF/request.security (Repaint-arm, läuft identisch auf 15m/1h/4h).
+//   Alle Module einzeln abschaltbar -> im Backtest testen, was WIRKLICH hilft.
+//
+//  EHRLICHER HINWEIS: Die Entry-Idee (Pullback-Short) wurde bereits gemessen
+//  (nur-Short auf ETH: PF ~1,10, +1,9%/18M) und lebt stark vom fallenden Markt.
+//  Der Mehrwert dieser Version liegt im Trade-MANAGEMENT (Time-Stop, Break-Even,
+//  Cooldown), nicht im Entry. Auf mehreren Coins/Phasen testen, nicht nur ETH.
+//
+//  Module:
+//   1) Regime      : EMA fallend + Preis darunter + ATR-Aktivität
+//   2) Setup       : begrenzter Pullback (X..Y Bars Bounce), Struktur bleibt bearish
+//   3) Entry       : bestätigter Close < Tief der Vorkerze (bearishe Trigger-Kerze)
+//   4) Init-Stop   : über Pullback-High + ATR-Puffer (Struktur)
+//   5) Exit        : Hard-Stop | Time-Stop | Break-Even | Regime-Flip | opt. R-TP | opt. Trail
+//   6) Cooldown    : X Bars Sperre nach Exit gegen Overtrading
+// =============================================================================
+
+strategy("Short Pullback Intraday v1",
+     overlay              = true,
+     initial_capital      = 10000,
+     default_qty_type     = strategy.percent_of_equity,
+     default_qty_value    = 100,
+     commission_type      = strategy.commission.percent,
+     commission_value     = 0.05,
+     slippage             = 1,
+     pyramiding           = 0,
+     process_orders_on_close = true,
+     calc_on_every_tick   = false)
+
+// ---------------------------------------------------------------------------
+//  INPUTS
+// ---------------------------------------------------------------------------
+gReg   = "1 | Regime (Intraday, kein MTF)"
+emaLen = input.int(50, "Intraday-Basis EMA", minval = 5, group = gReg)
+emaSlope = input.int(3, "EMA-Fall über N Bars", minval = 1, group = gReg)
+atrLen = input.int(14, "ATR Länge", minval = 2, group = gReg)
+minAtrPct = input.float(0.15, "Min. Aktivität (ATR/Preis in %)", minval = 0.0, step = 0.05, group = gReg)
+
+gSet   = "2 | Setup (Pullback)"
+pbMin  = input.int(2, "Min. Pullback-Bars", minval = 1, group = gSet)
+pbMax  = input.int(5, "Max. Pullback-Bars", minval = 2, group = gSet)
+
+gEnt   = "3 | Entry-Trigger"
+useBody = input.bool(true, "Bearishe Trigger-Kerze verlangen", group = gEnt)
+minBodyAtr = input.float(0.3, "Min. Kerzenkörper (× ATR)", minval = 0.0, step = 0.1, group = gEnt)
+
+gStop  = "4 | Initialer Stop"
+swingLB = input.int(5, "Swing-High Lookback (Struktur)", minval = 2, group = gStop)
+atrBuf  = input.float(0.5, "ATR-Puffer über Swing-High", minval = 0.0, step = 0.1, group = gStop)
+
+gExit  = "5 | Exit-Module"
+useTimeStop = input.bool(true, "Time-Stop aktiv", group = gExit)
+maxBars = input.int(12, "Max. Trade-Dauer (Bars)", minval = 2, group = gExit)
+useBE   = input.bool(true, "Break-Even aktiv", group = gExit)
+beTrig  = input.float(1.0, "Break-Even ab (× R Gewinn)", minval = 0.1, step = 0.1, group = gExit)
+useRegimeExit = input.bool(true, "Exit bei Regime-Flip (Close > EMA)", group = gExit)
+useTP   = input.bool(false, "Fixes Take-Profit nutzen", group = gExit)
+rMult   = input.float(2.0, "Take-Profit (× R)", minval = 0.5, step = 0.5, group = gExit)
+useTrail = input.bool(false, "ATR-Trailing aktiv", group = gExit)
+trailAtr = input.float(2.0, "Trailing-Abstand (× ATR)", minval = 0.5, step = 0.5, group = gExit)
+
+gCd    = "6 | Cooldown"
+useCd  = input.bool(true, "Cooldown nach Exit", group = gCd)
+cdBars = input.int(3, "Cooldown-Bars", minval = 0, group = gCd)
+
+// ---------------------------------------------------------------------------
+//  1 | REGIME
+// ---------------------------------------------------------------------------
+emaBase = ta.ema(close, emaLen)
+atr     = ta.atr(atrLen)
+emaFalling = emaBase < emaBase[emaSlope]
+atrActive  = (atr / close) * 100.0 > minAtrPct
+downRegime = close < emaBase and emaFalling and atrActive
+
+// ---------------------------------------------------------------------------
+//  2 | SETUP — begrenzter Pullback (Anzahl grüner/steigender Bars im Fenster)
+// ---------------------------------------------------------------------------
+// Zähle im Fenster [1..pbMax] die aufwärts gerichteten Bars (Bounce gegen den Impuls)
+int upBars = 0
+for i = 1 to pbMax
+    upBars := upBars + (close[i] > close[i + 1] ? 1 : 0)
+pulledBack = upBars >= pbMin and upBars <= pbMax
+
+// ---------------------------------------------------------------------------
+//  3 | ENTRY-TRIGGER — Pullback scheitert, Markt dreht wieder nach unten
+// ---------------------------------------------------------------------------
+body      = math.abs(close - open)
+bearBar   = close < open and (not useBody or body >= minBodyAtr * atr)
+breakDown = close < low[1]                       // Close unter Tief der Vorkerze
+
+// Cooldown-Status
+var int lastExitBar = na
+cdOk = not useCd or na(lastExitBar) or (bar_index - lastExitBar) >= cdBars
+
+shortSetup = downRegime and pulledBack and breakDown and bearBar and cdOk
+shortSig   = shortSetup and strategy.position_size == 0
+
+// ---------------------------------------------------------------------------
+//  4 | STOP + 5 | EXIT-MANAGEMENT
+// ---------------------------------------------------------------------------
+swingHigh = ta.highest(high, swingLB)
+
+var float entryPx = na
+var float slPx    = na
+var float tpPx    = na
+var int   barsIn  = 0
+
+if shortSig and barstate.isconfirmed
+    entryPx := close
+    slPx    := swingHigh + atrBuf * atr
+    tpPx    := useTP ? entryPx - (slPx - entryPx) * rMult : na
+    barsIn  := 0
+    strategy.entry("Short", strategy.short)
+    strategy.exit("Short-X", from_entry = "Short", stop = slPx, limit = tpPx)
+
+// laufendes Management
+if strategy.position_size < 0 and not na(entryPx)
+    barsIn := barsIn + 1
+    riskR  = slPx - entryPx                       // 1R in Preis (>0)
+    profit = entryPx - close                      // Short-Gewinn, wenn Preis fällt
+
+    // Break-Even: Stop auf Entry, sobald beTrig×R erreicht
+    if useBE and riskR > 0 and profit >= beTrig * riskR
+        slPx := math.min(slPx, entryPx)
+
+    // ATR-Trailing: Stop nur nach unten nachziehen
+    if useTrail
+        slPx := math.min(slPx, close + trailAtr * atr)
+
+    // aktualisierten Schutz-Stop / TP setzen
+    strategy.exit("Short-X", from_entry = "Short", stop = slPx, limit = tpPx)
+
+    // Regime-Flip-Exit: Trend vorbei -> raus
+    if useRegimeExit and close > emaBase and barstate.isconfirmed
+        strategy.close("Short", comment = "Regime-Exit")
+
+    // Time-Stop: Trade läuft nicht -> raus
+    if useTimeStop and barsIn >= maxBars and barstate.isconfirmed
+        strategy.close("Short", comment = "Time-Stop")
+
+// Flat-Übergang: Cooldown-Marke setzen, Levels zurück
+if strategy.position_size == 0 and strategy.position_size[1] != 0
+    lastExitBar := bar_index
+if strategy.position_size == 0
+    entryPx := na
+    slPx    := na
+    tpPx    := na
+    barsIn  := 0
+
+// ---------------------------------------------------------------------------
+//  VISUALS (minimal)
+// ---------------------------------------------------------------------------
+plot(emaBase, "Intraday-EMA", color.new(color.orange, 30), linewidth = 2)
+bgcolor(downRegime ? color.new(color.red, 92) : na, title = "Down-Regime")
+plotshape(shortSig, "Short-Signal", shape.triangledown, location.abovebar, color.new(color.red, 0), size = size.small)
+plot(strategy.position_size != 0 ? slPx : na, "Stop", color.new(color.red, 0), style = plot.style_linebr, linewidth = 2)
+plot(strategy.position_size != 0 and useTP ? tpPx : na, "TP", color.new(color.green, 0), style = plot.style_linebr, linewidth = 2)
+
+// ---------------------------------------------------------------------------
+//  ALERTS
+// ---------------------------------------------------------------------------
+alertcondition(shortSig, "SHORT Entry", "Short-Pullback: SHORT-Signal")

@@ -1,0 +1,133 @@
+//@version=6
+// Overlay Toolkit — SIMPLE (ohne Buy/Sell-Signale)
+// Reine Darstellung: keine Entry/Exit-Logik, keine Labels, keine Alerts.
+// Bausteine (Stufe 1): 6x MA (SMA/EMA waehlbar), Supertrend, Ichimoku, Bollinger (2.0 + 2.5)
+// Signal-Gegenstueck: pine/indicator_crypto_intraday.pine
+indicator("Overlay Toolkit [Simple]", shorttitle="OT-Simple", overlay=true)
+
+// ===================== HELPER =====================
+f_ma(string maType, float src, simple int len) =>
+    maType == "EMA" ? ta.ema(src, len) : ta.sma(src, len)
+
+// ===================== INPUTS =====================
+grpMA = "Moving Averages"
+maSrc = input.source(close, "Source", group=grpMA)
+
+ma1On   = input.bool(true, "MA 1", group=grpMA, inline="ma1")
+ma1Type = input.string("EMA", "", options=["SMA", "EMA"], group=grpMA, inline="ma1")
+ma1Len  = input.int(9, "", minval=1, group=grpMA, inline="ma1")
+ma1Col  = input.color(color.new(color.red, 0), "", group=grpMA, inline="ma1")
+
+ma2On   = input.bool(true, "MA 2", group=grpMA, inline="ma2")
+ma2Type = input.string("EMA", "", options=["SMA", "EMA"], group=grpMA, inline="ma2")
+ma2Len  = input.int(20, "", minval=1, group=grpMA, inline="ma2")
+ma2Col  = input.color(color.new(color.blue, 0), "", group=grpMA, inline="ma2")
+
+ma3On   = input.bool(true, "MA 3", group=grpMA, inline="ma3")
+ma3Type = input.string("EMA", "", options=["SMA", "EMA"], group=grpMA, inline="ma3")
+ma3Len  = input.int(50, "", minval=1, group=grpMA, inline="ma3")
+ma3Col  = input.color(color.new(color.orange, 0), "", group=grpMA, inline="ma3")
+
+ma4On   = input.bool(true, "MA 4", group=grpMA, inline="ma4")
+ma4Type = input.string("SMA", "", options=["SMA", "EMA"], group=grpMA, inline="ma4")
+ma4Len  = input.int(100, "", minval=1, group=grpMA, inline="ma4")
+ma4Col  = input.color(color.new(color.green, 0), "", group=grpMA, inline="ma4")
+
+ma5On   = input.bool(true, "MA 5", group=grpMA, inline="ma5")
+ma5Type = input.string("SMA", "", options=["SMA", "EMA"], group=grpMA, inline="ma5")
+ma5Len  = input.int(200, "", minval=1, group=grpMA, inline="ma5")
+ma5Col  = input.color(color.new(color.purple, 0), "", group=grpMA, inline="ma5")
+
+ma6On   = input.bool(false, "MA 6", group=grpMA, inline="ma6")
+ma6Type = input.string("SMA", "", options=["SMA", "EMA"], group=grpMA, inline="ma6")
+ma6Len  = input.int(400, "", minval=1, group=grpMA, inline="ma6")
+ma6Col  = input.color(color.new(color.gray, 0), "", group=grpMA, inline="ma6")
+
+grpST = "Supertrend"
+stOn     = input.bool(true, "Supertrend anzeigen", group=grpST)
+stFactor = input.float(3.0, "Faktor", minval=0.1, step=0.1, group=grpST)
+stAtrLen = input.int(10, "ATR Length", minval=1, group=grpST)
+stFill   = input.bool(true, "Flaeche zum Kurs fuellen", group=grpST)
+stUpCol  = input.color(color.new(color.teal, 0), "Up", group=grpST, inline="stCol")
+stDnCol  = input.color(color.new(color.red, 0), "Down", group=grpST, inline="stCol")
+
+grpIch = "Ichimoku"
+ichOn      = input.bool(true, "Ichimoku anzeigen", group=grpIch)
+ichLines   = input.bool(true, "Linien (Tenkan/Kijun/Chikou)", group=grpIch)
+ichCloud   = input.bool(true, "Kumo Cloud", group=grpIch)
+tenkanLen  = input.int(9, "Tenkan-sen", minval=1, group=grpIch)
+kijunLen   = input.int(26, "Kijun-sen", minval=1, group=grpIch)
+senkouBLen = input.int(52, "Senkou Span B", minval=1, group=grpIch)
+ichDispl   = input.int(26, "Displacement", minval=1, group=grpIch)
+
+grpBB = "Bollinger Bands"
+bbOn      = input.bool(true, "Bollinger anzeigen", group=grpBB)
+bbLen     = input.int(20, "Length", minval=1, group=grpBB)
+bbSrc     = input.source(close, "Source", group=grpBB)
+bbMaType  = input.string("SMA", "Basis", options=["SMA", "EMA"], group=grpBB)
+bbMultIn  = input.float(2.0, "StdDev innen", minval=0.1, step=0.1, group=grpBB)
+bbMultOut = input.float(2.5, "StdDev aussen", minval=0.1, step=0.1, group=grpBB)
+bbBasisOn = input.bool(true, "Basis-Linie", group=grpBB)
+bbFill    = input.bool(true, "Baender fuellen", group=grpBB)
+bbCol     = input.color(color.new(color.blue, 0), "Farbe", group=grpBB)
+
+// ===================== LOGIK =====================
+ma1 = f_ma(ma1Type, maSrc, ma1Len)
+ma2 = f_ma(ma2Type, maSrc, ma2Len)
+ma3 = f_ma(ma3Type, maSrc, ma3Len)
+ma4 = f_ma(ma4Type, maSrc, ma4Len)
+ma5 = f_ma(ma5Type, maSrc, ma5Len)
+ma6 = f_ma(ma6Type, maSrc, ma6Len)
+
+[stValue, stDir] = ta.supertrend(stFactor, stAtrLen)
+stUp = stOn and stDir < 0 ? stValue : na
+stDn = stOn and stDir > 0 ? stValue : na
+
+f_donchian(simple int len) =>
+    math.avg(ta.lowest(len), ta.highest(len))
+
+tenkan  = f_donchian(tenkanLen)
+kijun   = f_donchian(kijunLen)
+senkouA = math.avg(tenkan, kijun)
+senkouB = f_donchian(senkouBLen)
+
+bbBasis = f_ma(bbMaType, bbSrc, bbLen)
+bbDev   = ta.stdev(bbSrc, bbLen)
+bbUpIn  = bbBasis + bbMultIn * bbDev
+bbLoIn  = bbBasis - bbMultIn * bbDev
+bbUpOut = bbBasis + bbMultOut * bbDev
+bbLoOut = bbBasis - bbMultOut * bbDev
+
+// ===================== PLOTS: MOVING AVERAGES =====================
+plot(ma1On ? ma1 : na, "MA 1", color=ma1Col)
+plot(ma2On ? ma2 : na, "MA 2", color=ma2Col)
+plot(ma3On ? ma3 : na, "MA 3", color=ma3Col)
+plot(ma4On ? ma4 : na, "MA 4", color=ma4Col, linewidth=2)
+plot(ma5On ? ma5 : na, "MA 5", color=ma5Col, linewidth=2)
+plot(ma6On ? ma6 : na, "MA 6", color=ma6Col, linewidth=2)
+
+// ===================== PLOTS: SUPERTREND =====================
+// style_linebr: beim Trendwechsel keine senkrechte Verbindungslinie
+pStUp  = plot(stUp, "Supertrend Up", color=stUpCol, style=plot.style_linebr, linewidth=2)
+pStDn  = plot(stDn, "Supertrend Down", color=stDnCol, style=plot.style_linebr, linewidth=2)
+pStRef = plot(stOn and stFill ? hl2 : na, "ST Fill Ref", display=display.none, editable=false)
+fill(pStUp, pStRef, color=stFill ? color.new(stUpCol, 90) : na, title="ST Up Fill")
+fill(pStDn, pStRef, color=stFill ? color.new(stDnCol, 90) : na, title="ST Down Fill")
+
+// ===================== PLOTS: ICHIMOKU =====================
+plot(ichOn and ichLines ? tenkan : na, "Tenkan-sen", color=color.new(color.blue, 0))
+plot(ichOn and ichLines ? kijun : na, "Kijun-sen", color=color.new(color.maroon, 0))
+plot(ichOn and ichLines ? close : na, "Chikou Span", color=color.new(color.green, 0), offset=-ichDispl + 1)
+pSenkouA = plot(ichOn ? senkouA : na, "Senkou Span A", color=color.new(color.teal, 40), offset=ichDispl - 1)
+pSenkouB = plot(ichOn ? senkouB : na, "Senkou Span B", color=color.new(color.red, 40), offset=ichDispl - 1)
+fill(pSenkouA, pSenkouB, color=not ichCloud ? na : senkouA > senkouB ? color.new(color.teal, 90) : color.new(color.red, 90), title="Kumo Cloud")
+
+// ===================== PLOTS: BOLLINGER BANDS =====================
+plot(bbOn and bbBasisOn ? bbBasis : na, "BB Basis", color=color.new(color.gray, 0))
+pBbUpIn  = plot(bbOn ? bbUpIn : na, "BB Upper 2.0", color=color.new(bbCol, 20))
+pBbLoIn  = plot(bbOn ? bbLoIn : na, "BB Lower 2.0", color=color.new(bbCol, 20))
+pBbUpOut = plot(bbOn ? bbUpOut : na, "BB Upper 2.5", color=color.new(bbCol, 55))
+pBbLoOut = plot(bbOn ? bbLoOut : na, "BB Lower 2.5", color=color.new(bbCol, 55))
+fill(pBbUpOut, pBbUpIn, color=bbFill ? color.new(bbCol, 92) : na, title="BB Zone oben")
+fill(pBbLoIn, pBbLoOut, color=bbFill ? color.new(bbCol, 92) : na, title="BB Zone unten")
+fill(pBbUpIn, pBbLoIn, color=bbFill ? color.new(bbCol, 96) : na, title="BB Innenband")

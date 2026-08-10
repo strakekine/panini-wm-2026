@@ -58,7 +58,9 @@ ichCloud   = input.bool(true, "Kumo Cloud", group=grpIch)
 tenkanLen  = input.int(9, "Tenkan-sen", minval=1, group=grpIch)
 kijunLen   = input.int(26, "Kijun-sen", minval=1, group=grpIch)
 senkouBLen = input.int(52, "Senkou Span B", minval=1, group=grpIch)
-ichDispl   = input.int(26, "Displacement", minval=1, group=grpIch)
+// Geplottet mit offset=ichDispl-1 (TradingView-Konvention, aktuelle Kerze zaehlt mit):
+// 27 => 26 Bars tatsaechliche Verschiebung. Built-in-Default waere 26 (= 25 Bars).
+ichDispl   = input.int(27, "Displacement", minval=1, group=grpIch)
 
 grpBB = "Bollinger Bands"
 bbOn      = input.bool(true, "Bollinger anzeigen", group=grpBB)

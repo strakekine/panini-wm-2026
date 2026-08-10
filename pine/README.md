@@ -25,7 +25,7 @@ beim Betrachter. Stufe 1 enthält vier Bausteine, jeder einzeln abschaltbar:
 |---|---|
 | **6× MA** | pro Linie: An/Aus, SMA/EMA-Umschalter, Länge, Farbe. Defaults 9/20/50 EMA, 100/200 SMA, MA 6 (400) aus. Gemeinsame Source. |
 | **Supertrend** | Faktor (3.0), ATR Length (10), Farben Up/Down, optionale Fläche zum Kurs. `plot.style_linebr`, damit beim Flip keine senkrechte Linie entsteht. |
-| **Ichimoku** | Tenkan 9 / Kijun 26 / Senkou B 52, Displacement 26, Chikou Span. Linien und Kumo Cloud getrennt schaltbar, Cloud färbt nach Span A vs. B. |
+| **Ichimoku** | Tenkan 9 / Kijun 26 / Senkou B 52, Displacement 27, Chikou Span. Linien und Kumo Cloud getrennt schaltbar, Cloud färbt nach Span A vs. B. |
 | **Bollinger** | Length 20, Basis SMA/EMA wählbar, zwei Abweichungen gleichzeitig: 2.0 innen + 2.5 außen, mit abgestuften Zonen-Fills. |
 
 Weitere Bausteine kommen schrittweise dazu. Platzbudget: TradingView erlaubt 64 Plots pro

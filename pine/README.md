@@ -8,28 +8,32 @@ keine Marktstruktur-Pivots, kein Pullback/Candle-Pattern-Kram. Absichtlich schla
 - `indicator_crypto_intraday.pine` — Live-Version (`indicator()`) mit Signal-Plots,
   automatisch gezeichnetem Entry/Stop und Alerts (JSON-Message für Webhook/Bot).
 
-- `indicator_overlay_simple.pine` — **signalfreie Variante** (`indicator()`): nur Darstellung,
-  keine Entry/Exit-Logik, keine Labels, keine Alerts. Siehe unten.
+- `indicator_overlay_simple.pine` — **signalfreie Variante** des "Confluence Buy/Sell Signal":
+  nur Darstellung, keine Score-Logik, keine Labels, keine Alerts. Siehe unten.
 
 Beide Signal-Scripts enthalten dieselbe Logik redundant (kein Pine-Library-Import, um den
 Publish-Test-Republish-Zyklus zu vermeiden — siehe unten).
 
-## Overlay Toolkit [Simple] — ohne Buy/Sell-Signale
+## Confluence Simple — ohne Buy/Sell-Signale
 
-`indicator_overlay_simple.pine` ist die abgespeckte Anzeige-Version: dieselbe Pine-v6-Basis,
-aber ohne jede Signalgebung. Kein `plotshape` für Entries, kein Trailing-Stop, kein
-`alertcondition` — das Script zeichnet ausschließlich Indikatoren, die Interpretation bleibt
-beim Betrachter. Stufe 1 enthält vier Bausteine, jeder einzeln abschaltbar:
+`indicator_overlay_simple.pine` ist die abgespeckte Anzeige-Version des
+"Confluence Buy/Sell Signal": Inputs, Defaults und Farben sind aus dem Original übernommen,
+aber die gesamte Signalgebung fehlt. Entfernt sind Konfluenz-Score, BUY/SELL/EXIT-Labels,
+ADX-Filter, RSI, MACD, Volumen-Bestätigung, Engulfing, Inside Bar, Golden/Death Cross,
+TK-Cross, 200MA-Cross, Score-Hintergrund und alle `alertcondition`. Das Script zeichnet
+ausschließlich Indikatoren, die Interpretation bleibt beim Betrachter.
+
+Stufe 1 enthält vier Bausteine, jeder einzeln abschaltbar:
 
 | Baustein | Einstellungen |
 |---|---|
-| **6× MA** | pro Linie: An/Aus, SMA/EMA-Umschalter, Länge, Farbe. Defaults 9/20/50 EMA, 100/200 SMA, MA 6 (400) aus. Gemeinsame Source. |
-| **Supertrend** | Faktor (3.0), ATR Length (10), Farben Up/Down, optionale Fläche zum Kurs. `plot.style_linebr`, damit beim Flip keine senkrechte Linie entsteht. |
-| **Ichimoku** | Tenkan 9 / Kijun 26 / Senkou B 52, Displacement 27, Chikou Span. Linien und Kumo Cloud getrennt schaltbar, Cloud färbt nach Span A vs. B. |
-| **Bollinger** | Length 20, Basis SMA/EMA wählbar, zwei Abweichungen gleichzeitig: 2.0 innen + 2.5 außen, mit abgestuften Zonen-Fills. |
+| **6× MA** | pro Linie: An/Aus, SMA/EMA-Umschalter, Länge, Farbe. MA 1–5 wie im Original (SMA 10/20/50/100/200, MA 4+5 aus), MA 6 neu (EMA 9, aus). Gemeinsame Source. |
+| **Supertrend** | Faktor 3.0, ATR Länge 10, Farben bullish/bärisch. Ein Plot mit `plot.style_linebr` wie im Original. |
+| **Ichimoku** | Tenkan 9 / Kijun 26 / Senkou B 52, Verschiebung 27 mit Plot-Offset `displacement - 1` (deckungsgleich mit den TV-Indikatoren). Cloud und Tenkan/Kijun getrennt schaltbar. |
+| **Bollinger** | Gemeinsame Länge 20, Basis SMA, zwei Bänder gleichzeitig: 2.0 + 2.5, je mit eigenen Farben und Füllung. |
 
 Weitere Bausteine kommen schrittweise dazu. Platzbudget: TradingView erlaubt 64 Plots pro
-Script, aktuell sind ~20 belegt.
+Script, aktuell sind 16 belegt.
 
 ## Die vier Bedingungen (alle per UND verknüpft)
 

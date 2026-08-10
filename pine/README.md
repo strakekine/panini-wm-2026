@@ -29,11 +29,11 @@ Stufe 1 enthält vier Bausteine, jeder einzeln abschaltbar:
 |---|---|
 | **6× MA** | pro Linie: An/Aus, SMA/EMA-Umschalter, Länge, Farbe. MA 1–5 wie im Original (SMA 10/20/50/100/200, MA 4+5 aus), MA 6 neu (EMA 9, aus). Gemeinsame Source. |
 | **Supertrend** | Faktor 3.0, ATR Länge 10, Farben bullish/bärisch. Ein Plot mit `plot.style_linebr` wie im Original. |
-| **Ichimoku** | Tenkan 9 / Kijun 26 / Senkou B 52, Verschiebung 27 mit Plot-Offset `displacement - 1` (deckungsgleich mit den TV-Indikatoren). Cloud und Tenkan/Kijun getrennt schaltbar. |
-| **Bollinger** | Gemeinsame Länge 20, Basis SMA, zwei Bänder gleichzeitig: 2.0 + 2.5, je mit eigenen Farben und Füllung. |
+| **Ichimoku** | Tenkan 9 / Kijun 26 / Senkou B 52, Verschiebung 27 mit Plot-Offset `displacement - 1` (= 26 Bars, klassisch korrekt; das TV-Built-in verschiebt nur 25). Cloud, Tenkan/Kijun und Lagging Span (Chikou) getrennt schaltbar. |
+| **Bollinger** | Gemeinsame Länge 20, Basis SMA, zwei Bänder gleichzeitig: 2.0 + 2.5, je mit eigenen Farben und Füllung. Basis-Linie separat schaltbar. |
 
 Weitere Bausteine kommen schrittweise dazu. Platzbudget: TradingView erlaubt 64 Plots pro
-Script, aktuell sind 16 belegt.
+Script, aktuell sind 17 belegt.
 
 ## Die vier Bedingungen (alle per UND verknüpft)
 

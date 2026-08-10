@@ -57,12 +57,14 @@ i_senkouBLen    = input.int(52, "Senkou Span B", minval=1, group="Ichimoku")
 i_displacement  = input.int(27, "Verschiebung", minval=1, tooltip="27 mit Plot-Offset (displacement - 1), damit die Cloud deckungsgleich mit den TV-Indikatoren liegt.", group="Ichimoku")
 i_showCloud     = input.bool(true, "Cloud anzeigen", group="Ichimoku")
 i_showTK        = input.bool(true, "Tenkan/Kijun-Linien anzeigen", group="Ichimoku")
+i_showChikou    = input.bool(true, "Lagging Span (Chikou) anzeigen", group="Ichimoku")
 i_senkouACol    = input.color(color.new(color.green, 70), "Senkou Span A Farbe", group="Ichimoku")
 i_senkouBCol    = input.color(color.new(color.red, 70), "Senkou Span B Farbe", group="Ichimoku")
 i_cloudBullCol  = input.color(color.new(color.green, 90), "Cloud Farbe (bullish)", group="Ichimoku")
 i_cloudBearCol  = input.color(color.new(color.red, 90), "Cloud Farbe (bearish)", group="Ichimoku")
 i_tenkanCol     = input.color(color.new(color.blue, 40), "Tenkan-sen Farbe", group="Ichimoku")
 i_kijunCol      = input.color(color.new(color.orange, 40), "Kijun-sen Farbe", group="Ichimoku")
+i_chikouCol     = input.color(color.new(color.fuchsia, 40), "Lagging Span Farbe", group="Ichimoku")
 
 // --- Bollinger Bands (2 Bänder mit gemeinsamer Länge) ---
 i_showBB     = input.bool(true, "BB 1 (2.0 StdDev) anzeigen", group="Bollinger Bands")
@@ -78,8 +80,9 @@ i_bbUpperCol2 = input.color(color.navy, "BB 2 Upper Farbe", group="Bollinger Ban
 i_bbLowerCol2 = input.color(color.navy, "BB 2 Lower Farbe", group="Bollinger Bands")
 i_bbFillCol2  = input.color(color.new(color.purple, 92), "BB 2 Füllung Farbe", group="Bollinger Bands")
 
-i_bbBasisCol = input.color(color.gray, "Basis (SMA) Farbe", group="Bollinger Bands")
-i_bbFill     = input.bool(true, "Band-Füllung anzeigen (beide)", group="Bollinger Bands")
+i_showBBBasis = input.bool(true, "Basis-Linie (Mitte) anzeigen", group="Bollinger Bands")
+i_bbBasisCol  = input.color(color.gray, "Basis (SMA) Farbe", group="Bollinger Bands")
+i_bbFill      = input.bool(true, "Band-Füllung anzeigen (beide)", group="Bollinger Bands")
 
 // ============================================================
 // BERECHNUNGEN
@@ -136,9 +139,12 @@ fill(senkouAPlot, senkouBPlot, color = senkouA > senkouB ? i_cloudBullCol : i_cl
 plot(i_useIchimoku and i_showTK ? tenkan : na, color=i_tenkanCol, title="Tenkan-sen")
 plot(i_useIchimoku and i_showTK ? kijun : na, color=i_kijunCol, title="Kijun-sen")
 
+// Lagging Span (Chikou): Close um dieselbe Distanz nach LINKS verschoben wie die Cloud nach rechts
+plot(i_useIchimoku and i_showChikou ? close : na, offset=-i_displacement + 1, color=i_chikouCol, title="Lagging Span (Chikou)")
+
 bbUpperPlot = plot(i_showBB ? bbUpper : na, color=i_bbUpperCol, title="BB1 Upper (2.0)", linewidth=2)
 bbLowerPlot = plot(i_showBB ? bbLower : na, color=i_bbLowerCol, title="BB1 Lower (2.0)", linewidth=2)
-plot(i_showBB or i_showBB2 ? bbBasis : na, color=i_bbBasisCol, title="BB Basis")
+plot(i_showBBBasis ? bbBasis : na, color=i_bbBasisCol, title="BB Basis")
 fill(bbUpperPlot, bbLowerPlot, color = i_showBB and i_bbFill ? i_bbFillCol : na, title="BB1 Füllung")
 
 bbUpperPlot2 = plot(i_showBB2 ? bbUpper2 : na, color=i_bbUpperCol2, title="BB2 Upper (2.5)", linewidth=2)

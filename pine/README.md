@@ -78,7 +78,7 @@ Stufe 3 im Overlay. Beides ohne eigenes Pane, beides ohne Signale.
   M      71    19     ▬
   ATR   1.8 %
   Vol   1.8×
-  VWAP  58412.50   +4.2 %
+  VWAP  58412.50   +4.2 %   2025-04-09
 ```
 
 Oben das Zeitrahmen-Raster, darunter die Kennzahlen, die es nur einmal gibt. Spalten und
@@ -93,7 +93,7 @@ rechts).
 | **Trend** | ▲ / ▼ / ▬ pro Zeitrahmen | grün / rot / grau |
 | **ATR** | in Prozent vom Kurs, Chart-Zeitrahmen | orange, wenn über dem eigenen 100-Kerzen-Schnitt |
 | **Vol** | Volumen relativ zum 20er-EMA | kräftig ab 1.5× |
-| **VWAP** | Kurs des Anchored VWAP plus Abstand in Prozent | grün über, rot unter dem VWAP |
+| **VWAP** | Kurs des Anchored VWAP, Abstand in Prozent und das Datum des Ankers | grün über, rot unter dem VWAP |
 
 Die drei Zeitrahmen sind frei wählbar, Default **D/W/M**.
 
@@ -138,10 +138,20 @@ speichert Indikator-Einstellungen pro Chart, nicht pro Symbol).
 
 | Anker | Verhalten |
 |---|---|
-| **Tief der letzten N Kerzen** (Default, N=365) | springt automatisch auf das jüngste Extrem dieser Spanne |
-| **Hoch der letzten N Kerzen** | dito, invers |
+| **Tief des Fensters** (Default) | springt automatisch auf das jüngste Tief innerhalb des Fensters |
+| **Hoch des Fensters** | dito, invers |
 | **Jahresanfang** / **Quartalsanfang** | kalendarisch, für alle Symbole gleich sinnvoll |
 | **Manuelles Datum** | fest, muss pro Symbol gepflegt werden |
+
+Das Fenster wird in **Zeit** angegeben (3 Monate bis 5 Jahre oder gesamte Historie, Default
+1 Jahr), nicht in Kerzen — und pro Chart in Kerzen umgerechnet. Eine feste Kerzenzahl wäre
+zeitrahmenabhängig: 365 Kerzen sind auf dem Tageschart ein Jahr, auf dem Wochenchart sieben
+und auf dem Monatschart über dreißig Jahre. So viele Monatskerzen hat kein Coin, `ta.lowest`
+liefert dann `na`, der Anker greift nie und der VWAP läuft still ab der ersten Kerze.
+
+Reicht die Historie eines Symbols nicht für das gewählte Fenster, ankert der VWAP an der
+ersten verfügbaren Kerze — in dem Fall die einzig sinnvolle Auslegung. Damit du siehst, wo der
+Anker tatsächlich sitzt, steht sein **Datum** in der VWAP-Zeile der Tabelle.
 
 Gelesen wird er als Durchschnittspreis aller Käufer seit dem Anker: Liegt der Kurs darüber, ist
 die durchschnittliche Position seit dem Ankerpunkt im Gewinn, und der Level wird bei

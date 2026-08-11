@@ -160,8 +160,8 @@ i_volCol  = input.color(color.new(#26a69a, 0), "Farbe hohes Volumen", group=grpV
 // du musst also beim Wechsel von BTC auf einen anderen Coin nichts nachpflegen.
 grpVwap = "Anchored VWAP"
 i_vwapLine   = input.bool(true, "VWAP-Linie im Chart zeichnen", group=grpVwap)
-i_vwapAnchor = input.string("Tief der letzten N Kerzen", "Anker", options=["Tief der letzten N Kerzen", "Hoch der letzten N Kerzen", "Jahresanfang", "Quartalsanfang", "Manuelles Datum"], group=grpVwap)
-i_vwapLb     = input.int(365, "N Kerzen (für Hoch/Tief-Anker)", minval=2, group=grpVwap, tooltip="Der Anker springt automatisch auf das jeweils jüngste Extrem dieser Spanne. Auf dem Tageschart entsprechen 365 Kerzen etwa einem Jahr.")
+i_vwapAnchor = input.string("Tief des Fensters", "Anker", options=["Tief des Fensters", "Hoch des Fensters", "Jahresanfang", "Quartalsanfang", "Manuelles Datum"], group=grpVwap)
+i_vwapWin    = input.string("1 Jahr", "Fenster (für Hoch/Tief-Anker)", options=["3 Monate", "6 Monate", "1 Jahr", "2 Jahre", "5 Jahre", "Gesamte Historie"], group=grpVwap, tooltip="Bewusst in Zeit statt in Kerzen: eine feste Kerzenzahl bedeutet auf jedem Zeitrahmen etwas anderes (365 Kerzen sind auf D ein Jahr, auf M über 30 Jahre - so viele Monatskerzen hat kein Coin). Das Fenster wird pro Chart in Kerzen umgerechnet.\n\nReicht die Historie des Symbols nicht für das Fenster, ankert der VWAP an der ersten verfügbaren Kerze.")
 i_vwapDate   = input.time(timestamp("01 Jan 2024 00:00 +0000"), "Manuelles Datum", group=grpVwap)
 i_vwapCol    = input.color(color.new(#ff9800, 0), "Linien Farbe", group=grpVwap)
 
@@ -276,15 +276,37 @@ atrAvg = ta.sma(atrPct, i_atrAvgLen)
 relVol = volume / ta.ema(volume, i_volLen)
 
 // --- Anchored VWAP ---
+// Das Fenster ist in Zeit definiert und wird hier in Kerzen des laufenden Charts umgerechnet.
+// Eine feste Kerzenzahl waere zeitrahmenabhaengig und auf W/M schlicht falsch.
+vwapWinSec = switch i_vwapWin
+    "3 Monate"  => 7776000
+    "6 Monate"  => 15552000
+    "2 Jahre"   => 63072000
+    "5 Jahre"   => 157680000
+    =>             31536000
+
+vwapWinBars = math.max(2, int(vwapWinSec / math.max(1, timeframe.in_seconds(timeframe.period))))
+
+// Reicht die Historie nicht fuer das Fenster, liefern ta.lowest/ta.highest na. Dann greift
+// der Anker nie und der VWAP laeuft ab der ersten verfuegbaren Kerze - also ueber die
+// gesamte Historie, was in dem Fall die einzig sinnvolle Auslegung ist.
+vwapWinLow  = ta.lowest(low, vwapWinBars)
+vwapWinHigh = ta.highest(high, vwapWinBars)
+
 vwapAnchorCond = switch i_vwapAnchor
-    "Hoch der letzten N Kerzen" => high == ta.highest(high, i_vwapLb)
-    "Jahresanfang"              => timeframe.change("12M")
-    "Quartalsanfang"            => timeframe.change("3M")
-    "Manuelles Datum"           => time >= i_vwapDate and time[1] < i_vwapDate
-    =>                             low == ta.lowest(low, i_vwapLb)
+    "Hoch des Fensters" => i_vwapWin == "Gesamte Historie" ? bar_index == 0 : not na(vwapWinHigh) and high == vwapWinHigh
+    "Jahresanfang"      => timeframe.change("12M")
+    "Quartalsanfang"    => timeframe.change("3M")
+    "Manuelles Datum"   => time >= i_vwapDate and time[1] < i_vwapDate
+    =>                     i_vwapWin == "Gesamte Historie" ? bar_index == 0 : not na(vwapWinLow) and low == vwapWinLow
 
 vwapVal  = ta.vwap(hlc3, vwapAnchorCond)
 vwapDist = (close - vwapVal) / vwapVal * 100
+
+// Ankerdatum mitfuehren, damit in der Tabelle nachvollziehbar ist, worauf der VWAP sitzt.
+var float vwapAnchorTime = na
+if vwapAnchorCond
+    vwapAnchorTime := time
 
 // ============================================================
 // PLOTS
@@ -443,3 +465,5 @@ if i_tblOn and barstate.islast
         table.cell(tbl, 0, r, "VWAP", text_color=i_tblHead, text_size=f_tblSize())
         table.cell(tbl, 1, r, f_txt(vwapVal, format.mintick), text_color=i_rsiNeutral, text_size=f_tblSize())
         table.cell(tbl, 2, r, (vwapDist >= 0 ? "+" : "") + f_txt(vwapDist, "#.0") + " %", text_color=vwapDist >= 0 ? i_trUpCol : i_trDownCol, text_size=f_tblSize())
+        // Ankerdatum: macht sofort sichtbar, ob der automatische Anker dort sitzt, wo du denkst.
+        table.cell(tbl, 3, r, na(vwapAnchorTime) ? "—" : str.format_time(vwapAnchorTime, "yyyy-MM-dd", syminfo.timezone), text_color=i_tblHead, text_size=size.small)

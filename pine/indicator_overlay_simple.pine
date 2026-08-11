@@ -1,8 +1,9 @@
 //@version=6
 // Vereinfachte Version des "Confluence Buy/Sell Signal" — reine Anzeige, ohne Signale.
-// Entfernt: Konfluenz-Score, BUY/SELL/EXIT, ADX-Filter, RSI, MACD, Volumen, Engulfing,
+// Entfernt: Konfluenz-Score, BUY/SELL/EXIT, ADX-Filter, MACD, Volumen, Engulfing,
 // Inside Bar, Golden/Death Cross, TK-Cross, 200MA-Cross, Score-Hintergrund, alle Alerts.
 // Stufe 1 - vier Bausteine: 6x MA (SMA/EMA), Supertrend, Ichimoku, Bollinger (2.0 + 2.5)
+// Stufe 2 - RSI, ohne eigenes Pane (siehe Block "RSI" unten)
 indicator("Confluence Simple (nur Anzeige)", overlay=true)
 
 // ============================================================
@@ -84,6 +85,35 @@ i_showBBBasis = input.bool(true, "Basis-Linie (Mitte) anzeigen", group="Bollinge
 i_bbBasisCol  = input.color(color.gray, "Basis (SMA) Farbe", group="Bollinger Bands")
 i_bbFill      = input.bool(true, "Band-Füllung anzeigen (beide)", group="Bollinger Bands")
 
+// --- RSI ---
+// Der RSI läuft 0-100, dieses Script liegt auf der Preisachse. Eine normale RSI-Linie wäre
+// hier der Kurs 62 statt der Wert 62 - also unsichtbar. Deshalb drei Darstellungsformen,
+// die ohne eigene Achse auskommen. Alle drei einzeln abschaltbar.
+grpRSI = "RSI"
+i_rsiOn     = input.bool(true, "RSI aktiv", group=grpRSI)
+i_rsiLen    = input.int(14, "RSI Länge", minval=1, group=grpRSI)
+i_rsiSource = input.source(close, "Source", group=grpRSI)
+i_rsiOB     = input.float(70, "Überkauft", minval=50, maxval=100, group=grpRSI)
+i_rsiOS     = input.float(30, "Überverkauft", minval=0, maxval=50, group=grpRSI)
+i_rsiObCol  = input.color(color.new(color.red, 0), "Farbe überkauft", inline="rsicol", group=grpRSI)
+i_rsiOsCol  = input.color(color.new(color.green, 0), "Farbe überverkauft", inline="rsicol", group=grpRSI)
+
+// Form 1: Zahlenfeld in der Chart-Ecke
+i_rsiTable    = input.bool(true, "Zahlenfeld anzeigen", group=grpRSI)
+i_rsiTablePos = input.string("Oben rechts", "Position", options=["Oben rechts", "Oben links", "Unten rechts", "Unten links", "Mitte rechts", "Mitte links"], group=grpRSI)
+i_rsiTableSize= input.string("Normal", "Schriftgröße", options=["Klein", "Normal", "Groß"], group=grpRSI)
+i_rsiNeutral  = input.color(color.new(color.gray, 0), "Farbe neutral (zwischen den Zonen)", group=grpRSI)
+i_rsiTableBg  = input.color(color.new(color.black, 70), "Hintergrund Zahlenfeld", group=grpRSI)
+
+// Form 2: Kerzenfärbung in den Extremzonen
+i_rsiBarCol   = input.bool(false, "Kerzen in OB/OS-Zone einfärben", group=grpRSI, tooltip="Färbt nur Kerzen, deren RSI über der Überkauft- bzw. unter der Überverkauft-Schwelle liegt. Alle übrigen Kerzen behalten ihre normale Farbe.")
+
+// Form 3: RSI-Kurve, auf ein Preisband gemappt
+i_rsiCurve    = input.bool(false, "RSI-Kurve ins Chart mappen", group=grpRSI, tooltip="Zeichnet den echten RSI-Verlauf, umgerechnet auf ein Preisband aus Hoch/Tief der letzten N Kerzen. Die Höhe im Chart ist dadurch willkürlich - sie sagt nichts über das Kursniveau aus, nur die Form und die Lage zu den 70/30-Linien sind aussagekräftig.")
+i_rsiCurveLb  = input.int(200, "Lookback für das Band", minval=10, group=grpRSI)
+i_rsiCurveCol = input.color(color.new(#7e57c2, 0), "Kurven Farbe", group=grpRSI)
+i_rsiCurveLvl = input.color(color.new(#7e57c2, 65), "Farbe der gemappten 70/30-Linien", group=grpRSI)
+
 // ============================================================
 // BERECHNUNGEN
 // ============================================================
@@ -119,6 +149,18 @@ bbDev2   = i_bbMult2 * bbStdev
 bbUpper2 = bbBasis + bbDev2
 bbLower2 = bbBasis - bbDev2
 
+// --- RSI ---
+rsi        = ta.rsi(i_rsiSource, i_rsiLen)
+rsiOB      = i_rsiOn and rsi >= i_rsiOB
+rsiOS      = i_rsiOn and rsi <= i_rsiOS
+rsiZoneCol = rsiOB ? i_rsiObCol : rsiOS ? i_rsiOsCol : i_rsiNeutral
+
+// Mapping des RSI (0-100) auf ein Preisband aus Hoch/Tief der letzten N Kerzen.
+rsiBandHi = ta.highest(high, i_rsiCurveLb)
+rsiBandLo = ta.lowest(low, i_rsiCurveLb)
+f_rsiToPrice(float v) =>
+    rsiBandLo + (v / 100.0) * (rsiBandHi - rsiBandLo)
+
 // ============================================================
 // PLOTS
 // ============================================================
@@ -150,3 +192,34 @@ fill(bbUpperPlot, bbLowerPlot, color = i_showBB and i_bbFill ? i_bbFillCol : na,
 bbUpperPlot2 = plot(i_showBB2 ? bbUpper2 : na, color=i_bbUpperCol2, title="BB2 Upper (2.5)", linewidth=2)
 bbLowerPlot2 = plot(i_showBB2 ? bbLower2 : na, color=i_bbLowerCol2, title="BB2 Lower (2.5)", linewidth=2)
 fill(bbUpperPlot2, bbLowerPlot2, color = i_showBB2 and i_bbFill ? i_bbFillCol2 : na, title="BB2 Füllung")
+
+// --- RSI, Form 3: gemappte Kurve ---
+plot(i_rsiOn and i_rsiCurve ? f_rsiToPrice(rsi) : na, title="RSI (gemappt)", color=i_rsiCurveCol, linewidth=2)
+plot(i_rsiOn and i_rsiCurve ? f_rsiToPrice(i_rsiOB) : na, title="RSI Überkauft (gemappt)", color=i_rsiCurveLvl, linewidth=1)
+plot(i_rsiOn and i_rsiCurve ? f_rsiToPrice(i_rsiOS) : na, title="RSI Überverkauft (gemappt)", color=i_rsiCurveLvl, linewidth=1)
+
+// --- RSI, Form 2: Kerzenfärbung ---
+// na = kein Eingriff, die Kerze behält ihre normale Farbe. Betrifft nur Kerzen in der Zone.
+barcolor(i_rsiOn and i_rsiBarCol ? (rsiOB ? i_rsiObCol : rsiOS ? i_rsiOsCol : na) : na, title="RSI Kerzenfärbung")
+
+// --- RSI, Form 1: Zahlenfeld ---
+f_tablePos() =>
+    switch i_rsiTablePos
+        "Oben links"   => position.top_left
+        "Unten rechts" => position.bottom_right
+        "Unten links"  => position.bottom_left
+        "Mitte rechts" => position.middle_right
+        "Mitte links"  => position.middle_left
+        => position.top_right
+
+f_tableSize() =>
+    switch i_rsiTableSize
+        "Klein" => size.small
+        "Groß"  => size.large
+        => size.normal
+
+var table rsiTable = table.new(f_tablePos(), 1, 2, bgcolor=i_rsiTableBg, frame_width=0, border_width=0)
+
+if i_rsiOn and i_rsiTable and barstate.islast
+    table.cell(rsiTable, 0, 0, "RSI " + str.tostring(i_rsiLen), text_color=color.new(color.gray, 20), text_size=size.small)
+    table.cell(rsiTable, 0, 1, str.tostring(rsi, "#.0"), text_color=rsiZoneCol, text_size=f_tableSize())

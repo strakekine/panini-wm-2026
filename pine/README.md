@@ -10,8 +10,8 @@ keine Marktstruktur-Pivots, kein Pullback/Candle-Pattern-Kram. Absichtlich schla
 
 - `indicator_overlay_simple.pine` — **signalfreie Variante** des "Confluence Buy/Sell Signal":
   nur Darstellung, keine Score-Logik, keine Labels, keine Alerts. Siehe unten.
-- `indicator_lower_momentum.pine` — signalfreies **unteres Pane**: RSI + ADX/DI.
-- `indicator_lower_macd.pine` — signalfreies **unteres Pane**: MACD.
+- `indicator_lower_macd.pine` — signalfreies **unteres Pane**: MACD. Slot 2 des Charts.
+- `indicator_lower_momentum.pine` — Alternative für Slot 2: RSI + ADX/DI im unteren Pane.
 
 Beide Signal-Scripts enthalten dieselbe Logik redundant (kein Pine-Library-Import, um den
 Publish-Test-Republish-Zyklus zu vermeiden — siehe unten).
@@ -21,7 +21,7 @@ Publish-Test-Republish-Zyklus zu vermeiden — siehe unten).
 `indicator_overlay_simple.pine` ist die abgespeckte Anzeige-Version des
 "Confluence Buy/Sell Signal": Inputs, Defaults und Farben sind aus dem Original übernommen,
 aber die gesamte Signalgebung fehlt. Entfernt sind Konfluenz-Score, BUY/SELL/EXIT-Labels,
-ADX-Filter, RSI, MACD, Volumen-Bestätigung, Engulfing, Inside Bar, Golden/Death Cross,
+ADX-Filter, MACD, Volumen-Bestätigung, Engulfing, Inside Bar, Golden/Death Cross,
 TK-Cross, 200MA-Cross, Score-Hintergrund und alle `alertcondition`. Das Script zeichnet
 ausschließlich Indikatoren, die Interpretation bleibt beim Betrachter.
 
@@ -34,42 +34,58 @@ Stufe 1 enthält vier Bausteine, jeder einzeln abschaltbar:
 | **Ichimoku** | Tenkan 9 / Kijun 26 / Senkou B 52, Verschiebung 27 mit Plot-Offset `displacement - 1` (= 26 Bars, klassisch korrekt; das TV-Built-in verschiebt nur 25). Cloud, Tenkan/Kijun und Lagging Span (Chikou) getrennt schaltbar. |
 | **Bollinger** | Gemeinsame Länge 20, Basis SMA, zwei Bänder gleichzeitig: 2.0 + 2.5, je mit eigenen Farben und Füllung. Basis-Linie separat schaltbar. |
 
-Weitere Bausteine kommen schrittweise dazu. Platzbudget: TradingView erlaubt 64 Plots pro
-Script, aktuell sind 17 belegt.
+Stufe 2 ergänzt den **RSI** — ohne eigenes Pane, siehe nächster Abschnitt.
 
-## Unteres Pane — RSI/ADX und MACD
+Platzbudget: TradingView erlaubt 64 Plots pro Script, aktuell sind 20 belegt.
 
-Ergänzung zum Overlay: zwei Scripts mit `overlay=false`, die unter dem Kurschart laufen.
-Gleiche Philosophie wie `indicator_overlay_simple.pine` — reine Anzeige, jeder Baustein
-einzeln abschaltbar, keine Signale, keine Labels, keine Alerts.
+## RSI im Overlay — ohne eigenes Pane
 
-| Script | Inhalt | Einstellungen |
-|---|---|---|
-| `indicator_lower_momentum.pine` | **RSI** + **ADX/DI** | RSI: Länge 14, freie Source, optionale SMA/EMA-Glättung, Level-Linien 70/50/30 mit Zonenfüllung. ADX: DI-Länge 14, Glättung 14, DI+/DI− separat schaltbar, Orientierungs-Schwelle 20. |
-| `indicator_lower_macd.pine` | **MACD** | 12/26/9, freie Source. Linie, Signal und Histogramm einzeln schaltbar, Histogramm wahlweise vier- oder zweifarbig, Nulllinie. |
+Hintergrund: TradingView erlaubt in der kostenlosen Version nur zwei Indikatoren pro Chart.
+Slot 1 ist dieses Overlay, Slot 2 der MACD im unteren Pane — für den RSI bleibt keiner übrig.
+Also wandert er ins Overlay.
 
-### Warum zwei Scripts und nicht eines
+Eine gewöhnliche RSI-Linie geht dort nicht: Das Script liegt auf der Preisachse, ein RSI von
+62 wäre schlicht der Kurs 62 und läge bei den meisten Instrumenten weit außerhalb des Bildes.
+Deshalb drei Darstellungsformen, die ohne eigene Achse auskommen — alle einzeln schaltbar,
+alle vom Hauptschalter „RSI aktiv" abhängig.
 
-Ein TradingView-Pane hat **eine** Y-Achse für alles, was darin liegt. RSI und ADX laufen
-nativ zwischen 0 und 100 und passen deshalb zusammen in ein Script. MACD rechnet dagegen in
-Preis-Einheiten — bei BTC grob ±500, bei einem Cent-Coin ±0.03. Zusammen in einem Pane würde
-die Achse über beide Wertebereiche gespannt und der RSI läge als platte Linie am oberen Rand.
+| Form | Default | Was sie zeigt | Grenzen |
+|---|---|---|---|
+| **Zahlenfeld** | an | Aktueller RSI-Wert als Text in der Chart-Ecke, eingefärbt nach Zone. Position (6 Ecken) und Schriftgröße wählbar. | Nur der Wert der letzten Kerze, kein Verlauf. |
+| **Kerzenfärbung** | aus | Kerzen werden getönt, solange der RSI über der Überkauft- bzw. unter der Überverkauft-Schwelle liegt. | Nur die beiden Extremzonen, keine Zwischenwerte, keine Zahl. |
+| **Gemappte Kurve** | aus | Der vollständige RSI-Verlauf, umgerechnet auf ein Preisband aus Hoch/Tief der letzten N Kerzen (Default 200), samt gemappten 70/30-Linien. | Die Höhe im Chart ist willkürlich und sagt nichts über das Kursniveau. Aussagekräftig sind nur Form und Lage zu den 70/30-Linien. |
 
-### Beide trotzdem in einer Kachel
+Zahlenfeld und Kerzenfärbung greifen auf dieselbe Farbvariable zu, sind also immer synchron:
+Wird die Kerze rot getönt, steht auch die Zahl auf Rot. Alle drei Farben (überkauft,
+überverkauft, neutral) sind frei wählbar.
 
-Getrennte Scripts heißt nicht zwangsläufig getrennte Kacheln:
+Die Kerzenfärbung arbeitet mit `barcolor()` und liefert außerhalb der Zonen `na` zurück — dort
+greift sie also gar nicht ein und die Kerzen behalten ihre normale Chart-Färbung. Ist der
+Schalter aus, ist die Funktion durchgehend wirkungslos.
 
-1. Beide Indikatoren aufs Chart legen — sie erscheinen zunächst in zwei eigenen Panes.
-2. Rechtsklick auf den Namen des MACD-Indikators → **Move to → Existing pane above/below**,
-   Ziel ist das Pane des Momentum-Indikators.
-3. Im gemeinsamen Pane Rechtsklick auf die Werteachse des MACD → **Pin to left scale**.
+## Unteres Pane — MACD
 
-Ergebnis: eine Kachel unter dem Chart, RSI/ADX auf der rechten Achse (0–100), MACD auf der
-linken (Preis-Einheiten). Beide behalten ihre echten, ablesbaren Werte — im Gegensatz zu
-einer Normalisierung, bei der die MACD-Zahlen nur noch relative Form wären.
+Slot 2 des Charts. `indicator_lower_macd.pine`, `overlay=false`, gleiche Philosophie wie das
+Overlay — reine Anzeige, jeder Baustein einzeln abschaltbar, keine Signale, keine Alerts.
 
-Die Anordnung merkt sich TradingView im Chart-Layout; beim Speichern des Layouts bleibt sie
-erhalten.
+MACD 12/26/9 mit freier Source. Linie, Signal und Histogramm einzeln schaltbar, Nulllinie,
+Histogramm wahlweise vierfarbig (kräftig = Bewegung von der Nulllinie weg, blass = zurück zur
+Nulllinie) oder zweifarbig.
+
+Der MACD bleibt bewusst ein eigenes Script und wandert nicht wie der RSI ins Overlay: Er
+rechnet in Preis-Einheiten, hat also weder eine feste Ober- noch Untergrenze. Für ein
+Zahlenfeld wäre er zu wenig aussagekräftig (der absolute Wert sagt ohne Verlauf nichts), und
+für eine gemappte Kurve fehlt ihm der feste 0–100-Rahmen, in dem der RSI sich bewegt. Im
+eigenen Pane behält er seine echte Skala und seine echten Werte.
+
+### Alternative für Slot 2
+
+`indicator_lower_momentum.pine` — RSI + ADX/DI im unteren Pane, beide nativ 0–100, deshalb
+zusammen in einem Pane möglich. Nur relevant, wenn du statt des MACD lieber ADX/DI im zweiten
+Slot hättest; der RSI im Overlay wird dadurch überflüssig und lässt sich per Hauptschalter
+abschalten. Einstellungen: RSI Länge 14, freie Source, optionale SMA/EMA-Glättung,
+Level-Linien 70/50/30 mit Zonenfüllung; ADX DI-Länge 14, Glättung 14, DI+/DI− separat
+schaltbar, Orientierungs-Schwelle 20.
 
 ## Die vier Bedingungen (alle per UND verknüpft)
 

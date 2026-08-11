@@ -224,6 +224,69 @@ Zahlenfeld wäre er zu wenig aussagekräftig (der absolute Wert sagt ohne Verlau
 für eine gemappte Kurve fehlt ihm der feste 0–100-Rahmen, in dem der RSI sich bewegt. Im
 eigenen Pane behält er seine echte Skala und seine echten Werte.
 
+### PPO — dieselbe Kurve in Prozent
+
+Umschalter `Als PPO in Prozent rechnen`. Der Percentage Price Oscillator ist derselbe Aufbau,
+nur relativ: `(EMA fast − EMA slow) / EMA slow × 100`. Der MACD von BTC steht bei 412, der von
+TRX bei 0.0003 — beide Zahlen sagen ohne Kontext nichts und sind untereinander nicht
+vergleichbar. Als PPO stehen beide bei z. B. 1.8 %, und der Wert wird über Coins und
+Zeitrahmen hinweg lesbar. Die Form der Kurve bleibt identisch, nur die Skala ändert sich.
+
+Beide Varianten werden auf jeder Kerze gerechnet und erst danach ausgewählt — im
+Ternär-Operator liefe nur der genommene Zweig, und `ta.ema` führt internen Zustand mit. Auch
+die Signallinie existiert doppelt, damit sie immer auf der tatsächlich gezeigten Reihe läuft.
+
+### ADX als Hintergrundtönung
+
+Der ADX steht im Overlay nur als Zahl. Als Tönung dieses Panes beantwortet er beim Blick auf
+den MACD sofort die entscheidende Frage: Passiert dieses Momentum in einem Trend oder im
+Rauschen? Unterhalb der Startschwelle (Default 20) bleibt der Hintergrund unsichtbar, ab dort
+wird er mit steigendem ADX kräftiger, bei „volle Tönung" (Default 45) ist das Maximum erreicht.
+Kostet keine Achse und keinen Plot.
+
+### Preislevel im Kurschart — `force_overlay`
+
+Der eigentliche Hebel gegen das Zwei-Indikator-Limit: Pine v6 erlaubt es, einzelne Plots eines
+Pane-Scripts auf den **Hauptchart** zu schieben. Slot 2 belegt damit zwei Bereiche gleichzeitig
+und liefert die Preislevel, für die im Overlay kein Platz mehr ist.
+
+| Level | Quelle |
+|---|---|
+| **Vorwoche Hoch/Tief** | `request.security(…, "W", high[1] / low[1], lookahead_on)` |
+| **Vormonat Hoch/Tief** | dito auf `"M"` |
+| **Jahres-Open** | `open` der laufenden `"12M"`-Kerze |
+
+`high[1]` mit `lookahead_on` ist das übliche repaint-freie Muster für den Wert der
+**abgeschlossenen** Vorperiode: Der steht bereits fest, es wird also nichts vorweggenommen.
+Dasselbe gilt für den Eröffnungskurs der laufenden Jahreskerze, der seit deren erster Sekunde
+feststeht.
+
+Optionale Beschriftungen am rechten Rand machen die Linien ohne Nachschlagen lesbar. Auf
+Vortages-Level wurde bewusst verzichtet — auf einem Tageschart wäre das die letzte Kerze.
+
+### Die Tabelle im Pane
+
+```
+  MACD  Linie  Hist  Rtg
+   D      +     +     ↑
+   W      +     −     ↓
+   M      −     −     ↑
+```
+
+| Spalte | Bedeutung |
+|---|---|
+| **Linie** | MACD über (+) oder unter (−) der Nulllinie |
+| **Hist** | Histogramm positiv (+) oder negativ (−), also MACD über oder unter dem Signal |
+| **Rtg** | Histogramm wächst (↑) oder schrumpft (↓) |
+
+Als **Linien** ginge das nicht: Ein Wochen-MACD misst Kursdifferenzen über Wochen und ist damit
+ein Vielfaches des Tageswerts — er würde die Achse an sich reißen und den Tages-MACD platt an
+die Nulllinie drücken. Als Text bleibt dieselbe Information erhalten, ohne dass eine Skala
+daran hängt. Und ehrlicherweise liest man beim MACD ohnehin Vorzeichen und Richtung, nicht den
+absoluten Wert.
+
+Zeitrahmen frei wählbar (Default D/W/M), Werte von laufenden Kerzen wie im Overlay.
+
 ### Alternative für Slot 2
 
 `indicator_lower_momentum.pine` — RSI + ADX/DI im unteren Pane, beide nativ 0–100, deshalb

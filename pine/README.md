@@ -49,7 +49,7 @@ Also wandert er ins Overlay.
 Eine gewöhnliche RSI-Linie geht dort nicht: Das Script liegt auf der Preisachse, ein RSI von
 62 wäre schlicht der Kurs 62 und läge bei den meisten Instrumenten weit außerhalb des Bildes.
 Deshalb Darstellungsformen, die ohne eigene Achse auskommen — einzeln schaltbar,
-beide vom Hauptschalter „RSI aktiv" abhängig.
+beide vom Schalter „RSI-Anzeige im Chart" abhängig.
 
 | Form | Default | Was sie zeigt | Grenzen |
 |---|---|---|---|
@@ -61,6 +61,11 @@ Dazu kommt die **Tabelle**, die den RSI pro Zeitrahmen führt — siehe unten.
 Eine frühere dritte Form, den auf ein Preisband gemappten RSI-Verlauf, gab es kurzzeitig; sie
 wurde wieder entfernt (ungenutzt, und die willkürliche Höhe im Chart war eher irreführend als
 hilfreich). In der Git-Historie dieses Branches ist sie zu finden.
+
+Der Schalter **„RSI-Anzeige im Chart"** betrifft ausschließlich diese beiden Formen. Die
+RSI-Spalte der Tabelle hat ihren eigenen Schalter und bleibt stehen. Die *Einstellungen* der
+RSI-Gruppe wirken dagegen auf beides: Länge und Source speisen auch die Werte der drei
+Zeitrahmen, die Schwellen auch deren Einfärbung.
 
 Zahlenfeld und Kerzenfärbung greifen auf dieselbe Farbvariable zu, sind also immer synchron:
 Wird die Kerze rot getönt, steht auch die Zahl auf Rot. Alle drei Farben (überkauft,

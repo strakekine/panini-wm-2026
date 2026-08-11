@@ -95,7 +95,7 @@ i_bbFill      = input.bool(true, "Band-Füllung anzeigen (beide)", group="Bollin
 // die ohne eigene Achse auskommen: das Zahlenfeld und die Kerzenfaerbung. Beide abschaltbar.
 // Der RSI steht ausserdem pro Zeitrahmen in der Tabelle weiter unten.
 grpRSI = "RSI"
-i_rsiOn     = input.bool(true, "RSI aktiv", group=grpRSI)
+i_rsiOn     = input.bool(true, "RSI-Anzeige im Chart", group=grpRSI, tooltip="Betrifft nur die beiden Chart-Darstellungen: Zahlenfeld und Kerzenfaerbung. Die RSI-Spalte der Tabelle hat ihren eigenen Schalter und bleibt davon unberuehrt.\n\nLaenge, Source und die beiden Schwellen wirken dagegen auf beides - sie speisen auch die Werte und die Einfaerbung in der Tabelle.")
 i_rsiLen    = input.int(14, "RSI Länge", minval=1, group=grpRSI)
 i_rsiSource = input.source(close, "Source", group=grpRSI)
 i_rsiOB     = input.float(70, "Überkauft", minval=50, maxval=100, group=grpRSI)

@@ -183,6 +183,23 @@ Gelesen wird er als Durchschnittspreis aller Käufer seit dem Anker: Liegt der K
 die durchschnittliche Position seit dem Ankerpunkt im Gewinn, und der Level wird bei
 Rücksetzern häufig verteidigt.
 
+#### Die gezeichnete Linie
+
+`ta.vwap` liefert auch **vor** dem aktuellen Anker Werte — nämlich die der früheren
+Anker-Segmente. Ein einfaches `plot()` reiht die alle aneinander und ergibt eine Linie über die
+gesamte Historie, die nicht zum Ankerdatum in der Tabelle passt (das nennt nur den jüngsten
+Anker). Bei einem Symbol, das über die Jahre mehrfach neue Jahrestiefs gedruckt hat, ist das
+sichtbar falsch.
+
+Per `plot()` ist das nicht lösbar: Auf einer Kerze von 2024 weiß das Script nicht, dass 2026
+noch ein Anker folgt — welcher der letzte ist, steht erst am rechten Rand fest. Die Linie wird
+deshalb dort einmalig als **Polyline** über die Werte seit dem aktuellen Anker gezogen. Sie
+beginnt damit sichtbar am Ankerpunkt und nirgends sonst.
+
+Wer die vollständige Serie sehen will, schaltet „Auch frühere Anker-Segmente zeichnen" an —
+dann greift wieder das normale `plot()`. Die Segmentlänge ist auf 2000 Kerzen begrenzt
+(einstellbar), damit sehr alte Anker die Zeichenzeit nicht sprengen.
+
 Für einzelne, bewusst gesetzte Anker ist übrigens das TradingView-**Zeichenwerkzeug** „Anchored
 VWAP" der bessere Weg — Zeichnungen zählen nicht gegen das Zwei-Indikator-Limit und werden pro
 Symbol gespeichert.

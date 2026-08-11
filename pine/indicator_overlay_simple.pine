@@ -161,6 +161,8 @@ i_vwapWin    = input.string("1 Jahr", "Fenster (für Hoch/Tief-Anker)", options=
 i_vwapDate   = input.time(timestamp("01 Jan 2024 00:00 +0000"), "Manuelles Datum", group=grpVwap)
 i_vwapBase   = input.string("Automatisch (feinste Basis)", "Berechnungsbasis", options=["Automatisch (feinste Basis)", "Chart-Zeitrahmen", "Täglich (D)"], group=grpVwap, tooltip="In den VWAP geht pro Kerze nur ein Preis ein - je groeber der Zeitrahmen, desto groeber die Naeherung. Automatisch heisst: unterhalb von D rechnet er auf dem Chart-Zeitrahmen, ab D aufwaerts auf Tagesdaten. Die tatsaechlich genutzte Basis steht im Label der Tabellenzeile.")
 i_vwapCol    = input.color(color.new(#ff9800, 0), "Linien Farbe", group=grpVwap)
+i_vwapAllSeg = input.bool(false, "Auch frühere Anker-Segmente zeichnen", group=grpVwap, tooltip="Aus (Default): nur das Segment ab dem aktuellen Anker.\n\nAn: die gesamte Serie. ta.vwap liefert auch vor dem aktuellen Anker Werte - die der frueheren Anker-Segmente. Aneinandergereiht ergibt das eine Linie ueber die ganze Historie, die nicht zum Ankerdatum in der Tabelle passt.")
+i_vwapMaxBars= input.int(2000, "Maximale Segmentlänge (Kerzen)", minval=10, group=grpVwap, tooltip="Begrenzt, wie weit fuer die Linie zurueckgerechnet wird. Nur relevant bei sehr alten Ankern.")
 
 // --- Tabelle ---
 grpTbl = "Tabelle"
@@ -386,7 +388,25 @@ if i_rsiOn and i_rsiTable and barstate.islast
 // ANCHORED VWAP
 // ============================================================
 
-plot(i_vwapLine ? vwapVal : na, title="Anchored VWAP", color=i_vwapCol, linewidth=2, style=plot.style_linebr)
+// Die gesamte Serie - also alle Anker-Segmente hintereinander. Nur auf Wunsch.
+plot(i_vwapLine and i_vwapAllSeg ? vwapVal : na, title="Anchored VWAP (alle Segmente)", color=i_vwapCol, linewidth=2, style=plot.style_linebr)
+
+// Nur das aktuelle Segment. Per plot() nicht moeglich: auf einer alten Kerze weiss das Script
+// nicht, dass spaeter noch ein Anker folgt - welcher der letzte ist, steht erst am rechten Rand
+// fest. Deshalb wird die Linie dort einmalig als Polyline ueber die Werte seit dem Anker gezogen.
+var polyline vwapPl = na
+if i_vwapLine and not i_vwapAllSeg and barstate.islast and not na(vwapAnchorTime)
+    polyline.delete(vwapPl)
+    int back = 0
+    for i = 0 to i_vwapMaxBars
+        if i > bar_index or time[i] < vwapAnchorTime
+            break
+        back := i
+    if back > 0
+        pts = array.new<chart.point>()
+        for i = back to 0
+            array.push(pts, chart.point.from_index(bar_index - i, vwapVal[i]))
+        vwapPl := polyline.new(pts, xloc=xloc.bar_index, line_color=i_vwapCol, line_width=2)
 
 // ============================================================
 // TABELLE

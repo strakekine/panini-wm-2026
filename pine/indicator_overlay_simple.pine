@@ -55,12 +55,12 @@ i_stBullCol      = input.color(color.green, "Supertrend Farbe (bullish)", group=
 i_stBearCol      = input.color(color.red, "Supertrend Farbe (bärisch)", group="Supertrend")
 
 // --- Ichimoku ---
-i_useIchimoku   = input.bool(true, "Ichimoku Cloud verwenden", group="Ichimoku")
+i_useIchimoku   = input.bool(true, "Ichimoku aktiv (Hauptschalter)", group="Ichimoku", tooltip="Schaltet alle Ichimoku-Linien gemeinsam ab: Cloud, Tenkan/Kijun und Lagging Span. Fuer einzelne Linien die drei Schalter darunter nutzen.\n\nDie Chikou (Lagging Span) gehoert zum Ichimoku-System, ist aber NICHT Teil der Kumo - die besteht nur aus Senkou Span A und B. Deshalb bleibt sie stehen, wenn nur 'Cloud anzeigen' aus ist.")
 i_tenkanLen     = input.int(9, "Tenkan-sen", minval=1, group="Ichimoku")
 i_kijunLen      = input.int(26, "Kijun-sen", minval=1, group="Ichimoku")
 i_senkouBLen    = input.int(52, "Senkou Span B", minval=1, group="Ichimoku")
 i_displacement  = input.int(27, "Verschiebung", minval=1, tooltip="27 mit Plot-Offset (displacement - 1), damit die Cloud deckungsgleich mit den TV-Indikatoren liegt.", group="Ichimoku")
-i_showCloud     = input.bool(true, "Cloud anzeigen", group="Ichimoku")
+i_showCloud     = input.bool(true, "Cloud (Kumo) anzeigen", group="Ichimoku", tooltip="Nur die Flaeche zwischen Senkou Span A und B. Tenkan/Kijun und Lagging Span bleiben davon unberuehrt.")
 i_showTK        = input.bool(true, "Tenkan/Kijun-Linien anzeigen", group="Ichimoku")
 i_showChikou    = input.bool(true, "Lagging Span (Chikou) anzeigen", group="Ichimoku")
 i_senkouACol    = input.color(color.new(color.green, 70), "Senkou Span A Farbe", group="Ichimoku")

@@ -122,6 +122,10 @@ bgTransp = na(bgAdx) or bgRatio <= 0 ? 100 : int(100 - bgRatio * (100 - i_bgTran
 // um ein Vielfaches groesser als der Tageswert - er wuerde die Achse an sich reissen. Als Text
 // bleibt dieselbe Information erhalten, ohne dass eine Skala daran haengt.
 htfOff = i_htfLive ? 0 : 1
+// Hist: MACD ueber/unter der SIGNALLINIE. Null: MACD ueber/unter der NULLLINIE.
+// Rtg: waechst oder schrumpft das HISTOGRAMM - also der Abstand der beiden Linien. Das ist
+// NICHT die Richtung der MACD-Linie: die kann steigen, waehrend das Histogramm schrumpft,
+// naemlich wenn die Signallinie schneller steigt. Genau das ist der Frühwarnfall.
 macdState = macdLine >= 0 ? 1.0 : -1.0
 histState = histLine >= 0 ? 1.0 : -1.0
 dirState  = histRising ? 1.0 : -1.0
@@ -215,9 +219,12 @@ if i_tblOn and barstate.islast
     table.clear(tbl, 0, 0, 3, 3)
     int r = 0
 
+    // Reihenfolge als Steigerungsleiter, in der die Bedingungen typischerweise eintreten:
+    // erst kreuzt der MACD sein Signal (Hist), dann schiebt er sich ueber Null (Null),
+    // dann waechst der Abstand (Rtg).
     table.cell(tbl, 0, r, i_usePpo ? "PPO" : "MACD", text_color=i_tblHead, text_size=size.small)
-    table.cell(tbl, 1, r, "Linie", text_color=i_tblHead, text_size=size.small)
-    table.cell(tbl, 2, r, "Hist", text_color=i_tblHead, text_size=size.small)
+    table.cell(tbl, 1, r, "Hist", text_color=i_tblHead, text_size=size.small)
+    table.cell(tbl, 2, r, "Null", text_color=i_tblHead, text_size=size.small)
     table.cell(tbl, 3, r, "Rtg", text_color=i_tblHead, text_size=size.small)
     r += 1
 
@@ -233,7 +240,7 @@ if i_tblOn and barstate.islast
             vH = array.get(tfHist, i)
             vD = array.get(tfDir, i)
             table.cell(tbl, 0, r, array.get(tfLabels, i), text_color=i_tblHead, text_size=f_tblSize())
-            table.cell(tbl, 1, r, f_signTxt(vM), text_color=f_colOf(vM), text_size=f_tblSize())
-            table.cell(tbl, 2, r, f_signTxt(vH), text_color=f_colOf(vH), text_size=f_tblSize())
+            table.cell(tbl, 1, r, f_signTxt(vH), text_color=f_colOf(vH), text_size=f_tblSize())
+            table.cell(tbl, 2, r, f_signTxt(vM), text_color=f_colOf(vM), text_size=f_tblSize())
             table.cell(tbl, 3, r, f_dirTxt(vD),  text_color=f_colOf(vD), text_size=f_tblSize())
             r += 1

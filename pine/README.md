@@ -272,17 +272,27 @@ Auf Vortages-Level wurde bewusst verzichtet — auf einem Tageschart wäre das d
 ### Die Tabelle im Pane
 
 ```
-  MACD  Linie  Hist  Rtg
-   D      +     +     ↑
-   W      +     −     ↓
-   M      −     −     ↑
+  MACD  Hist  Null  Rtg
+   D      +     +    ↑
+   W      +     −    ↓
+   M      −     −    ↑
 ```
 
 | Spalte | Bedeutung |
 |---|---|
-| **Linie** | MACD über (+) oder unter (−) der Nulllinie |
-| **Hist** | Histogramm positiv (+) oder negativ (−), also MACD über oder unter dem **Signal** — nicht über oder unter der Nulllinie |
-| **Rtg** | Histogramm wächst (↑) oder schrumpft (↓) |
+| **Hist** | MACD über (+) oder unter (−) der **Signallinie** — das Vorzeichen des Histogramms |
+| **Null** | MACD über (+) oder unter (−) der **Nulllinie** |
+| **Rtg** | Das **Histogramm** wächst (↑) oder schrumpft (↓), also ob der Abstand zwischen MACD und Signal größer wird |
+
+Die Reihenfolge ist eine Steigerungsleiter, in der die Bedingungen typischerweise eintreten:
+erst kreuzt der MACD sein Signal, dann schiebt er sich über Null, dann beschleunigt der
+Abstand. `+ + ↑` ist damit der stärkste Zustand, und man liest die Zeile von links nach rechts
+als zunehmende Bestätigung.
+
+**Rtg ist nicht die Richtung der MACD-Linie.** Die kann steigen, während das Histogramm
+schrumpft — nämlich dann, wenn die Signallinie noch schneller steigt. Genau dieser Fall ist der
+früheste Hinweis auf nachlassendes Momentum, und er ginge verloren, wenn hier die Linienrichtung
+stünde.
 
 Als **Linien** ginge das nicht: Ein Wochen-MACD misst Kursdifferenzen über Wochen und ist damit
 ein Vielfaches des Tageswerts — er würde die Achse an sich reißen und den Tages-MACD platt an

@@ -53,7 +53,7 @@ alle vom Hauptschalter „RSI aktiv" abhängig.
 
 | Form | Default | Was sie zeigt | Grenzen |
 |---|---|---|---|
-| **Zahlenfeld** | an | Aktueller RSI-Wert als Text in der Chart-Ecke, eingefärbt nach Zone. Position (6 Ecken) und Schriftgröße wählbar. | Nur der Wert der letzten Kerze, kein Verlauf. |
+| **Zahlenfeld** | aus | Aktueller RSI-Wert als große Zahl in der Chart-Ecke, eingefärbt nach Zone. Position (6 Ecken) und Schriftgröße wählbar. Default aus, seit die Tabelle den RSI mitführt. | Nur der Wert der letzten Kerze, kein Verlauf. |
 | **Kerzenfärbung** | aus | Kerzen werden getönt, solange der RSI über der Überkauft- bzw. unter der Überverkauft-Schwelle liegt. | Nur die beiden Extremzonen, keine Zwischenwerte, keine Zahl. |
 | **Gemappte Kurve** | aus | Der vollständige RSI-Verlauf, umgerechnet auf ein Preisband aus Hoch/Tief der letzten N Kerzen (Default 200), samt gemappten 70/30-Linien. | Die Höhe im Chart ist willkürlich und sagt nichts über das Kursniveau. Aussagekräftig sind nur Form und Lage zu den 70/30-Linien. |
 

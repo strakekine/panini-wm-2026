@@ -34,9 +34,11 @@ Stufe 1 enthält vier Bausteine, jeder einzeln abschaltbar:
 | **Ichimoku** | Tenkan 9 / Kijun 26 / Senkou B 52, Verschiebung 27 mit Plot-Offset `displacement - 1` (= 26 Bars, klassisch korrekt; das TV-Built-in verschiebt nur 25). Cloud, Tenkan/Kijun und Lagging Span (Chikou) getrennt schaltbar. |
 | **Bollinger** | Gemeinsame Länge 20, Basis SMA, zwei Bänder gleichzeitig: 2.0 + 2.5, je mit eigenen Farben und Füllung. Basis-Linie separat schaltbar. |
 
-Stufe 2 ergänzt den **RSI** — ohne eigenes Pane, siehe nächster Abschnitt.
+Stufe 2 ergänzt den **RSI**, Stufe 3 die **Tabelle** und den **Anchored VWAP** — alles ohne
+eigenes Pane, siehe die nächsten Abschnitte.
 
-Platzbudget: TradingView erlaubt 64 Plots pro Script, aktuell sind 20 belegt.
+Platzbudget: TradingView erlaubt 64 Plots pro Script, aktuell sind 21 belegt (Tabellen zählen
+nicht mit).
 
 ## RSI im Overlay — ohne eigenes Pane
 
@@ -62,6 +64,92 @@ Wird die Kerze rot getönt, steht auch die Zahl auf Rot. Alle drei Farben (über
 Die Kerzenfärbung arbeitet mit `barcolor()` und liefert außerhalb der Zonen `na` zurück — dort
 greift sie also gar nicht ein und die Kerzen behalten ihre normale Chart-Färbung. Ist der
 Schalter aus, ist die Funktion durchgehend wirkungslos.
+
+## Tabelle und Anchored VWAP
+
+Stufe 3 im Overlay. Beides ohne eigenes Pane, beides ohne Signale.
+
+### Die Tabelle
+
+```
+        RSI   ADX   Trend
+  D      62    24     ▲
+  W      58    31     ▲
+  M      71    19     ▬
+  ATR   1.8 %
+  Vol   1.8×
+  VWAP  58412.50   +4.2 %
+```
+
+Oben das Zeitrahmen-Raster, darunter die Kennzahlen, die es nur einmal gibt. Spalten und
+Zeilen einzeln abschaltbar, Position wählbar (Default unten links: dort kollidiert sie weder
+mit der TradingView-Legende oben links noch mit den aktuellen Kerzen und der Preisskala
+rechts).
+
+| Feld | Inhalt | Färbung |
+|---|---|---|
+| **RSI** | pro Zeitrahmen | rot ab Überkauft-Schwelle, grün ab Überverkauft, sonst grau |
+| **ADX** | pro Zeitrahmen | grau unter der Trendschwelle (Default 25), sonst kräftig |
+| **Trend** | ▲ / ▼ / ▬ pro Zeitrahmen | grün / rot / grau |
+| **ATR** | in Prozent vom Kurs, Chart-Zeitrahmen | orange, wenn über dem eigenen 100-Kerzen-Schnitt |
+| **Vol** | Volumen relativ zum 20er-EMA | kräftig ab 1.5× |
+| **VWAP** | Kurs des Anchored VWAP plus Abstand in Prozent | grün über, rot unter dem VWAP |
+
+Die drei Zeitrahmen sind frei wählbar, Default **D/W/M**.
+
+**RSI und ADX kommen ins Raster, ATR und Volumen nicht.** RSI und ADX laufen beide 0–100 und
+messen dasselbe über verschieden lange Fenster — die sind über Zeitrahmen hinweg vergleichbar.
+Ein Wochen-ATR neben einem Tages-ATR lädt dagegen zum Fehlschluss ein: Für den Stop zählt der
+ATR des Zeitrahmens, auf dem du handelst, also der des Charts.
+
+**Laufende Kerzen, nicht abgeschlossene.** Default zeigen alle drei Zeitrahmen ihren aktuellen
+Stand — sonst stünde ein Tages-RSI von heute neben einem Monats-RSI vom vorletzten Monat, und
+der Vergleich wäre wertlos. Preis dafür: Die Werte ändern sich bis zum jeweiligen Kerzenschluss
+noch, die Monatszeile also einen Monat lang. Per Schalter auf abgeschlossene Kerzen umstellbar.
+
+Die Tabelle zeigt grundsätzlich nur den Jetzt-Zustand. Beim Zurückscrollen siehst du weiterhin
+die aktuellen Werte, nicht die von damals.
+
+### Die Trend-Spalte
+
+Drei Stimmen, alle müssen einig sein — sonst ▬:
+
+| Stimme | Aufwärts, wenn … |
+|---|---|
+| MA-Staffelung | schnell > mittel > langsam **und** Kurs über der schnellen MA |
+| Supertrend | Richtung bullish |
+| Ichimoku | Kurs über der Kumo |
+
+Die Trend-MAs haben **eigene Längen** (Default 10/20/50), entkoppelt von den sechs
+Anzeige-MAs: Du kannst das Chart optisch beliebig umbauen, ohne die Trend-Aussage zu ändern.
+Ebenso läuft die Berechnung unabhängig von der Sichtbarkeit — Supertrend und Kumo stimmen mit
+ab, auch wenn du sie ausgeblendet hast. Jede Stimme einzeln abwählbar.
+
+Dass bei Uneinigkeit ▬ steht, ist Absicht: Widersprechen sich Supertrend und Kumo, *ist* der
+Markt uneinig, und das ist die nützlichste Information der Zeile.
+
+### Anchored VWAP
+
+Bewusst **kein** Session-VWAP: Auf Tages-, Wochen- und Monatscharts fällt dessen Anker mit der
+Kerze zusammen, er ist dort wertlos. Stattdessen ein Anker, den du wählst — und der sich, außer
+beim manuellen Datum, **pro Symbol selbst findet**. Beim Wechsel von BTC auf einen anderen Coin
+ist also nichts nachzupflegen, was bei einem festen Datums-Input nötig wäre (TradingView
+speichert Indikator-Einstellungen pro Chart, nicht pro Symbol).
+
+| Anker | Verhalten |
+|---|---|
+| **Tief der letzten N Kerzen** (Default, N=365) | springt automatisch auf das jüngste Extrem dieser Spanne |
+| **Hoch der letzten N Kerzen** | dito, invers |
+| **Jahresanfang** / **Quartalsanfang** | kalendarisch, für alle Symbole gleich sinnvoll |
+| **Manuelles Datum** | fest, muss pro Symbol gepflegt werden |
+
+Gelesen wird er als Durchschnittspreis aller Käufer seit dem Anker: Liegt der Kurs darüber, ist
+die durchschnittliche Position seit dem Ankerpunkt im Gewinn, und der Level wird bei
+Rücksetzern häufig verteidigt.
+
+Für einzelne, bewusst gesetzte Anker ist übrigens das TradingView-**Zeichenwerkzeug** „Anchored
+VWAP" der bessere Weg — Zeichnungen zählen nicht gegen das Zwei-Indikator-Limit und werden pro
+Symbol gespeichert.
 
 ## Unteres Pane — MACD
 

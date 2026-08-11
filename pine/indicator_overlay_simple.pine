@@ -4,6 +4,10 @@
 // Inside Bar, Golden/Death Cross, TK-Cross, 200MA-Cross, Score-Hintergrund, alle Alerts.
 // Stufe 1 - vier Bausteine: 6x MA (SMA/EMA), Supertrend, Ichimoku, Bollinger (2.0 + 2.5)
 // Stufe 2 - RSI, ohne eigenes Pane (siehe Block "RSI" unten)
+// Stufe 3 - Anchored VWAP und Tabelle: RSI/ADX/Trend ueber drei Zeitrahmen, dazu ATR,
+//           relatives Volumen und VWAP-Abstand. Weiterhin ohne Signale.
+//
+// Hinweis: die Tabelle nutzt ta.vwap und braucht damit ein Symbol mit Volumendaten.
 indicator("Confluence Simple (nur Anzeige)", overlay=true)
 
 // ============================================================
@@ -99,7 +103,9 @@ i_rsiObCol  = input.color(color.new(color.red, 0), "Farbe überkauft", inline="r
 i_rsiOsCol  = input.color(color.new(color.green, 0), "Farbe überverkauft", inline="rsicol", group=grpRSI)
 
 // Form 1: Zahlenfeld in der Chart-Ecke
-i_rsiTable    = input.bool(true, "Zahlenfeld anzeigen", group=grpRSI)
+// Default aus, seit die Zeitrahmen-Tabelle den RSI ohnehin mitfuehrt. Wer nur die eine
+// grosse Zahl will und die Tabelle nicht braucht, schaltet hier an und die Tabelle aus.
+i_rsiTable    = input.bool(false, "Zahlenfeld anzeigen", group=grpRSI)
 i_rsiTablePos = input.string("Oben rechts", "Position", options=["Oben rechts", "Oben links", "Unten rechts", "Unten links", "Mitte rechts", "Mitte links"], group=grpRSI)
 i_rsiTableSize= input.string("Normal", "Schriftgröße", options=["Klein", "Normal", "Groß"], group=grpRSI)
 i_rsiNeutral  = input.color(color.new(color.gray, 0), "Farbe neutral (zwischen den Zonen)", group=grpRSI)
@@ -113,6 +119,76 @@ i_rsiCurve    = input.bool(false, "RSI-Kurve ins Chart mappen", group=grpRSI, to
 i_rsiCurveLb  = input.int(200, "Lookback für das Band", minval=10, group=grpRSI)
 i_rsiCurveCol = input.color(color.new(#7e57c2, 0), "Kurven Farbe", group=grpRSI)
 i_rsiCurveLvl = input.color(color.new(#7e57c2, 65), "Farbe der gemappten 70/30-Linien", group=grpRSI)
+
+// --- Trend-Berechnung (nur für die Tabelle) ---
+// Bewusst eigene Längen, entkoppelt von den sechs Anzeige-MAs: Du kannst oben auf beliebige
+// MAs umstellen, ohne dass sich die Trend-Aussage ändert.
+grpTrend = "Trend-Berechnung"
+i_trType  = input.string("SMA", "MA-Typ", options=["SMA", "EMA"], group=grpTrend)
+i_trFast  = input.int(10, "Schnelle MA", minval=1, group=grpTrend)
+i_trMed   = input.int(20, "Mittlere MA", minval=1, group=grpTrend)
+i_trSlow  = input.int(50, "Langsame MA", minval=1, group=grpTrend)
+i_voteMa   = input.bool(true, "MA-Staffelung mitzählen", group=grpTrend, tooltip="Aufwärts: schnell > mittel > langsam UND Kurs über der schnellen MA.")
+i_voteSt   = input.bool(true, "Supertrend mitzählen", group=grpTrend)
+i_voteIchi = input.bool(true, "Ichimoku mitzählen", group=grpTrend, tooltip="Aufwärts: Kurs über der Kumo. Die Berechnung läuft unabhängig davon, ob die Cloud sichtbar ist.")
+i_trUpCol   = input.color(color.new(#26a69a, 0), "Farbe aufwärts", inline="trcol", group=grpTrend)
+i_trDownCol = input.color(color.new(#ef5350, 0), "Farbe abwärts", inline="trcol", group=grpTrend)
+i_trNeutCol = input.color(color.new(color.gray, 0), "Farbe uneinig", inline="trcol", group=grpTrend)
+
+// --- ADX ---
+grpADX = "ADX"
+i_adxLen     = input.int(14, "DI Länge", minval=1, group=grpADX)
+i_adxSmooth  = input.int(14, "ADX Glättung", minval=1, group=grpADX)
+i_adxTrend   = input.float(25, "Ab hier Trend", minval=0, maxval=100, group=grpADX, tooltip="Darunter wird der Wert grau dargestellt: zu schwach, um von einem Trend zu sprechen.")
+i_adxStrCol  = input.color(color.new(#e91e63, 0), "Farbe ab Trendstärke", group=grpADX)
+
+// --- ATR ---
+grpATR = "ATR"
+i_atrLen     = input.int(14, "ATR Länge", minval=1, group=grpATR)
+i_atrAvgLen  = input.int(100, "Vergleichsschnitt", minval=1, group=grpATR, tooltip="Der ATR in Prozent wird mit seinem eigenen Durchschnitt über diese Anzahl Kerzen verglichen. Darüber = erhöhte Volatilität.")
+i_atrHighCol = input.color(color.new(color.orange, 0), "Farbe erhöhte Volatilität", group=grpATR)
+
+// --- Relatives Volumen ---
+grpVol = "Volumen"
+i_volLen  = input.int(20, "Vergleichsschnitt (EMA)", minval=1, group=grpVol)
+i_volHigh = input.float(1.5, "Ab hier hervorheben", minval=0.1, step=0.1, group=grpVol)
+i_volCol  = input.color(color.new(#26a69a, 0), "Farbe hohes Volumen", group=grpVol)
+
+// --- Anchored VWAP ---
+// Bewusst KEIN Session-VWAP: der ist auf Tages-, Wochen- und Monatscharts wertlos, weil der
+// Anker mit der Kerze zusammenfällt. Die automatischen Anker finden sich pro Symbol selbst,
+// du musst also beim Wechsel von BTC auf einen anderen Coin nichts nachpflegen.
+grpVwap = "Anchored VWAP"
+i_vwapLine   = input.bool(true, "VWAP-Linie im Chart zeichnen", group=grpVwap)
+i_vwapAnchor = input.string("Tief der letzten N Kerzen", "Anker", options=["Tief der letzten N Kerzen", "Hoch der letzten N Kerzen", "Jahresanfang", "Quartalsanfang", "Manuelles Datum"], group=grpVwap)
+i_vwapLb     = input.int(365, "N Kerzen (für Hoch/Tief-Anker)", minval=2, group=grpVwap, tooltip="Der Anker springt automatisch auf das jeweils jüngste Extrem dieser Spanne. Auf dem Tageschart entsprechen 365 Kerzen etwa einem Jahr.")
+i_vwapDate   = input.time(timestamp("01 Jan 2024 00:00 +0000"), "Manuelles Datum", group=grpVwap)
+i_vwapCol    = input.color(color.new(#ff9800, 0), "Linien Farbe", group=grpVwap)
+
+// --- Tabelle ---
+grpTbl = "Tabelle"
+i_tblOn    = input.bool(true, "Tabelle anzeigen", group=grpTbl)
+i_tblPos   = input.string("Unten links", "Position", options=["Unten links", "Unten rechts", "Oben links", "Oben rechts", "Mitte links", "Mitte rechts"], group=grpTbl, tooltip="Unten links kollidiert weder mit der TradingView-Legende (oben links) noch mit den aktuellen Kerzen und der Preisskala (rechts).")
+i_tblSize  = input.string("Normal", "Schriftgröße", options=["Klein", "Normal", "Groß"], group=grpTbl)
+i_tblBg    = input.color(color.new(color.black, 70), "Hintergrund", group=grpTbl)
+i_tblHead  = input.color(color.new(color.gray, 20), "Farbe Beschriftungen", group=grpTbl)
+
+i_tfS1 = input.bool(true, "Zeitrahmen 1", inline="tf1", group=grpTbl)
+i_tf1  = input.timeframe("D", "", inline="tf1", group=grpTbl)
+i_tfS2 = input.bool(true, "Zeitrahmen 2", inline="tf2", group=grpTbl)
+i_tf2  = input.timeframe("W", "", inline="tf2", group=grpTbl)
+i_tfS3 = input.bool(true, "Zeitrahmen 3", inline="tf3", group=grpTbl)
+i_tf3  = input.timeframe("M", "", inline="tf3", group=grpTbl)
+
+i_htfLive = input.bool(true, "Laufende Kerze der Zeitrahmen verwenden", group=grpTbl, tooltip="An: alle Zeitrahmen zeigen ihren aktuellen Stand, also vergleichbare Momentaufnahmen. Diese Werte ändern sich noch bis zum Kerzenschluss.\n\nAus: nur abgeschlossene Kerzen. Stabil, aber die Monatszeile hinkt dann bis zu einem Monat hinterher.")
+
+i_colRsi   = input.bool(true, "Spalte RSI", inline="col", group=grpTbl)
+i_colAdx   = input.bool(true, "Spalte ADX", inline="col", group=grpTbl)
+i_colTrend = input.bool(true, "Spalte Trend", inline="col", group=grpTbl)
+
+i_rowAtr  = input.bool(true, "Zeile ATR", inline="row", group=grpTbl)
+i_rowVol  = input.bool(true, "Zeile Volumen", inline="row", group=grpTbl)
+i_rowVwap = input.bool(true, "Zeile VWAP", inline="row", group=grpTbl)
 
 // ============================================================
 // BERECHNUNGEN
@@ -160,6 +236,55 @@ rsiBandHi = ta.highest(high, i_rsiCurveLb)
 rsiBandLo = ta.lowest(low, i_rsiCurveLb)
 f_rsiToPrice(float v) =>
     rsiBandLo + (v / 100.0) * (rsiBandHi - rsiBandLo)
+
+// --- ADX ---
+[diPlus, diMinus, adxVal] = ta.dmi(i_adxLen, i_adxSmooth)
+
+// --- Trend: drei Stimmen, alle müssen einig sein ---
+trFast = f_ma(i_trType, close, i_trFast)
+trMed  = f_ma(i_trType, close, i_trMed)
+trSlow = f_ma(i_trType, close, i_trSlow)
+
+maUp = trFast > trMed and trMed > trSlow and close > trFast
+maDn = trFast < trMed and trMed < trSlow and close < trFast
+
+// Die sichtbare Kumo an der aktuellen Kerze wurde vor (displacement - 1) Kerzen berechnet.
+cloudTop = math.max(senkouA[i_displacement - 1], senkouB[i_displacement - 1])
+cloudBot = math.min(senkouA[i_displacement - 1], senkouB[i_displacement - 1])
+ichiUp = close > cloudTop
+ichiDn = close < cloudBot
+
+votesTotal = (i_voteMa ? 1 : 0) + (i_voteSt ? 1 : 0) + (i_voteIchi ? 1 : 0)
+votesUp    = (i_voteMa and maUp ? 1 : 0) + (i_voteSt and supertrendBullish ? 1 : 0) + (i_voteIchi and ichiUp ? 1 : 0)
+votesDn    = (i_voteMa and maDn ? 1 : 0) + (i_voteSt and not supertrendBullish ? 1 : 0) + (i_voteIchi and ichiDn ? 1 : 0)
+
+float trendState = votesTotal == 0 ? 0.0 : votesUp == votesTotal ? 1.0 : votesDn == votesTotal ? -1.0 : 0.0
+
+// --- Werte der drei Zeitrahmen ---
+// Offset 0 = laufende Kerze (Default): alle Zeitrahmen zeigen denselben Moment, dafür ändern
+// sich die Werte bis zum Kerzenschluss noch. Offset 1 = letzte abgeschlossene Kerze.
+htfOff = i_htfLive ? 0 : 1
+[rsiTf1, adxTf1, trdTf1] = request.security(syminfo.tickerid, i_tf1, [rsi[htfOff], adxVal[htfOff], trendState[htfOff]], lookahead=barmerge.lookahead_off)
+[rsiTf2, adxTf2, trdTf2] = request.security(syminfo.tickerid, i_tf2, [rsi[htfOff], adxVal[htfOff], trendState[htfOff]], lookahead=barmerge.lookahead_off)
+[rsiTf3, adxTf3, trdTf3] = request.security(syminfo.tickerid, i_tf3, [rsi[htfOff], adxVal[htfOff], trendState[htfOff]], lookahead=barmerge.lookahead_off)
+
+// --- ATR in Prozent, verglichen mit dem eigenen Schnitt ---
+atrPct = ta.atr(i_atrLen) / close * 100
+atrAvg = ta.sma(atrPct, i_atrAvgLen)
+
+// --- Relatives Volumen ---
+relVol = volume / ta.ema(volume, i_volLen)
+
+// --- Anchored VWAP ---
+vwapAnchorCond = switch i_vwapAnchor
+    "Hoch der letzten N Kerzen" => high == ta.highest(high, i_vwapLb)
+    "Jahresanfang"              => timeframe.change("12M")
+    "Quartalsanfang"            => timeframe.change("3M")
+    "Manuelles Datum"           => time >= i_vwapDate and time[1] < i_vwapDate
+    =>                             low == ta.lowest(low, i_vwapLb)
+
+vwapVal  = ta.vwap(hlc3, vwapAnchorCond)
+vwapDist = (close - vwapVal) / vwapVal * 100
 
 // ============================================================
 // PLOTS
@@ -223,3 +348,98 @@ var table rsiTable = table.new(f_tablePos(), 1, 2, bgcolor=i_rsiTableBg, frame_w
 if i_rsiOn and i_rsiTable and barstate.islast
     table.cell(rsiTable, 0, 0, "RSI " + str.tostring(i_rsiLen), text_color=color.new(color.gray, 20), text_size=size.small)
     table.cell(rsiTable, 0, 1, str.tostring(rsi, "#.0"), text_color=rsiZoneCol, text_size=f_tableSize())
+
+// ============================================================
+// ANCHORED VWAP
+// ============================================================
+
+plot(i_vwapLine ? vwapVal : na, title="Anchored VWAP", color=i_vwapCol, linewidth=2, style=plot.style_linebr)
+
+// ============================================================
+// TABELLE
+// ============================================================
+
+f_tblPos() =>
+    switch i_tblPos
+        "Unten rechts" => position.bottom_right
+        "Oben links"   => position.top_left
+        "Oben rechts"  => position.top_right
+        "Mitte links"  => position.middle_left
+        "Mitte rechts" => position.middle_right
+        =>                position.bottom_left
+
+f_tblSize() =>
+    switch i_tblSize
+        "Klein" => size.small
+        "Groß"  => size.large
+        =>         size.normal
+
+f_txt(float v, string fmt) =>
+    na(v) ? "—" : str.tostring(v, fmt)
+
+f_rsiColOf(float v) =>
+    na(v) ? i_rsiNeutral : v >= i_rsiOB ? i_rsiObCol : v <= i_rsiOS ? i_rsiOsCol : i_rsiNeutral
+
+f_adxColOf(float v) =>
+    na(v) or v < i_adxTrend ? i_rsiNeutral : i_adxStrCol
+
+f_trdTxt(float v) =>
+    na(v) ? "—" : v > 0 ? "▲" : v < 0 ? "▼" : "▬"
+
+f_trdColOf(float v) =>
+    na(v) ? i_trNeutCol : v > 0 ? i_trUpCol : v < 0 ? i_trDownCol : i_trNeutCol
+
+// 4 Spalten (Beschriftung + 3 Werte), 7 Zeilen (Kopf + 3 Zeitrahmen + 3 Kennzahlen).
+// Nicht gesetzte Zellen bleiben unsichtbar, abgeschaltete Zeilen rücken also nach oben.
+var table tbl = table.new(f_tblPos(), 4, 7, bgcolor=i_tblBg, frame_width=0, border_width=0)
+
+if i_tblOn and barstate.islast
+    table.clear(tbl, 0, 0, 3, 6)
+    int r = 0
+
+    // Kopfzeile
+    if i_colRsi
+        table.cell(tbl, 1, r, "RSI", text_color=i_tblHead, text_size=size.small)
+    if i_colAdx
+        table.cell(tbl, 2, r, "ADX", text_color=i_tblHead, text_size=size.small)
+    if i_colTrend
+        table.cell(tbl, 3, r, "Trend", text_color=i_tblHead, text_size=size.small)
+    r += 1
+
+    // Zeitrahmen-Raster
+    tfLabels = array.from(i_tf1, i_tf2, i_tf3)
+    tfShow   = array.from(i_tfS1, i_tfS2, i_tfS3)
+    tfRsi    = array.from(rsiTf1, rsiTf2, rsiTf3)
+    tfAdx    = array.from(adxTf1, adxTf2, adxTf3)
+    tfTrd    = array.from(trdTf1, trdTf2, trdTf3)
+
+    for i = 0 to 2
+        if array.get(tfShow, i)
+            table.cell(tbl, 0, r, array.get(tfLabels, i), text_color=i_tblHead, text_size=f_tblSize())
+            if i_colRsi
+                vRsi = array.get(tfRsi, i)
+                table.cell(tbl, 1, r, f_txt(vRsi, "#"), text_color=f_rsiColOf(vRsi), text_size=f_tblSize())
+            if i_colAdx
+                vAdx = array.get(tfAdx, i)
+                table.cell(tbl, 2, r, f_txt(vAdx, "#"), text_color=f_adxColOf(vAdx), text_size=f_tblSize())
+            if i_colTrend
+                vTrd = array.get(tfTrd, i)
+                table.cell(tbl, 3, r, f_trdTxt(vTrd), text_color=f_trdColOf(vTrd), text_size=f_tblSize())
+            r += 1
+
+    // Kennzahlen des Chart-Zeitrahmens: bewusst NICHT pro Zeitrahmen, weil ein Wochen-ATR
+    // und ein Tages-ATR verschiedene Dinge messen und nebeneinander zum Fehlschluss einladen.
+    if i_rowAtr
+        table.cell(tbl, 0, r, "ATR", text_color=i_tblHead, text_size=f_tblSize())
+        table.cell(tbl, 1, r, f_txt(atrPct, "#.0") + " %", text_color=atrPct > atrAvg ? i_atrHighCol : i_rsiNeutral, text_size=f_tblSize())
+        r += 1
+
+    if i_rowVol
+        table.cell(tbl, 0, r, "Vol", text_color=i_tblHead, text_size=f_tblSize())
+        table.cell(tbl, 1, r, f_txt(relVol, "#.0") + "×", text_color=relVol >= i_volHigh ? i_volCol : i_rsiNeutral, text_size=f_tblSize())
+        r += 1
+
+    if i_rowVwap
+        table.cell(tbl, 0, r, "VWAP", text_color=i_tblHead, text_size=f_tblSize())
+        table.cell(tbl, 1, r, f_txt(vwapVal, format.mintick), text_color=i_rsiNeutral, text_size=f_tblSize())
+        table.cell(tbl, 2, r, (vwapDist >= 0 ? "+" : "") + f_txt(vwapDist, "#.0") + " %", text_color=vwapDist >= 0 ? i_trUpCol : i_trDownCol, text_size=f_tblSize())

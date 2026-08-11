@@ -159,6 +159,7 @@ i_vwapLine   = input.bool(true, "VWAP-Linie im Chart zeichnen", group=grpVwap)
 i_vwapAnchor = input.string("Tief des Fensters", "Anker", options=["Tief des Fensters", "Hoch des Fensters", "Jahresanfang", "Quartalsanfang", "Manuelles Datum"], group=grpVwap)
 i_vwapWin    = input.string("1 Jahr", "Fenster (für Hoch/Tief-Anker)", options=["3 Monate", "6 Monate", "1 Jahr", "2 Jahre", "5 Jahre", "Gesamte Historie"], group=grpVwap, tooltip="Bewusst in Zeit statt in Kerzen: eine feste Kerzenzahl bedeutet auf jedem Zeitrahmen etwas anderes (365 Kerzen sind auf D ein Jahr, auf M über 30 Jahre - so viele Monatskerzen hat kein Coin). Das Fenster wird pro Chart in Kerzen umgerechnet.\n\nReicht die Historie des Symbols nicht für das Fenster, ankert der VWAP an der ersten verfügbaren Kerze.")
 i_vwapDate   = input.time(timestamp("01 Jan 2024 00:00 +0000"), "Manuelles Datum", group=grpVwap)
+i_vwapBase   = input.string("Automatisch (feinste Basis)", "Berechnungsbasis", options=["Automatisch (feinste Basis)", "Chart-Zeitrahmen", "Täglich (D)"], group=grpVwap, tooltip="In den VWAP geht pro Kerze nur ein Preis ein - je groeber der Zeitrahmen, desto groeber die Naeherung. Automatisch heisst: unterhalb von D rechnet er auf dem Chart-Zeitrahmen, ab D aufwaerts auf Tagesdaten. Die tatsaechlich genutzte Basis steht im Label der Tabellenzeile.")
 i_vwapCol    = input.color(color.new(#ff9800, 0), "Linien Farbe", group=grpVwap)
 
 // --- Tabelle ---
@@ -267,7 +268,7 @@ atrAvg = ta.sma(atrPct, i_atrAvgLen)
 relVol = volume / ta.ema(volume, i_volLen)
 
 // --- Anchored VWAP ---
-// Das Fenster ist in Zeit definiert und wird hier in Kerzen des laufenden Charts umgerechnet.
+// Das Fenster ist in Zeit definiert und wird in Kerzen des jeweiligen Zeitrahmens umgerechnet.
 // Eine feste Kerzenzahl waere zeitrahmenabhaengig und auf W/M schlicht falsch.
 vwapWinSec = switch i_vwapWin
     "3 Monate"  => 7776000
@@ -276,28 +277,42 @@ vwapWinSec = switch i_vwapWin
     "5 Jahre"   => 157680000
     =>             31536000
 
-vwapWinBars = math.max(2, int(vwapWinSec / math.max(1, timeframe.in_seconds(timeframe.period))))
+f_winBars(simple int tfSec) =>
+    math.max(2, int(vwapWinSec / math.max(1, tfSec)))
 
-// Reicht die Historie nicht fuer das Fenster, liefern ta.lowest/ta.highest na. Dann greift
-// der Anker nie und der VWAP laeuft ab der ersten verfuegbaren Kerze - also ueber die
-// gesamte Historie, was in dem Fall die einzig sinnvolle Auslegung ist.
-vwapWinLow  = ta.lowest(low, vwapWinBars)
-vwapWinHigh = ta.highest(high, vwapWinBars)
+// Ein VWAP-Datenpunkt pro Kerze: je groeber der Zeitrahmen, desto ungenauer die Naeherung.
+// Ein 5-Jahres-VWAP auf dem Monatschart haette 60 Stuetzpunkte, auf Tagesbasis rund 1800.
+// Deshalb wird oberhalb von D auf Tagesdaten ausgewichen; unterhalb von D ist der
+// Chart-Zeitrahmen bereits feiner und wird beibehalten.
+chartTfSec = timeframe.in_seconds(timeframe.period)
+autoUsesD  = chartTfSec > 86400
+useDaily   = i_vwapBase == "Täglich (D)" or (i_vwapBase == "Automatisch (feinste Basis)" and autoUsesD)
 
-vwapAnchorCond = switch i_vwapAnchor
-    "Hoch des Fensters" => i_vwapWin == "Gesamte Historie" ? bar_index == 0 : not na(vwapWinHigh) and high == vwapWinHigh
-    "Jahresanfang"      => timeframe.change("12M")
-    "Quartalsanfang"    => timeframe.change("3M")
-    "Manuelles Datum"   => time >= i_vwapDate and time[1] < i_vwapDate
-    =>                     i_vwapWin == "Gesamte Historie" ? bar_index == 0 : not na(vwapWinLow) and low == vwapWinLow
+f_avwap(simple int lb) =>
+    // Reicht die Historie nicht fuer das Fenster, liefern ta.lowest/ta.highest na. Dann greift
+    // der Anker nie und der VWAP laeuft ab der ersten verfuegbaren Kerze - in dem Fall die
+    // einzig sinnvolle Auslegung.
+    winLow  = ta.lowest(low, lb)
+    winHigh = ta.highest(high, lb)
+    cond = switch i_vwapAnchor
+        "Hoch des Fensters" => i_vwapWin == "Gesamte Historie" ? bar_index == 0 : not na(winHigh) and high == winHigh
+        "Jahresanfang"      => timeframe.change("12M")
+        "Quartalsanfang"    => timeframe.change("3M")
+        "Manuelles Datum"   => time >= i_vwapDate and time[1] < i_vwapDate
+        =>                     i_vwapWin == "Gesamte Historie" ? bar_index == 0 : not na(winLow) and low == winLow
+    v = ta.vwap(hlc3, cond)
+    var float anchorAt = na
+    if cond
+        anchorAt := time
+    [v, anchorAt]
 
-vwapVal  = ta.vwap(hlc3, vwapAnchorCond)
-vwapDist = (close - vwapVal) / vwapVal * 100
+[vwapLocal, vwapAnchorLocal] = f_avwap(f_winBars(chartTfSec))
+[vwapDaily, vwapAnchorDaily] = request.security(syminfo.tickerid, "D", f_avwap(f_winBars(86400)), lookahead=barmerge.lookahead_off)
 
-// Ankerdatum mitfuehren, damit in der Tabelle nachvollziehbar ist, worauf der VWAP sitzt.
-var float vwapAnchorTime = na
-if vwapAnchorCond
-    vwapAnchorTime := time
+vwapVal        = useDaily ? vwapDaily : vwapLocal
+vwapAnchorTime = useDaily ? vwapAnchorDaily : vwapAnchorLocal
+vwapDist       = (close - vwapVal) / vwapVal * 100
+vwapLabel      = "VWAP (" + (useDaily ? "D" : timeframe.period) + ")"
 
 // ============================================================
 // PLOTS
@@ -449,7 +464,7 @@ if i_tblOn and barstate.islast
         r += 1
 
     if i_rowVwap
-        table.cell(tbl, 0, r, "VWAP", text_color=i_tblHead, text_size=f_tblSize())
+        table.cell(tbl, 0, r, vwapLabel, text_color=i_tblHead, text_size=f_tblSize())
         table.cell(tbl, 1, r, f_txt(vwapVal, format.mintick), text_color=i_rsiNeutral, text_size=f_tblSize())
         table.cell(tbl, 2, r, (vwapDist >= 0 ? "+" : "") + f_txt(vwapDist, "#.0") + " %", text_color=vwapDist >= 0 ? i_trUpCol : i_trDownCol, text_size=f_tblSize())
         // Ankerdatum: macht sofort sichtbar, ob der automatische Anker dort sitzt, wo du denkst.

@@ -83,7 +83,7 @@ Stufe 3 im Overlay. Beides ohne eigenes Pane, beides ohne Signale.
   M      71    19     ▬
   ATR   1.8 %
   Vol   1.8×
-  VWAP  58412.50   +4.2 %   2025-04-09
+  VWAP(D) 58412.50  +4.2 %  2025-04-09
 ```
 
 Oben das Zeitrahmen-Raster, darunter die Kennzahlen, die es nur einmal gibt. Spalten und
@@ -98,7 +98,7 @@ rechts).
 | **Trend** | ▲ / ▼ / ▬ pro Zeitrahmen | grün / rot / grau |
 | **ATR** | in Prozent vom Kurs, Chart-Zeitrahmen | orange, wenn über dem eigenen 100-Kerzen-Schnitt |
 | **Vol** | Volumen relativ zum 20er-EMA | kräftig ab 1.5× |
-| **VWAP** | Kurs des Anchored VWAP, Abstand in Prozent und das Datum des Ankers | grün über, rot unter dem VWAP |
+| **VWAP (D)** | Kurs des Anchored VWAP, Abstand in Prozent und das Datum des Ankers. Das Label nennt die Berechnungsbasis. | grün über, rot unter dem VWAP |
 
 Die drei Zeitrahmen sind frei wählbar, Default **D/W/M**.
 
@@ -157,6 +157,27 @@ liefert dann `na`, der Anker greift nie und der VWAP läuft still ab der ersten 
 Reicht die Historie eines Symbols nicht für das gewählte Fenster, ankert der VWAP an der
 ersten verfügbaren Kerze — in dem Fall die einzig sinnvolle Auslegung. Damit du siehst, wo der
 Anker tatsächlich sitzt, steht sein **Datum** in der VWAP-Zeile der Tabelle.
+
+#### Berechnungsbasis
+
+In den VWAP geht pro Kerze nur **ein** Preis ein (`hlc3`), gewichtet mit dem Volumen dieser
+Kerze. Je gröber der Zeitrahmen, desto gröber also die Näherung: Ein Fünf-Jahres-VWAP hätte auf
+dem Monatschart 60 Stützpunkte — jeder ein Mittelwert über einen ganzen Monat — auf Tagesbasis
+dagegen rund 1800.
+
+Deshalb wählt das Script die Basis selbst (Default „Automatisch"):
+
+| Chart-Zeitrahmen | Basis | Label |
+|---|---|---|
+| unter D (z. B. 4H) | Chart-Zeitrahmen, ist bereits feiner als D | `VWAP (240)` |
+| D | Tagesdaten | `VWAP (D)` |
+| W, M | Tagesdaten statt der groben W-/M-Kerzen | `VWAP (D)` |
+
+Das Label in der Tabelle nennt immer die tatsächlich verwendete Basis, du siehst also direkt,
+worauf der Wert beruht. Per Input auf „Chart-Zeitrahmen" oder „Täglich (D)" festnagelbar.
+
+Der Effekt: Auf dem Monatschart bekommst du denselben präzisen VWAP-Kurs wie auf dem
+Tageschart, statt eines aus zwölf Monatsmittelwerten zusammengerührten Näherungswerts.
 
 Gelesen wird er als Durchschnittspreis aller Käufer seit dem Anker: Liegt der Kurs darüber, ist
 die durchschnittliche Position seit dem Ankerpunkt im Gewinn, und der Level wird bei

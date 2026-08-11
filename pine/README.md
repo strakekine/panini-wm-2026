@@ -37,7 +37,7 @@ Stufe 1 enthält vier Bausteine, jeder einzeln abschaltbar:
 Stufe 2 ergänzt den **RSI**, Stufe 3 die **Tabelle** und den **Anchored VWAP** — alles ohne
 eigenes Pane, siehe die nächsten Abschnitte.
 
-Platzbudget: TradingView erlaubt 64 Plots pro Script, aktuell sind 21 belegt (Tabellen zählen
+Platzbudget: TradingView erlaubt 64 Plots pro Script, aktuell sind 18 belegt (Tabellen zählen
 nicht mit).
 
 ## RSI im Overlay — ohne eigenes Pane
@@ -48,14 +48,19 @@ Also wandert er ins Overlay.
 
 Eine gewöhnliche RSI-Linie geht dort nicht: Das Script liegt auf der Preisachse, ein RSI von
 62 wäre schlicht der Kurs 62 und läge bei den meisten Instrumenten weit außerhalb des Bildes.
-Deshalb drei Darstellungsformen, die ohne eigene Achse auskommen — alle einzeln schaltbar,
-alle vom Hauptschalter „RSI aktiv" abhängig.
+Deshalb Darstellungsformen, die ohne eigene Achse auskommen — einzeln schaltbar,
+beide vom Hauptschalter „RSI aktiv" abhängig.
 
 | Form | Default | Was sie zeigt | Grenzen |
 |---|---|---|---|
 | **Zahlenfeld** | aus | Aktueller RSI-Wert als große Zahl in der Chart-Ecke, eingefärbt nach Zone. Position (6 Ecken) und Schriftgröße wählbar. Default aus, seit die Tabelle den RSI mitführt. | Nur der Wert der letzten Kerze, kein Verlauf. |
 | **Kerzenfärbung** | aus | Kerzen werden getönt, solange der RSI über der Überkauft- bzw. unter der Überverkauft-Schwelle liegt. | Nur die beiden Extremzonen, keine Zwischenwerte, keine Zahl. |
-| **Gemappte Kurve** | aus | Der vollständige RSI-Verlauf, umgerechnet auf ein Preisband aus Hoch/Tief der letzten N Kerzen (Default 200), samt gemappten 70/30-Linien. | Die Höhe im Chart ist willkürlich und sagt nichts über das Kursniveau. Aussagekräftig sind nur Form und Lage zu den 70/30-Linien. |
+
+Dazu kommt die **Tabelle**, die den RSI pro Zeitrahmen führt — siehe unten.
+
+Eine frühere dritte Form, den auf ein Preisband gemappten RSI-Verlauf, gab es kurzzeitig; sie
+wurde wieder entfernt (ungenutzt, und die willkürliche Höhe im Chart war eher irreführend als
+hilfreich). In der Git-Historie dieses Branches ist sie zu finden.
 
 Zahlenfeld und Kerzenfärbung greifen auf dieselbe Farbvariable zu, sind also immer synchron:
 Wird die Kerze rot getönt, steht auch die Zahl auf Rot. Alle drei Farben (überkauft,

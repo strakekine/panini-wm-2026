@@ -192,8 +192,13 @@ i_rowVwap = input.bool(true, "Zeile VWAP", inline="row", group=grpTbl)
 // ============================================================
 
 // --- Moving Averages ---
+// Beide MAs werden auf jeder Kerze berechnet und erst danach ausgewaehlt. Im Ternaer-Operator
+// wuerde nur der genommene Zweig laufen - ta.ema/ta.sma fuehren aber internen Zustand mit und
+// liefern nach einem Umschalten falsche Werte, bis sie sich wieder eingeschwungen haben.
 f_ma(string maType, float src, simple int len) =>
-    maType == "EMA" ? ta.ema(src, len) : ta.sma(src, len)
+    emaVal = ta.ema(src, len)
+    smaVal = ta.sma(src, len)
+    maType == "EMA" ? emaVal : smaVal
 
 ma1 = f_ma(i_ma1Type, i_maSource, i_ma1Len)
 ma2 = f_ma(i_ma2Type, i_maSource, i_ma2Len)
@@ -313,6 +318,10 @@ vwapVal        = useDaily ? vwapDaily : vwapLocal
 vwapAnchorTime = useDaily ? vwapAnchorDaily : vwapAnchorLocal
 vwapDist       = (close - vwapVal) / vwapVal * 100
 vwapLabel      = "VWAP (" + (useDaily ? "D" : timeframe.period) + ")"
+
+// Der Ankerzeitpunkt kommt als series float aus der Tuple-Auswahl, str.format_time erwartet
+// aber series int - deshalb der Cast. nz faengt den Fall ab, dass noch kein Anker gesetzt ist.
+vwapAnchorTxt = na(vwapAnchorTime) ? "—" : str.format_time(int(nz(vwapAnchorTime, time)), "yyyy-MM-dd", syminfo.timezone)
 
 // ============================================================
 // PLOTS
@@ -468,4 +477,4 @@ if i_tblOn and barstate.islast
         table.cell(tbl, 1, r, f_txt(vwapVal, format.mintick), text_color=i_rsiNeutral, text_size=f_tblSize())
         table.cell(tbl, 2, r, (vwapDist >= 0 ? "+" : "") + f_txt(vwapDist, "#.0") + " %", text_color=vwapDist >= 0 ? i_trUpCol : i_trDownCol, text_size=f_tblSize())
         // Ankerdatum: macht sofort sichtbar, ob der automatische Anker dort sitzt, wo du denkst.
-        table.cell(tbl, 3, r, na(vwapAnchorTime) ? "—" : str.format_time(vwapAnchorTime, "yyyy-MM-dd", syminfo.timezone), text_color=i_tblHead, text_size=size.small)
+        table.cell(tbl, 3, r, vwapAnchorTxt, text_color=i_tblHead, text_size=size.small)

@@ -30,11 +30,11 @@ i_showSignal = input.bool(true, "Signal-Linie anzeigen", inline="sig", group="Li
 i_signalCol  = input.color(color.new(color.orange, 0), "", inline="sig", group="Linien")
 
 i_showHist = input.bool(true, "Histogramm anzeigen", group="Histogramm")
-i_histFour = input.bool(true, "Vierfarbig (steigend/fallend getrennt)", group="Histogramm", tooltip="Kräftige Farbe = Histogramm bewegt sich von der Nulllinie weg, blasse Farbe = es läuft auf sie zu.")
-i_histUpStrong   = input.color(color.new(#26a69a, 0),  "Über Null, steigend",  group="Histogramm")
-i_histUpWeak     = input.color(color.new(#26a69a, 60), "Über Null, fallend",   group="Histogramm")
-i_histDownStrong = input.color(color.new(#ef5350, 0),  "Unter Null, fallend",  group="Histogramm")
-i_histDownWeak   = input.color(color.new(#ef5350, 60), "Unter Null, steigend", group="Histogramm")
+i_histFour = input.bool(true, "Vierfarbig (Abstand wächst/schrumpft getrennt)", group="Histogramm", tooltip="Das Histogramm ist MACD MINUS Signallinie - es misst den Abstand der beiden Linien zueinander, nicht ihre Lage zur Nulllinie. Beide Linien koennen tief unter Null liegen und das Histogramm trotzdem gruen sein: dann liegt der MACD ueber seinem Signal.\n\nKraeftige Farbe = der Abstand waechst, blasse Farbe = er schrumpft.")
+i_histUpStrong   = input.color(color.new(#26a69a, 0),  "MACD über Signal, Abstand wächst",    group="Histogramm")
+i_histUpWeak     = input.color(color.new(#26a69a, 60), "MACD über Signal, Abstand schrumpft", group="Histogramm")
+i_histDownStrong = input.color(color.new(#ef5350, 0),  "MACD unter Signal, Abstand wächst",   group="Histogramm")
+i_histDownWeak   = input.color(color.new(#ef5350, 60), "MACD unter Signal, Abstand schrumpft", group="Histogramm")
 
 i_showZero = input.bool(true, "Nulllinie anzeigen", inline="zero", group="Nulllinie")
 i_zeroCol  = input.color(color.new(color.gray, 40), "", inline="zero", group="Nulllinie")
@@ -55,14 +55,14 @@ i_bgTransp = input.int(88, "Transparenz bei voller Tönung", minval=0, maxval=99
 // Pine v6 erlaubt es, einzelne Plots eines Pane-Scripts auf den Hauptchart zu schieben.
 // Damit liefert Slot 2 zusaetzlich die Preislevel, fuer die im Overlay kein Platz mehr ist.
 grpLvl = "Preislevel im Kurschart"
-i_lvlOn      = input.bool(true, "Level im Kurschart zeichnen", group=grpLvl, tooltip="Diese Linien erscheinen im KURSCHART, nicht in diesem Pane - moeglich per force_overlay. So belegt Slot 2 zwei Bereiche gleichzeitig.")
+i_lvlOn      = input.bool(true, "Level im Kurschart anzeigen", group=grpLvl, tooltip="Diese Linien erscheinen im KURSCHART, nicht in diesem Pane - moeglich per force_overlay. So belegt Slot 2 zwei Bereiche gleichzeitig.")
 i_lvlWeek    = input.bool(true, "Vorwoche Hoch/Tief", inline="lw", group=grpLvl)
 i_lvlWeekCol = input.color(color.new(#42a5f5, 20), "", inline="lw", group=grpLvl)
 i_lvlMonth   = input.bool(true, "Vormonat Hoch/Tief", inline="lm", group=grpLvl)
 i_lvlMonthCol= input.color(color.new(#ab47bc, 20), "", inline="lm", group=grpLvl)
 i_lvlYear    = input.bool(true, "Jahres-Open", inline="ly", group=grpLvl)
 i_lvlYearCol = input.color(color.new(#ffa726, 20), "", inline="ly", group=grpLvl)
-i_lvlLabels  = input.bool(true, "Beschriftungen anzeigen", group=grpLvl)
+i_lvlMode    = input.string("Nur Zahl am rechten Rand", "Darstellung", options=["Nur Zahl am rechten Rand", "Linie + Zahl", "Nur Linie"], group=grpLvl, tooltip="Der Chart traegt bereits MAs, Ichimoku, zwei Bollinger-Baender und den VWAP. Fuenf weitere Linien machen ihn schnell unlesbar - die Zahl am rechten Rand steht auf der richtigen Kurshoehe und liefert dieselbe Information ohne einen einzigen zusaetzlichen Strich.")
 i_lvlOffset  = input.int(3, "Abstand der Beschriftung (Kerzen)", minval=0, group=grpLvl)
 
 // --- Tabelle im Pane ---
@@ -140,6 +140,9 @@ prevMonthLow  = request.security(syminfo.tickerid, "M",   low[1],  lookahead=bar
 // Der Eroeffnungskurs der LAUFENDEN Jahreskerze steht seit deren erster Sekunde fest.
 yearOpen      = request.security(syminfo.tickerid, "12M", open,    lookahead=barmerge.lookahead_on)
 
+lvlShowLine  = i_lvlMode != "Nur Zahl am rechten Rand"
+lvlShowLabel = i_lvlMode != "Nur Linie"
+
 // ============================================================
 // PLOTS (dieses Pane)
 // ============================================================
@@ -155,26 +158,27 @@ bgcolor(i_bgOn ? color.new(i_bgCol, bgTransp) : na, title="ADX Trendstärke")
 // PREISLEVEL IM KURSCHART (force_overlay)
 // ============================================================
 
-plot(i_lvlOn and i_lvlWeek  ? prevWeekHigh  : na, title="Vorwoche Hoch",  color=i_lvlWeekCol,  linewidth=1, style=plot.style_linebr, force_overlay=true)
-plot(i_lvlOn and i_lvlWeek  ? prevWeekLow   : na, title="Vorwoche Tief",  color=i_lvlWeekCol,  linewidth=1, style=plot.style_linebr, force_overlay=true)
-plot(i_lvlOn and i_lvlMonth ? prevMonthHigh : na, title="Vormonat Hoch",  color=i_lvlMonthCol, linewidth=1, style=plot.style_linebr, force_overlay=true)
-plot(i_lvlOn and i_lvlMonth ? prevMonthLow  : na, title="Vormonat Tief",  color=i_lvlMonthCol, linewidth=1, style=plot.style_linebr, force_overlay=true)
-plot(i_lvlOn and i_lvlYear  ? yearOpen      : na, title="Jahres-Open",    color=i_lvlYearCol,  linewidth=1, style=plot.style_linebr, force_overlay=true)
+plot(i_lvlOn and lvlShowLine and i_lvlWeek  ? prevWeekHigh  : na, title="Vorwoche Hoch",  color=i_lvlWeekCol,  linewidth=1, style=plot.style_linebr, force_overlay=true)
+plot(i_lvlOn and lvlShowLine and i_lvlWeek  ? prevWeekLow   : na, title="Vorwoche Tief",  color=i_lvlWeekCol,  linewidth=1, style=plot.style_linebr, force_overlay=true)
+plot(i_lvlOn and lvlShowLine and i_lvlMonth ? prevMonthHigh : na, title="Vormonat Hoch",  color=i_lvlMonthCol, linewidth=1, style=plot.style_linebr, force_overlay=true)
+plot(i_lvlOn and lvlShowLine and i_lvlMonth ? prevMonthLow  : na, title="Vormonat Tief",  color=i_lvlMonthCol, linewidth=1, style=plot.style_linebr, force_overlay=true)
+plot(i_lvlOn and lvlShowLine and i_lvlYear  ? yearOpen      : na, title="Jahres-Open",    color=i_lvlYearCol,  linewidth=1, style=plot.style_linebr, force_overlay=true)
 
-// Beschriftungen: einmalig am rechten Rand, damit die Linien ohne Nachschlagen lesbar sind.
+// Beschriftung am rechten Rand, auf Hoehe des jeweiligen Kurses. Der Kurs steht mit im Text,
+// damit die Angabe auch ohne Linie fuer sich steht.
 f_lvlLabel(bool show, float price, string txt, color col) =>
     var label lb = na
     label.delete(lb)
     if show and not na(price)
-        lb := label.new(bar_index + i_lvlOffset, price, txt, xloc=xloc.bar_index, style=label.style_label_left, color=color.new(color.black, 100), textcolor=col, size=size.small, force_overlay=true)
+        lb := label.new(bar_index + i_lvlOffset, price, txt + "  " + str.tostring(price, format.mintick), xloc=xloc.bar_index, style=label.style_label_left, color=color.new(color.black, 100), textcolor=col, size=size.small, force_overlay=true)
     lb
 
 if barstate.islast
-    f_lvlLabel(i_lvlOn and i_lvlLabels and i_lvlWeek,  prevWeekHigh,  "Vorwoche H",  i_lvlWeekCol)
-    f_lvlLabel(i_lvlOn and i_lvlLabels and i_lvlWeek,  prevWeekLow,   "Vorwoche T",  i_lvlWeekCol)
-    f_lvlLabel(i_lvlOn and i_lvlLabels and i_lvlMonth, prevMonthHigh, "Vormonat H",  i_lvlMonthCol)
-    f_lvlLabel(i_lvlOn and i_lvlLabels and i_lvlMonth, prevMonthLow,  "Vormonat T",  i_lvlMonthCol)
-    f_lvlLabel(i_lvlOn and i_lvlLabels and i_lvlYear,  yearOpen,      "Jahres-Open", i_lvlYearCol)
+    f_lvlLabel(i_lvlOn and lvlShowLabel and i_lvlWeek,  prevWeekHigh,  "Vorwoche H",  i_lvlWeekCol)
+    f_lvlLabel(i_lvlOn and lvlShowLabel and i_lvlWeek,  prevWeekLow,   "Vorwoche T",  i_lvlWeekCol)
+    f_lvlLabel(i_lvlOn and lvlShowLabel and i_lvlMonth, prevMonthHigh, "Vormonat H",  i_lvlMonthCol)
+    f_lvlLabel(i_lvlOn and lvlShowLabel and i_lvlMonth, prevMonthLow,  "Vormonat T",  i_lvlMonthCol)
+    f_lvlLabel(i_lvlOn and lvlShowLabel and i_lvlYear,  yearOpen,      "Jahres-Open", i_lvlYearCol)
 
 // ============================================================
 // TABELLE

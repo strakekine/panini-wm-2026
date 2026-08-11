@@ -261,8 +261,13 @@ und liefert die Preislevel, für die im Overlay kein Platz mehr ist.
 Dasselbe gilt für den Eröffnungskurs der laufenden Jahreskerze, der seit deren erster Sekunde
 feststeht.
 
-Optionale Beschriftungen am rechten Rand machen die Linien ohne Nachschlagen lesbar. Auf
-Vortages-Level wurde bewusst verzichtet — auf einem Tageschart wäre das die letzte Kerze.
+**Darstellung** wählbar, Default `Nur Zahl am rechten Rand`: Der Chart trägt schon MAs,
+Ichimoku, zwei Bollinger-Bänder und den VWAP — fünf weitere Linien machen ihn unlesbar. Die
+Beschriftung sitzt auf der richtigen Kurshöhe und nennt den Wert im Klartext
+(`Vorwoche H  62450.00`), liefert also dieselbe Information ohne einen einzigen zusätzlichen
+Strich. Alternativ `Linie + Zahl` oder `Nur Linie`.
+
+Auf Vortages-Level wurde bewusst verzichtet — auf einem Tageschart wäre das die letzte Kerze.
 
 ### Die Tabelle im Pane
 
@@ -276,7 +281,7 @@ Vortages-Level wurde bewusst verzichtet — auf einem Tageschart wäre das die l
 | Spalte | Bedeutung |
 |---|---|
 | **Linie** | MACD über (+) oder unter (−) der Nulllinie |
-| **Hist** | Histogramm positiv (+) oder negativ (−), also MACD über oder unter dem Signal |
+| **Hist** | Histogramm positiv (+) oder negativ (−), also MACD über oder unter dem **Signal** — nicht über oder unter der Nulllinie |
 | **Rtg** | Histogramm wächst (↑) oder schrumpft (↓) |
 
 Als **Linien** ginge das nicht: Ein Wochen-MACD misst Kursdifferenzen über Wochen und ist damit
@@ -286,6 +291,20 @@ daran hängt. Und ehrlicherweise liest man beim MACD ohnehin Vorzeichen und Rich
 absoluten Wert.
 
 Zeitrahmen frei wählbar (Default D/W/M), Werte von laufenden Kerzen wie im Overlay.
+
+### Histogramm-Farben: Abstand, nicht Nulllinie
+
+Das Histogramm ist `MACD − Signal`. Es misst den **Abstand der beiden Linien zueinander**, nicht
+ihre Lage zur Nulllinie. Beide Linien können tief im negativen Bereich liegen und das
+Histogramm trotzdem grün sein — dann liegt der MACD über seinem Signal. Die vier Farben heißen
+deshalb:
+
+| Farbe | Bedeutung |
+|---|---|
+| kräftig grün | MACD über Signal, Abstand wächst |
+| blass grün | MACD über Signal, Abstand schrumpft |
+| kräftig rot | MACD unter Signal, Abstand wächst |
+| blass rot | MACD unter Signal, Abstand schrumpft |
 
 ### Alternative für Slot 2
 

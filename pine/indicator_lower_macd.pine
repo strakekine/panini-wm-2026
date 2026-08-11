@@ -1,0 +1,53 @@
+//@version=6
+// Unteres Pane, Teil 2: MACD — reine Anzeige, ohne Signale.
+// Bewusst ein eigenes Script statt eines Moduls im Momentum-Indikator: MACD rechnet in
+// Preis-Einheiten (bei BTC ±hunderte, bei Cent-Coins ±0.0x), RSI und ADX in 0–100. In
+// einem Pane mit einer gemeinsamen Achse würde eines der beiden zur platten Linie am Rand.
+//
+// Beide trotzdem in EINER Kachel: dieses Script aufs Chart legen, dann per Rechtsklick auf
+// den Indikator-Namen → "Move to → Existing pane above/below" in das Pane des Momentum-
+// Indikators ziehen, und dort per Rechtsklick auf die Werteachse → "Pin to left scale"
+// auf die linke Achse pinnen. Beide behalten ihre echte Skala und ihre echten Werte.
+indicator("Confluence Simple — MACD (nur Anzeige)", overlay=false)
+
+// ============================================================
+// INPUTS
+// ============================================================
+
+i_source  = input.source(close, "Source", group="MACD")
+i_fastLen = input.int(12, "Fast Länge", minval=1, group="MACD")
+i_slowLen = input.int(26, "Slow Länge", minval=1, group="MACD")
+i_sigLen  = input.int(9, "Signal Länge", minval=1, group="MACD")
+
+i_showMacd   = input.bool(true, "MACD-Linie anzeigen", inline="macd", group="Linien")
+i_macdCol    = input.color(color.new(#2962ff, 0), "", inline="macd", group="Linien")
+i_showSignal = input.bool(true, "Signal-Linie anzeigen", inline="sig", group="Linien")
+i_signalCol  = input.color(color.new(color.orange, 0), "", inline="sig", group="Linien")
+
+i_showHist = input.bool(true, "Histogramm anzeigen", group="Histogramm")
+i_histFour = input.bool(true, "Vierfarbig (steigend/fallend getrennt)", group="Histogramm", tooltip="Kräftige Farbe = Histogramm bewegt sich von der Nulllinie weg, blasse Farbe = es läuft auf sie zu.")
+i_histUpStrong   = input.color(color.new(#26a69a, 0),  "Über Null, steigend",  group="Histogramm")
+i_histUpWeak     = input.color(color.new(#26a69a, 60), "Über Null, fallend",   group="Histogramm")
+i_histDownStrong = input.color(color.new(#ef5350, 0),  "Unter Null, fallend",  group="Histogramm")
+i_histDownWeak   = input.color(color.new(#ef5350, 60), "Unter Null, steigend", group="Histogramm")
+
+i_showZero = input.bool(true, "Nulllinie anzeigen", inline="zero", group="Nulllinie")
+i_zeroCol  = input.color(color.new(color.gray, 40), "", inline="zero", group="Nulllinie")
+
+// ============================================================
+// BERECHNUNGEN
+// ============================================================
+
+[macdLine, signalLine, histLine] = ta.macd(i_source, i_fastLen, i_slowLen, i_sigLen)
+
+histRising = histLine > histLine[1]
+histCol = not i_histFour ? (histLine >= 0 ? i_histUpStrong : i_histDownStrong) : histLine >= 0 ? (histRising ? i_histUpStrong : i_histUpWeak) : (histRising ? i_histDownWeak : i_histDownStrong)
+
+// ============================================================
+// PLOTS
+// ============================================================
+
+plot(i_showHist ? histLine : na, title="Histogramm", style=plot.style_columns, color=histCol)
+plot(i_showMacd ? macdLine : na, title="MACD", color=i_macdCol, linewidth=2)
+plot(i_showSignal ? signalLine : na, title="Signal", color=i_signalCol, linewidth=2)
+plot(i_showZero ? 0.0 : na, title="Nulllinie", color=i_zeroCol, linewidth=1)

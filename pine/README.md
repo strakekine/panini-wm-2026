@@ -10,6 +10,8 @@ keine Marktstruktur-Pivots, kein Pullback/Candle-Pattern-Kram. Absichtlich schla
 
 - `indicator_overlay_simple.pine` — **signalfreie Variante** des "Confluence Buy/Sell Signal":
   nur Darstellung, keine Score-Logik, keine Labels, keine Alerts. Siehe unten.
+- `indicator_lower_momentum.pine` — signalfreies **unteres Pane**: RSI + ADX/DI.
+- `indicator_lower_macd.pine` — signalfreies **unteres Pane**: MACD.
 
 Beide Signal-Scripts enthalten dieselbe Logik redundant (kein Pine-Library-Import, um den
 Publish-Test-Republish-Zyklus zu vermeiden — siehe unten).
@@ -34,6 +36,40 @@ Stufe 1 enthält vier Bausteine, jeder einzeln abschaltbar:
 
 Weitere Bausteine kommen schrittweise dazu. Platzbudget: TradingView erlaubt 64 Plots pro
 Script, aktuell sind 17 belegt.
+
+## Unteres Pane — RSI/ADX und MACD
+
+Ergänzung zum Overlay: zwei Scripts mit `overlay=false`, die unter dem Kurschart laufen.
+Gleiche Philosophie wie `indicator_overlay_simple.pine` — reine Anzeige, jeder Baustein
+einzeln abschaltbar, keine Signale, keine Labels, keine Alerts.
+
+| Script | Inhalt | Einstellungen |
+|---|---|---|
+| `indicator_lower_momentum.pine` | **RSI** + **ADX/DI** | RSI: Länge 14, freie Source, optionale SMA/EMA-Glättung, Level-Linien 70/50/30 mit Zonenfüllung. ADX: DI-Länge 14, Glättung 14, DI+/DI− separat schaltbar, Orientierungs-Schwelle 20. |
+| `indicator_lower_macd.pine` | **MACD** | 12/26/9, freie Source. Linie, Signal und Histogramm einzeln schaltbar, Histogramm wahlweise vier- oder zweifarbig, Nulllinie. |
+
+### Warum zwei Scripts und nicht eines
+
+Ein TradingView-Pane hat **eine** Y-Achse für alles, was darin liegt. RSI und ADX laufen
+nativ zwischen 0 und 100 und passen deshalb zusammen in ein Script. MACD rechnet dagegen in
+Preis-Einheiten — bei BTC grob ±500, bei einem Cent-Coin ±0.03. Zusammen in einem Pane würde
+die Achse über beide Wertebereiche gespannt und der RSI läge als platte Linie am oberen Rand.
+
+### Beide trotzdem in einer Kachel
+
+Getrennte Scripts heißt nicht zwangsläufig getrennte Kacheln:
+
+1. Beide Indikatoren aufs Chart legen — sie erscheinen zunächst in zwei eigenen Panes.
+2. Rechtsklick auf den Namen des MACD-Indikators → **Move to → Existing pane above/below**,
+   Ziel ist das Pane des Momentum-Indikators.
+3. Im gemeinsamen Pane Rechtsklick auf die Werteachse des MACD → **Pin to left scale**.
+
+Ergebnis: eine Kachel unter dem Chart, RSI/ADX auf der rechten Achse (0–100), MACD auf der
+linken (Preis-Einheiten). Beide behalten ihre echten, ablesbaren Werte — im Gegensatz zu
+einer Normalisierung, bei der die MACD-Zahlen nur noch relative Form wären.
+
+Die Anordnung merkt sich TradingView im Chart-Layout; beim Speichern des Layouts bleibt sie
+erhalten.
 
 ## Die vier Bedingungen (alle per UND verknüpft)
 

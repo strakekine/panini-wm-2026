@@ -1,0 +1,76 @@
+//@version=6
+// Unteres Pane, Teil 1: RSI + ADX/DI — reine Anzeige, ohne Signale.
+// Gegenstück zu "Confluence Simple (nur Anzeige)": gleiche Philosophie, nur Plots,
+// keine Score-Logik, keine Labels, keine Alerts.
+//
+// Beide Bausteine laufen nativ auf der Skala 0–100 und teilen sich deshalb
+// problemlos eine Y-Achse. MACD gehört NICHT hier hinein (Preis-Einheiten,
+// andere Größenordnung) — dafür gibt es indicator_lower_macd.pine.
+// Wie man beide trotzdem in EINE Kachel bekommt: siehe pine/README.md.
+indicator("Confluence Simple — Momentum (RSI + ADX)", overlay=false, precision=1)
+
+// ============================================================
+// INPUTS
+// ============================================================
+
+// --- RSI ---
+i_rsiShow   = input.bool(true, "RSI anzeigen", group="RSI")
+i_rsiLen    = input.int(14, "RSI Länge", minval=1, group="RSI")
+i_rsiSource = input.source(close, "Source", group="RSI")
+i_rsiCol    = input.color(color.new(#7e57c2, 0), "RSI Farbe", group="RSI")
+
+i_rsiMaShow = input.bool(false, "RSI-Glättung anzeigen", inline="rsima", group="RSI")
+i_rsiMaType = input.string("SMA", "", options=["SMA", "EMA"], inline="rsima", group="RSI")
+i_rsiMaLen  = input.int(14, "", minval=1, inline="rsima", group="RSI")
+i_rsiMaCol  = input.color(color.new(color.orange, 0), "", inline="rsima", group="RSI")
+
+i_rsiLevels = input.bool(true, "Level-Linien (OB/Mitte/OS) anzeigen", group="RSI")
+i_rsiOB     = input.float(70, "Überkauft", minval=50, maxval=100, group="RSI")
+i_rsiOS     = input.float(30, "Überverkauft", minval=0, maxval=50, group="RSI")
+i_rsiMid    = input.float(50, "Mittellinie", minval=0, maxval=100, group="RSI")
+i_rsiLvlCol = input.color(color.new(color.gray, 40), "Level-Linien Farbe", group="RSI")
+i_rsiFill   = input.bool(true, "Zone zwischen OB und OS füllen", group="RSI")
+i_rsiFillCol= input.color(color.new(#7e57c2, 92), "Füllung Farbe", group="RSI")
+
+// --- ADX / DI ---
+i_adxShow   = input.bool(true, "ADX anzeigen", group="ADX / DI")
+i_adxLen    = input.int(14, "DI Länge", minval=1, group="ADX / DI")
+i_adxSmooth = input.int(14, "ADX Glättung", minval=1, group="ADX / DI")
+i_adxCol    = input.color(color.new(#e91e63, 0), "ADX Farbe", group="ADX / DI")
+
+i_diShow    = input.bool(true, "DI+ / DI- anzeigen", group="ADX / DI")
+i_diPlusCol = input.color(color.new(color.green, 20), "DI+ Farbe", group="ADX / DI")
+i_diMinusCol= input.color(color.new(color.red, 20), "DI- Farbe", group="ADX / DI")
+
+i_adxLevel     = input.bool(true, "ADX-Schwellenlinie anzeigen", inline="adxlvl", group="ADX / DI")
+i_adxThreshold = input.float(20, "", minval=0, maxval=100, inline="adxlvl", group="ADX / DI", tooltip="Übliche Lesart: darunter Seitwärtsphase, darüber Trend. Reine Orientierungslinie, kein Filter.")
+i_adxLvlCol    = input.color(color.new(#e91e63, 60), "", inline="adxlvl", group="ADX / DI")
+
+// ============================================================
+// BERECHNUNGEN
+// ============================================================
+
+f_ma(string maType, float src, simple int len) =>
+    maType == "EMA" ? ta.ema(src, len) : ta.sma(src, len)
+
+rsi   = ta.rsi(i_rsiSource, i_rsiLen)
+rsiMa = f_ma(i_rsiMaType, rsi, i_rsiMaLen)
+
+[diPlus, diMinus, adxVal] = ta.dmi(i_adxLen, i_adxSmooth)
+
+// ============================================================
+// PLOTS
+// ============================================================
+
+plot(i_rsiShow ? rsi : na, title="RSI", color=i_rsiCol, linewidth=2)
+plot(i_rsiShow and i_rsiMaShow ? rsiMa : na, title="RSI Glättung", color=i_rsiMaCol, linewidth=1)
+
+obPlot = plot(i_rsiShow and i_rsiLevels ? i_rsiOB : na, title="Überkauft", color=i_rsiLvlCol, linewidth=1)
+osPlot = plot(i_rsiShow and i_rsiLevels ? i_rsiOS : na, title="Überverkauft", color=i_rsiLvlCol, linewidth=1)
+plot(i_rsiShow and i_rsiLevels ? i_rsiMid : na, title="Mittellinie", color=i_rsiLvlCol, linewidth=1)
+fill(obPlot, osPlot, color = i_rsiShow and i_rsiLevels and i_rsiFill ? i_rsiFillCol : na, title="RSI Zone")
+
+plot(i_adxShow ? adxVal : na, title="ADX", color=i_adxCol, linewidth=2)
+plot(i_adxShow and i_diShow ? diPlus : na, title="DI+", color=i_diPlusCol, linewidth=1)
+plot(i_adxShow and i_diShow ? diMinus : na, title="DI-", color=i_diMinusCol, linewidth=1)
+plot(i_adxShow and i_adxLevel ? i_adxThreshold : na, title="ADX Schwelle", color=i_adxLvlCol, linewidth=1)

@@ -101,6 +101,10 @@ vorgeschlagen. „Rtg" meint das **Histogramm**, nicht die MACD-Linie.
 - Session-VWAP, Session-Schattierung, Vortages-Level — auf D/W/M sinnlos.
 - Divergenz-Erkennung, Stochastik, weitere MAs/Trendlinien — Signalprinzip bzw. Redundanz.
 - Normalisierung des MACD ins 0–100-Panel — verwirft die echten Werte.
+- **Weitere Overlay-Bausteine** (Volatilitäts-Squeeze, auffällige Kerzen, 52-Wochen-Marker,
+  Marktstruktur-Pivots, Kreuzungs-Marker). Wurden angeboten, der Nutzer hat bewusst abgelehnt:
+  das Setup ist fertig. Plot-Budget wäre da (18/64), aber die knappe Ressource ist die
+  Chartfläche, nicht der Zähler. Nicht erneut von sich aus vorschlagen.
 
 ## Zusammenarbeit
 

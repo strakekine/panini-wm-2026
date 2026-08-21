@@ -1,8 +1,13 @@
 //@version=6
 // Vereinfachte Version des "Confluence Buy/Sell Signal" — reine Anzeige, ohne Signale.
-// Entfernt: Konfluenz-Score, BUY/SELL/EXIT, ADX-Filter, RSI, MACD, Volumen, Engulfing,
+// Entfernt: Konfluenz-Score, BUY/SELL/EXIT, ADX-Filter, MACD, Volumen, Engulfing,
 // Inside Bar, Golden/Death Cross, TK-Cross, 200MA-Cross, Score-Hintergrund, alle Alerts.
 // Stufe 1 - vier Bausteine: 6x MA (SMA/EMA), Supertrend, Ichimoku, Bollinger (2.0 + 2.5)
+// Stufe 2 - RSI, ohne eigenes Pane (siehe Block "RSI" unten)
+// Stufe 3 - Anchored VWAP und Tabelle: RSI/ADX/Trend ueber drei Zeitrahmen, dazu ATR,
+//           relatives Volumen und VWAP-Abstand. Weiterhin ohne Signale.
+//
+// Hinweis: die Tabelle nutzt ta.vwap und braucht damit ein Symbol mit Volumendaten.
 indicator("Confluence Simple (nur Anzeige)", overlay=true)
 
 // ============================================================
@@ -50,12 +55,12 @@ i_stBullCol      = input.color(color.green, "Supertrend Farbe (bullish)", group=
 i_stBearCol      = input.color(color.red, "Supertrend Farbe (bärisch)", group="Supertrend")
 
 // --- Ichimoku ---
-i_useIchimoku   = input.bool(true, "Ichimoku Cloud verwenden", group="Ichimoku")
+i_useIchimoku   = input.bool(true, "Ichimoku aktiv (Hauptschalter)", group="Ichimoku", tooltip="Schaltet alle Ichimoku-Linien gemeinsam ab: Cloud, Tenkan/Kijun und Lagging Span. Fuer einzelne Linien die drei Schalter darunter nutzen.\n\nDie Chikou (Lagging Span) gehoert zum Ichimoku-System, ist aber NICHT Teil der Kumo - die besteht nur aus Senkou Span A und B. Deshalb bleibt sie stehen, wenn nur 'Cloud anzeigen' aus ist.")
 i_tenkanLen     = input.int(9, "Tenkan-sen", minval=1, group="Ichimoku")
 i_kijunLen      = input.int(26, "Kijun-sen", minval=1, group="Ichimoku")
 i_senkouBLen    = input.int(52, "Senkou Span B", minval=1, group="Ichimoku")
 i_displacement  = input.int(27, "Verschiebung", minval=1, tooltip="27 mit Plot-Offset (displacement - 1), damit die Cloud deckungsgleich mit den TV-Indikatoren liegt.", group="Ichimoku")
-i_showCloud     = input.bool(true, "Cloud anzeigen", group="Ichimoku")
+i_showCloud     = input.bool(true, "Cloud (Kumo) anzeigen", group="Ichimoku", tooltip="Nur die Flaeche zwischen Senkou Span A und B. Tenkan/Kijun und Lagging Span bleiben davon unberuehrt.")
 i_showTK        = input.bool(true, "Tenkan/Kijun-Linien anzeigen", group="Ichimoku")
 i_showChikou    = input.bool(true, "Lagging Span (Chikou) anzeigen", group="Ichimoku")
 i_senkouACol    = input.color(color.new(color.green, 70), "Senkou Span A Farbe", group="Ichimoku")
@@ -84,13 +89,118 @@ i_showBBBasis = input.bool(true, "Basis-Linie (Mitte) anzeigen", group="Bollinge
 i_bbBasisCol  = input.color(color.gray, "Basis (SMA) Farbe", group="Bollinger Bands")
 i_bbFill      = input.bool(true, "Band-Füllung anzeigen (beide)", group="Bollinger Bands")
 
+// --- RSI ---
+// Der RSI läuft 0-100, dieses Script liegt auf der Preisachse. Eine normale RSI-Linie wäre
+// hier der Kurs 62 statt der Wert 62 - also unsichtbar. Deshalb zwei Darstellungsformen,
+// die ohne eigene Achse auskommen: das Zahlenfeld und die Kerzenfaerbung. Beide abschaltbar.
+// Der RSI steht ausserdem pro Zeitrahmen in der Tabelle weiter unten.
+grpRSI = "RSI"
+i_rsiOn     = input.bool(true, "RSI-Anzeige im Chart", group=grpRSI, tooltip="Betrifft nur die beiden Chart-Darstellungen: Zahlenfeld und Kerzenfaerbung. Die RSI-Spalte der Tabelle hat ihren eigenen Schalter und bleibt davon unberuehrt.\n\nLaenge, Source und die beiden Schwellen wirken dagegen auf beides - sie speisen auch die Werte und die Einfaerbung in der Tabelle.")
+i_rsiLen    = input.int(14, "RSI Länge", minval=1, group=grpRSI)
+i_rsiSource = input.source(close, "Source", group=grpRSI)
+i_rsiOB     = input.float(70, "Überkauft", minval=50, maxval=100, group=grpRSI)
+i_rsiOS     = input.float(30, "Überverkauft", minval=0, maxval=50, group=grpRSI)
+i_rsiObCol  = input.color(color.new(color.red, 0), "Farbe überkauft", inline="rsicol", group=grpRSI)
+i_rsiOsCol  = input.color(color.new(color.green, 0), "Farbe überverkauft", inline="rsicol", group=grpRSI)
+
+// Zahlenfeld in der Chart-Ecke
+// Default aus, seit die Zeitrahmen-Tabelle den RSI ohnehin mitfuehrt. Wer nur die eine
+// grosse Zahl will und die Tabelle nicht braucht, schaltet hier an und die Tabelle aus.
+i_rsiTable    = input.bool(false, "Zahlenfeld anzeigen", group=grpRSI)
+i_rsiTablePos = input.string("Oben rechts", "Position", options=["Oben rechts", "Oben links", "Unten rechts", "Unten links", "Mitte rechts", "Mitte links"], group=grpRSI)
+i_rsiTableSize= input.string("Normal", "Schriftgröße", options=["Klein", "Normal", "Groß"], group=grpRSI)
+i_rsiNeutral  = input.color(color.new(color.gray, 0), "Farbe neutral (zwischen den Zonen)", group=grpRSI)
+i_rsiTableBg  = input.color(color.new(color.black, 70), "Hintergrund Zahlenfeld", group=grpRSI)
+
+// Kerzenfärbung in den Extremzonen
+i_rsiBarCol   = input.bool(false, "Kerzen in OB/OS-Zone einfärben", group=grpRSI, tooltip="Färbt nur Kerzen, deren RSI über der Überkauft- bzw. unter der Überverkauft-Schwelle liegt. Alle übrigen Kerzen behalten ihre normale Farbe.")
+
+
+// --- Trend-Berechnung (nur für die Tabelle) ---
+// Bewusst eigene Längen, entkoppelt von den sechs Anzeige-MAs: Du kannst oben auf beliebige
+// MAs umstellen, ohne dass sich die Trend-Aussage ändert.
+grpTrend = "Trend-Berechnung"
+i_trType  = input.string("SMA", "MA-Typ", options=["SMA", "EMA"], group=grpTrend)
+i_trFast  = input.int(10, "Schnelle MA", minval=1, group=grpTrend)
+i_trMed   = input.int(20, "Mittlere MA", minval=1, group=grpTrend)
+i_trSlow  = input.int(50, "Langsame MA", minval=1, group=grpTrend)
+i_voteMa   = input.bool(true, "MA-Staffelung mitzählen", group=grpTrend, tooltip="Aufwärts: schnell > mittel > langsam UND Kurs über der schnellen MA.")
+i_voteSt   = input.bool(true, "Supertrend mitzählen", group=grpTrend)
+i_voteIchi = input.bool(true, "Ichimoku mitzählen", group=grpTrend, tooltip="Aufwärts: Kurs über der Kumo. Die Berechnung läuft unabhängig davon, ob die Cloud sichtbar ist.")
+i_trUpCol   = input.color(color.new(#26a69a, 0), "Farbe aufwärts", inline="trcol", group=grpTrend)
+i_trDownCol = input.color(color.new(#ef5350, 0), "Farbe abwärts", inline="trcol", group=grpTrend)
+i_trNeutCol = input.color(color.new(color.gray, 0), "Farbe uneinig", inline="trcol", group=grpTrend)
+
+// --- ADX ---
+grpADX = "ADX"
+i_adxLen     = input.int(14, "DI Länge", minval=1, group=grpADX)
+i_adxSmooth  = input.int(14, "ADX Glättung", minval=1, group=grpADX)
+i_adxTrend   = input.float(25, "Ab hier Trend", minval=0, maxval=100, group=grpADX, tooltip="Darunter wird der Wert grau dargestellt: zu schwach, um von einem Trend zu sprechen.")
+i_adxStrCol  = input.color(color.new(#e91e63, 0), "Farbe ab Trendstärke", group=grpADX)
+
+// --- ATR ---
+grpATR = "ATR"
+i_atrLen     = input.int(14, "ATR Länge", minval=1, group=grpATR)
+i_atrAvgLen  = input.int(100, "Vergleichsschnitt", minval=1, group=grpATR, tooltip="Der ATR in Prozent wird mit seinem eigenen Durchschnitt über diese Anzahl Kerzen verglichen. Darüber = erhöhte Volatilität.")
+i_atrHighCol = input.color(color.new(color.orange, 0), "Farbe erhöhte Volatilität", group=grpATR)
+
+// --- Relatives Volumen ---
+grpVol = "Volumen"
+i_volLen  = input.int(20, "Vergleichsschnitt (EMA)", minval=1, group=grpVol)
+i_volHigh = input.float(1.5, "Ab hier hervorheben", minval=0.1, step=0.1, group=grpVol)
+i_volCol  = input.color(color.new(#26a69a, 0), "Farbe hohes Volumen", group=grpVol)
+
+// --- Anchored VWAP ---
+// Bewusst KEIN Session-VWAP: der ist auf Tages-, Wochen- und Monatscharts wertlos, weil der
+// Anker mit der Kerze zusammenfällt. Die automatischen Anker finden sich pro Symbol selbst,
+// du musst also beim Wechsel von BTC auf einen anderen Coin nichts nachpflegen.
+grpVwap = "Anchored VWAP"
+i_vwapLine   = input.bool(true, "VWAP-Linie im Chart zeichnen", group=grpVwap)
+i_vwapAnchor = input.string("Tief des Fensters", "Anker", options=["Tief des Fensters", "Hoch des Fensters", "Jahresanfang", "Quartalsanfang", "Manuelles Datum"], group=grpVwap)
+i_vwapWin    = input.string("1 Jahr", "Fenster (für Hoch/Tief-Anker)", options=["3 Monate", "6 Monate", "1 Jahr", "2 Jahre", "5 Jahre", "Gesamte Historie"], group=grpVwap, tooltip="Bewusst in Zeit statt in Kerzen: eine feste Kerzenzahl bedeutet auf jedem Zeitrahmen etwas anderes (365 Kerzen sind auf D ein Jahr, auf M über 30 Jahre - so viele Monatskerzen hat kein Coin). Das Fenster wird in Tageskerzen umgerechnet.\n\nReicht die Historie des Symbols nicht für das Fenster, ankert der VWAP an der ersten verfügbaren Kerze.")
+i_vwapDate   = input.time(timestamp("01 Jan 2024 00:00 +0000"), "Manuelles Datum", group=grpVwap)
+i_vwapBase   = input.string("Automatisch (feinste Basis)", "Berechnungsbasis", options=["Automatisch (feinste Basis)", "Chart-Zeitrahmen", "Täglich (D)"], group=grpVwap, tooltip="In den VWAP geht pro Kerze nur ein Preis ein - je groeber der Zeitrahmen, desto groeber die Naeherung. Automatisch heisst: unterhalb von D rechnet er auf dem Chart-Zeitrahmen, ab D aufwaerts auf Tagesdaten. Die tatsaechlich genutzte Basis steht im Label der Tabellenzeile.\n\nDas Ankerdatum selbst wird immer auf Tagesbasis bestimmt und ist damit auf jedem Zeitrahmen dasselbe.")
+i_vwapCol    = input.color(color.new(#ff9800, 0), "Linien Farbe", group=grpVwap)
+i_vwapAllSeg = input.bool(false, "Auch frühere Anker-Segmente zeichnen", group=grpVwap, tooltip="Aus (Default): nur das Segment ab dem aktuellen Anker.\n\nAn: die gesamte Serie. ta.vwap liefert auch vor dem aktuellen Anker Werte - die der frueheren Anker-Segmente. Aneinandergereiht ergibt das eine Linie ueber die ganze Historie, die nicht zum Ankerdatum in der Tabelle passt.")
+i_vwapMaxBars= input.int(2000, "Maximale Segmentlänge (Kerzen)", minval=10, group=grpVwap, tooltip="Begrenzt, wie weit fuer die Linie zurueckgerechnet wird. Nur relevant bei sehr alten Ankern.")
+
+// --- Tabelle ---
+grpTbl = "Tabelle"
+i_tblOn    = input.bool(true, "Tabelle anzeigen", group=grpTbl)
+i_tblPos   = input.string("Unten links", "Position", options=["Unten links", "Unten rechts", "Oben links", "Oben rechts", "Mitte links", "Mitte rechts"], group=grpTbl, tooltip="Unten links kollidiert weder mit der TradingView-Legende (oben links) noch mit den aktuellen Kerzen und der Preisskala (rechts).")
+i_tblSize  = input.string("Normal", "Schriftgröße", options=["Klein", "Normal", "Groß"], group=grpTbl)
+i_tblBg    = input.color(color.new(color.black, 70), "Hintergrund", group=grpTbl)
+i_tblHead  = input.color(color.new(color.gray, 20), "Farbe Beschriftungen", group=grpTbl)
+
+i_tfS1 = input.bool(true, "Zeitrahmen 1", inline="tf1", group=grpTbl)
+i_tf1  = input.timeframe("D", "", inline="tf1", group=grpTbl)
+i_tfS2 = input.bool(true, "Zeitrahmen 2", inline="tf2", group=grpTbl)
+i_tf2  = input.timeframe("W", "", inline="tf2", group=grpTbl)
+i_tfS3 = input.bool(true, "Zeitrahmen 3", inline="tf3", group=grpTbl)
+i_tf3  = input.timeframe("M", "", inline="tf3", group=grpTbl)
+
+i_htfLive = input.bool(true, "Laufende Kerze der Zeitrahmen verwenden", group=grpTbl, tooltip="An: alle Zeitrahmen zeigen ihren aktuellen Stand, also vergleichbare Momentaufnahmen. Diese Werte ändern sich noch bis zum Kerzenschluss.\n\nAus: nur abgeschlossene Kerzen. Stabil, aber die Monatszeile hinkt dann bis zu einem Monat hinterher.")
+
+i_colRsi   = input.bool(true, "Spalte RSI", inline="col", group=grpTbl)
+i_colAdx   = input.bool(true, "Spalte ADX", inline="col", group=grpTbl)
+i_colTrend = input.bool(true, "Spalte Trend", inline="col", group=grpTbl)
+
+i_rowAtr  = input.bool(true, "Zeile ATR", inline="row", group=grpTbl)
+i_rowVol  = input.bool(true, "Zeile Volumen", inline="row", group=grpTbl)
+i_rowVwap = input.bool(true, "Zeile VWAP", inline="row", group=grpTbl)
+
 // ============================================================
 // BERECHNUNGEN
 // ============================================================
 
 // --- Moving Averages ---
+// Beide MAs werden auf jeder Kerze berechnet und erst danach ausgewaehlt. Im Ternaer-Operator
+// wuerde nur der genommene Zweig laufen - ta.ema/ta.sma fuehren aber internen Zustand mit und
+// liefern nach einem Umschalten falsche Werte, bis sie sich wieder eingeschwungen haben.
 f_ma(string maType, float src, simple int len) =>
-    maType == "EMA" ? ta.ema(src, len) : ta.sma(src, len)
+    emaVal = ta.ema(src, len)
+    smaVal = ta.sma(src, len)
+    maType == "EMA" ? emaVal : smaVal
 
 ma1 = f_ma(i_ma1Type, i_maSource, i_ma1Len)
 ma2 = f_ma(i_ma2Type, i_maSource, i_ma2Len)
@@ -118,6 +228,114 @@ bbLower = bbBasis - bbDev
 bbDev2   = i_bbMult2 * bbStdev
 bbUpper2 = bbBasis + bbDev2
 bbLower2 = bbBasis - bbDev2
+
+// --- RSI ---
+rsi        = ta.rsi(i_rsiSource, i_rsiLen)
+rsiOB      = i_rsiOn and rsi >= i_rsiOB
+rsiOS      = i_rsiOn and rsi <= i_rsiOS
+rsiZoneCol = rsiOB ? i_rsiObCol : rsiOS ? i_rsiOsCol : i_rsiNeutral
+
+
+// --- ADX ---
+[diPlus, diMinus, adxVal] = ta.dmi(i_adxLen, i_adxSmooth)
+
+// --- Trend: drei Stimmen, alle müssen einig sein ---
+trFast = f_ma(i_trType, close, i_trFast)
+trMed  = f_ma(i_trType, close, i_trMed)
+trSlow = f_ma(i_trType, close, i_trSlow)
+
+maUp = trFast > trMed and trMed > trSlow and close > trFast
+maDn = trFast < trMed and trMed < trSlow and close < trFast
+
+// Die sichtbare Kumo an der aktuellen Kerze wurde vor (displacement - 1) Kerzen berechnet.
+cloudTop = math.max(senkouA[i_displacement - 1], senkouB[i_displacement - 1])
+cloudBot = math.min(senkouA[i_displacement - 1], senkouB[i_displacement - 1])
+ichiUp = close > cloudTop
+ichiDn = close < cloudBot
+
+votesTotal = (i_voteMa ? 1 : 0) + (i_voteSt ? 1 : 0) + (i_voteIchi ? 1 : 0)
+votesUp    = (i_voteMa and maUp ? 1 : 0) + (i_voteSt and supertrendBullish ? 1 : 0) + (i_voteIchi and ichiUp ? 1 : 0)
+votesDn    = (i_voteMa and maDn ? 1 : 0) + (i_voteSt and not supertrendBullish ? 1 : 0) + (i_voteIchi and ichiDn ? 1 : 0)
+
+float trendState = votesTotal == 0 ? 0.0 : votesUp == votesTotal ? 1.0 : votesDn == votesTotal ? -1.0 : 0.0
+
+// --- Werte der drei Zeitrahmen ---
+// Offset 0 = laufende Kerze (Default): alle Zeitrahmen zeigen denselben Moment, dafür ändern
+// sich die Werte bis zum Kerzenschluss noch. Offset 1 = letzte abgeschlossene Kerze.
+htfOff = i_htfLive ? 0 : 1
+[rsiTf1, adxTf1, trdTf1] = request.security(syminfo.tickerid, i_tf1, [rsi[htfOff], adxVal[htfOff], trendState[htfOff]], lookahead=barmerge.lookahead_off)
+[rsiTf2, adxTf2, trdTf2] = request.security(syminfo.tickerid, i_tf2, [rsi[htfOff], adxVal[htfOff], trendState[htfOff]], lookahead=barmerge.lookahead_off)
+[rsiTf3, adxTf3, trdTf3] = request.security(syminfo.tickerid, i_tf3, [rsi[htfOff], adxVal[htfOff], trendState[htfOff]], lookahead=barmerge.lookahead_off)
+
+// --- ATR in Prozent, verglichen mit dem eigenen Schnitt ---
+atrPct = ta.atr(i_atrLen) / close * 100
+atrAvg = ta.sma(atrPct, i_atrAvgLen)
+
+// --- Relatives Volumen ---
+relVol = volume / ta.ema(volume, i_volLen)
+
+// --- Anchored VWAP ---
+// Das Fenster ist in Zeit definiert und wird in Kerzen umgerechnet. Eine feste Kerzenzahl
+// waere zeitrahmenabhaengig und auf W/M schlicht falsch.
+vwapWinSec = switch i_vwapWin
+    "3 Monate"  => 7776000
+    "6 Monate"  => 15552000
+    "2 Jahre"   => 63072000
+    "5 Jahre"   => 157680000
+    =>             31536000
+
+// Pine begrenzt den Lookback von ta.lowest/ta.highest auf 15000 Kerzen. Das math.min ist eine
+// Sicherung fuer den Fall, dass hier je ein feinerer Zeitrahmen als D hineingereicht wird -
+// im Normalfall greift es nicht, weil das Fenster auf Tageskerzen gerechnet wird (5 Jahre
+// = rund 1825, weit unter dem Limit).
+f_winBars(simple int tfSec) =>
+    math.min(15000, math.max(2, int(vwapWinSec / math.max(1, tfSec))))
+
+// Ein VWAP-Datenpunkt pro Kerze: je groeber der Zeitrahmen, desto ungenauer die Naeherung.
+// Ein 5-Jahres-VWAP auf dem Monatschart haette 60 Stuetzpunkte, auf Tagesbasis rund 1800.
+// Deshalb wird oberhalb von D auf Tagesdaten ausgewichen; unterhalb von D ist der
+// Chart-Zeitrahmen bereits feiner und wird beibehalten.
+chartTfSec = timeframe.in_seconds(timeframe.period)
+autoUsesD  = chartTfSec > 86400
+useDaily   = i_vwapBase == "Täglich (D)" or (i_vwapBase == "Automatisch (feinste Basis)" and autoUsesD)
+
+// Hoch/Tief des Fensters immer aus Tagesdaten - aus zwei Gruenden:
+// 1. Der Anker wird dadurch unabhaengig vom Chart-Zeitrahmen. Vorher konnte derselbe
+//    "1 Jahr"-Anker auf 15M und auf 4H auf verschiedenen Kerzen sitzen.
+// 2. Auf dem Chart-Zeitrahmen gerechnet sprengt das Fenster unterhalb von 1h das
+//    Lookback-Limit: 1 Jahr auf 15M sind 35040 Kerzen, erlaubt sind 15000.
+dayWinBars = f_winBars(86400)
+[dWinLow, dWinHigh] = request.security(syminfo.tickerid, "D", [ta.lowest(low, dayWinBars), ta.highest(high, dayWinBars)], lookahead=barmerge.lookahead_off)
+
+// winLow/winHigh kommen von aussen herein, damit die Funktion in beiden Kontexten
+// (Chart-Zeitrahmen und "D") mit denselben Ankerwerten arbeitet.
+f_avwap(float winLow, float winHigh) =>
+    // Reicht die Historie nicht fuer das Fenster, sind winLow/winHigh na. Dann greift der
+    // Anker nie und der VWAP laeuft ab der ersten verfuegbaren Kerze - in dem Fall die
+    // einzig sinnvolle Auslegung.
+    cond = switch i_vwapAnchor
+        "Hoch des Fensters" => i_vwapWin == "Gesamte Historie" ? bar_index == 0 : not na(winHigh) and high >= winHigh
+        "Jahresanfang"      => timeframe.change("12M")
+        "Quartalsanfang"    => timeframe.change("3M")
+        "Manuelles Datum"   => time >= i_vwapDate and time[1] < i_vwapDate
+        =>                     i_vwapWin == "Gesamte Historie" ? bar_index == 0 : not na(winLow) and low <= winLow
+    v = ta.vwap(hlc3, cond)
+    var float anchorAt = na
+    if cond
+        anchorAt := time
+    [v, anchorAt]
+
+[vwapLocal, vwapAnchorLocal] = f_avwap(dWinLow, dWinHigh)
+[vwapDaily, vwapAnchorDaily] = request.security(syminfo.tickerid, "D", f_avwap(ta.lowest(low, dayWinBars), ta.highest(high, dayWinBars)), lookahead=barmerge.lookahead_off)
+
+vwapVal        = useDaily ? vwapDaily : vwapLocal
+vwapAnchorTime = useDaily ? vwapAnchorDaily : vwapAnchorLocal
+vwapDist       = (close - vwapVal) / vwapVal * 100
+vwapLabel      = "VWAP (" + (useDaily ? "D" : timeframe.period) + ")"
+
+// Der Ankerzeitpunkt kommt als series float aus der Tuple-Auswahl, str.format_time erwartet
+// aber series int - deshalb der Cast. nz faengt den Fall ab, dass noch kein Anker gesetzt ist.
+vwapAnchorTxt = na(vwapAnchorTime) ? "—" : str.format_time(int(nz(vwapAnchorTime, time)), "yyyy-MM-dd", syminfo.timezone)
 
 // ============================================================
 // PLOTS
@@ -150,3 +368,145 @@ fill(bbUpperPlot, bbLowerPlot, color = i_showBB and i_bbFill ? i_bbFillCol : na,
 bbUpperPlot2 = plot(i_showBB2 ? bbUpper2 : na, color=i_bbUpperCol2, title="BB2 Upper (2.5)", linewidth=2)
 bbLowerPlot2 = plot(i_showBB2 ? bbLower2 : na, color=i_bbLowerCol2, title="BB2 Lower (2.5)", linewidth=2)
 fill(bbUpperPlot2, bbLowerPlot2, color = i_showBB2 and i_bbFill ? i_bbFillCol2 : na, title="BB2 Füllung")
+
+
+// --- RSI: Kerzenfärbung ---
+// na = kein Eingriff, die Kerze behält ihre normale Farbe. Betrifft nur Kerzen in der Zone.
+barcolor(i_rsiOn and i_rsiBarCol ? (rsiOB ? i_rsiObCol : rsiOS ? i_rsiOsCol : na) : na, title="RSI Kerzenfärbung")
+
+// --- RSI: Zahlenfeld ---
+f_tablePos() =>
+    switch i_rsiTablePos
+        "Oben links"   => position.top_left
+        "Unten rechts" => position.bottom_right
+        "Unten links"  => position.bottom_left
+        "Mitte rechts" => position.middle_right
+        "Mitte links"  => position.middle_left
+        => position.top_right
+
+f_tableSize() =>
+    switch i_rsiTableSize
+        "Klein" => size.small
+        "Groß"  => size.large
+        => size.normal
+
+var table rsiTable = table.new(f_tablePos(), 1, 2, bgcolor=i_rsiTableBg, frame_width=0, border_width=0)
+
+if i_rsiOn and i_rsiTable and barstate.islast
+    table.cell(rsiTable, 0, 0, "RSI " + str.tostring(i_rsiLen), text_color=color.new(color.gray, 20), text_size=size.small)
+    table.cell(rsiTable, 0, 1, str.tostring(rsi, "#.0"), text_color=rsiZoneCol, text_size=f_tableSize())
+
+// ============================================================
+// ANCHORED VWAP
+// ============================================================
+
+// Die gesamte Serie - also alle Anker-Segmente hintereinander. Nur auf Wunsch.
+plot(i_vwapLine and i_vwapAllSeg ? vwapVal : na, title="Anchored VWAP (alle Segmente)", color=i_vwapCol, linewidth=2, style=plot.style_linebr)
+
+// Nur das aktuelle Segment. Per plot() nicht moeglich: auf einer alten Kerze weiss das Script
+// nicht, dass spaeter noch ein Anker folgt - welcher der letzte ist, steht erst am rechten Rand
+// fest. Deshalb wird die Linie dort einmalig als Polyline ueber die Werte seit dem Anker gezogen.
+var polyline vwapPl = na
+if i_vwapLine and not i_vwapAllSeg and barstate.islast and not na(vwapAnchorTime)
+    polyline.delete(vwapPl)
+    int back = 0
+    for i = 0 to i_vwapMaxBars
+        if i > bar_index or time[i] < vwapAnchorTime
+            break
+        back := i
+    if back > 0
+        pts = array.new<chart.point>()
+        for i = back to 0
+            array.push(pts, chart.point.from_index(bar_index - i, vwapVal[i]))
+        vwapPl := polyline.new(pts, xloc=xloc.bar_index, line_color=i_vwapCol, line_width=2)
+
+// ============================================================
+// TABELLE
+// ============================================================
+
+f_tblPos() =>
+    switch i_tblPos
+        "Unten rechts" => position.bottom_right
+        "Oben links"   => position.top_left
+        "Oben rechts"  => position.top_right
+        "Mitte links"  => position.middle_left
+        "Mitte rechts" => position.middle_right
+        =>                position.bottom_left
+
+f_tblSize() =>
+    switch i_tblSize
+        "Klein" => size.small
+        "Groß"  => size.large
+        =>         size.normal
+
+f_txt(float v, string fmt) =>
+    na(v) ? "—" : str.tostring(v, fmt)
+
+f_rsiColOf(float v) =>
+    na(v) ? i_rsiNeutral : v >= i_rsiOB ? i_rsiObCol : v <= i_rsiOS ? i_rsiOsCol : i_rsiNeutral
+
+f_adxColOf(float v) =>
+    na(v) or v < i_adxTrend ? i_rsiNeutral : i_adxStrCol
+
+f_trdTxt(float v) =>
+    na(v) ? "—" : v > 0 ? "▲" : v < 0 ? "▼" : "▬"
+
+f_trdColOf(float v) =>
+    na(v) ? i_trNeutCol : v > 0 ? i_trUpCol : v < 0 ? i_trDownCol : i_trNeutCol
+
+// 4 Spalten (Beschriftung + 3 Werte), 7 Zeilen (Kopf + 3 Zeitrahmen + 3 Kennzahlen).
+// Nicht gesetzte Zellen bleiben unsichtbar, abgeschaltete Zeilen rücken also nach oben.
+var table tbl = table.new(f_tblPos(), 4, 7, bgcolor=i_tblBg, frame_width=0, border_width=0)
+
+if i_tblOn and barstate.islast
+    table.clear(tbl, 0, 0, 3, 6)
+    int r = 0
+
+    // Kopfzeile
+    if i_colRsi
+        table.cell(tbl, 1, r, "RSI", text_color=i_tblHead, text_size=size.small)
+    if i_colAdx
+        table.cell(tbl, 2, r, "ADX", text_color=i_tblHead, text_size=size.small)
+    if i_colTrend
+        table.cell(tbl, 3, r, "Trend", text_color=i_tblHead, text_size=size.small)
+    r += 1
+
+    // Zeitrahmen-Raster
+    tfLabels = array.from(i_tf1, i_tf2, i_tf3)
+    tfShow   = array.from(i_tfS1, i_tfS2, i_tfS3)
+    tfRsi    = array.from(rsiTf1, rsiTf2, rsiTf3)
+    tfAdx    = array.from(adxTf1, adxTf2, adxTf3)
+    tfTrd    = array.from(trdTf1, trdTf2, trdTf3)
+
+    for i = 0 to 2
+        if array.get(tfShow, i)
+            table.cell(tbl, 0, r, array.get(tfLabels, i), text_color=i_tblHead, text_size=f_tblSize())
+            if i_colRsi
+                vRsi = array.get(tfRsi, i)
+                table.cell(tbl, 1, r, f_txt(vRsi, "#"), text_color=f_rsiColOf(vRsi), text_size=f_tblSize())
+            if i_colAdx
+                vAdx = array.get(tfAdx, i)
+                table.cell(tbl, 2, r, f_txt(vAdx, "#"), text_color=f_adxColOf(vAdx), text_size=f_tblSize())
+            if i_colTrend
+                vTrd = array.get(tfTrd, i)
+                table.cell(tbl, 3, r, f_trdTxt(vTrd), text_color=f_trdColOf(vTrd), text_size=f_tblSize())
+            r += 1
+
+    // Kennzahlen des Chart-Zeitrahmens: bewusst NICHT pro Zeitrahmen, weil ein Wochen-ATR
+    // und ein Tages-ATR verschiedene Dinge messen und nebeneinander zum Fehlschluss einladen.
+    if i_rowAtr
+        table.cell(tbl, 0, r, "ATR", text_color=i_tblHead, text_size=f_tblSize())
+        table.cell(tbl, 1, r, f_txt(atrPct, "#.0") + " %", text_color=atrPct > atrAvg ? i_atrHighCol : i_rsiNeutral, text_size=f_tblSize())
+        r += 1
+
+    if i_rowVol
+        table.cell(tbl, 0, r, "Vol", text_color=i_tblHead, text_size=f_tblSize())
+        table.cell(tbl, 1, r, f_txt(relVol, "#.0") + "×", text_color=relVol >= i_volHigh ? i_volCol : i_rsiNeutral, text_size=f_tblSize())
+        r += 1
+
+    if i_rowVwap
+        table.cell(tbl, 0, r, vwapLabel, text_color=i_tblHead, text_size=f_tblSize())
+        table.cell(tbl, 1, r, f_txt(vwapVal, format.mintick), text_color=i_rsiNeutral, text_size=f_tblSize())
+        table.cell(tbl, 2, r, (vwapDist >= 0 ? "+" : "") + f_txt(vwapDist, "#.0") + " %", text_color=vwapDist >= 0 ? i_trUpCol : i_trDownCol, text_size=f_tblSize())
+        // Ankerdatum: macht sofort sichtbar, ob der automatische Anker dort sitzt, wo du denkst.
+        table.cell(tbl, 3, r, vwapAnchorTxt, text_color=i_tblHead, text_size=size.small)

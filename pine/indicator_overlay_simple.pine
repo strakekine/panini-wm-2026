@@ -299,13 +299,7 @@ chartTfSec = timeframe.in_seconds(timeframe.period)
 autoUsesD  = chartTfSec > 86400
 useDaily   = i_vwapBase == "Täglich (D)" or (i_vwapBase == "Automatisch (feinste Basis)" and autoUsesD)
 
-// Hoch/Tief des Fensters immer aus Tagesdaten - aus zwei Gruenden:
-// 1. Der Anker wird dadurch unabhaengig vom Chart-Zeitrahmen. Vorher konnte derselbe
-//    "1 Jahr"-Anker auf 15M und auf 4H auf verschiedenen Kerzen sitzen.
-// 2. Auf dem Chart-Zeitrahmen gerechnet sprengt das Fenster unterhalb von 1h das
-//    Lookback-Limit: 1 Jahr auf 15M sind 35040 Kerzen, erlaubt sind 15000.
 dayWinBars = f_winBars(86400)
-[dWinLow, dWinHigh] = request.security(syminfo.tickerid, "D", [ta.lowest(low, dayWinBars), ta.highest(high, dayWinBars)], lookahead=barmerge.lookahead_off)
 
 // winLow/winHigh kommen von aussen herein, damit die Funktion in beiden Kontexten
 // (Chart-Zeitrahmen und "D") mit denselben Ankerwerten arbeitet.
@@ -325,8 +319,23 @@ f_avwap(float winLow, float winHigh) =>
         anchorAt := time
     [v, anchorAt]
 
+// Der Tagesaufruf, den W und M ohnehin brauchen, liefert Hoch und Tief des Fensters gleich
+// mit. Damit kommen beide Pfade mit einem einzigen request.security auf "D" aus.
+f_avwapDaily() =>
+    wl = ta.lowest(low, dayWinBars)
+    wh = ta.highest(high, dayWinBars)
+    [v, a] = f_avwap(wl, wh)
+    [v, a, wl, wh]
+
+[vwapDaily, vwapAnchorDaily, dWinLow, dWinHigh] = request.security(syminfo.tickerid, "D", f_avwapDaily(), lookahead=barmerge.lookahead_off)
+
+// Der Anker kommt auch unterhalb von D aus den Tagesdaten - aus zwei Gruenden:
+// 1. Er wird dadurch unabhaengig vom Chart-Zeitrahmen. Vorher konnte derselbe "1 Jahr"-Anker
+//    auf 15M und auf 4H auf verschiedenen Kerzen sitzen.
+// 2. Auf dem Chart-Zeitrahmen gerechnet sprengt das Fenster unterhalb von 1h das
+//    Lookback-Limit: 1 Jahr auf 15M sind 35040 Kerzen, erlaubt sind 15000.
+// Die VWAP-Summe selbst laeuft weiterhin auf dem Chart-Zeitrahmen, also feiner als D.
 [vwapLocal, vwapAnchorLocal] = f_avwap(dWinLow, dWinHigh)
-[vwapDaily, vwapAnchorDaily] = request.security(syminfo.tickerid, "D", f_avwap(ta.lowest(low, dayWinBars), ta.highest(high, dayWinBars)), lookahead=barmerge.lookahead_off)
 
 vwapVal        = useDaily ? vwapDaily : vwapLocal
 vwapAnchorTime = useDaily ? vwapAnchorDaily : vwapAnchorLocal

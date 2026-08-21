@@ -337,10 +337,15 @@ f_avwapDaily() =>
 // Die VWAP-Summe selbst laeuft weiterhin auf dem Chart-Zeitrahmen, also feiner als D.
 [vwapLocal, vwapAnchorLocal] = f_avwap(dWinLow, dWinHigh)
 
-vwapVal        = useDaily ? vwapDaily : vwapLocal
-vwapAnchorTime = useDaily ? vwapAnchorDaily : vwapAnchorLocal
+// Liegt der Anker vor der ersten geladenen Kerze des Chart-Zeitrahmens, kann der lokale VWAP
+// dort nicht starten und bleibt na: TradingView laedt pro Chart nur begrenzt Kerzen, auf 15M
+// reicht das oft keine 365 Tage zurueck. In dem Fall auf die Tagesberechnung ausweichen, statt
+// gar nichts anzuzeigen. Welche Basis wirklich gerechnet wurde, steht im Label der Tabelle.
+useDailyEff    = useDaily or na(vwapAnchorLocal)
+vwapVal        = useDailyEff ? vwapDaily : vwapLocal
+vwapAnchorTime = useDailyEff ? vwapAnchorDaily : vwapAnchorLocal
 vwapDist       = (close - vwapVal) / vwapVal * 100
-vwapLabel      = "VWAP (" + (useDaily ? "D" : timeframe.period) + ")"
+vwapLabel      = "VWAP (" + (useDailyEff ? "D" : timeframe.period) + ")"
 
 // Der Ankerzeitpunkt kommt als series float aus der Tuple-Auswahl, str.format_time erwartet
 // aber series int - deshalb der Cast. nz faengt den Fall ab, dass noch kein Anker gesetzt ist.

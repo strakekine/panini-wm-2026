@@ -169,10 +169,44 @@ function buildKO(seed){
   let size=1; while(size < seed.length) size*=2;
   if(size<2) size=2;
   /* Freilose so verteilen, dass sie sich nie gegenseitig treffen */
-  const slots = seedOrder(size).map(pos => seed[pos-1]===undefined ? null : seed[pos-1]);
+  let slots = seedOrder(size).map(pos => seed[pos-1]===undefined ? null : seed[pos-1]);
+  slots = avoidSameGroup(slots);
+  return { seed: slots.map(x=> x ? x.id : null), rounds: emptyRounds(size), third:{sa:'',sb:''} };
+}
+function emptyRounds(size){
   const rounds=[]; let cnt=size/2;
   while(cnt>=1){ rounds.push(Array.from({length:cnt},()=>({sa:'',sb:''}))); cnt/=2; }
-  return { seed:slots, rounds, third:{sa:'',sb:''} };
+  return rounds;
+}
+/* Erste Runde: keine zwei Teams aus derselben Gruppe gegeneinander.
+   Zuerst nur Tausch innerhalb derselben Setzstufe (Sieger gegen Sieger,
+   Zweite gegen Zweite), damit die Rangfolge erhalten bleibt. */
+function avoidSameGroup(slots){
+  const clash = m => {
+    const a=slots[2*m], b=slots[2*m+1];
+    return !!(a && b && a.g!=null && a.g===b.g);
+  };
+  const N = slots.length/2;
+  [true,false].forEach(sameTierOnly=>{
+    for(let pass=0; pass<3; pass++){
+      for(let m=0;m<N;m++){
+        if(!clash(m)) continue;
+        let fixed=false;
+        for(let n=0;n<N && !fixed;n++){
+          if(n===m) continue;
+          for(let i=0;i<2 && !fixed;i++) for(let j=0;j<2 && !fixed;j++){
+            const A=slots[2*m+i], B=slots[2*n+j];
+            if(!A || !B) continue;
+            if(sameTierOnly && A.tier!==B.tier) continue;
+            slots[2*m+i]=B; slots[2*n+j]=A;
+            if(!clash(m) && !clash(n)) fixed=true;
+            else { slots[2*m+i]=A; slots[2*n+j]=B; }
+          }
+        }
+      }
+    }
+  });
+  return slots;
 }
 
 /* KO auswerten: Teilnehmer je Partie aus Vorrunden ableiten */
@@ -230,21 +264,19 @@ function tableFor(g){
 const groupDone = g => S.gm.filter(m=>m.g===g).every(m=> num(m.sa)!==null && num(m.sb)!==null);
 const allGroupsDone = () => S.groups.every((_,g)=> groupDone(g));
 
-/* Setzliste fuer die KO-Phase: Gruppensieger gegen Zweite der Nachbargruppe */
+/* Setzliste fuer die KO-Phase: nach Setzstufe (alle Gruppensieger, dann alle
+   Zweiten ...), innerhalb einer Stufe nach Staerke. Der beste Gruppensieger
+   trifft so auf den schwaechsten Zweiten - und nie auf jemanden aus der
+   eigenen Gruppe (siehe avoidSameGroup). */
 function qualifiers(){
   const tabs = S.groups.map((_,g)=> tableFor(g));
   const maxQ = Math.min.apply(null, tabs.map(t=>t.length));
   const q = Math.max(1, Math.min(S.qual, maxQ));
-  const G = tabs.length;
-  const pool = []; // pool[pos][group] = teamId
-  for(let pos=0; pos<q; pos++) pool.push(tabs.map(t=> t[pos].id));
   const seed=[];
-  for(let pos=0; pos<q; pos+=2){
-    if(pos+1 < q){
-      for(let g=0; g<G; g++){ seed.push(pool[pos][g]); seed.push(pool[pos+1][(g+1)%G]); }
-    } else {
-      for(let g=0; g<G; g++) seed.push(pool[pos][g]);
-    }
+  for(let pos=0; pos<q; pos++){
+    const tier = tabs.map((t,g)=>({ id:t[pos].id, g:g, tier:pos, p:t[pos].p, d:t[pos].pf-t[pos].pa, f:t[pos].pf }));
+    tier.sort((a,b)=> b.p-a.p || b.d-a.d || b.f-a.f);
+    tier.forEach(x=> seed.push(x));
   }
   return seed;
 }
@@ -451,7 +483,7 @@ function startTournament(){
   S.teams = makeTeams();
   S.ko = null; S.gm=[]; S.groups=[];
   if(S.mode==='ko'){
-    S.ko = buildKO(shuffle(S.teams.map(t=>t.id)));
+    S.ko = buildKO(shuffle(S.teams.map(t=>t.id)).map(id=>({id:id, g:null, tier:0})));
   } else {
     const ids = shuffle(S.teams.map(t=>t.id));
     const n = Math.min(S.nGroups, Math.max(1, Math.floor(ids.length/2)));

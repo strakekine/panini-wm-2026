@@ -263,9 +263,16 @@ float trendState = votesTotal == 0 ? 0.0 : votesUp == votesTotal ? 1.0 : votesDn
 // Offset 0 = laufende Kerze (Default): alle Zeitrahmen zeigen denselben Moment, dafür ändern
 // sich die Werte bis zum Kerzenschluss noch. Offset 1 = letzte abgeschlossene Kerze.
 htfOff = i_htfLive ? 0 : 1
-[rsiTf1, adxTf1, trdTf1] = request.security(syminfo.tickerid, i_tf1, [rsi[htfOff], adxVal[htfOff], trendState[htfOff]], lookahead=barmerge.lookahead_off)
-[rsiTf2, adxTf2, trdTf2] = request.security(syminfo.tickerid, i_tf2, [rsi[htfOff], adxVal[htfOff], trendState[htfOff]], lookahead=barmerge.lookahead_off)
-[rsiTf3, adxTf3, trdTf3] = request.security(syminfo.tickerid, i_tf3, [rsi[htfOff], adxVal[htfOff], trendState[htfOff]], lookahead=barmerge.lookahead_off)
+// lookahead_on ist hier korrekt, obwohl es sonst die Warnlampe ist: Mit lookahead_off liefert
+// eine HISTORISCHE Kerze die letzte ABGESCHLOSSENE Wochenkerze, waehrend der W-Chart die
+// laufende zeigt. Bei geschlossener Boerse ist die letzte Tageskerze historisch, also standen
+// D-Chart und W-Chart um genau eine Woche versetzt (bei ASTS aufgefallen: W-RSI 42 statt 44).
+// Unbedenklich, weil diese drei Reihen AUSSCHLIESSLICH in der Tabelle unter barstate.islast
+// landen und nie geplottet werden - historische Werte bekommt niemand zu sehen. Wer sie je
+// plotten will, braucht wieder lookahead_off.
+[rsiTf1, adxTf1, trdTf1] = request.security(syminfo.tickerid, i_tf1, [rsi[htfOff], adxVal[htfOff], trendState[htfOff]], lookahead=barmerge.lookahead_on)
+[rsiTf2, adxTf2, trdTf2] = request.security(syminfo.tickerid, i_tf2, [rsi[htfOff], adxVal[htfOff], trendState[htfOff]], lookahead=barmerge.lookahead_on)
+[rsiTf3, adxTf3, trdTf3] = request.security(syminfo.tickerid, i_tf3, [rsi[htfOff], adxVal[htfOff], trendState[htfOff]], lookahead=barmerge.lookahead_on)
 
 // --- ATR in Prozent, verglichen mit dem eigenen Schnitt ---
 atrPct = ta.atr(i_atrLen) / close * 100

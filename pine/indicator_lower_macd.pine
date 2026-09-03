@@ -130,9 +130,16 @@ macdState = macdLine >= 0 ? 1.0 : -1.0
 histState = histLine >= 0 ? 1.0 : -1.0
 dirState  = histRising ? 1.0 : -1.0
 
-[mTf1, hTf1, dTf1] = request.security(syminfo.tickerid, i_tf1, [macdState[htfOff], histState[htfOff], dirState[htfOff]], lookahead=barmerge.lookahead_off)
-[mTf2, hTf2, dTf2] = request.security(syminfo.tickerid, i_tf2, [macdState[htfOff], histState[htfOff], dirState[htfOff]], lookahead=barmerge.lookahead_off)
-[mTf3, hTf3, dTf3] = request.security(syminfo.tickerid, i_tf3, [macdState[htfOff], histState[htfOff], dirState[htfOff]], lookahead=barmerge.lookahead_off)
+// lookahead_on ist hier korrekt, obwohl es sonst die Warnlampe ist: Mit lookahead_off liefert
+// eine HISTORISCHE Kerze die letzte ABGESCHLOSSENE Wochenkerze, waehrend der W-Chart die
+// laufende zeigt. Bei geschlossener Boerse ist die letzte Tageskerze historisch, also standen
+// D-Chart und W-Chart um genau eine Woche versetzt (bei ASTS aufgefallen).
+// Unbedenklich, weil diese drei Reihen AUSSCHLIESSLICH in der Tabelle unter barstate.islast
+// landen und nie geplottet werden - historische Werte bekommt niemand zu sehen. Wer sie je
+// plotten will, braucht wieder lookahead_off.
+[mTf1, hTf1, dTf1] = request.security(syminfo.tickerid, i_tf1, [macdState[htfOff], histState[htfOff], dirState[htfOff]], lookahead=barmerge.lookahead_on)
+[mTf2, hTf2, dTf2] = request.security(syminfo.tickerid, i_tf2, [macdState[htfOff], histState[htfOff], dirState[htfOff]], lookahead=barmerge.lookahead_on)
+[mTf3, hTf3, dTf3] = request.security(syminfo.tickerid, i_tf3, [macdState[htfOff], histState[htfOff], dirState[htfOff]], lookahead=barmerge.lookahead_on)
 
 // --- Preislevel ---
 // high[1] bzw. low[1] mit lookahead_on ist das uebliche repaint-freie Muster fuer den Wert der

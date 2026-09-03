@@ -106,6 +106,14 @@ vorgeschlagen. „Rtg" meint das **Histogramm**, nicht die MACD-Linie.
   Tage zurück, `cond` wurde nie wahr und die VWAP-Linie verschwand. `useDailyEff` weicht in dem
   Fall auf die Tagesberechnung aus, statt nichts anzuzeigen. Vom Nutzer gemeldet.
 - **`lookahead_on` mit `[1]`** ist das korrekte, repaint-freie Muster für Vorperiodenwerte.
+- **MTF-Tabellen brauchen `lookahead_on`, nicht `_off`.** Mit `_off` liefert eine *historische*
+  Kerze die letzte **abgeschlossene** HTF-Kerze, der HTF-Chart selbst zeigt aber die laufende.
+  Bei geschlossener Börse ist die letzte Tageskerze historisch → D-Chart und W-Chart standen um
+  genau eine Woche versetzt (bei ASTS aufgefallen: W-RSI 42 statt 44, MACD-Rtg gespiegelt).
+  `lookahead_on` ist unbedenklich, **solange die Reihen nur in einer Tabelle unter
+  `barstate.islast` landen** und nie geplottet werden. Beim Plotten wieder `_off`.
+  Meine erste Vermutung — instabile Teilkerze — war falsch; die vier Screenshots des Nutzers
+  (D/W × Schalter an/aus) haben den Ein-Kerzen-Versatz eindeutig gezeigt.
 - **RE-Fehlercodes sind nicht dokumentiert.** Der Stacktrace (`at f_avwap():302`) benennt die
   Funktion und ist der eigentliche Schlüssel, nicht die Nummer.
 

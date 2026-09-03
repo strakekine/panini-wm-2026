@@ -93,7 +93,19 @@ vorgeschlagen. „Rtg" meint das **Histogramm**, nicht die MACD-Linie.
   `timeframe.in_seconds`. Auch vom Nutzer gefunden.
 - **VWAP-Genauigkeit.** Ein Preis pro Kerze — auf M viel zu grob. Oberhalb von D wird auf
   Tagesdaten ausgewichen, das Label nennt die Basis (`VWAP (D)`). Idee kam vom Nutzer.
+- **Lookback-Limit 15000 Kerzen** bei `ta.lowest`/`ta.highest`. Das VWAP-Fenster wurde in
+  Kerzen des Chart-Zeitrahmens gerechnet: 1 Jahr auf 15M sind 35040 → `RE10004` auf allen
+  Zeitrahmen unter 1h. Deshalb kommen Hoch und Tief des Ankerfensters jetzt **immer aus
+  Tagesdaten** (5 Jahre = rund 1825 Kerzen). Nebeneffekt, der das Eigentliche ist: der Anker
+  ist damit zeitrahmenunabhängig — vorher konnte dasselbe „1 Jahr" auf 15M und 4H auf
+  verschiedenen Kerzen sitzen. `f_winBars` behält ein `math.min(15000, …)` als Sicherung.
+- **Anker außerhalb der geladenen Historie.** Folgefehler des Obigen: Der lokale VWAP kann nur
+  an einer Kerze starten, die der Chart geladen hat. Unter 4h reicht die Historie oft keine 365
+  Tage zurück, `cond` wurde nie wahr und die VWAP-Linie verschwand. `useDailyEff` weicht in dem
+  Fall auf die Tagesberechnung aus, statt nichts anzuzeigen. Vom Nutzer gemeldet.
 - **`lookahead_on` mit `[1]`** ist das korrekte, repaint-freie Muster für Vorperiodenwerte.
+- **RE-Fehlercodes sind nicht dokumentiert.** Der Stacktrace (`at f_avwap():302`) benennt die
+  Funktion und ist der eigentliche Schlüssel, nicht die Nummer.
 
 ## Verworfen (nicht erneut vorschlagen)
 

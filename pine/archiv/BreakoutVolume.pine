@@ -1,0 +1,132 @@
+//@version=6
+// =============================================================================
+//  Volatility Breakout + Volume  (Gegenthese zur Pullback-Strategie)
+//  -------------------------------------------------------------------------
+//  Philosophie: NICHT Pullbacks kaufen, sondern MIT dem Ausbruch gehen.
+//   - Krypto hat "fat tails": die großen Moves kommen explosiv aus Ranges.
+//   - Volumen als ORTHOGONALE Info (nicht nochmal Preis-Momentum):
+//       Ausbruch auf hohem Volumen = echt, auf niedrigem = Falle.
+//
+//  Kern (bewusst wenige Parameter -> schwer zu überfitten):
+//   1) ENTRY : Donchian-Breakout (Close bricht über/unter N-Bar-Kanal)
+//   2) FILTER: Volumen > Durchschnitt × Faktor  (+ optionaler Trend-Filter)
+//   3) STOP  : ATR-basiert (harter Stop)
+//   4) EXIT  : gegenläufiger Donchian-Break (Turtle-Style, lässt Runner laufen)
+//
+//  Kein Repainting: Kanäle mit [1]-Offset, Signale auf Close, Orders on close.
+//  WICHTIG: NICHT nur auf ETH testen! Auf BTC/SOL/... und mehreren Phasen prüfen.
+// =============================================================================
+
+strategy("Breakout + Volume (Intraday Crypto)",
+     overlay              = true,
+     initial_capital      = 10000,
+     default_qty_type     = strategy.percent_of_equity,
+     default_qty_value    = 100,
+     commission_type      = strategy.commission.percent,
+     commission_value     = 0.05,
+     slippage             = 1,
+     pyramiding           = 0,
+     process_orders_on_close = true,
+     calc_on_every_tick   = false)
+
+// ---------------------------------------------------------------------------
+//  INPUTS
+// ---------------------------------------------------------------------------
+grpBrk   = "1 | Breakout (Donchian)"
+entryLen = input.int(20, "Entry-Kanal (Ausbruch-Lookback)", minval = 3, group = grpBrk)
+exitLen  = input.int(10, "Exit-Kanal (Trailing-Lookback)",  minval = 2, group = grpBrk)
+
+grpVol   = "2 | Volumen-Filter"
+useVol   = input.bool(true, "Volumen-Bestätigung nutzen", group = grpVol)
+volLen   = input.int(20, "Volumen-Durchschnitt (Länge)", minval = 2, group = grpVol)
+volMult  = input.float(1.5, "Volumen-Faktor (Ausbruch × Ø)", minval = 1.0, group = grpVol)
+
+grpTrend = "3 | Trend-Filter (optional)"
+useTrend = input.bool(true, "Nur mit übergeordnetem Trend", group = grpTrend)
+trendLen = input.int(200, "Trend-EMA (Länge)", minval = 20, group = grpTrend)
+
+grpRisk  = "4 | Risk"
+atrLen   = input.int(14, "ATR Länge", minval = 2, group = grpRisk)
+atrStop  = input.float(2.0, "Initialer Stop (× ATR)", minval = 0.5, group = grpRisk)
+useTP    = input.bool(false, "Fixes Take-Profit nutzen (sonst nur Donchian-Trail)", group = grpRisk)
+rMult    = input.float(3.0, "Take-Profit (R-Vielfaches)", minval = 0.5, group = grpRisk)
+
+grpSide  = "Richtung"
+allowLong  = input.bool(true, "Longs erlauben",  group = grpSide)
+allowShort = input.bool(true, "Shorts erlauben", group = grpSide)
+
+// ---------------------------------------------------------------------------
+//  BAUSTEINE
+// ---------------------------------------------------------------------------
+upperEntry = ta.highest(high, entryLen)
+lowerEntry = ta.lowest(low,  entryLen)
+upperExit  = ta.highest(high, exitLen)
+lowerExit  = ta.lowest(low,  exitLen)
+
+atr      = ta.atr(atrLen)
+volAvg   = ta.sma(volume, volLen)
+volOk    = not useVol or volume > volAvg * volMult
+
+emaTrend = ta.ema(close, trendLen)
+longTrendOk  = not useTrend or close > emaTrend
+shortTrendOk = not useTrend or close < emaTrend
+
+// -- Breakout-Signale (Close bricht über/unter Kanal des VORbars => kein Repaint)
+longBreak  = ta.crossover(close,  upperEntry[1])
+shortBreak = ta.crossunder(close, lowerEntry[1])
+
+longSig  = allowLong  and longBreak  and volOk and longTrendOk  and strategy.position_size == 0
+shortSig = allowShort and shortBreak and volOk and shortTrendOk and strategy.position_size == 0
+
+// ---------------------------------------------------------------------------
+//  RISK / ORDERS
+// ---------------------------------------------------------------------------
+var float entryPx = na
+var float slPx    = na
+var float tpPx    = na
+
+if longSig and barstate.isconfirmed
+    entryPx := close
+    slPx    := close - atrStop * atr
+    tpPx    := useTP ? close + atrStop * atr * rMult : na
+    strategy.entry("Long", strategy.long)
+    strategy.exit("Long-X", from_entry = "Long", stop = slPx, limit = tpPx)
+
+if shortSig and barstate.isconfirmed
+    entryPx := close
+    slPx    := close + atrStop * atr
+    tpPx    := useTP ? close - atrStop * atr * rMult : na
+    strategy.entry("Short", strategy.short)
+    strategy.exit("Short-X", from_entry = "Short", stop = slPx, limit = tpPx)
+
+// -- Turtle-Exit: gegenläufiger Donchian-Break schließt die Position ---------
+exitLongTrail  = strategy.position_size > 0 and ta.crossunder(close, lowerExit[1])
+exitShortTrail = strategy.position_size < 0 and ta.crossover(close,  upperExit[1])
+if exitLongTrail and barstate.isconfirmed
+    strategy.close("Long",  comment = "Donchian-Exit")
+if exitShortTrail and barstate.isconfirmed
+    strategy.close("Short", comment = "Donchian-Exit")
+
+if strategy.position_size == 0
+    entryPx := na
+    slPx    := na
+    tpPx    := na
+
+// ---------------------------------------------------------------------------
+//  VISUALS
+// ---------------------------------------------------------------------------
+plot(upperEntry, "Entry-Kanal oben", color.new(color.green, 40))
+plot(lowerEntry, "Entry-Kanal unten", color.new(color.red,   40))
+plot(useTrend ? emaTrend : na, "Trend-EMA", color.new(color.blue, 30), linewidth = 2)
+
+plotshape(longSig,  "Long-Breakout",  shape.triangleup,   location.belowbar, color.new(color.green, 0), size = size.small)
+plotshape(shortSig, "Short-Breakout", shape.triangledown, location.abovebar, color.new(color.red,   0), size = size.small)
+
+plot(strategy.position_size != 0 ? slPx : na, "Stop-Loss", color.new(color.red, 0), style = plot.style_linebr, linewidth = 2)
+plot(strategy.position_size != 0 and useTP ? tpPx : na, "Take-Profit", color.new(color.green, 0), style = plot.style_linebr, linewidth = 2)
+
+// ---------------------------------------------------------------------------
+//  ALERTS
+// ---------------------------------------------------------------------------
+alertcondition(longSig,  "LONG Breakout",  "Breakout+Volume: LONG-Signal")
+alertcondition(shortSig, "SHORT Breakout", "Breakout+Volume: SHORT-Signal")

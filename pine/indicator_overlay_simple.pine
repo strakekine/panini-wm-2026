@@ -157,9 +157,9 @@ i_volCol  = input.color(color.new(#26a69a, 0), "Farbe hohes Volumen", group=grpV
 grpVwap = "Anchored VWAP"
 i_vwapLine   = input.bool(true, "VWAP-Linie im Chart zeichnen", group=grpVwap)
 i_vwapAnchor = input.string("Tief des Fensters", "Anker", options=["Tief des Fensters", "Hoch des Fensters", "Jahresanfang", "Quartalsanfang", "Manuelles Datum"], group=grpVwap)
-i_vwapWin    = input.string("1 Jahr", "Fenster (für Hoch/Tief-Anker)", options=["3 Monate", "6 Monate", "1 Jahr", "2 Jahre", "5 Jahre", "Gesamte Historie"], group=grpVwap, tooltip="Bewusst in Zeit statt in Kerzen: eine feste Kerzenzahl bedeutet auf jedem Zeitrahmen etwas anderes (365 Kerzen sind auf D ein Jahr, auf M über 30 Jahre - so viele Monatskerzen hat kein Coin). Das Fenster wird pro Chart in Kerzen umgerechnet.\n\nReicht die Historie des Symbols nicht für das Fenster, ankert der VWAP an der ersten verfügbaren Kerze.")
+i_vwapWin    = input.string("1 Jahr", "Fenster (für Hoch/Tief-Anker)", options=["3 Monate", "6 Monate", "1 Jahr", "2 Jahre", "5 Jahre", "Gesamte Historie"], group=grpVwap, tooltip="Bewusst in Zeit statt in Kerzen: eine feste Kerzenzahl bedeutet auf jedem Zeitrahmen etwas anderes (365 Kerzen sind auf D ein Jahr, auf M über 30 Jahre - so viele Monatskerzen hat kein Coin). Das Fenster wird in Tageskerzen umgerechnet.\n\nReicht die Historie des Symbols nicht für das Fenster, ankert der VWAP an der ersten verfügbaren Kerze.")
 i_vwapDate   = input.time(timestamp("01 Jan 2024 00:00 +0000"), "Manuelles Datum", group=grpVwap)
-i_vwapBase   = input.string("Automatisch (feinste Basis)", "Berechnungsbasis", options=["Automatisch (feinste Basis)", "Chart-Zeitrahmen", "Täglich (D)"], group=grpVwap, tooltip="In den VWAP geht pro Kerze nur ein Preis ein - je groeber der Zeitrahmen, desto groeber die Naeherung. Automatisch heisst: unterhalb von D rechnet er auf dem Chart-Zeitrahmen, ab D aufwaerts auf Tagesdaten. Die tatsaechlich genutzte Basis steht im Label der Tabellenzeile.")
+i_vwapBase   = input.string("Automatisch (feinste Basis)", "Berechnungsbasis", options=["Automatisch (feinste Basis)", "Chart-Zeitrahmen", "Täglich (D)"], group=grpVwap, tooltip="In den VWAP geht pro Kerze nur ein Preis ein - je groeber der Zeitrahmen, desto groeber die Naeherung. Automatisch heisst: unterhalb von D rechnet er auf dem Chart-Zeitrahmen, ab D aufwaerts auf Tagesdaten. Die tatsaechlich genutzte Basis steht im Label der Tabellenzeile.\n\nDas Ankerdatum selbst wird immer auf Tagesbasis bestimmt und ist damit auf jedem Zeitrahmen dasselbe.")
 i_vwapCol    = input.color(color.new(#ff9800, 0), "Linien Farbe", group=grpVwap)
 i_vwapAllSeg = input.bool(false, "Auch frühere Anker-Segmente zeichnen", group=grpVwap, tooltip="Aus (Default): nur das Segment ab dem aktuellen Anker.\n\nAn: die gesamte Serie. ta.vwap liefert auch vor dem aktuellen Anker Werte - die der frueheren Anker-Segmente. Aneinandergereiht ergibt das eine Linie ueber die ganze Historie, die nicht zum Ankerdatum in der Tabelle passt.")
 i_vwapMaxBars= input.int(2000, "Maximale Segmentlänge (Kerzen)", minval=10, group=grpVwap, tooltip="Begrenzt, wie weit fuer die Linie zurueckgerechnet wird. Nur relevant bei sehr alten Ankern.")
@@ -275,8 +275,8 @@ atrAvg = ta.sma(atrPct, i_atrAvgLen)
 relVol = volume / ta.ema(volume, i_volLen)
 
 // --- Anchored VWAP ---
-// Das Fenster ist in Zeit definiert und wird in Kerzen des jeweiligen Zeitrahmens umgerechnet.
-// Eine feste Kerzenzahl waere zeitrahmenabhaengig und auf W/M schlicht falsch.
+// Das Fenster ist in Zeit definiert und wird in Kerzen umgerechnet. Eine feste Kerzenzahl
+// waere zeitrahmenabhaengig und auf W/M schlicht falsch.
 vwapWinSec = switch i_vwapWin
     "3 Monate"  => 7776000
     "6 Monate"  => 15552000
@@ -284,8 +284,12 @@ vwapWinSec = switch i_vwapWin
     "5 Jahre"   => 157680000
     =>             31536000
 
+// Pine begrenzt den Lookback von ta.lowest/ta.highest auf 15000 Kerzen. Das math.min ist eine
+// Sicherung fuer den Fall, dass hier je ein feinerer Zeitrahmen als D hineingereicht wird -
+// im Normalfall greift es nicht, weil das Fenster auf Tageskerzen gerechnet wird (5 Jahre
+// = rund 1825, weit unter dem Limit).
 f_winBars(simple int tfSec) =>
-    math.max(2, int(vwapWinSec / math.max(1, tfSec)))
+    math.min(15000, math.max(2, int(vwapWinSec / math.max(1, tfSec))))
 
 // Ein VWAP-Datenpunkt pro Kerze: je groeber der Zeitrahmen, desto ungenauer die Naeherung.
 // Ein 5-Jahres-VWAP auf dem Monatschart haette 60 Stuetzpunkte, auf Tagesbasis rund 1800.
@@ -295,31 +299,53 @@ chartTfSec = timeframe.in_seconds(timeframe.period)
 autoUsesD  = chartTfSec > 86400
 useDaily   = i_vwapBase == "Täglich (D)" or (i_vwapBase == "Automatisch (feinste Basis)" and autoUsesD)
 
-f_avwap(simple int lb) =>
-    // Reicht die Historie nicht fuer das Fenster, liefern ta.lowest/ta.highest na. Dann greift
-    // der Anker nie und der VWAP laeuft ab der ersten verfuegbaren Kerze - in dem Fall die
+dayWinBars = f_winBars(86400)
+
+// winLow/winHigh kommen von aussen herein, damit die Funktion in beiden Kontexten
+// (Chart-Zeitrahmen und "D") mit denselben Ankerwerten arbeitet.
+f_avwap(float winLow, float winHigh) =>
+    // Reicht die Historie nicht fuer das Fenster, sind winLow/winHigh na. Dann greift der
+    // Anker nie und der VWAP laeuft ab der ersten verfuegbaren Kerze - in dem Fall die
     // einzig sinnvolle Auslegung.
-    winLow  = ta.lowest(low, lb)
-    winHigh = ta.highest(high, lb)
     cond = switch i_vwapAnchor
-        "Hoch des Fensters" => i_vwapWin == "Gesamte Historie" ? bar_index == 0 : not na(winHigh) and high == winHigh
+        "Hoch des Fensters" => i_vwapWin == "Gesamte Historie" ? bar_index == 0 : not na(winHigh) and high >= winHigh
         "Jahresanfang"      => timeframe.change("12M")
         "Quartalsanfang"    => timeframe.change("3M")
         "Manuelles Datum"   => time >= i_vwapDate and time[1] < i_vwapDate
-        =>                     i_vwapWin == "Gesamte Historie" ? bar_index == 0 : not na(winLow) and low == winLow
+        =>                     i_vwapWin == "Gesamte Historie" ? bar_index == 0 : not na(winLow) and low <= winLow
     v = ta.vwap(hlc3, cond)
     var float anchorAt = na
     if cond
         anchorAt := time
     [v, anchorAt]
 
-[vwapLocal, vwapAnchorLocal] = f_avwap(f_winBars(chartTfSec))
-[vwapDaily, vwapAnchorDaily] = request.security(syminfo.tickerid, "D", f_avwap(f_winBars(86400)), lookahead=barmerge.lookahead_off)
+// Der Tagesaufruf, den W und M ohnehin brauchen, liefert Hoch und Tief des Fensters gleich
+// mit. Damit kommen beide Pfade mit einem einzigen request.security auf "D" aus.
+f_avwapDaily() =>
+    wl = ta.lowest(low, dayWinBars)
+    wh = ta.highest(high, dayWinBars)
+    [v, a] = f_avwap(wl, wh)
+    [v, a, wl, wh]
 
-vwapVal        = useDaily ? vwapDaily : vwapLocal
-vwapAnchorTime = useDaily ? vwapAnchorDaily : vwapAnchorLocal
+[vwapDaily, vwapAnchorDaily, dWinLow, dWinHigh] = request.security(syminfo.tickerid, "D", f_avwapDaily(), lookahead=barmerge.lookahead_off)
+
+// Der Anker kommt auch unterhalb von D aus den Tagesdaten - aus zwei Gruenden:
+// 1. Er wird dadurch unabhaengig vom Chart-Zeitrahmen. Vorher konnte derselbe "1 Jahr"-Anker
+//    auf 15M und auf 4H auf verschiedenen Kerzen sitzen.
+// 2. Auf dem Chart-Zeitrahmen gerechnet sprengt das Fenster unterhalb von 1h das
+//    Lookback-Limit: 1 Jahr auf 15M sind 35040 Kerzen, erlaubt sind 15000.
+// Die VWAP-Summe selbst laeuft weiterhin auf dem Chart-Zeitrahmen, also feiner als D.
+[vwapLocal, vwapAnchorLocal] = f_avwap(dWinLow, dWinHigh)
+
+// Liegt der Anker vor der ersten geladenen Kerze des Chart-Zeitrahmens, kann der lokale VWAP
+// dort nicht starten und bleibt na: TradingView laedt pro Chart nur begrenzt Kerzen, auf 15M
+// reicht das oft keine 365 Tage zurueck. In dem Fall auf die Tagesberechnung ausweichen, statt
+// gar nichts anzuzeigen. Welche Basis wirklich gerechnet wurde, steht im Label der Tabelle.
+useDailyEff    = useDaily or na(vwapAnchorLocal)
+vwapVal        = useDailyEff ? vwapDaily : vwapLocal
+vwapAnchorTime = useDailyEff ? vwapAnchorDaily : vwapAnchorLocal
 vwapDist       = (close - vwapVal) / vwapVal * 100
-vwapLabel      = "VWAP (" + (useDaily ? "D" : timeframe.period) + ")"
+vwapLabel      = "VWAP (" + (useDailyEff ? "D" : timeframe.period) + ")"
 
 // Der Ankerzeitpunkt kommt als series float aus der Tuple-Auswahl, str.format_time erwartet
 // aber series int - deshalb der Cast. nz faengt den Fall ab, dass noch kein Anker gesetzt ist.

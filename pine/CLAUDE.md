@@ -4,7 +4,9 @@ Gedächtnisdatei für die beiden aktiven Indikatoren. Das `README.md` daneben be
 sie tun; hier steht, **warum** sie so gebaut sind, damit Entscheidungen nicht erneut
 durchgekaut werden müssen.
 
-Aktiver Branch: `claude/zweiter-tv-indikator-utf68y`.
+Alles liegt auf **`main`**. Früher lagen die Scripts nur auf `claude/*`-Branches — das hat
+einmal dazu geführt, dass eine Session auf `main` nachsah, nichts fand und einen Indikator neu
+baute. Neue Arbeit deshalb wieder nach `main` bringen, nicht auf einem Branch liegen lassen.
 
 ## Die harte Randbedingung
 

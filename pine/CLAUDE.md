@@ -106,6 +106,15 @@ vorgeschlagen. „Rtg" meint das **Histogramm**, nicht die MACD-Linie.
   Tage zurück, `cond` wurde nie wahr und die VWAP-Linie verschwand. `useDailyEff` weicht in dem
   Fall auf die Tagesberechnung aus, statt nichts anzuzeigen. Vom Nutzer gemeldet.
 - **`lookahead_on` mit `[1]`** ist das korrekte, repaint-freie Muster für Vorperiodenwerte.
+- **Zeilen unterhalb des Chart-Zeitrahmens sind unzuverlässig — und das ist kein Bug.** Eine
+  Tabellenzeile stimmt nur, wenn ihr Zeitrahmen gleich oder größer ist als der des Charts. Auf
+  dem W-Chart schwankt die D-Zeile, auf dem M-Chart D und W: Pine kann aus einer laufenden
+  Wochenkerze den einzelnen Tag nicht eindeutig bestimmen. Dagegen ist nichts zu programmieren.
+  Als Tooltip an „Zeitrahmen 1" in beiden Scripts hinterlegt. Der Nutzer hat das zweimal
+  gemeldet (MACD-Rtg und RSI) — **nicht erneut als Fehler untersuchen**, sondern auf die Regel
+  verweisen: Tabelle auf dem kleinsten der drei Zeitrahmen ablesen, in der Praxis D.
+  Verworfene Alternative: Zeilen unterhalb des Chart-Zeitrahmens ausgrauen. Nimmt Information
+  weg, die auf dem D-Chart korrekt ist; der Nutzer hat sich bewusst für den Hinweis entschieden.
 - **MTF-Tabellen brauchen `lookahead_on`, nicht `_off`.** Mit `_off` liefert eine *historische*
   Kerze die letzte **abgeschlossene** HTF-Kerze, der HTF-Chart selbst zeigt aber die laufende.
   Bei geschlossener Börse ist die letzte Tageskerze historisch → D-Chart und W-Chart standen um

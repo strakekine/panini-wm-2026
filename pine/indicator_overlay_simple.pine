@@ -172,7 +172,7 @@ i_tblSize  = input.string("Normal", "Schriftgröße", options=["Klein", "Normal"
 i_tblBg    = input.color(color.new(color.black, 70), "Hintergrund", group=grpTbl)
 i_tblHead  = input.color(color.new(color.gray, 20), "Farbe Beschriftungen", group=grpTbl)
 
-i_tfS1 = input.bool(true, "Zeitrahmen 1", inline="tf1", group=grpTbl)
+i_tfS1 = input.bool(true, "Zeitrahmen 1", inline="tf1", group=grpTbl, tooltip="Eine Zeile ist nur verlaesslich, wenn ihr Zeitrahmen GLEICH ODER GROESSER ist als der Chart-Zeitrahmen.\n\nAuf dem Tages-Chart stimmen D, W und M. Auf dem Wochen-Chart schwankt die D-Zeile, auf dem Monats-Chart D und W - ein groesserer Chart kennt die einzelnen Tage nicht genau, solange seine eigene Kerze noch laeuft.\n\nDie Tabelle deshalb am besten auf dem kleinsten der drei Zeitrahmen ablesen. Das ist kein Fehler, sondern eine Eigenschaft der Zeitrahmen-Abfrage.")
 i_tf1  = input.timeframe("D", "", inline="tf1", group=grpTbl)
 i_tfS2 = input.bool(true, "Zeitrahmen 2", inline="tf2", group=grpTbl)
 i_tf2  = input.timeframe("W", "", inline="tf2", group=grpTbl)

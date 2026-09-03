@@ -1,0 +1,228 @@
+//@version=6
+// =============================================================================
+//  Regime-Adaptive Intraday Crypto Strategy
+//  -------------------------------------------------------------------------
+//  Idee (4 Schichten):
+//   1) BIAS      -> Trendrichtung vom höheren Timeframe (HTF-EMA-Stack)
+//   2) REGIME    -> ADX entscheidet: Trend  ODER  Range
+//   3) ENTRY     -> Trend  => Pullback-Einstieg mit dem Trend
+//                   Range  => Mean-Reversion an RSI-Extremen (Gegenbewegung)
+//   4) RISK      -> SL an letztem Swing-Hoch/-Tief (Struktur), TP als R-Vielfaches
+//
+//  Kein Repainting:
+//   - Pivots (Struktur) sind erst nach 'pivLen' Bars bestätigt -> stabil
+//   - HTF-Werte per lookahead_off, Entries nur auf Bar-Close (isconfirmed)
+//   - process_orders_on_close = realistische Fills im Backtest
+// =============================================================================
+
+strategy("Regime-Adaptive Intraday Crypto",
+     overlay              = true,
+     initial_capital      = 10000,
+     default_qty_type     = strategy.percent_of_equity,
+     default_qty_value    = 100,
+     commission_type      = strategy.commission.percent,
+     commission_value     = 0.05,      // typ. Krypto-Taker-Fee
+     slippage             = 1,
+     pyramiding           = 0,
+     process_orders_on_close = true,
+     calc_on_every_tick   = false)
+
+// ---------------------------------------------------------------------------
+//  INPUTS
+// ---------------------------------------------------------------------------
+grpBias   = "1 | Bias (Higher Timeframe)"
+htfTf     = input.timeframe("240", "HTF Bias-Timeframe",           group = grpBias)
+emaFastLn = input.int(50,  "HTF EMA schnell",  minval = 2,          group = grpBias)
+emaSlowLn = input.int(200, "HTF EMA langsam",  minval = 5,          group = grpBias)
+
+grpReg    = "2 | Regime-Filter (ADX)"
+adxLen    = input.int(14, "ADX / DMI Länge",   minval = 2,          group = grpReg)
+adxThresh = input.float(20.0, "ADX-Schwelle (Trend ab)", minval = 5, group = grpReg)
+// Regime getrennt schaltbar -> saubere Isolation im Backtest.
+// Default: Range AUS (Diagnose: negativer Vorteil), Trend AN.
+enableTrend = input.bool(true,  "Trend-Trades aktiv", group = grpReg)
+enableRange = input.bool(false, "Range-Trades aktiv", group = grpReg)
+
+grpTrend  = "3a | Trend-Entry (Pullback)"
+ltfEmaLn  = input.int(21, "Pullback-EMA (LTF)", minval = 2,         group = grpTrend)
+rsiLen    = input.int(14, "RSI Länge",         minval = 2,          group = grpTrend)
+pbLong    = input.float(45, "Pullback-Tief long (RSI <)",           group = grpTrend)
+pbShort   = input.float(55, "Pullback-Hoch short (RSI >)",          group = grpTrend)
+
+grpRange  = "3b | Range-Entry (Mean-Reversion)"
+rsiOS     = input.float(30, "RSI überverkauft",  group = grpRange)
+rsiOB     = input.float(70, "RSI überkauft",     group = grpRange)
+rangeBias = input.bool(false, "Range-Trades nur mit HTF-Bias", group = grpRange)
+
+grpRisk   = "4 | Risk (Struktur SL + R-TP)"
+pivLen    = input.int(5, "Swing-Lookback (Pivot)", minval = 2,      group = grpRisk)
+slBufAtr  = input.float(0.25, "SL-Puffer (× ATR hinter Swing)", minval = 0, group = grpRisk)
+rMult     = input.float(2.0, "Take-Profit (R-Vielfaches)", minval = 0.5, group = grpRisk)
+atrLen    = input.int(14, "ATR Länge", minval = 2,                  group = grpRisk)
+useTrail  = input.bool(true, "Trailing-Exit nach 1R aktiv", group = grpRisk)
+
+grpMacd   = "5 | MACD (optional, zum A/B-Testen)"
+useMacdEntry = input.bool(true,  "MACD als Entry-Filter",  group = grpMacd)
+useMacdExit  = input.bool(true,  "MACD-Dreh als Exit",     group = grpMacd)
+macdFast  = input.int(12, "MACD schnell", minval = 1, group = grpMacd)
+macdSlow  = input.int(26, "MACD langsam", minval = 2, group = grpMacd)
+macdSig   = input.int(9,  "MACD Signal",  minval = 1, group = grpMacd)
+
+grpSide   = "Richtung"
+allowLong  = input.bool(true, "Longs erlauben",  group = grpSide)
+allowShort = input.bool(true, "Shorts erlauben", group = grpSide)
+
+// ---------------------------------------------------------------------------
+//  1 | BIAS  — HTF-EMA-Stack (non-repainting via lookahead_off)
+// ---------------------------------------------------------------------------
+htfBias() =>
+    ef = ta.ema(close, emaFastLn)
+    es = ta.ema(close, emaSlowLn)
+    [ef, es]
+
+[htfFast, htfSlow] = request.security(syminfo.tickerid, htfTf, htfBias(),
+     lookahead = barmerge.lookahead_off)
+
+biasLong  = htfFast > htfSlow
+biasShort = htfFast < htfSlow
+
+// ---------------------------------------------------------------------------
+//  2 | REGIME — ADX
+// ---------------------------------------------------------------------------
+[diPlus, diMinus, adx] = ta.dmi(adxLen, adxLen)
+trending = adx >= adxThresh
+ranging  = not trending
+
+// ---------------------------------------------------------------------------
+//  Indikatoren für Entries
+// ---------------------------------------------------------------------------
+ltfEma = ta.ema(close, ltfEmaLn)
+rsi    = ta.rsi(close, rsiLen)
+atr    = ta.atr(atrLen)
+
+// MACD — misst Momentum; hier NUR als optionaler Filter/Exit, nicht als Kern-Trigger
+[macdLine, macdSignal, macdHist] = ta.macd(close, macdFast, macdSlow, macdSig)
+macdBull = macdLine > macdSignal        // Momentum aufwärts
+macdBear = macdLine < macdSignal        // Momentum abwärts
+// Entry-Filter: wenn abgeschaltet, immer 'true' (kein Einfluss)
+macdOkLong  = not useMacdEntry or macdBull
+macdOkShort = not useMacdEntry or macdBear
+
+// ---------------------------------------------------------------------------
+//  3 | ENTRY-Trigger
+//     Trend  -> Pullback in Richtung Bias (RSI dippt, dreht, Preis über/unter EMA)
+//     Range  -> RSI verlässt Extremzone (Mean-Reversion)
+// ---------------------------------------------------------------------------
+// -- Trend / Pullback ------------------------------------------------------
+pulledBackLong  = ta.lowest(rsi, 3) < pbLong        // kürzlicher RSI-Dip
+pulledBackShort = ta.highest(rsi, 3) > pbShort
+trendLong  = enableTrend and trending and biasLong  and pulledBackLong  and ta.crossover(close, ltfEma)
+trendShort = enableTrend and trending and biasShort and pulledBackShort and ta.crossunder(close, ltfEma)
+
+// -- Range / Mean-Reversion ------------------------------------------------
+rangeLong  = enableRange and ranging and ta.crossover(rsi, rsiOS) and (not rangeBias or biasLong)
+rangeShort = enableRange and ranging and ta.crossunder(rsi, rsiOB) and (not rangeBias or biasShort)
+
+goLong  = allowLong  and (trendLong  or rangeLong)  and macdOkLong  and strategy.position_size == 0
+goShort = allowShort and (trendShort or rangeShort) and macdOkShort and strategy.position_size == 0
+
+// ---------------------------------------------------------------------------
+//  Struktur — letztes bestätigtes Swing-Hoch/-Tief (Pivots)
+// ---------------------------------------------------------------------------
+ph = ta.pivothigh(high, pivLen, pivLen)
+pl = ta.pivotlow(low,  pivLen, pivLen)
+var float lastPH = na
+var float lastPL = na
+if not na(ph)
+    lastPH := ph
+if not na(pl)
+    lastPL := pl
+
+// ---------------------------------------------------------------------------
+//  4 | RISK — SL an Struktur, TP als R-Vielfaches; Speicherung pro Trade
+// ---------------------------------------------------------------------------
+var float entryPx = na
+var float slPx     = na
+var float tpPx     = na
+var bool  armedTrail = false   // Trailing erst nach 1R scharf schalten
+
+// nur einsteigen, wenn eine sinnvolle Struktur vorhanden ist
+longRiskOK  = goLong  and not na(lastPL) and (close - (lastPL - slBufAtr * atr)) > 0
+shortRiskOK = goShort and not na(lastPH) and ((lastPH + slBufAtr * atr) - close) > 0
+
+if longRiskOK and barstate.isconfirmed
+    entryPx := close
+    slPx    := lastPL - slBufAtr * atr
+    tpPx    := entryPx + (entryPx - slPx) * rMult
+    armedTrail := false
+    strategy.entry("Long", strategy.long)
+    strategy.exit("Long-X", from_entry = "Long", stop = slPx, limit = tpPx)
+
+if shortRiskOK and barstate.isconfirmed
+    entryPx := close
+    slPx    := lastPH + slBufAtr * atr
+    tpPx    := entryPx - (slPx - entryPx) * rMult
+    armedTrail := false
+    strategy.entry("Short", strategy.short)
+    strategy.exit("Short-X", from_entry = "Short", stop = slPx, limit = tpPx)
+
+// -- optionaler Trailing-Exit: ab 1R Gewinn Stop auf Struktur nachziehen ----
+if useTrail and strategy.position_size > 0 and not na(entryPx)
+    oneR = entryPx - slPx
+    if high >= entryPx + oneR
+        armedTrail := true
+    if armedTrail and not na(lastPL)
+        newStop = math.max(slPx, lastPL - slBufAtr * atr)   // nur nach oben
+        slPx := newStop
+        strategy.exit("Long-X", from_entry = "Long", stop = slPx, limit = tpPx)
+
+if useTrail and strategy.position_size < 0 and not na(entryPx)
+    oneR = slPx - entryPx
+    if low <= entryPx - oneR
+        armedTrail := true
+    if armedTrail and not na(lastPH)
+        newStop = math.min(slPx, lastPH + slBufAtr * atr)   // nur nach unten
+        slPx := newStop
+        strategy.exit("Short-X", from_entry = "Short", stop = slPx, limit = tpPx)
+
+// -- MACD-Exit: dreht das Momentum gegen die offene Position, sofort schließen --
+macdExitLong  = useMacdExit and strategy.position_size > 0 and ta.crossunder(macdLine, macdSignal)
+macdExitShort = useMacdExit and strategy.position_size < 0 and ta.crossover(macdLine, macdSignal)
+if macdExitLong and barstate.isconfirmed
+    strategy.close("Long",  comment = "MACD-Exit")
+if macdExitShort and barstate.isconfirmed
+    strategy.close("Short", comment = "MACD-Exit")
+
+// Position flat -> Levels zurücksetzen
+if strategy.position_size == 0
+    entryPx := na
+    slPx    := na
+    tpPx    := na
+
+// ---------------------------------------------------------------------------
+//  VISUALS
+// ---------------------------------------------------------------------------
+plot(htfFast, "HTF EMA schnell", color.new(color.orange, 40))
+plot(htfSlow, "HTF EMA langsam", color.new(color.blue,   40))
+plot(ltfEma,  "Pullback-EMA",    color.new(color.gray,   50))
+
+// Regime-Hintergrund
+bgcolor(trending ? color.new(color.teal, 92) : color.new(color.purple, 94), title = "Regime")
+
+// Signale
+plotshape(longRiskOK,  "Long-Signal",  shape.triangleup,   location.belowbar, color.new(color.green, 0), size = size.small)
+plotshape(shortRiskOK, "Short-Signal", shape.triangledown, location.abovebar, color.new(color.red,   0), size = size.small)
+
+// SL / TP im Trade sichtbar
+plot(strategy.position_size != 0 ? slPx    : na, "Stop-Loss",   color.new(color.red,   0), style = plot.style_linebr, linewidth = 2)
+plot(strategy.position_size != 0 ? tpPx    : na, "Take-Profit", color.new(color.green, 0), style = plot.style_linebr, linewidth = 2)
+plot(strategy.position_size != 0 ? entryPx : na, "Entry",       color.new(color.gray,  0), style = plot.style_linebr, linewidth = 1)
+
+// ---------------------------------------------------------------------------
+//  ALERTS
+// ---------------------------------------------------------------------------
+plotshape(macdExitLong or macdExitShort, "MACD-Exit", shape.xcross, location.abovebar, color.new(color.yellow, 0), size = size.tiny)
+
+alertcondition(longRiskOK,  "LONG Entry",  "Regime-Adaptive: LONG-Signal")
+alertcondition(shortRiskOK, "SHORT Entry", "Regime-Adaptive: SHORT-Signal")
+alertcondition(macdExitLong or macdExitShort, "MACD Exit", "Regime-Adaptive: MACD-Exit-Signal")

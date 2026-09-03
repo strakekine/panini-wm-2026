@@ -1,0 +1,116 @@
+//@version=6
+// Crypto Intraday Trend Indicator — SIMPLE (Live Signale/Alerts)
+// Radikal vereinfachte Version: kein Score, kein HTF, kein Funding/OI, keine Marktstruktur.
+// Nur 4 UND-verknuepfte Bedingungen + ein Exit-Verfahren (ATR-Trailing).
+// Backtest-Gegenstueck: pine/strategy_crypto_intraday.pine (identische Logik).
+indicator("Crypto Intraday Trend Indicator [Simple]", shorttitle="CIT-Simple", overlay=true, max_lines_count=20, max_labels_count=20)
+
+// ===================== INPUTS =====================
+grpTrend = "Trend"
+emaFastLen = input.int(20, "EMA Fast", group=grpTrend)
+emaSlowLen = input.int(50, "EMA Slow", group=grpTrend)
+
+grpMom = "Momentum"
+macdFastLen = input.int(12, "MACD Fast", group=grpMom)
+macdSlowLen = input.int(26, "MACD Slow", group=grpMom)
+macdSigLen  = input.int(9, "MACD Signal", group=grpMom)
+
+grpVol = "Volume"
+volEmaLen       = input.int(20, "Volume EMA Length", group=grpVol)
+useVolumeFilter = input.bool(true, "Volumen-Filter aktiv", group=grpVol)
+
+grpADX = "ADX"
+adxLen = input.int(14, "ADX Length", group=grpADX)
+adxMin = input.float(20, "Min ADX", group=grpADX)
+
+grpExit = "Exit (ATR Trailing)"
+atrStopMult    = input.float(2.0, "Initial Stop (x ATR)", group=grpExit)
+chandelierLen  = input.int(22, "Trailing ATR Length", group=grpExit)
+chandelierMult = input.float(3.0, "Trailing ATR Mult", group=grpExit)
+slLineBarsFwd  = input.int(20, "Stop-Linie: Bars nach rechts", group=grpExit)
+
+// ===================== LOGIK =====================
+emaFast = ta.ema(close, emaFastLen)
+emaSlow = ta.ema(close, emaSlowLen)
+trendUp   = emaFast > emaSlow and close > emaFast
+trendDown = emaFast < emaSlow and close < emaFast
+
+[macdLine, signalLine, histLine] = ta.macd(close, macdFastLen, macdSlowLen, macdSigLen)
+momUp   = histLine > 0 and histLine > histLine[1]
+momDown = histLine < 0 and histLine < histLine[1]
+
+volEma = ta.ema(volume, volEmaLen)
+volOk  = not useVolumeFilter or volume > volEma
+
+[diPlus, diMinus, adxVal] = ta.dmi(adxLen, adxLen)
+adxOk = adxVal >= adxMin
+
+var string activePos = na
+
+longSignal  = trendUp and momUp and volOk and adxOk and activePos != "long"
+shortSignal = trendDown and momDown and volOk and adxOk and activePos != "short"
+
+// ===================== STOP (Initial ATR + Trailing) =====================
+atrVal = ta.atr(chandelierLen)
+chLongStop  = ta.highest(high, chandelierLen) - chandelierMult * atrVal
+chShortStop = ta.lowest(low, chandelierLen) + chandelierMult * atrVal
+
+var float stopLevel = na
+var line  stopLine  = na
+var line  entryLine = na
+var label sigLabel  = na
+
+f_clear() =>
+    line.delete(stopLine)
+    line.delete(entryLine)
+    label.delete(sigLabel)
+
+if longSignal
+    f_clear()
+    activePos := "long"
+    stopLevel := close - atrStopMult * atrVal
+    entryLine := line.new(bar_index, close, bar_index + slLineBarsFwd, close, color=color.new(color.gray, 0), style=line.style_dashed)
+    stopLine  := line.new(bar_index, stopLevel, bar_index + slLineBarsFwd, stopLevel, color=color.new(color.red, 0), width=2)
+    sigLabel  := label.new(bar_index, low, "LONG", style=label.style_label_up, color=color.new(color.green, 0), textcolor=color.white, size=size.small)
+
+if shortSignal
+    f_clear()
+    activePos := "short"
+    stopLevel := close + atrStopMult * atrVal
+    entryLine := line.new(bar_index, close, bar_index + slLineBarsFwd, close, color=color.new(color.gray, 0), style=line.style_dashed)
+    stopLine  := line.new(bar_index, stopLevel, bar_index + slLineBarsFwd, stopLevel, color=color.new(color.red, 0), width=2)
+    sigLabel  := label.new(bar_index, high, "SHORT", style=label.style_label_down, color=color.new(color.red, 0), textcolor=color.white, size=size.small)
+
+if activePos == "long"
+    stopLevel := math.max(stopLevel, chLongStop)
+    line.set_xy1(stopLine, bar_index, stopLevel)
+    line.set_xy2(stopLine, bar_index + slLineBarsFwd, stopLevel)
+    line.set_x2(entryLine, bar_index + slLineBarsFwd)
+
+if activePos == "short"
+    stopLevel := math.min(stopLevel, chShortStop)
+    line.set_xy1(stopLine, bar_index, stopLevel)
+    line.set_xy2(stopLine, bar_index + slLineBarsFwd, stopLevel)
+    line.set_x2(entryLine, bar_index + slLineBarsFwd)
+
+exitLongAlert  = activePos == "long"  and low  <= stopLevel
+exitShortAlert = activePos == "short" and high >= stopLevel
+
+if exitLongAlert
+    activePos := na
+if exitShortAlert
+    activePos := na
+
+// ===================== PLOTS =====================
+plot(emaFast, "EMA Fast", color=color.new(color.blue, 0))
+plot(emaSlow, "EMA Slow", color=color.new(color.orange, 0))
+plotshape(longSignal, "Long Signal", shape.triangleup, location.belowbar, color=color.new(color.lime, 0), size=size.small)
+plotshape(shortSignal, "Short Signal", shape.triangledown, location.abovebar, color=color.new(color.red, 0), size=size.small)
+plotshape(exitLongAlert, "Exit Long", shape.xcross, location.abovebar, color=color.new(color.silver, 0), size=size.tiny)
+plotshape(exitShortAlert, "Exit Short", shape.xcross, location.belowbar, color=color.new(color.silver, 0), size=size.tiny)
+
+// ===================== ALERTS =====================
+alertcondition(longSignal, title="Long Signal", message='{"action":"long_entry","symbol":"{{ticker}}","price":"{{close}}"}')
+alertcondition(shortSignal, title="Short Signal", message='{"action":"short_entry","symbol":"{{ticker}}","price":"{{close}}"}')
+alertcondition(exitLongAlert, title="Exit Long", message='{"action":"exit_long","symbol":"{{ticker}}","price":"{{close}}"}')
+alertcondition(exitShortAlert, title="Exit Short", message='{"action":"exit_short","symbol":"{{ticker}}","price":"{{close}}"}')

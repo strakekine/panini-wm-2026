@@ -18,52 +18,57 @@
   :root{
     --bg:#0e1116; --panel:#161b22; --panel2:#1c232c; --line:#2a313c;
     --text:#e8ecf1; --muted:#8a94a3; --gold:#f4c542; --accent:#f4c542;
-    --good:#3ecf6a; --warn:#ffa63d; --bad:#ff5d6b; --cold:#5aa9f0; --hot:#ff8b4a;
+    --good:#3ecf6a; --warn:#ffa63d; --bad:#ff5d6b;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Barlow,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
   body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
   header{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,var(--panel),rgba(22,27,34,.94));backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-  .wrap{max-width:880px;margin:0 auto;padding:14px 14px 10px}
-  h1{font-family:'Bebas Neue',sans-serif;letter-spacing:1.5px;margin:0;font-size:30px;color:var(--gold)}
-  .sub{color:var(--muted);font-size:13px;margin-top:2px}
+  .wrap{max-width:880px;margin:0 auto;padding:12px 14px 10px}
+  h1{font-family:'Bebas Neue',sans-serif;letter-spacing:1.5px;margin:0;font-size:28px;color:var(--gold)}
+  .sub{color:var(--muted);font-size:12.5px;margin-top:2px}
   main{max-width:880px;margin:0 auto;padding:10px 12px 90px}
 
   .seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
   .seg button{background:transparent;color:var(--muted);border:0;padding:9px 12px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer}
   .seg button.on{background:var(--accent);color:#1a1300}
-  .bar{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center}
+  .bar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center}
 
   .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin:12px 0;overflow:hidden}
   .chead{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--panel2);border-bottom:1px solid var(--line)}
   .chead h2{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1px;margin:0;flex:1;color:var(--text)}
-  .chead .hint{font-size:12px;color:var(--muted)}
+  .chead .hint{font-size:12px;color:var(--muted);text-align:right}
   .cbody{padding:12px}
+  details.card > summary{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--panel2);border-bottom:1px solid var(--line);cursor:pointer;list-style:none;font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1px}
+  details.card > summary::-webkit-details-marker{display:none}
+  details.card > summary::after{content:"▾";color:var(--muted);font-family:Barlow;font-size:14px;margin-left:auto;transition:transform .2s}
+  details.card[open] > summary::after{transform:rotate(180deg)}
+  details.card > summary .hint{font-family:Barlow;font-size:12px;letter-spacing:0;color:var(--muted);font-weight:600}
 
   .chips{display:flex;gap:6px;flex-wrap:wrap}
   .chip{background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:999px;padding:7px 12px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
   .chip:active{transform:scale(.96)}
   .chip.on{background:var(--accent);color:#1a1300;border-color:var(--accent)}
 
-  .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+  .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(142px,1fr));gap:10px}
   label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:600}
-  label.f .lab{display:flex;justify-content:space-between;align-items:baseline}
+  label.f .lab{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+  label.f .lab b{color:var(--muted);font-weight:600}
   input,select{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 11px;font-size:16px;font-family:inherit;width:100%}
   input:focus,select:focus{outline:none;border-color:var(--accent)}
   input[type=number]{-moz-appearance:textfield}
 
-  .phase{display:grid;grid-template-columns:1fr 78px 82px 38px;gap:8px;align-items:end;margin-bottom:8px}
-  .phase .pname{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:.8px;padding-bottom:9px;color:var(--text);display:flex;align-items:center;gap:7px;min-width:0}
-  .phase .dot{width:10px;height:10px;border-radius:50%;flex:none}
-  .phase .ptag{font-family:Barlow;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0;white-space:nowrap}
+  .phase{display:grid;grid-template-columns:1fr 72px 68px 36px;gap:7px;align-items:end;margin-bottom:8px}
+  .phase .pname{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.8px;padding-bottom:8px;color:var(--text);display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;min-width:0;line-height:1.15}
+  .phase .dot{width:10px;height:10px;border-radius:50%;flex:none;align-self:center}
+  .phase .ptag{font-family:Barlow;font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:0;white-space:nowrap}
   .xbtn{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:10px 0;font-size:15px;cursor:pointer;font-family:inherit}
   .xbtn:active{transform:scale(.94)}
   .addbtn{background:var(--panel2);border:1px dashed var(--line);color:var(--muted);border-radius:10px;padding:10px;width:100%;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;margin-top:2px}
-
   .ballrow{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
   .ballrow .t{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:6px}
 
-  .tl{width:100%;height:132px;display:block}
+  .tl{width:100%;height:140px;display:block}
   .tlleg{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:6px}
   .tlleg i{font-style:normal;color:var(--text);font-weight:700}
 
@@ -71,8 +76,10 @@
   table.ing td{padding:7px 0;border-bottom:1px solid var(--line)}
   table.ing tr:last-child td{border-bottom:0}
   table.ing td.n{text-align:right;font-family:Menlo,monospace;font-weight:700;font-size:15px;white-space:nowrap;padding-left:12px}
+  table.ing td.p{text-align:right;font-family:Menlo,monospace;font-weight:600;font-size:13px;color:var(--muted);white-space:nowrap;padding-left:10px;width:64px}
   table.ing td.sub{color:var(--muted);font-size:12px;padding-top:0;border-bottom:0}
-  .big{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--gold)}
+  table.ing tr.sec td{font-family:'Bebas Neue',sans-serif;letter-spacing:1px;font-size:15px;color:var(--gold);padding-top:14px;border-bottom:1px solid var(--line)}
+  table.ing tr.sec:first-child td{padding-top:0}
 
   .steps{list-style:none;margin:0;padding:0}
   .steps li{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);align-items:flex-start}
@@ -81,12 +88,14 @@
   .steps .tx{flex:1;font-size:15px;line-height:1.35}
   .steps .tx small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px;line-height:1.35}
   .steps li.now{background:rgba(244,197,66,.07);margin:0 -12px;padding-left:12px;padding-right:12px}
+  .steps li.pf .tm{color:#7fb3e8}
 
   .msg{display:flex;gap:9px;padding:9px 10px;border-radius:10px;margin-bottom:8px;font-size:13.5px;line-height:1.4;align-items:flex-start}
   .msg:last-child{margin-bottom:0}
   .msg .ic{flex:none;font-size:14px;line-height:1.3}
   .msg.warn{background:rgba(255,166,61,.1);border:1px solid rgba(255,166,61,.35)}
   .msg.bad{background:rgba(255,93,107,.1);border:1px solid rgba(255,93,107,.35)}
+  .msg.good{background:rgba(62,207,106,.1);border:1px solid rgba(62,207,106,.3)}
   .msg.info{background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
   .msg b{color:var(--text)}
 
@@ -101,9 +110,10 @@
   .check li::before{content:"○";position:absolute;left:2px;color:var(--muted)}
   .check li.ok::before{content:"●";color:var(--good)}
 
-  .btnrow{display:flex;gap:8px;flex-wrap:wrap}
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .btn{background:var(--gold);color:#1a1300;border:0;border-radius:10px;padding:11px 15px;font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1px;cursor:pointer}
   .btn.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+  .btn.sm{padding:8px 12px;font-size:15px}
   .btn:active{transform:scale(.97)}
   .saved{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
   .saved .s{display:flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:5px 6px 5px 12px;font-size:13px}
@@ -113,7 +123,28 @@
   .exp, label.f.exp{display:none}
   body.expert .exp{display:block}
   body.expert label.f.exp{display:flex}
+  body.expert .exp.row{display:flex}
   .foot{color:var(--muted);font-size:11.5px;text-align:center;padding:18px 12px 0;line-height:1.5}
+
+  .logrow{display:flex;gap:8px;align-items:center;font-size:13px;padding:7px 0;border-bottom:1px solid var(--line)}
+  .logrow:last-child{border-bottom:0}
+  .logrow .d{font-family:Menlo,monospace;color:var(--muted);font-size:12px;min-width:72px}
+  .logrow .r{flex:1}
+  .logrow button{background:transparent;border:0;color:var(--muted);cursor:pointer;font-family:inherit;font-size:14px}
+
+  /* Küchenmodus */
+  #kitchen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:none;overflow:auto;padding:22px 20px 40px}
+  #kitchen.show{display:block}
+  #kitchen .ktop{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+  #kitchen .ktop h2{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;margin:0;color:var(--gold)}
+  #kitchen .know{background:var(--panel);border:1px solid var(--gold);border-radius:16px;padding:18px;margin-bottom:14px}
+  #kitchen .klabel{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+  #kitchen .kbig{font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1.1;letter-spacing:1px;margin:6px 0}
+  #kitchen .ksub{font-size:16px;color:var(--muted);line-height:1.4}
+  #kitchen .kcount{font-family:Menlo,monospace;font-size:28px;color:var(--gold);font-weight:700;margin-top:10px}
+  #kitchen .knext{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+  #kitchen .king{font-size:17px;line-height:1.8}
+  #kitchen .king b{font-family:Menlo,monospace;color:var(--gold)}
 </style>
 </head>
 <body>
@@ -127,7 +158,9 @@
         <button data-mode="simple">Einfach</button>
         <button data-mode="expert">Experte</button>
       </div>
-      <button class="btn ghost" id="linkBtn">LINK KOPIEREN</button>
+      <button class="btn ghost sm" id="kitchenBtn">KÜCHE</button>
+      <button class="btn ghost sm" id="icsBtn">KALENDER</button>
+      <button class="btn ghost sm" id="linkBtn">LINK</button>
     </div>
   </div>
 </header>
@@ -140,11 +173,11 @@
 </div>
 
 <div class="card">
-  <div class="chead"><h2>Teig</h2></div>
+  <div class="chead"><h2>Teig</h2><div class="hint" id="doughHint"></div></div>
   <div class="cbody">
     <div class="fields">
       <label class="f"><span class="lab">Ballen</span><input type="number" id="n" min="1" max="40" step="1"></label>
-      <label class="f"><span class="lab">Ballengewicht <b id="bwHint" style="color:var(--muted);font-weight:600"></b></span><input type="number" id="bw" min="80" max="1200" step="5"></label>
+      <label class="f"><span class="lab">Ballengewicht <b id="bwHint"></b></span><input type="number" id="bw" min="80" max="1500" step="5"></label>
       <label class="f"><span class="lab">Hydration %</span><input type="number" id="h" min="45" max="90" step="0.5"></label>
       <label class="f"><span class="lab">Salz %</span><input type="number" id="salt" min="0" max="5" step="0.1"></label>
       <label class="f exp"><span class="lab">Öl %</span><input type="number" id="oil" min="0" max="10" step="0.5"></label>
@@ -176,6 +209,15 @@
 </div>
 
 <div class="card">
+  <div class="chead"><h2>Vorteig</h2><div class="hint">Aroma und Struktur, die ein Direktteig nicht schafft</div></div>
+  <div class="cbody">
+    <div class="chips" id="pfChips"></div>
+    <div id="pfFields" style="margin-top:12px"></div>
+    <div id="pfInfo"></div>
+  </div>
+</div>
+
+<div class="card">
   <div class="chead"><h2>Gärplan</h2><div class="hint">Backzeit ist der Fixpunkt</div></div>
   <div class="cbody">
     <div class="fields" style="margin-bottom:14px">
@@ -188,7 +230,7 @@
       <div class="t">In Ballen teilen …</div>
       <div class="chips" id="ballChips"></div>
     </div>
-    <div class="fields exp" style="margin-top:14px">
+    <div class="fields exp" style="margin-top:14px;display:none" id="expGrid">
       <label class="f"><span class="lab">Behälter im Kühlschrank</span>
         <select id="container">
           <option value="1">Kunststoffbox, geschlossen</option>
@@ -212,11 +254,12 @@
 <div class="card">
   <div class="chead"><h2>Verlauf</h2><div class="hint">Linie = Kerntemperatur</div></div>
   <div class="cbody">
-    <svg class="tl" id="tl" viewBox="0 0 700 132" preserveAspectRatio="none"></svg>
+    <svg class="tl" id="tl" viewBox="0 0 700 140" preserveAspectRatio="none"></svg>
     <div class="tlleg">
       <span><i>▬</i> Stockgare</span>
       <span><i>▭</i> Stückgare</span>
       <span><i>┊</i> Ballen</span>
+      <span id="legPf"></span>
       <span id="legNow"></span>
     </div>
   </div>
@@ -235,6 +278,19 @@
   <div class="cbody"><ol class="steps" id="steps"></ol></div>
 </div>
 
+<details class="card" id="replanCard">
+  <summary>Umplanen <span class="hint">Backzeit verschiebt sich</span></summary>
+  <div class="cbody">
+    <div class="note" style="margin-top:0">Der Teig läuft schon und der Termin wackelt? Neue Backzeit eintragen — der Rechner
+      verrechnet, was bis jetzt an Gärung gelaufen ist, und sagt, wie die Restzeit temperiert werden muss.</div>
+    <div class="fields" style="margin-top:12px">
+      <label class="f"><span class="lab">Neue Backzeit</span><input type="datetime-local" id="newBake"></label>
+      <label class="f"><span class="lab">Teig angesetzt am</span><input type="datetime-local" id="realStart"></label>
+    </div>
+    <div id="replanOut" style="margin-top:12px"></div>
+  </div>
+</details>
+
 <div class="card">
   <div class="chead"><h2>Einschätzung</h2></div>
   <div class="cbody">
@@ -244,8 +300,21 @@
   </div>
 </div>
 
+<details class="card">
+  <summary>Belag und Einkauf <span class="hint">skaliert mit</span></summary>
+  <div class="cbody">
+    <div class="fields" style="margin-bottom:12px">
+      <label class="f"><span class="lab">Tomaten g/Pizza</span><input type="number" id="tTom" min="0" max="300" step="5"></label>
+      <label class="f"><span class="lab">Mozzarella g/Pizza</span><input type="number" id="tMoz" min="0" max="300" step="5"></label>
+    </div>
+    <table class="ing" id="shop"></table>
+    <div class="note">Richtwerte für eine 28-cm-Pizza: 70–90 g passierte Tomaten, 80–100 g Fior di latte gut abgetropft,
+      ein Spritzer Olivenöl, Basilikum erst nach dem Backen.</div>
+  </div>
+</details>
+
 <div class="card">
-  <div class="chead"><h2>Fertig oder nicht?</h2><div class="hint">Am Teig entscheiden, nicht an der Uhr</div></div>
+  <div class="chead"><h2>Fertig oder nicht?</h2><div class="hint">Am Teig entscheiden</div></div>
   <div class="cbody">
     <div style="font-size:13px;font-weight:700;margin-bottom:2px">Backbereit</div>
     <ul class="check">
@@ -265,6 +334,20 @@
   </div>
 </div>
 
+<details class="card">
+  <summary>Backprotokoll <span class="hint" id="calHint"></span></summary>
+  <div class="cbody">
+    <div class="note" style="margin-top:0">Nach dem Backen eintragen, wie der Teig war. Der Rechner zieht die Hefemenge
+      für die nächsten Pläne entsprechend nach — das ist die einzige Kalibrierung, die deine Küche wirklich kennt.</div>
+    <div class="btnrow" style="margin-top:10px">
+      <button class="btn ghost sm" data-log="young">zu jung</button>
+      <button class="btn ghost sm" data-log="good">genau richtig</button>
+      <button class="btn ghost sm" data-log="over">überreif</button>
+    </div>
+    <div id="logList" style="margin-top:10px"></div>
+  </div>
+</details>
+
 <div class="card">
   <div class="chead"><h2>Rezepte</h2></div>
   <div class="cbody">
@@ -273,7 +356,7 @@
       <button class="btn" id="saveBtn">SICHERN</button>
     </div>
     <div class="saved" id="saved"></div>
-    <div class="note">Rezepte liegen nur in diesem Browser. Über „Link kopieren“ oben lässt sich ein Plan teilen oder als Lesezeichen ablegen.</div>
+    <div class="note">Rezepte und Backprotokoll liegen nur in diesem Browser. Über „Link“ oben lässt sich ein Plan teilen oder als Lesezeichen ablegen.</div>
   </div>
 </div>
 
@@ -284,19 +367,28 @@
 
 </main>
 
+<div id="kitchen">
+  <div class="ktop">
+    <h2>KÜCHE</h2>
+    <button class="btn ghost sm" id="kClose">SCHLIESSEN</button>
+  </div>
+  <div class="know" id="kNow"></div>
+  <div class="knext" id="kNext"></div>
+  <div class="knext"><div class="klabel">Zutaten</div><div class="king" id="kIng"></div></div>
+</div>
+
 <script>
 (function(){
 "use strict";
 
-/* ===================== Modell =====================
+/* ===================== Gärmodell =====================
    Gärgeschwindigkeit relativ zu 21 °C.
-   Über 15 °C: Q10 = 2,3 (üblicher Bereich für Bäckerhefe im Teig).
+   Über 15 °C: Q10 = 2,3.
    Unter 15 °C: nicht weiter exponentiell extrapolieren, sondern
-   Ratkowsky-artig gegen eine Minimaltemperatur laufen lassen, sonst
-   wird die Kaltgare massiv überschätzt.
+   Ratkowsky-artig gegen eine Minimaltemperatur laufen lassen.
    Zweite Spur "Reifung" (Enzyme, Proteolyse, Aroma) reagiert flacher
    auf Temperatur und läuft in der Kälte relativ gesehen weiter.
-==================================================== */
+====================================================== */
 const TREF = 21, Q10_GAS = 2.3, Q10_MAT = 1.7;
 const TMIN_GAS = -6, TMIN_MAT = -12, TCOLD = 15;
 const R15_GAS = Math.pow(Q10_GAS, (TCOLD-TREF)/10);
@@ -312,12 +404,20 @@ function rMat(T){
   const f = Math.max(0,(T-TMIN_MAT))/(TCOLD-TMIN_MAT);
   return R15_MAT * f * f;
 }
+/* Umkehrung: welche Temperatur ergibt diese Geschwindigkeit? */
+function tempForRate(r){
+  if(r >= R15_GAS) return TREF + 10*Math.log(r)/Math.log(Q10_GAS);
+  return TMIN_GAS + (TCOLD-TMIN_GAS)*Math.sqrt(Math.max(r,0)/R15_GAS);
+}
 /* Hefemenge: kalibriert auf 8 h bei 20 °C = 0,6 % Frischhefe.
-   Exponent > 1 weil Hefe sich vermehrt: eine doppelt so lange Gare
-   braucht weniger als die halbe Hefemenge. Kalibriert so, dass sich
-   24-, 48- und 72-Stunden-Plaene realistisch voneinander abheben. */
+   Exponent > 1, weil Hefe sich vermehrt: eine doppelt so lange Gare
+   braucht weniger als die halbe Hefemenge. Ergibt 24 h 0,36 %,
+   48 h 0,26 %, 72 h 0,17 % — deckt sich mit gängigen Rezepten. */
 const YK = 0.6 * Math.pow(8*rGas(20), 1.55);
 function freshPct(E){ return YK / Math.pow(Math.max(E,0.5), 1.55); }
+/* Sauerteig: Anstellgut in % des Mehls, kalibriert auf 20 % bei 8 h / 24 °C. */
+const SK = 20 * Math.pow(8*rGas(24), 1.2);
+function starterPct(E){ return clamp(SK / Math.pow(Math.max(E,0.5), 1.2), 3, 40); }
 
 /* Newtonsche Abkühlung. tau skaliert mit m^(2/3): ein 250-g-Ballen
    ist in gut einer Stunde durch, 1,5 kg brauchen 3–5 h. */
@@ -327,44 +427,67 @@ function tauH(massG, containerF){
 
 const YCONV = { fresh:1, instant:1/2.8, adry:1/2.0 };
 const YNAME = { fresh:"Frischhefe", instant:"Trockenhefe instant", adry:"Trockenhefe aktiv" };
-/* Salz bremst, Zucker füttert bis er osmotisch stresst. Bewusst kleine Korrekturen. */
 function saltF(s){ return Math.max(0.80, 1 - 0.035*Math.max(0,s-2)); }
 function sugarF(z){ return z<=0 ? 1 : (z<=5 ? 1 + 0.03*z : 1.15 - 0.02*(z-5)); }
 function hydF(h){ return h<60 ? 0.93 + 0.012*(h-55) : (h<=70 ? 1 : Math.min(1.08, 1+0.006*(h-70))); }
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
 
-/* ===================== Presets ===================== */
+const PF = {
+  none:   { name:"Direktteig", hyd:0 },
+  poolish:{ name:"Poolish",    hyd:100, share:30, h:16, t:19,
+            tip:"Flüssig, mild, macht den Teig dehnbar. Reif ist er, wenn die Oberfläche blubbert und sich wölbt — kurz bevor sie in der Mitte einfällt." },
+  biga:   { name:"Biga",       hyd:48,  share:50, h:18, t:17,
+            tip:"Fest und krümelig, kräftiger im Aroma, gibt luftig-knusprigen Rand. Mag ein starkes Mehl und will kühl stehen, nicht warm." },
+  sour:   { name:"Sauerteig",  hyd:100, share:0,  h:0,  t:0,
+            tip:"Anstellgut 8–12 h vor dem Ansetzen füttern, damit es auf dem Höhepunkt ist. Die Menge rechnet der Planer aus dem Gärplan." }
+};
+
+/* ===================== Vorlagen ===================== */
 const PRESETS = [
   { key:"nap24a", name:"Napoletana 24 h · kalte Stockgare",
     s:{ n:6,bw:250,h:62,salt:2.8,oil:0,sugar:0,flourW:"325",
-        phases:[{h:2,t:21},{h:19,t:6},{h:3,t:21}], ballAfter:2 } },
+        phases:[{h:2,t:21},{h:19,t:6},{h:3,t:21}], ballAfter:2, pf:{type:"none"} } },
   { key:"nap24b", name:"Napoletana 24 h · Ballen im Kühlschrank",
     s:{ n:6,bw:250,h:62,salt:2.8,oil:0,sugar:0,flourW:"325",
-        phases:[{h:2,t:21},{h:19,t:6},{h:3,t:21}], ballAfter:1 } },
+        phases:[{h:2,t:21},{h:19,t:6},{h:3,t:21}], ballAfter:1, pf:{type:"none"} } },
   { key:"nap48", name:"Napoletana 48 h kalt",
     s:{ n:6,bw:260,h:63,salt:2.8,oil:0,sugar:0,flourW:"325",
-        phases:[{h:2,t:21},{h:42,t:5},{h:4,t:21}], ballAfter:1 } },
+        phases:[{h:2,t:21},{h:42,t:5},{h:4,t:21}], ballAfter:1, pf:{type:"none"} } },
   { key:"nap8", name:"Napoletana 8 h · same day",
     s:{ n:6,bw:250,h:60,salt:2.8,oil:0,sugar:0,flourW:"275",
-        phases:[{h:2,t:22},{h:6,t:22}], ballAfter:1 } },
+        phases:[{h:2,t:22},{h:6,t:22}], ballAfter:1, pf:{type:"none"} } },
+  { key:"poolish", name:"Poolish 16 h + 8 h",
+    s:{ n:6,bw:250,h:65,salt:2.8,oil:0,sugar:0,flourW:"325",
+        phases:[{h:2,t:21},{h:4,t:21},{h:2,t:21}], ballAfter:1,
+        pf:{type:"poolish",share:30,hyd:100,h:16,t:19} } },
+  { key:"biga", name:"Biga 18 h + 6 h",
+    s:{ n:6,bw:260,h:65,salt:2.8,oil:0,sugar:0,flourW:"380",
+        phases:[{h:2,t:21},{h:3,t:21},{h:1.5,t:21}], ballAfter:1,
+        pf:{type:"biga",share:60,hyd:48,h:18,t:17} } },
+  { key:"sour", name:"Sauerteig 24 h",
+    s:{ n:6,bw:260,h:65,salt:2.8,oil:0,sugar:0,flourW:"325",
+        phases:[{h:4,t:22},{h:16,t:6},{h:4,t:21}], ballAfter:1,
+        pf:{type:"sour",hyd:100} } },
   { key:"ny", name:"New York 48 h",
     s:{ n:5,bw:290,h:63,salt:2.5,oil:2,sugar:1.5,flourW:"325",
-        phases:[{h:1,t:21},{h:44,t:5},{h:3,t:21}], ballAfter:1 } },
+        phases:[{h:1,t:21},{h:44,t:5},{h:3,t:21}], ballAfter:1, pf:{type:"none"} } },
   { key:"teglia", name:"Teglia / Blech 24 h",
     s:{ n:2,bw:800,h:75,salt:2.5,oil:2,sugar:0,flourW:"325",
-        phases:[{h:3,t:21},{h:18,t:6},{h:4,t:22}], ballAfter:1 } }
+        phases:[{h:3,t:21},{h:18,t:6},{h:4,t:22}], ballAfter:1, pf:{type:"none"} } }
 ];
 
-/* ===================== State ===================== */
+/* ===================== Zustand ===================== */
 const KEY = "pizza_teigplaner_v1";
 function defaults(){
   const d = new Date(Date.now() + 26*3600e3);
   d.setMinutes(0,0,0); d.setHours(18);
   return Object.assign({
     bake: toLocal(d), ddt:23, container:"1", friction:"1", tflour:21, tkitchen:21,
-    yeast:"fresh", scale:"0.1", mode:"simple"
+    yeast:"fresh", scale:"0.1", mode:"simple", tTom:85, tMoz:90
   }, JSON.parse(JSON.stringify(PRESETS[0].s)));
 }
 let S = defaults();
+let STEPS = [], CALC = null;
 
 function toLocal(d){
   const p = n => String(n).padStart(2,"0");
@@ -377,12 +500,18 @@ function encodeState(){
 function decodeState(str){
   try { return JSON.parse(decodeURIComponent(escape(atob(str)))); } catch(e){ return null; }
 }
+function getCal(){ const v = parseFloat(localStorage.getItem(KEY+"_cal")); return isFinite(v) ? clamp(v,0.5,2) : 1; }
+function setCal(v){ try{ localStorage.setItem(KEY+"_cal", String(clamp(v,0.5,2))); }catch(e){} }
+function getLog(){ try{ return JSON.parse(localStorage.getItem(KEY+"_log")||"[]"); }catch(e){ return []; } }
+function setLog(l){ try{ localStorage.setItem(KEY+"_log", JSON.stringify(l.slice(-20))); }catch(e){} }
+
 (function boot(){
   const m = location.hash.match(/p=([A-Za-z0-9+/=_-]+)/);
   if(m){ const s = decodeState(m[1]); if(s && s.phases) S = Object.assign(defaults(), s); }
   else { try{ const s = JSON.parse(localStorage.getItem(KEY+"_last")||"null"); if(s && s.phases) S = Object.assign(defaults(), s); }catch(e){} }
   if(!Array.isArray(S.phases) || !S.phases.length) S.phases = [{h:2,t:21},{h:6,t:21}];
-  S.ballAfter = Math.min(Math.max(0, S.ballAfter|0), S.phases.length-1);
+  if(!S.pf || !PF[S.pf.type]) S.pf = { type:"none" };
+  S.ballAfter = clamp(S.ballAfter|0, 0, S.phases.length-1);
 })();
 function persist(){
   try { localStorage.setItem(KEY+"_last", JSON.stringify(S)); } catch(e){}
@@ -390,24 +519,11 @@ function persist(){
 }
 
 /* ===================== Rechnen ===================== */
-function calc(){
-  const n = clamp(+S.n||1,1,40), bw = clamp(+S.bw||250,80,1200);
-  const total = n*bw;
-  const h = +S.h||62, salt = +S.salt||0, oil = +S.oil||0, sugar = +S.sugar||0;
-  const pct = 1 + (h+salt+oil+sugar)/100;
-  const flour = total/pct;
-
-  const contF = +S.container||1;
-  const phases = S.phases.map(p=>({ h: clamp(+p.h||0,0,120), t: clamp(+p.t||20,-5,45) }));
-  const ballAfter = Math.min(Math.max(0,S.ballAfter|0), phases.length-1);
-
-  /* Simulation in 5-Minuten-Schritten */
+function simulate(phases, ballAfter, total, bw, ddt, contF){
   const dt = 5/60;
-  let T = clamp(+S.ddt||23,10,35);
-  let Eg = 0, Em = 0, EgBall = 0, EgBallWarm = 0;
-  const track = [];   // {x:h, T, env, ball, Eg}
+  let T = clamp(ddt,10,35), Eg = 0, Em = 0, EgBall = 0, EgBallWarm = 0;
+  const track = [];
   let elapsed = 0;
-
   phases.forEach((p,i)=>{
     const isBall = i >= ballAfter;
     const tau = tauH(isBall ? bw : total, p.t < 15 ? contF : 1);
@@ -415,48 +531,100 @@ function calc(){
     const steps = Math.max(1, Math.round(p.h/dt));
     for(let s=0;s<steps;s++){
       T += (p.t - T)*k;
-      const g = rGas(T)*dt, m = rMat(T)*dt;
-      Eg += g; Em += m;
+      const g = rGas(T)*dt;
+      Eg += g; Em += rMat(T)*dt;
       if(isBall){ EgBall += g; if(T > 16) EgBallWarm += g; }
       elapsed += dt;
-      track.push({ x:elapsed, T:T, env:p.t, ball:isBall, Eg:Eg, phase:i });
+      track.push({ x:elapsed, T:T, Eg:Eg, phase:i, ball:isBall });
     }
   });
+  return { Eg, Em, EgBall, EgBallWarm, track, endT:T };
+}
+
+function calc(){
+  const n = clamp(+S.n||1,1,40), bw = clamp(+S.bw||250,80,1500);
+  const total = n*bw;
+  const h = +S.h||62, salt = +S.salt||0, oil = +S.oil||0, sugar = +S.sugar||0;
+  const flour = total/(1 + (h+salt+oil+sugar)/100);
+  const water = flour*h/100;
+
+  const contF = +S.container||1;
+  const phases = S.phases.map(p=>({ h: clamp(+p.h||0,0,120), t: clamp(+p.t||20,-5,45) }));
+  const ballAfter = clamp(S.ballAfter|0, 0, phases.length-1);
+  const sim = simulate(phases, ballAfter, total, bw, +S.ddt||23, contF);
   const totalH = phases.reduce((a,p)=>a+p.h,0);
 
-  /* Korrekturen auf die wirksame Gärleistung */
   const corr = saltF(salt)*sugarF(sugar)*hydF(h);
-  const Eeff = Eg * corr;
+  const Eeff = sim.Eg * corr;
+  const cal = getCal();
 
-  const fresh = freshPct(Eeff);
-  const yPct = fresh * (YCONV[S.yeast]||1);
-  const yG = flour * yPct/100;
+  /* --- Vorteig --- */
+  const pfType = (S.pf && S.pf.type) || "none";
+  const pfDef = PF[pfType];
+  const pf = { type:pfType, name:pfDef.name };
+  let mainFlour = flour, mainWater = water, EmatTotal = sim.Em;
+  let yPctTotal = freshPct(Eeff) * cal;   /* Frischhefe in % des Gesamtmehls */
+  let yPctMain = yPctTotal, pfYeastG = 0, pfCovered = 0;
 
-  /* Backfenster: wann erreicht die Gasbildung 90 % bzw. 115 %? */
-  const lastT = phases.length ? phases[phases.length-1].t : 21;
-  const rEnd = rGas(track.length ? track[track.length-1].T : lastT);
-  let early = null, late = null;
-  for(const pt of track){ if(early===null && pt.Eg >= 0.90*Eg) early = pt.x; }
-  if(early===null) early = totalH;
-  late = totalH + (0.13*Eg)/Math.max(rEnd,0.02);
-  late = Math.min(late, totalH + 14);
+  if(pfType === "poolish" || pfType === "biga"){
+    pf.share = clamp(+S.pf.share || pfDef.share, 5, 100);
+    pf.hyd = clamp(+S.pf.hyd || pfDef.hyd, 40, 120);
+    pf.h = clamp(+S.pf.h || pfDef.h, 2, 48);
+    pf.t = clamp(+S.pf.t || pfDef.t, 2, 32);
+    pf.flour = flour * pf.share/100;
+    pf.water = pf.flour * pf.hyd/100;
+    pf.Eg = pf.h * rGas(pf.t);
+    pf.Em = pf.h * rMat(pf.t);
+    pf.yPct = freshPct(pf.Eg) * cal;                 /* % des Vorteigmehls */
+    pf.yeastG = pf.flour * pf.yPct/100;
+    pf.weight = pf.flour + pf.water + pf.yeastG;
+    /* Der reife Vorteig bringt eine vermehrte Hefepopulation mit. */
+    const growth = clamp(1 + pf.Eg/6, 1, 4);
+    pfCovered = pf.yPct * (pf.share/100) * growth;   /* wirksam, in % des Gesamtmehls */
+    yPctMain = Math.max(0, yPctTotal - pfCovered);
+    mainFlour = flour - pf.flour;
+    mainWater = water - pf.water;
+    EmatTotal = sim.Em + pf.Em * (pf.share/100);
+    pfYeastG = pf.yeastG;
+  } else if(pfType === "sour"){
+    pf.hyd = clamp(+S.pf.hyd || 100, 50, 150);
+    pf.pct = starterPct(Eeff) * cal;                 /* mehr Anstellgut = schneller */
+    pf.weight = flour * pf.pct/100;
+    pf.flour = pf.weight/(1 + pf.hyd/100);
+    pf.water = pf.weight - pf.flour;
+    mainFlour = flour - pf.flour;
+    mainWater = water - pf.water;
+    yPctMain = 0; yPctTotal = 0;
+    EmatTotal = sim.Em * 1.15;                       /* Säuerung reift zusätzlich */
+  }
 
-  const Rip = Em/Math.max(Eg,0.01);
-  const ballH = phases.slice(ballAfter).reduce((a,p)=>a+p.h,0);
+  const yG = flour * (yPctMain * (YCONV[S.yeast]||1))/100;
+  const yPctShown = yPctMain * (YCONV[S.yeast]||1);
+  const pfYeastShown = pfYeastG * (YCONV[S.yeast]||1);
 
-  return { n,bw,total,flour,h,salt,oil,sugar,pct,
-    water: flour*h/100, saltG: flour*salt/100, oilG: flour*oil/100, sugarG: flour*sugar/100,
-    yPct, yG, freshPct: fresh, Eg, Em, Eeff, EgBall, EgBallWarm, corr,
-    phases, ballAfter, totalH, ballH, track, early, late, Rip };
+  /* Backfenster */
+  const rEnd = rGas(sim.endT);
+  let early = totalH;
+  for(const pt of sim.track){ if(pt.Eg >= 0.90*sim.Eg){ early = pt.x; break; } }
+  const late = Math.min(totalH + (0.13*sim.Eg)/Math.max(rEnd,0.02), totalH + 14);
+
+  return { n,bw,total,flour,water,h,salt,oil,sugar,
+    saltG: flour*salt/100, oilG: flour*oil/100, sugarG: flour*sugar/100,
+    mainFlour, mainWater, pf, pfCovered, yPctTotal, yPctMain, yPctShown, yG, pfYeastShown,
+    Eg: sim.Eg, Em: EmatTotal, Eeff, EgBall: sim.EgBall, EgBallWarm: sim.EgBallWarm,
+    corr, cal, phases, ballAfter, totalH, track: sim.track,
+    ballH: phases.slice(ballAfter).reduce((a,p)=>a+p.h,0),
+    early, late, Rip: EmatTotal/Math.max(sim.Eg,0.01),
+    prefH: (pfType==="poolish"||pfType==="biga") ? pf.h : 0 };
 }
-function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
 
 /* ===================== Hinweise ===================== */
 function messages(c){
   const out = [];
   const W = +S.flourW;
   const maxH = W>=380 ? 96 : W>=325 ? 72 : W>=275 ? 48 : 24;
-  if(c.totalH > maxH) out.push(["warn","Gesamtgare "+fmtH(c.totalH)+" ist viel für dieses Mehl. Ab etwa "+maxH+" h wird der Teig schlapp und reißt beim Öffnen. Stärkeres Mehl oder kürzer planen."]);
+  const realH = c.totalH + c.prefH;
+  if(realH > maxH) out.push(["warn","Gesamtgare "+fmtH(realH)+" ist viel für dieses Mehl. Ab etwa "+maxH+" h wird der Teig schlapp und reißt beim Öffnen. Stärkeres Mehl oder kürzer planen."]);
   if(c.EgBallWarm < 1.0) out.push(["bad","Warme Stückgare sehr kurz. Die Ballen sind noch straff und ziehen sich beim Öffnen zurück — nach dem Kühlschrank brauchen sie mindestens 2 h bei Raumtemperatur."]);
   else if(c.EgBallWarm > 9) out.push(["bad","Warme Stückgare sehr lang. Die Ballen laufen wahrscheinlich breit und reißen beim Öffnen. Später ballen oder die letzte Warmphase kürzen."]);
   else if(c.EgBallWarm > 7.5) out.push(["warn","Warme Stückgare am oberen Rand. Ab etwa zwei Stunden vor dem Backen regelmäßig anschauen."]);
@@ -466,10 +634,9 @@ function messages(c){
     if(p.t > 30) out.push(["bad","Phase "+(i+1)+" bei "+p.t+" °C: sehr kurzes Zeitfenster, das Modell wird hier unzuverlässig."]);
     else if(p.t > 27) out.push(["warn","Phase "+(i+1)+" bei "+p.t+" °C ist warm — der Teig verzeiht wenig, häufiger prüfen."]);
     if(p.t < 2) out.push(["warn","Phase "+(i+1)+" bei "+p.t+" °C: nahezu keine Gärung mehr, die Schätzung ist dort sehr unsicher."]);
-    const isBall = i >= c.ballAfter;
     if(p.t < 12){
-      const tau = tauH(isBall ? c.bw : c.total, +S.container||1);
-      if(p.h < tau*1.2) out.push(["warn","Phase "+(i+1)+": "+fmtH(p.h)+" reichen nicht, damit "+(isBall?"die Ballen":"der Teig")+" wirklich auf "+p.t+" °C herunterkommen (rechnerisch etwa "+fmtH(tau)+" Zeitkonstante). Es gärt weiter, als die Temperaturangabe vermuten lässt — genau das steckt in der Hefemenge drin."]);
+      const tau = tauH(i >= c.ballAfter ? c.bw : c.total, +S.container||1);
+      if(p.h < tau*1.2) out.push(["warn","Phase "+(i+1)+": "+fmtH(p.h)+" reichen nicht, damit "+(i>=c.ballAfter?"die Ballen":"der Teig")+" wirklich auf "+p.t+" °C herunterkommen (Zeitkonstante etwa "+fmtH(tau)+"). Es gärt weiter, als die Temperaturangabe vermuten lässt — genau das steckt in der Hefemenge drin."]);
     }
   });
   if(c.h > 75) out.push(["warn","Hydration "+c.h+" % ist hoch. Braucht starkes Mehl und geübte Hände beim Öffnen."]);
@@ -477,12 +644,20 @@ function messages(c){
   if(c.salt < 1.5) out.push(["warn","Salz "+c.salt+" % ist wenig — der Teig gärt schneller als geplant und schmeckt flach."]);
   if(c.Rip > 1.55) out.push(["warn","Sehr weit gereift im Verhältnis zur Gasbildung. Aromatisch, aber der Kleber baut ab: der Teig wird weich und schwer zu handhaben."]);
   if(c.ballAfter === 0) out.push(["info","Sofort nach dem Kneten ballen — ohne Stockgare fehlt dem Teig Struktur. Üblich sind mindestens 1–2 h im Stück."]);
+
+  if(c.mainWater < 0) out.push(["bad","Der Vorteig enthält mehr Wasser, als das Rezept insgesamt hat. Vorteig-Anteil senken oder Hydration erhöhen."]);
+  else if(c.mainWater < c.mainFlour*0.35) out.push(["warn","Für den Hauptteig bleibt sehr wenig Wasser übrig. Das lässt sich kaum noch vermischen — Vorteig-Anteil senken."]);
+  if(c.pf.type === "biga" && +S.flourW < 325) out.push(["warn","Biga verlangt ein starkes Mehl. Mit diesem Mehl wird der Teig nach 18 h Vorteig plus Hauptgare wahrscheinlich zu weich."]);
+  if(c.pf.type === "biga" && c.pf.t > 20) out.push(["warn","Biga bei "+c.pf.t+" °C ist warm. Klassisch sind 16–18 °C; wärmer wird sie schnell sauer statt aromatisch."]);
+  if((c.pf.type==="poolish"||c.pf.type==="biga") && c.yPctMain <= 0.0005)
+    out.push(["good","Der Vorteig trägt den ganzen Teig — im Hauptteig ist keine zusätzliche Hefe nötig."]);
+  if(c.cal !== 1) out.push(["info","Deine Kalibrierung aus dem Backprotokoll ist aktiv: Hefemenge × "+c.cal.toFixed(2).replace(".",",")+"."]);
   return out;
 }
 
-/* ===================== Render ===================== */
+/* ===================== Formate ===================== */
 const $ = id => document.getElementById(id);
-
+const WD = ["So","Mo","Di","Mi","Do","Fr","Sa"];
 function fmtG(v){
   if(v >= 100) return Math.round(v)+" g";
   if(v >= 10) return (Math.round(v*10)/10).toFixed(1).replace(".",",")+" g";
@@ -494,15 +669,12 @@ function fmtH(v){
   if(h === 0) return m+" min";
   return h+" h "+m+" min";
 }
-function fmtClock(d){
-  const p = n => String(n).padStart(2,"0");
-  return p(d.getHours())+":"+p(d.getMinutes());
-}
-const WD = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+function fmtClock(d){ const p = n => String(n).padStart(2,"0"); return p(d.getHours())+":"+p(d.getMinutes()); }
 function fmtWhen(d, ref){
-  const same = d.toDateString() === ref.toDateString();
-  return (same ? "" : WD[d.getDay()]+" ")+fmtClock(d);
+  return (d.toDateString() === ref.toDateString() ? "" : WD[d.getDay()]+" ")+fmtClock(d);
 }
+function num(v,dec){ return v.toFixed(dec===undefined?1:dec).replace(".",","); }
+function pct(v){ return (v < 0.1 ? v.toFixed(3) : v.toFixed(2)).replace(".",",")+" %"; }
 function tempColor(t){
   if(t <= 8) return "#2f6ea8";
   if(t <= 14) return "#3f7fa8";
@@ -511,40 +683,116 @@ function tempColor(t){
   if(t <= 27) return "#a8712f";
   return "#a8462f";
 }
+function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+function kv(a,b){ return '<div class="kv"><span>'+a+'</span><span>'+b+'</span></div>'; }
 
+/* ===================== Ablauf bauen ===================== */
+function buildSteps(c, bake){
+  const start = new Date(bake.getTime() - c.totalH*3600e3);
+  const steps = [];
+  const tw = waterTemp();
+
+  if(c.pf.type === "poolish" || c.pf.type === "biga"){
+    const pfStart = new Date(start.getTime() - c.pf.h*3600e3);
+    steps.push({ t:pfStart, pf:true,
+      title:c.pf.name+" ansetzen — "+fmtG(c.pf.flour)+" Mehl, "+fmtG(c.pf.water)+" Wasser, "+fmtG(c.pf.yeastG)+" Hefe",
+      sub:c.pf.h+" h bei "+num(c.pf.t,0)+" °C · "+(c.pf.type==="biga"
+        ? "nur grob vermengen, es bleibt krümelig"
+        : "glatt verrühren, Konsistenz wie Pfannkuchenteig") });
+    steps.push({ t:start, pf:true, title:c.pf.name+" ist reif",
+      sub:c.pf.type==="biga"
+        ? "riecht süßlich-hefig, hat sichtbar Volumen, zieht Fäden beim Auseinanderbrechen"
+        : "Oberfläche blubbert und wölbt sich — jetzt verwenden, bevor sie in der Mitte einfällt" });
+  }
+  if(c.pf.type === "sour"){
+    steps.push({ t:new Date(start.getTime() - 10*3600e3), pf:true,
+      title:"Anstellgut füttern — "+fmtG(c.pf.weight)+" werden gebraucht",
+      sub:"8–12 h vorher, damit es beim Ansetzen auf dem Höhepunkt ist" });
+  }
+
+  steps.push({ t:start,
+    title: c.pf.type==="none" ? "Wasser, Salz und Hefe verrühren, Mehl zugeben, kneten"
+                              : "Hauptteig kneten: "+c.pf.name+", Wasser, Salz und Mehl",
+    sub:"Zielteigtemperatur "+num(+S.ddt,1)+" °C · Schüttwasser ≈ "+Math.round(tw)+" °C" });
+
+  let t = new Date(start.getTime());
+  c.phases.forEach((p,i)=>{
+    if(i === c.ballAfter){
+      steps.push({ t:new Date(t), title:"In "+c.n+" Ballen à "+Math.round(c.bw)+" g teilen und rundschleifen",
+        sub:"Ab hier Stückgare — ein Ballen kühlt und erwärmt sich rund dreimal schneller als der ganze Teig." });
+    }
+    const kind = i >= c.ballAfter ? "Stückgare" : "Stockgare";
+    const place = p.t <= 10 ? "in den Kühlschrank ("+num(p.t,0)+" °C)"
+                : p.t <= 16 ? "kühl stellen ("+num(p.t,0)+" °C)"
+                : "bei "+num(p.t,0)+" °C stehen lassen";
+    const from = new Date(t);
+    t = new Date(t.getTime() + p.h*3600e3);
+    steps.push({ t:from, title:kind+" "+fmtH(p.h)+" — "+place, sub:"bis "+fmtWhen(t, start) });
+  });
+
+  const earlyD = new Date(start.getTime() + c.early*3600e3);
+  const lateD  = new Date(start.getTime() + c.late*3600e3);
+  steps.push({ t:bake, title:"Backen",
+    sub:"Fenster "+fmtWhen(earlyD,start)+" – "+fmtWhen(lateD,start)+" · davor Ofen und Stein auf Temperatur bringen" });
+  return steps;
+}
+function waterTemp(){
+  return clamp(3*(+S.ddt) - (+S.tflour) - (+S.tkitchen) - (+S.friction), -5, 60);
+}
+
+/* ===================== Render ===================== */
 function render(){
   document.body.classList.toggle("expert", S.mode === "expert");
-  const c = calc();
+  const c = calc(); CALC = c;
   const bake = new Date(S.bake || Date.now());
   const start = new Date(bake.getTime() - c.totalH*3600e3);
   const now = new Date();
 
-  /* --- Eingaben spiegeln --- */
   $("n").value = S.n; $("bw").value = S.bw; $("h").value = S.h; $("salt").value = S.salt;
   $("oil").value = S.oil; $("sugar").value = S.sugar; $("yeast").value = S.yeast;
   $("flourW").value = S.flourW; $("scale").value = S.scale; $("bake").value = S.bake;
   $("ddt").value = S.ddt; $("container").value = S.container; $("friction").value = S.friction;
   $("tflour").value = S.tflour; $("tkitchen").value = S.tkitchen;
+  $("tTom").value = S.tTom; $("tMoz").value = S.tMoz;
   $("bwHint").textContent = c.bw <= 500 ? "≈ " + Math.round(2*Math.sqrt(c.bw/0.42/Math.PI)) + " cm" : "";
+  $("doughHint").textContent = Math.round(c.total)+" g Teig";
+  $("expGrid").style.display = S.mode === "expert" ? "grid" : "none";
   Array.from($("modeSeg").children).forEach(b => b.classList.toggle("on", b.dataset.mode === S.mode));
 
-  /* --- Presets --- */
   $("presets").innerHTML = PRESETS.map(p =>
     '<button class="chip" data-preset="'+p.key+'">'+p.name+'</button>').join("");
 
+  /* --- Vorteig --- */
+  $("pfChips").innerHTML = Object.keys(PF).map(k =>
+    '<button class="chip'+(c.pf.type===k?" on":"")+'" data-pf="'+k+'">'+PF[k].name+'</button>').join("");
+  if(c.pf.type === "poolish" || c.pf.type === "biga"){
+    $("pfFields").innerHTML = '<div class="fields">'+
+      '<label class="f"><span class="lab">Anteil am Mehl %</span><input type="number" id="pfShare" min="5" max="100" step="5" value="'+c.pf.share+'"></label>'+
+      '<label class="f"><span class="lab">Hydration %</span><input type="number" id="pfHyd" min="40" max="120" step="1" value="'+c.pf.hyd+'"'+(c.pf.type==="poolish"?" disabled":"")+'></label>'+
+      '<label class="f"><span class="lab">Reifezeit h</span><input type="number" id="pfH" min="2" max="48" step="0.5" value="'+c.pf.h+'"></label>'+
+      '<label class="f"><span class="lab">Temperatur °C</span><input type="number" id="pfT" min="2" max="32" step="0.5" value="'+c.pf.t+'"></label>'+
+      '</div>';
+  } else if(c.pf.type === "sour"){
+    $("pfFields").innerHTML = '<div class="fields">'+
+      '<label class="f"><span class="lab">Hydration Anstellgut %</span><input type="number" id="pfHyd" min="50" max="150" step="5" value="'+c.pf.hyd+'"></label>'+
+      '<label class="f"><span class="lab">Berechnete Menge</span><input type="text" value="'+fmtG(c.pf.weight)+" · "+num(c.pf.pct,0)+' % vom Mehl" disabled></label>'+
+      '</div>';
+  } else $("pfFields").innerHTML = "";
+  $("pfInfo").innerHTML = PF[c.pf.type].tip
+    ? '<div class="msg info" style="margin-top:12px"><span class="ic">·</span><span>'+PF[c.pf.type].tip+'</span></div>'
+    : '<div class="note" style="margin-top:12px">Ohne Vorteig. Poolish ist der einfachere Einstieg, Biga gibt mehr Aroma und Struktur, will aber starkes Mehl und kühle Reifung.</div>';
+
   /* --- Phasen --- */
   $("phases").innerHTML = c.phases.map((p,i)=>{
-    const isBall = i >= c.ballAfter;
     const label = p.t <= 10 ? "Kühlschrank" : p.t <= 16 ? "Kühl" : "Raum";
     return '<div class="phase" data-i="'+i+'">'+
       '<div class="pname"><span class="dot" style="background:'+tempColor(p.t)+'"></span>'+
-        '<span>'+label+'</span><span class="ptag">'+(isBall?"Stückgare":"Stockgare")+'</span></div>'+
+        '<span>'+label+'</span><span class="ptag">'+(i>=c.ballAfter?"Stückgare":"Stockgare")+'</span></div>'+
       '<label class="f"><span class="lab">Stunden</span><input type="number" class="ph" data-k="h" min="0" max="120" step="0.25" value="'+p.h+'"></label>'+
       '<label class="f"><span class="lab">°C</span><input type="number" class="ph" data-k="t" min="-5" max="45" step="0.5" value="'+p.t+'"></label>'+
       '<button class="xbtn" data-del="'+i+'"'+(c.phases.length<2?" disabled":"")+'>✕</button>'+
     '</div>';
   }).join("");
-
   $("ballChips").innerHTML = c.phases.map((p,i)=>
     '<button class="chip'+(c.ballAfter===i?" on":"")+'" data-ball="'+i+'">'+
       (i===0 ? "sofort nach dem Kneten" : "nach Phase "+i)+'</button>').join("");
@@ -552,79 +800,77 @@ function render(){
   drawTimeline(c, start, now);
 
   /* --- Zutaten --- */
-  const sc = +S.scale;
-  const rows = [
-    ["Mehl", fmtG(c.flour), "100 %"],
-    ["Wasser", fmtG(c.water), c.h.toString().replace(".",",")+" %"],
-    ["Salz", fmtG(c.saltG), c.salt.toString().replace(".",",")+" %"],
-    [YNAME[S.yeast], fmtG(c.yG), (c.yPct < 0.1 ? c.yPct.toFixed(3) : c.yPct.toFixed(2)).replace(".",",")+" %"]
-  ];
-  if(c.oil > 0) rows.splice(3,0,["Öl", fmtG(c.oilG), c.oil.toString().replace(".",",")+" %"]);
-  if(c.sugar > 0) rows.splice(3,0,["Zucker", fmtG(c.sugarG), c.sugar.toString().replace(".",",")+" %"]);
+  const hasPf = c.pf.type !== "none";
+  let rows = "";
+  const row = (a,b,p,cls) => '<tr'+(cls?' class="'+cls+'"':'')+'><td>'+a+'</td><td class="n">'+b+'</td><td class="p">'+(p||"")+'</td></tr>';
+  if(c.pf.type === "poolish" || c.pf.type === "biga"){
+    rows += '<tr class="sec"><td colspan="3">'+c.pf.name.toUpperCase()+" · "+num(c.pf.share,0)+' % DES MEHLS</td></tr>';
+    rows += row("Mehl", fmtG(c.pf.flour), "");
+    rows += row("Wasser", fmtG(c.pf.water), num(c.pf.hyd,0)+" %");
+    rows += row(YNAME[S.yeast], fmtG(c.pfYeastShown), pct(c.pf.yPct*(YCONV[S.yeast]||1)));
+    rows += '<tr class="sec"><td colspan="3">HAUPTTEIG</td></tr>';
+    rows += row("Mehl", fmtG(c.mainFlour), "");
+    rows += row("Wasser", fmtG(c.mainWater), "");
+    rows += row(c.pf.name, fmtG(c.pf.weight), "");
+  } else if(c.pf.type === "sour"){
+    rows += row("Mehl", fmtG(c.mainFlour), "");
+    rows += row("Wasser", fmtG(c.mainWater), "");
+    rows += row("Anstellgut", fmtG(c.pf.weight), num(c.pf.pct,0)+" %");
+  } else {
+    rows += row("Mehl", fmtG(c.flour), "100 %");
+    rows += row("Wasser", fmtG(c.water), num(c.h,1)+" %");
+  }
+  rows += row("Salz", fmtG(c.saltG), num(c.salt,1)+" %");
+  if(c.sugar > 0) rows += row("Zucker", fmtG(c.sugarG), num(c.sugar,1)+" %");
+  if(c.oil > 0) rows += row("Öl", fmtG(c.oilG), num(c.oil,1)+" %");
+  if(c.pf.type !== "sour"){
+    rows += row(YNAME[S.yeast]+(hasPf?" (Hauptteig)":""), c.yG < 0.005 ? "—" : fmtG(c.yG), c.yG < 0.005 ? "" : pct(c.yPctShown));
+  }
   const lo = c.yG*0.7, hi = c.yG*1.4;
-  $("ing").innerHTML = rows.map(r =>
-    '<tr><td>'+r[0]+'</td><td class="n">'+r[1]+'</td><td class="n" style="color:var(--muted);font-weight:600;width:66px">'+r[2]+'</td></tr>'
-  ).join("") +
-  '<tr><td class="sub" colspan="3">Hefe-Erwartungsbereich '+fmtG(lo)+' – '+fmtG(hi)+'. Der Wert oben ist der Startpunkt, nicht die Wahrheit.</td></tr>';
+  if(c.pf.type === "sour"){
+    rows += '<tr><td class="sub" colspan="3">Anstellgut-Erwartungsbereich '+fmtG(c.pf.weight*0.7)+' – '+fmtG(c.pf.weight*1.4)+
+      '. Sauerteig ist deutlich schwerer vorherzusagen als Hefe — plane Puffer ein.</td></tr>';
+  } else if(c.yG >= 0.005){
+    rows += '<tr><td class="sub" colspan="3">Hefe-Erwartungsbereich '+fmtG(lo)+' – '+fmtG(hi)+
+      '. Der Wert oben ist der Startpunkt, nicht die Wahrheit.</td></tr>';
+  }
+  $("ing").innerHTML = rows;
   $("totalHint").textContent = c.n+" × "+Math.round(c.bw)+" g = "+Math.round(c.total)+" g Teig";
 
-  /* Wassertemperatur + Hefe zu klein für die Waage */
-  const tw = clamp(3*(+S.ddt) - (+S.tflour) - (+S.tkitchen) - (+S.friction), -5, 60);
+  const tw = waterTemp();
+  const sc = +S.scale;
   let note = '<div class="msg info" style="margin-top:10px"><span class="ic">🌡</span><span>'+
-    'Schüttwasser mit etwa <b>'+Math.round(tw)+' °C</b> ansetzen, damit der Teig bei '+
-    (+S.ddt).toString().replace(".",",")+' °C aus der Maschine kommt.'+
+    'Schüttwasser mit etwa <b>'+Math.round(tw)+' °C</b> ansetzen, damit der Teig bei '+num(+S.ddt,1)+' °C aus der Maschine kommt.'+
     (tw < 6 ? ' Das heißt in der Praxis: kaltes Wasser mit ein paar Eiswürfeln.' : '')+
-    (tw > 38 ? ' So warm ist ungewöhnlich — prüf mal Mehl- und Küchentemperatur.' : '')+
-    '</span></div>';
-  if(c.yG < sc*3){
-    const perMl = 1/20;
-    const ml = Math.round(c.yG/perMl);
-    note += '<div class="msg warn"><span class="ic">⚖</span><span>'+fmtG(c.yG)+
-      ' ist für eine '+S.scale.replace(".",",")+'-g-Waage zu wenig. Löse <b>1 g Hefe in 20 ml Wasser</b> '+
-      'und nimm davon <b>'+ml+' ml</b>. Diese Menge vom Schüttwasser abziehen.</span></div>';
+    (tw > 38 ? ' So warm ist ungewöhnlich — prüf mal Mehl- und Küchentemperatur.' : '')+'</span></div>';
+  const smallest = Math.min.apply(null, [c.yG, c.pfYeastShown].filter(v => v > 0.0001).concat([99]));
+  if(smallest < sc*3 && smallest < 99){
+    note += '<div class="msg warn"><span class="ic">⚖</span><span>'+fmtG(smallest)+
+      ' ist für eine '+S.scale.replace(".",",")+'-g-Waage zu wenig. Löse <b>1 g Hefe in 20 ml Wasser</b> und nimm davon <b>'+
+      Math.round(smallest*20)+' ml</b>. Diese Menge vom Schüttwasser abziehen.</span></div>';
   }
   note += '<div class="msg info"><span class="ic">🧂</span><span>Salz und Hefe dürfen zusammen im Schüttwasser gelöst werden — '+
     'problematisch ist nur direkter Kontakt von unverdünntem Salz mit Frischhefe.</span></div>';
   $("yeastNote").innerHTML = note;
 
   /* --- Ablauf --- */
-  const steps = [];
-  let t = new Date(start.getTime());
-  steps.push([new Date(t), "Wasser, Salz und Hefe verrühren, Mehl zugeben, kneten",
-    "Zielteigtemperatur "+(+S.ddt).toString().replace(".",",")+" °C · Schüttwasser ≈ "+Math.round(tw)+" °C"]);
-  c.phases.forEach((p,i)=>{
-    if(i === c.ballAfter){
-      steps.push([new Date(t), "In "+c.n+" Ballen à "+Math.round(c.bw)+" g teilen und rundschleifen",
-        "Ab hier Stückgare — ein Ballen kühlt und erwärmt sich rund dreimal schneller als der ganze Teig."]);
-    }
-    const kind = i >= c.ballAfter ? "Stückgare" : "Stockgare";
-    const place = p.t <= 10 ? "in den Kühlschrank ("+p.t.toString().replace(".",",")+" °C)"
-                : p.t <= 16 ? "kühl stellen ("+p.t.toString().replace(".",",")+" °C)"
-                : "bei "+p.t.toString().replace(".",",")+" °C stehen lassen";
-    const from = new Date(t);
-    t = new Date(t.getTime() + p.h*3600e3);
-    steps.push([from, kind+" "+fmtH(p.h)+" — "+place, "bis "+fmtWhen(t, start)]);
-  });
-  const earlyD = new Date(start.getTime() + c.early*3600e3);
-  const lateD  = new Date(start.getTime() + c.late*3600e3);
-  steps.push([bake, "Backen", "Fenster "+fmtWhen(earlyD,start)+" – "+fmtWhen(lateD,start)+
-    " · davor Ofen und Stein auf Temperatur bringen"]);
-
+  STEPS = buildSteps(c, bake);
+  const ref = STEPS[0].t;
   const nowMs = now.getTime();
-  $("steps").innerHTML = steps.map((s,i)=>{
-    const next = steps[i+1];
-    const isNow = nowMs >= s[0].getTime() && (!next || nowMs < next[0].getTime()) &&
-                  nowMs >= start.getTime() && nowMs <= bake.getTime()+3600e3;
-    return '<li'+(isNow?' class="now"':'')+'><span class="tm">'+fmtWhen(s[0], start)+'</span>'+
-      '<span class="tx">'+s[1]+(s[2]?'<small>'+s[2]+'</small>':'')+'</span></li>';
+  $("steps").innerHTML = STEPS.map((s,i)=>{
+    const next = STEPS[i+1];
+    const isNow = nowMs >= s.t.getTime() && (!next || nowMs < next.t.getTime()) &&
+                  nowMs >= ref.getTime() && nowMs <= bake.getTime()+3600e3;
+    return '<li class="'+(isNow?"now ":"")+(s.pf?"pf":"")+'"><span class="tm">'+fmtWhen(s.t, ref)+'</span>'+
+      '<span class="tx">'+s.title+(s.sub?'<small>'+s.sub+'</small>':'')+'</span></li>';
   }).join("");
-  $("windowHint").textContent = "Start " + WD[start.getDay()] + " " + fmtClock(start);
+  $("windowHint").textContent = "Start " + WD[ref.getDay()] + " " + fmtClock(ref);
 
   /* --- Einschätzung --- */
   const msgs = messages(c);
   $("msgs").innerHTML = msgs.length
     ? msgs.map(m => '<div class="msg '+m[0]+'"><span class="ic">'+
-        (m[0]==="bad"?"●":m[0]==="warn"?"▲":"·")+'</span><span>'+m[1]+'</span></div>').join("")
+        (m[0]==="bad"?"●":m[0]==="warn"?"▲":m[0]==="good"?"✓":"·")+'</span><span>'+m[1]+'</span></div>').join("")
     : '<div class="msg info"><span class="ic">✓</span><span>Plan sieht stimmig aus. Trotzdem gilt: am Teig entscheiden, nicht an der Uhr.</span></div>';
 
   const ripLabel = c.Rip < 0.95 ? "jung · wenig Aroma, straff"
@@ -633,32 +879,60 @@ function render(){
     : c.Rip < 1.55 ? "weit gereift · weich, sehr aromatisch"
     : "sehr weit · Kleberabbau wahrscheinlich";
   $("indices").innerHTML =
-    kv("Gesamtgare", fmtH(c.totalH)) +
+    kv("Gesamtgare", fmtH(c.totalH) + (c.prefH ? " + "+fmtH(c.prefH)+" Vorteig" : "")) +
     kv("davon Stückgare", fmtH(c.ballH)) +
-    kv("Gärleistung gesamt", c.Eeff.toFixed(1).replace(".",",")+" Std. bei 21 °C") +
-    kv("davon in den Ballen", c.EgBall.toFixed(1).replace(".",",")+" Std. · warm "+c.EgBallWarm.toFixed(1).replace(".",",")) +
-    kv("Reifegrad", c.Rip.toFixed(2).replace(".",",")+" × — "+ripLabel) +
+    kv("Gärleistung gesamt", num(c.Eeff)+" Std. bei 21 °C") +
+    kv("davon in den Ballen", num(c.EgBall)+" Std. · warm "+num(c.EgBallWarm)) +
+    ((c.pf.type==="poolish"||c.pf.type==="biga")
+      ? kv("Vorteig deckt", pct(c.pfCovered)+" von "+pct(c.yPctTotal)) : "") +
+    kv("Reifegrad", num(c.Rip,2)+" × — "+ripLabel) +
     '<div class="meter"><div style="width:'+clamp((c.Rip-0.8)/0.8*100,3,100)+'%"></div></div>';
-
   $("ripeNote").innerHTML = "„Gärleistung“ rechnet jede Phase auf Stunden bei 21 °C um — damit sind unterschiedliche Pläne vergleichbar. "+
-    "Der <b>Reifegrad</b> ist das Verhältnis von Teigreifung zu Gasbildung: Werte über 1,3 bekommt man nur über längere kalte Phasen, "+
-    "dort arbeiten die Enzyme relativ zur Hefe weiter. Eine reine Raumtemperaturgare bleibt auch nach 24 h bei etwa 1,0, 48 h kalt liegen bei etwa 1,4.";
+    "Der <b>Reifegrad</b> ist das Verhältnis von Teigreifung zu Gasbildung: Werte über 1,3 bekommt man nur über längere kalte Phasen oder einen Vorteig, "+
+    "dort arbeiten die Enzyme relativ zur Hefe weiter. Eine reine Raumtemperaturgare bleibt auch nach 24 h bei etwa 1,0.";
 
+  /* --- Belag / Einkauf --- */
+  const tom = (+S.tTom||0)*c.n, moz = (+S.tMoz||0)*c.n;
+  $("shop").innerHTML =
+    '<tr class="sec"><td colspan="3">TEIG</td></tr>'+
+    row("Mehl gesamt", fmtG(c.flour), "")+
+    row("Wasser gesamt", fmtG(c.water), "")+
+    row("Salz", fmtG(c.saltG), "")+
+    (c.pf.type==="sour" ? row("Anstellgut", fmtG(c.pf.weight), "")
+      : row(YNAME[S.yeast], fmtG(c.yG + c.pfYeastShown), ""))+
+    (c.oil>0?row("Öl", fmtG(c.oilG), ""):"")+
+    (c.sugar>0?row("Zucker", fmtG(c.sugarG), ""):"")+
+    '<tr class="sec"><td colspan="3">BELAG FÜR '+c.n+'</td></tr>'+
+    row("Passierte Tomaten", fmtG(tom), num(+S.tTom||0,0)+" g")+
+    row("Mozzarella", fmtG(moz), num(+S.tMoz||0,0)+" g")+
+    row("Olivenöl", fmtG(5*c.n), "5 g")+
+    row("Parmesan", fmtG(5*c.n), "5 g")+
+    row("Basilikum", c.n*2+" Blätter", "");
+
+  renderLog();
   renderSaved();
+  renderReplan(c, bake, start);
   persist();
 }
-function kv(a,b){ return '<div class="kv"><span>'+a+'</span><span>'+b+'</span></div>'; }
 
+/* ===================== Zeitstrahl ===================== */
 function drawTimeline(c, start, now){
-  const W = 700, H = 132, padL = 4, padR = 4, top = 18, botH = 26;
+  const W = 700, H = 140, padL = 4, padR = 4, top = 18, botH = 26;
   const plotW = W - padL - padR, plotTop = top, plotH = H - top - botH;
-  const T = c.totalH || 1;
-  const xs = h => padL + (h/T)*plotW;
+  const pre = c.prefH, T = (c.totalH + pre) || 1;
+  const xs = h => padL + ((h+pre)/T)*plotW;
   const temps = c.track.map(p=>p.T).concat(c.phases.map(p=>p.t));
   const tMin = Math.min.apply(null, temps) - 2, tMax = Math.max.apply(null, temps) + 2;
   const ys = t => plotTop + plotH - ((t - tMin)/Math.max(tMax-tMin,1))*plotH;
 
   let g = "";
+  if(pre > 0){
+    const x1 = xs(0);
+    g += '<rect x="'+padL+'" y="'+plotTop+'" width="'+Math.max(x1-padL,1).toFixed(1)+'" height="'+plotH+'" fill="#4a5a7a" opacity="0.30"/>';
+    if(x1-padL > 40) g += '<text x="'+((padL+x1)/2).toFixed(1)+'" y="'+(plotTop+plotH/2)+'" fill="#c9d2dd" font-size="10.5" font-family="Barlow" font-weight="700" text-anchor="middle">'+c.pf.name.toUpperCase()+'</text>';
+    document.getElementById("legPf").innerHTML = '<i style="color:#8ea4c8">▨</i> Vorteig';
+  } else document.getElementById("legPf").textContent = "";
+
   let acc = 0;
   c.phases.forEach((p,i)=>{
     const x0 = xs(acc), x1 = xs(acc+p.h);
@@ -666,15 +940,14 @@ function drawTimeline(c, start, now){
     g += '<rect x="'+x0.toFixed(1)+'" y="'+plotTop+'" width="'+Math.max(x1-x0,1).toFixed(1)+'" height="'+plotH+'" '+
          'fill="'+tempColor(p.t)+'" opacity="'+(isBall?0.40:0.22)+'"/>';
     if(isBall) g += '<rect x="'+x0.toFixed(1)+'" y="'+plotTop+'" width="'+Math.max(x1-x0,1).toFixed(1)+'" height="3" fill="'+tempColor(p.t)+'"/>';
-    if(i>0) g += '<line x1="'+x0.toFixed(1)+'" y1="'+plotTop+'" x2="'+x0.toFixed(1)+'" y2="'+(plotTop+plotH)+'" stroke="#0e1116" stroke-width="1"/>';
-    if(x1-x0 > 34) g += '<text x="'+((x0+x1)/2).toFixed(1)+'" y="'+(plotTop+plotH-6)+'" fill="#c9d2dd" font-size="10" font-family="Barlow" text-anchor="middle">'+
-        p.t.toString().replace(".",",")+'°</text>';
+    g += '<line x1="'+x0.toFixed(1)+'" y1="'+plotTop+'" x2="'+x0.toFixed(1)+'" y2="'+(plotTop+plotH)+'" stroke="#0e1116" stroke-width="1"/>';
+    if(x1-x0 > 34) g += '<text x="'+((x0+x1)/2).toFixed(1)+'" y="'+(plotTop+plotH-6)+'" fill="#c9d2dd" font-size="10" font-family="Barlow" text-anchor="middle">'+num(p.t,0)+'°</text>';
     acc += p.h;
   });
 
   const ballX = xs(c.phases.slice(0,c.ballAfter).reduce((a,p)=>a+p.h,0));
   g += '<line x1="'+ballX.toFixed(1)+'" y1="'+(plotTop-6)+'" x2="'+ballX.toFixed(1)+'" y2="'+(plotTop+plotH)+'" stroke="#f4c542" stroke-width="2" stroke-dasharray="4 3"/>';
-  g += '<text x="'+clamp(ballX,16,W-16).toFixed(1)+'" y="'+(plotTop-8)+'" fill="#f4c542" font-size="10.5" font-family="Barlow" font-weight="700" text-anchor="middle">BALLEN</text>';
+  g += '<text x="'+clamp(ballX,20,W-20).toFixed(1)+'" y="'+(plotTop-8)+'" fill="#f4c542" font-size="10.5" font-family="Barlow" font-weight="700" text-anchor="middle">BALLEN</text>';
 
   let d = "";
   const every = Math.max(1, Math.round(c.track.length/240));
@@ -682,19 +955,189 @@ function drawTimeline(c, start, now){
   g += '<path d="'+d+'" fill="none" stroke="#e8ecf1" stroke-width="1.8" stroke-linejoin="round"/>';
 
   const nowH = (now - start)/3600e3;
-  if(nowH > 0 && nowH < T){
+  if(nowH > -pre && nowH < c.totalH){
     g += '<line x1="'+xs(nowH).toFixed(1)+'" y1="'+plotTop+'" x2="'+xs(nowH).toFixed(1)+'" y2="'+(plotTop+plotH)+'" stroke="#3ecf6a" stroke-width="1.5"/>';
     document.getElementById("legNow").innerHTML = '<i style="color:#3ecf6a">┃</i> jetzt';
   } else document.getElementById("legNow").textContent = "";
 
-  const labelStart = WD[start.getDay()]+" "+fmtClock(start);
-  const bake = new Date(start.getTime()+T*3600e3);
-  g += '<text x="'+padL+'" y="'+(H-8)+'" fill="#8a94a3" font-size="11" font-family="Menlo,monospace">'+labelStart+'</text>';
-  g += '<text x="'+(W-padR)+'" y="'+(H-8)+'" fill="#f4c542" font-size="11" font-family="Menlo,monospace" text-anchor="end">'+
-       WD[bake.getDay()]+" "+fmtClock(bake)+'</text>';
+  const first = new Date(start.getTime() - pre*3600e3);
+  const bake = new Date(start.getTime() + c.totalH*3600e3);
+  g += '<text x="'+padL+'" y="'+(H-8)+'" fill="#8a94a3" font-size="11" font-family="Menlo,monospace">'+WD[first.getDay()]+" "+fmtClock(first)+'</text>';
+  g += '<text x="'+(W-padR)+'" y="'+(H-8)+'" fill="#f4c542" font-size="11" font-family="Menlo,monospace" text-anchor="end">'+WD[bake.getDay()]+" "+fmtClock(bake)+'</text>';
   g += '<text x="'+(W/2)+'" y="'+(H-8)+'" fill="#8a94a3" font-size="11" font-family="Barlow" text-anchor="middle">'+fmtH(T)+'</text>';
-
   document.getElementById("tl").innerHTML = g;
+}
+
+/* ===================== Umplanen ===================== */
+function renderReplan(c, bake, start){
+  if(!$("realStart").value) $("realStart").value = toLocal(start);
+  if(!$("newBake").value) $("newBake").value = S.bake;
+  const rs = new Date($("realStart").value), nb = new Date($("newBake").value);
+  const now = new Date();
+  const out = $("replanOut");
+  if(isNaN(rs) || isNaN(nb)){ out.innerHTML = ""; return; }
+
+  const doneH = (now - rs)/3600e3;
+  if(doneH <= 0){
+    out.innerHTML = '<div class="msg info"><span class="ic">·</span><span>Der Teig läuft noch nicht. Ändere oben einfach die Backzeit — '+
+      'der ganze Plan verschiebt sich mit.</span></div>';
+    return;
+  }
+  const remH = (nb - now)/3600e3;
+  if(remH <= 0){
+    out.innerHTML = '<div class="msg bad"><span class="ic">●</span><span>Die neue Backzeit liegt in der Vergangenheit.</span></div>';
+    return;
+  }
+  /* Was ist bis jetzt gelaufen? Ursprungsplan bis doneH simulieren. */
+  const cut = [];
+  let left = doneH;
+  for(const p of c.phases){
+    if(left <= 0) break;
+    cut.push({ h: Math.min(p.h, left), t: p.t });
+    left -= p.h;
+  }
+  const overrun = left > 0 ? left : 0;
+  if(overrun > 0 && cut.length) cut[cut.length-1].h += overrun;   /* hängt über: letzte Bedingung hält an */
+  const ballIdx = clamp(c.ballAfter, 0, Math.max(cut.length-1,0));
+  const done = simulate(cut, ballIdx, c.total, c.bw, +S.ddt||23, +S.container||1);
+  const Edone = done.Eg * c.corr;
+  const Erem = c.Eeff - Edone;
+  const share = clamp(Edone/Math.max(c.Eeff,0.01)*100, 0, 999);
+
+  let body = kv("Bisher gelaufen", fmtH(doneH)+" · "+num(share,0)+" % der Gärleistung") +
+             kv("Kerntemperatur jetzt", num(done.endT,1)+" °C") +
+             kv("Bis zur neuen Backzeit", fmtH(remH));
+
+  const origBake = new Date(S.bake);
+  const shifted = Math.abs(nb - origBake)/60e3;
+
+  let msg;
+  if(shifted < 30 && Erem > 0.2){
+    msg = ["good","Nichts zu tun — die Backzeit ist praktisch unverändert. Weiter nach dem Plan oben."];
+  } else if(Erem <= 0.2){
+    msg = ["bad","Der Teig hat sein Gärziel schon erreicht. Sofort so kalt wie möglich stellen, das bremst am stärksten — "+
+      "und früher backen, wenn es irgendwie geht. Je länger es jetzt dauert, desto weicher wird er."];
+  } else {
+    const tAll = tempForRate(Erem/remH);
+    if(tAll >= 16){
+      /* Eine Temperatur reicht, kein Kühlschrank nötig. */
+      if(tAll <= 26) msg = ["good","Rest einfach bei etwa <b>"+num(tAll,0)+" °C</b> stehen lassen."];
+      else if(tAll <= 31) msg = ["warn","Es wird knapp — der Teig müsste bei etwa <b>"+num(tAll,0)+" °C</b> stehen, "+
+        "um rechtzeitig fertig zu werden. Warmer Ort, aber gut beobachten."];
+      else msg = ["bad","Nicht mehr aufholbar: für "+fmtWhen(nb,rs)+" wäre der Teig noch zu jung. Später backen, "+
+        "oder mit einem straffen, weniger dehnbaren Teig rechnen."];
+    } else {
+      /* Kalt parken und rechtzeitig aufwärmen. Die Warmphase wird reserviert. */
+      const warmH = Math.min(c.bw > 400 ? 3 : 2, remH*0.4);
+      const coldH = remH - warmH;
+      const Ewarm = warmH * rGas(21) * 0.8;      /* Ballen sind anfangs noch kalt */
+      const Ecold = Erem - Ewarm;
+      if(Ecold <= 0){
+        msg = ["warn","Der Teig braucht kaum noch Gärung. Bis kurz vor dem Backen so kalt wie möglich lagern und "+
+          "die Ballen nur noch <b>"+fmtH(Math.max(remH*0.3,0.5))+"</b> akklimatisieren lassen — sonst wird er zu weich."];
+      } else {
+        const tCold = tempForRate(Ecold/coldH);
+        const outAt = new Date(nb.getTime() - warmH*3600e3);
+        if(tCold < 1){
+          msg = ["bad","Selbst im Kühlschrank ist das zu lang: bis "+fmtWhen(nb,rs)+" wäre der Teig überreif. "+
+            "Entweder früher backen, oder die Ballen jetzt einfrieren — das ist der einzige echte Notaus."];
+        } else if(tCold < 9){
+          msg = [tCold < 3 ? "warn" : "good","Ab jetzt in den Kühlschrank bei etwa <b>"+num(tCold,0)+" °C</b>, "+
+            "dann um <b>"+fmtWhen(outAt,rs)+"</b> herausnehmen und "+fmtH(warmH)+" akklimatisieren lassen."+
+            (tCold < 3 ? " Kälter als 3 °C schafft kaum ein Haushaltskühlschrank — falls deiner das nicht kann, plane lieber früher zu backen." : "")];
+        } else {
+          msg = ["good","Rest kühl parken bei etwa <b>"+num(tCold,0)+" °C</b> — Keller oder kühlster Raum, notfalls Kühlschrank "+
+            "mit früherem Herausnehmen. Um <b>"+fmtWhen(outAt,rs)+"</b> auf Raumtemperatur stellen."];
+        }
+      }
+    }
+  }
+  out.innerHTML = body + '<div class="msg '+msg[0]+'" style="margin-top:12px"><span class="ic">'+
+    (msg[0]==="bad"?"●":msg[0]==="warn"?"▲":"✓")+'</span><span>'+msg[1]+'</span></div>'+
+    '<div class="note">Gerechnet wird gegen die Gärleistung, die dein ursprünglicher Plan insgesamt vorsah: '+
+    'was bis jetzt gelaufen ist, wird abgezogen, der Rest auf die verbleibende Zeit verteilt. '+
+    'Der Vorschlag hält die Summe konstant — er ersetzt nicht den Blick auf den Teig.</div>';
+}
+
+/* ===================== Kalender ===================== */
+function icsDate(d){
+  const p = n => String(n).padStart(2,"0");
+  return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+"T"+p(d.getHours())+p(d.getMinutes())+"00";
+}
+function downloadICS(){
+  if(!STEPS.length) return;
+  const now = new Date();
+  let out = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Teigplaner//DE","CALSCALE:GREGORIAN"];
+  STEPS.forEach((s,i)=>{
+    const end = new Date(s.t.getTime() + 15*60e3);
+    out = out.concat([
+      "BEGIN:VEVENT",
+      "UID:teigplaner-"+now.getTime()+"-"+i+"@local",
+      "DTSTAMP:"+icsDate(now),
+      "DTSTART:"+icsDate(s.t),
+      "DTEND:"+icsDate(end),
+      "SUMMARY:"+("Teig: "+s.title).replace(/[,;\\]/g, m => "\\"+m),
+      "DESCRIPTION:"+String(s.sub||"").replace(/[,;\\]/g, m => "\\"+m),
+      "BEGIN:VALARM","TRIGGER:PT0M","ACTION:DISPLAY","DESCRIPTION:Teigplaner","END:VALARM",
+      "END:VEVENT"]);
+  });
+  out.push("END:VCALENDAR");
+  const blob = new Blob([out.join("\r\n")], {type:"text/calendar;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "teigplan.ics";
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+}
+
+/* ===================== Küchenmodus ===================== */
+function renderKitchen(){
+  if(!$("kitchen").classList.contains("show") || !STEPS.length || !CALC) return;
+  const now = Date.now();
+  let cur = 0;
+  for(let i=0;i<STEPS.length;i++){ if(now >= STEPS[i].t.getTime()) cur = i; }
+  const s = STEPS[cur], nx = STEPS[cur+1];
+  const started = now >= STEPS[0].t.getTime();
+  $("kNow").innerHTML = '<div class="klabel">'+(started?"Jetzt":"Geplanter Start")+'</div>'+
+    '<div class="kbig">'+s.title+'</div>'+
+    (s.sub?'<div class="ksub">'+s.sub+'</div>':'')+
+    (nx ? '<div class="kcount">'+countdown(nx.t.getTime()-now)+'</div>' : '');
+  $("kNext").innerHTML = nx
+    ? '<div class="klabel">Als Nächstes · '+fmtWhen(nx.t, STEPS[0].t)+'</div><div class="ksub" style="color:var(--text);font-size:18px;margin-top:4px">'+nx.title+'</div>'
+    : '<div class="klabel">Fertig</div>';
+  const c = CALC;
+  let ing = "";
+  if(c.pf.type === "poolish" || c.pf.type === "biga"){
+    ing += c.pf.name+": <b>"+fmtG(c.pf.flour)+"</b> Mehl · <b>"+fmtG(c.pf.water)+"</b> Wasser · <b>"+fmtG(c.pf.yeastG)+"</b> Hefe<br>";
+    ing += "Hauptteig: <b>"+fmtG(c.mainFlour)+"</b> Mehl · <b>"+fmtG(c.mainWater)+"</b> Wasser<br>";
+  } else if(c.pf.type === "sour"){
+    ing += "<b>"+fmtG(c.mainFlour)+"</b> Mehl · <b>"+fmtG(c.mainWater)+"</b> Wasser · <b>"+fmtG(c.pf.weight)+"</b> Anstellgut<br>";
+  } else {
+    ing += "<b>"+fmtG(c.flour)+"</b> Mehl · <b>"+fmtG(c.water)+"</b> Wasser<br>";
+  }
+  ing += "<b>"+fmtG(c.saltG)+"</b> Salz";
+  if(c.pf.type !== "sour" && c.yG >= 0.005) ing += " · <b>"+fmtG(c.yG)+"</b> "+YNAME[S.yeast];
+  if(c.oil > 0) ing += " · <b>"+fmtG(c.oilG)+"</b> Öl";
+  if(c.sugar > 0) ing += " · <b>"+fmtG(c.sugarG)+"</b> Zucker";
+  ing += "<br>Wasser ≈ <b>"+Math.round(waterTemp())+" °C</b> · "+c.n+" × "+Math.round(c.bw)+" g";
+  $("kIng").innerHTML = ing;
+}
+function countdown(ms){
+  if(ms <= 0) return "jetzt";
+  const h = Math.floor(ms/3600e3), m = Math.floor(ms/60e3)%60;
+  return h > 0 ? "noch "+h+" h "+String(m).padStart(2,"0")+" min" : "noch "+m+" min";
+}
+
+/* ===================== Backprotokoll ===================== */
+const LOGNAME = { young:"zu jung", good:"genau richtig", over:"überreif" };
+function renderLog(){
+  const cal = getCal(), log = getLog();
+  $("calHint").textContent = cal === 1 ? "noch nicht kalibriert" : "Hefe × "+num(cal,2);
+  $("logList").innerHTML = (log.length
+    ? log.slice().reverse().map((e,i)=>'<div class="logrow"><span class="d">'+e.d+'</span>'+
+        '<span class="r">'+LOGNAME[e.r]+'</span><button data-dellog="'+(log.length-1-i)+'">✕</button></div>').join("")
+    : '<div class="note" style="margin:0">Noch keine Einträge.</div>')+
+    (cal !== 1 ? '<div class="btnrow" style="margin-top:10px"><button class="btn ghost sm" id="calReset">KALIBRIERUNG ZURÜCKSETZEN</button></div>' : "");
 }
 
 /* ===================== Rezepte ===================== */
@@ -706,21 +1149,24 @@ function renderSaved(){
     ? names.map(n => '<div class="s"><span data-load="'+esc(n)+'">'+esc(n)+'</span><button data-drop="'+esc(n)+'">✕</button></div>').join("")
     : '<div class="note" style="margin:0">Noch nichts gesichert.</div>';
 }
-function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
 
 /* ===================== Events ===================== */
 document.addEventListener("input", e => {
   const t = e.target;
   if(t.classList.contains("ph")){
-    const i = +t.closest(".phase").dataset.i;
-    S.phases[i][t.dataset.k] = +t.value;
+    S.phases[+t.closest(".phase").dataset.i][t.dataset.k] = +t.value;
     render(); return;
   }
-  const map = { n:"n", bw:"bw", h:"h", salt:"salt", oil:"oil", sugar:"sugar", yeast:"yeast",
-    flourW:"flourW", scale:"scale", bake:"bake", ddt:"ddt", container:"container",
-    friction:"friction", tflour:"tflour", tkitchen:"tkitchen" };
-  if(map[t.id]){
-    S[map[t.id]] = (t.type === "number") ? +t.value : t.value;
+  if(t.id === "pfShare"){ S.pf.share = +t.value; render(); return; }
+  if(t.id === "pfHyd"){ S.pf.hyd = +t.value; render(); return; }
+  if(t.id === "pfH"){ S.pf.h = +t.value; render(); return; }
+  if(t.id === "pfT"){ S.pf.t = +t.value; render(); return; }
+  if(t.id === "newBake" || t.id === "realStart"){ renderReplan(CALC, new Date(S.bake), new Date(STEPS.length?STEPS[0].t:Date.now())); return; }
+  const keys = ["n","bw","h","salt","oil","sugar","yeast","flourW","scale","bake","ddt",
+                "container","friction","tflour","tkitchen","tTom","tMoz"];
+  if(keys.indexOf(t.id) >= 0){
+    S[t.id] = (t.type === "number") ? +t.value : t.value;
+    if(t.id === "bake") $("newBake").value = t.value;
     render();
   }
 });
@@ -734,6 +1180,13 @@ document.addEventListener("click", e => {
     const p = PRESETS.find(x => x.key === t.dataset.preset);
     if(p){ S = Object.assign(S, JSON.parse(JSON.stringify(p.s))); render(); }
     return;
+  }
+  if(t.dataset.pf){
+    const k = t.dataset.pf, d = PF[k];
+    S.pf = k === "none" ? { type:"none" }
+      : k === "sour" ? { type:"sour", hyd:100 }
+      : { type:k, share:d.share, hyd:d.hyd, h:d.h, t:d.t };
+    render(); return;
   }
   if(t.dataset.ball !== undefined){ S.ballAfter = +t.dataset.ball; render(); return; }
   if(t.dataset.del !== undefined){
@@ -749,6 +1202,18 @@ document.addEventListener("click", e => {
     S.phases.push({ h:2, t: last && last.t <= 10 ? 21 : 6 });
     render(); return;
   }
+  if(t.dataset.log){
+    const log = getLog();
+    log.push({ d: new Date().toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"}), r: t.dataset.log });
+    setLog(log);
+    if(t.dataset.log === "over") setCal(getCal()*0.85);
+    if(t.dataset.log === "young") setCal(getCal()*1.15);
+    render(); return;
+  }
+  if(t.id === "calReset"){ setCal(1); render(); return; }
+  if(t.dataset.dellog !== undefined){
+    const log = getLog(); log.splice(+t.dataset.dellog,1); setLog(log); renderLog(); return;
+  }
   if(t.id === "saveBtn"){
     const name = ($("recName").value||"").trim();
     if(!name){ $("recName").focus(); return; }
@@ -756,25 +1221,28 @@ document.addEventListener("click", e => {
     $("recName").value = ""; renderSaved(); return;
   }
   if(t.dataset.load){
-    const r = loadRecipes(), s = r[t.dataset.load];
-    if(s){ S = Object.assign(defaults(), s); S.bake = $("bake").value || S.bake; render(); window.scrollTo({top:0,behavior:"smooth"}); }
+    const s = loadRecipes()[t.dataset.load];
+    if(s){ const keep = S.bake; S = Object.assign(defaults(), s); S.bake = keep; render(); window.scrollTo({top:0,behavior:"smooth"}); }
     return;
   }
   if(t.dataset.drop){
     const r = loadRecipes(); delete r[t.dataset.drop]; saveRecipes(r); renderSaved(); return;
   }
+  if(t.id === "icsBtn"){ downloadICS(); return; }
+  if(t.id === "kitchenBtn"){ $("kitchen").classList.add("show"); renderKitchen(); return; }
+  if(t.id === "kClose"){ $("kitchen").classList.remove("show"); return; }
   if(t.id === "linkBtn"){
     persist();
     const url = location.href;
-    const done = () => { t.textContent = "KOPIERT"; setTimeout(()=>{ t.textContent = "LINK KOPIEREN"; }, 1400); };
+    const done = () => { t.textContent = "KOPIERT"; setTimeout(()=>{ t.textContent = "LINK"; }, 1400); };
     if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, done);
-    else { prompt("Link:", url); }
+    else prompt("Link:", url);
     return;
   }
 });
 
 render();
-setInterval(render, 60000);
+setInterval(()=>{ render(); renderKitchen(); }, 30000);
 })();
 </script>
 </body>

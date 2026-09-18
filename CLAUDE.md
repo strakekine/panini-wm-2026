@@ -128,7 +128,11 @@ Einstellungen" am Kartenende.
 `S.yOv` ist eine selbst eingetippte Hefemenge in Gramm. Sie ersetzt den
 Vorschlag nicht stillschweigend, sondern verschiebt das Backfenster: weniger
 Hefe heißt, dasselbe Ziel erst bei mehr Gärleistung zu erreichen
-(E ~ yPct^(-1/EXP), EXP = 1,55 bzw. 1,2 bei Sauerteig). Sie gilt nur für den
+(E ~ yPct^(-1/EXP), EXP = 1,55 bzw. 1,2 bei Sauerteig). Reicht der Plan mit der eigenen Menge nicht bis zur Backreife, wird er für die
+Einschätzung bis dahin verlängert (letzte Phase läuft weiter, sie ist immer eine
+Ballenphase). Stückgare, Gärleistung, Reifegrad und die Warnungen rechnen mit dem
+verlängerten Plan — sonst beschreiben sie einen Ablauf, den niemand so backt.
+Sie gilt nur für den
 Plan, für den sie gedacht war, und wird von jeder Vorlage gelöscht. Das Feld
 liegt in `#yOvBox` außerhalb der Zutatentabelle, weil die bei jedem Render neu
 gebaut wird; gesperrt wird es nur mit `focusIn(box) && typing()`, sonst würde

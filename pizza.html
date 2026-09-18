@@ -610,7 +610,7 @@ function shareURL(){
 /* ===================== Rechnen ===================== */
 function simulate(phases, ballAfter, total, bw, ddt, contF){
   const dt = 5/60;
-  let T = clamp(ddt,10,35), Eg = 0, Em = 0, EgBall = 0, EgBallWarm = 0;
+  let T = clamp(ddt,-5,40), Eg = 0, Em = 0, EgBall = 0, EgBallWarm = 0;
   const track = [];
   let elapsed = 0;
   phases.forEach((p,i)=>{
@@ -715,13 +715,30 @@ function calc(st){
      bei kalt endenden Plänen wäre es sonst absurd weit offen. */
   const late  = Math.min(zeitFuer(1.13*Eziel), fertig + 14);
 
+  /* Reicht der Plan wegen einer eigenen Hefemenge nicht bis zur Backreife, wird
+     er für die Einschätzung bis dahin verlängert — die letzte Phase läuft weiter.
+     Sonst würden Stückgare und Warnungen einen Plan beschreiben, den niemand so
+     backen wird. Die letzte Phase ist immer eine Ballenphase (ballAfter ≤ n-1). */
+  let EgBallEff = sim.EgBall, EgBallWarmEff = sim.EgBallWarm, EgEff = sim.Eg;
+  let EmEff = EmatTotal, EgAllEff = EgAll;
+  let ballHeff = phases.slice(ballAfter).reduce((a,p)=>a+p.h,0);
+  if(fertig > totalH + 0.05 && phases.length){
+    const extraH = fertig - totalH;
+    const ex = simulate([{ h:extraH, t:phases[phases.length-1].t }], 0, total, bw, sim.endT, contF);
+    EgBallEff += ex.EgBall; EgBallWarmEff += ex.EgBallWarm; EgEff += ex.Eg;
+    /* Auch der Reifegrad gehört mitgezogen: zusätzliche Warmzeit bringt Gas und
+       Reifung etwa im Verhältnis 1, zieht die Kennzahl also Richtung 1,0. */
+    EmEff += ex.Em; EgAllEff += ex.Eg;
+    ballHeff += extraH;
+  }
+
   return { n,bw,total,flour,water,h,salt,oil,sugar,
     saltG: flour*salt/100, oilG: flour*oil/100, sugarG: flour*sugar/100,
     mainFlour, mainWater, pf, pfCovered, yPctTotal, yPctMain, yPctShown, yG, pfYeastShown,
-    Eg: sim.Eg, Em: EmatTotal, Eeff, EgBall: sim.EgBall, EgBallWarm: sim.EgBallWarm, endT: sim.endT,
+    Eg: sim.Eg, Em: EmEff, Eeff: EgEff*corr, EgBall: EgBallEff, EgBallWarm: EgBallWarmEff, endT: sim.endT,
     corr, cal, phases, ballAfter, totalH, track: sim.track,
-    ballH: phases.slice(ballAfter).reduce((a,p)=>a+p.h,0),
-    early, late, fertig, yRec, yOv, yFac, Eziel, Rip: EmatTotal/Math.max(EgAll,0.01),
+    ballH: ballHeff,
+    early, late, fertig, yRec, yOv, yFac, Eziel, Rip: EmEff/Math.max(EgAllEff,0.01),
     prefH: (pf.type==="poolish"||pf.type==="biga") ? pf.h : 0 };
 }
 
@@ -758,6 +775,10 @@ function messages(c){
   if(c.pf.type === "biga" && c.pf.t > 20) out.push(["warn","Biga bei "+c.pf.t+" °C ist warm. Klassisch sind 16–18 °C; wärmer wird sie schnell sauer statt aromatisch."]);
   if((c.pf.type==="poolish"||c.pf.type==="biga") && c.yPctMain <= 0.0005)
     out.push(["good","Der Vorteig trägt den ganzen Teig — im Hauptteig ist keine zusätzliche Hefe nötig."]);
+  if(c.yOv && c.fertig > c.totalH + 0.75)
+    out.push(["info","Mit deiner Menge ("+num(c.yFac,2)+"×) reicht der Gärplan nicht bis zur Backreife. "+
+      "Die Einschätzung rechnet deshalb mit "+fmtH(c.fertig-c.totalH)+" mehr in der letzten Phase — "+
+      "entweder später backen oder die Phase im Gärplan verlängern."]);
   if(c.yOv && c.fertig < c.totalH - 0.75)
     out.push(["warn","Du nimmst mehr "+(c.pf.type==="sour"?"Anstellgut":"Hefe")+" als vorgeschlagen ("+num(c.yFac,2)+"×). "+
       "Der Teig ist dadurch rund "+fmtH(c.totalH-c.fertig)+" vor der geplanten Backzeit fertig und gärt bis dahin weiter."]);
@@ -1019,8 +1040,13 @@ function render(){
     : c.Rip < 1.35 ? "aromatisch · typisch kalte Führung"
     : c.Rip < 1.55 ? "weit gereift · weich, sehr aromatisch"
     : "sehr weit · Kleberabbau wahrscheinlich";
+  const verl = c.fertig > c.totalH + 0.05 ? c.fertig - c.totalH : 0;
+  const fertigD = new Date(start.getTime() + c.fertig*3600e3);
   $("indices").innerHTML =
-    kv("Gesamtgare", fmtH(c.totalH) + (c.prefH ? " + "+fmtH(c.prefH)+" Vorteig" : "")) +
+    kv("Gesamtgare", fmtH(c.totalH + verl) + (verl ? " (Plan "+fmtH(c.totalH)+" + "+fmtH(verl)+")" : "") +
+       (c.prefH ? " + "+fmtH(c.prefH)+" Vorteig" : "")) +
+    (c.yOv ? kv("Backbereit", fmtWhen(fertigD, start) + (verl ? " · "+fmtH(verl)+" nach Plan" :
+       (c.fertig < c.totalH - 0.05 ? " · "+fmtH(c.totalH-c.fertig)+" vor Plan" : " · wie geplant"))) : "") +
     kv("davon Stückgare", fmtH(c.ballH)) +
     kv("Gärleistung gesamt", num(c.Eeff)+" Std. bei 21 °C") +
     kv("davon in den Ballen", num(c.EgBall)+" Std. · warm "+num(c.EgBallWarm)) +

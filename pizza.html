@@ -353,15 +353,15 @@
   <div class="cbody">
     <div class="btnrow">
       <input type="text" id="recName" placeholder="Name, z. B. Napoletana 48h" style="flex:1;min-width:150px">
-      <button class="btn" id="saveBtn">SICHERN</button>
+      <button class="btn" id="saveBtn">REZEPT SICHERN</button>
     </div>
     <div class="saved" id="saved"></div>
     <div class="note">Rezepte, Backprotokoll und Kalibrierung liegen nur in diesem Browser. Über „Link“ oben lässt sich ein einzelner Plan teilen oder als Lesezeichen ablegen.</div>
     <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
-      <div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:8px">Sicherung</div>
+      <div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:2px">Sicherung — alles auf einmal</div><div class="note" style="margin:0 0 8px">Nicht einzelne Rezepte, sondern die komplette Sammlung samt Backprotokoll und Kalibrierung.</div>
       <div class="btnrow">
-        <button class="btn ghost sm" id="expBtn">SPEICHERN</button>
-        <button class="btn ghost sm" id="impBtn">LADEN</button>
+        <button class="btn ghost sm" id="expBtn">IN DATEI SICHERN</button>
+        <button class="btn ghost sm" id="impBtn">AUS DATEI LADEN</button>
         <input type="file" id="impFile" accept=".json,application/json" style="display:none">
       </div>
       <div class="btnrow" style="margin-top:8px">
@@ -1233,8 +1233,8 @@ function renderBackupInfo(){
   if(getCal() !== 1) txt += " · Kalibrierung × "+num(getCal(),2);
   txt += exp ? " · zuletzt gesichert am "+new Date(exp).toLocaleDateString("de-DE") : " · noch nie gesichert";
   const el = $("backupInfo");
-  if(el) el.innerHTML = '<div class="note">'+txt+'.<br>„Sichern“ öffnet auf dem iPhone das Teilen-Menü — dort <b>In Dateien sichern</b> '+
-    'und als Ort <b>iCloud Drive</b> wählen. „Laden“ öffnet den Dateien-Picker, wo iCloud Drive unter „Durchsuchen“ liegt.</div>';
+  if(el) el.innerHTML = '<div class="note">'+txt+'.<br>„In Datei sichern“ öffnet auf dem iPhone das Teilen-Menü — dort <b>In Dateien sichern</b> '+
+    'und als Ort <b>iCloud Drive</b> wählen. „Aus Datei laden“ öffnet den Dateien-Picker, wo iCloud Drive unter „Durchsuchen“ liegt.</div>';
 }
 
 /* ===================== Events ===================== */

@@ -248,13 +248,6 @@
           <option value="0.75">Metallbehälter / Blech</option>
         </select>
       </label>
-      <label class="f"><span class="lab">Kneten</span>
-        <select id="friction">
-          <option value="1">Von Hand</option>
-          <option value="3">Küchenmaschine kurz</option>
-          <option value="6">Spiralkneter / lange</option>
-        </select>
-      </label>
       <label class="f"><span class="lab">Mehltemperatur °C</span><input type="number" id="tflour" min="0" max="35" step="0.5"></label>
       <label class="f"><span class="lab">Küchentemperatur °C</span><input type="number" id="tkitchen" min="5" max="40" step="0.5"></label>
     </div>
@@ -506,7 +499,7 @@ function defaults(){
   const d = new Date(Date.now() + 26*3600e3);
   d.setMinutes(0,0,0); d.setHours(18);
   return Object.assign({
-    bake: toLocal(d), ddt:23, container:"1", friction:"1", tflour:21, tkitchen:21,
+    bake: toLocal(d), ddt:23, container:"1", tflour:21, tkitchen:21,
     yeast:"fresh", scale:"0.1", mode:"simple", tTom:85, tMoz:90,
     /* Ooni-Vorgabe aus dem Classic-Teig für den Halo Pro: 10 min bei 120 U/min,
        10 min Rast, 30 s bei 90 U/min. Am Core auf die nächstliegenden Rastungen
@@ -766,8 +759,19 @@ function buildSteps(c, bake){
     sub:"Fenster "+fmtWhen(earlyD,start)+" – "+fmtWhen(lateD,start)+" · davor Ofen und Stein auf Temperatur bringen" });
   return steps;
 }
+/* Knetwärme aus dem Programm: Ein Spiralkneter trägt Wärme proportional zu
+   Dauer und Drehzahl ein. Kalibriert auf Oonis Standardprogramm (10 min bei
+   123 U/min) = rund 6 °C, was dem üblichen Wert für einen Spiralkneter
+   entspricht. Rastphasen zählen nicht mit. Eine Faustformel, keine Messung —
+   wer die Teigtemperatur nach dem Kneten misst und daneben liegt, korrigiert
+   die Zielteigtemperatur oder das Schüttwasser entsprechend. */
+function knetWaerme(){
+  const work = (S.mix ? S.mix.steps : []).reduce((a,st)=>
+    a + (st.k === "rest" ? 0 : (+st.min||0)*(+st.rpm||0)), 0);
+  return clamp(1 + work/250, 1, 12);
+}
 function waterTemp(){
-  return clamp(3*(+S.ddt) - (+S.tflour) - (+S.tkitchen) - (+S.friction), -5, 60);
+  return clamp(3*(+S.ddt) - (+S.tflour) - (+S.tkitchen) - knetWaerme(), -5, 60);
 }
 
 /* ===================== Render ===================== */
@@ -782,7 +786,7 @@ function render(){
   $("n").value = S.n; $("bw").value = S.bw; $("h").value = S.h; $("salt").value = S.salt;
   $("oil").value = S.oil; $("sugar").value = S.sugar; $("yeast").value = S.yeast;
   $("flourW").value = S.flourW; $("scale").value = S.scale; $("bake").value = S.bake;
-  $("ddt").value = S.ddt; $("container").value = S.container; $("friction").value = S.friction;
+  $("ddt").value = S.ddt; $("container").value = S.container;
   $("tflour").value = S.tflour; $("tkitchen").value = S.tkitchen;
   $("tTom").value = S.tTom; $("tMoz").value = S.tMoz;
   $("bwHint").textContent = c.bw <= 500 ? "≈ " + Math.round(2*Math.sqrt(c.bw/0.42/Math.PI)) + " cm" : "";
@@ -1267,9 +1271,14 @@ function renderMix(){
       '<div class="note">Striche → U/min: '+
       [0.5,1,2,3,4,5,6,7,8,9,10].map(v => (v===0.5?"½":v)+" = "+rpmForStripes(v)).join(" · ")+'</div>';
   }
-  if(mixActive() >= 12){
-    info += '<div class="msg warn"><span class="ic">▲</span><span>Langes Kneten wärmt den Teig spürbar auf. '+
-      'Stell unter <b>Experte → Kneten</b> passend ein, damit die Schüttwassertemperatur stimmt.</span></div>';
+  info += '<div class="msg info"><span class="ic">🌡</span><span>Dieses Programm trägt rechnerisch etwa '+
+    '<b>+'+num(knetWaerme(),1)+' °C</b> Knetwärme ein. Damit der Teig bei '+num(+S.ddt,1)+' °C fertig wird, '+
+    'braucht es Schüttwasser mit etwa <b>'+Math.round(waterTemp())+' °C</b>.'+
+    (waterTemp() < 6 ? ' Also kaltes Wasser mit ein paar Eiswürfeln.' : '')+'</span></div>';
+  if(knetWaerme() >= 9){
+    info += '<div class="msg warn"><span class="ic">▲</span><span>Das ist viel Knetwärme. Prüf die Teigtemperatur '+
+      'nach dem Kneten mit dem Thermometer — wenn sie deutlich über '+num(+S.ddt,1)+' °C liegt, kürzer oder '+
+      'langsamer kneten statt das Wasser noch kälter zu machen.</span></div>';
   }
   $("mixInfo").innerHTML = info;
 }
@@ -1371,7 +1380,7 @@ document.addEventListener("input", e => {
   if(t.id === "pfT"){ S.pf.t = +t.value; render(); return; }
   if(t.id === "newBake" || t.id === "realStart"){ renderReplan(CALC, new Date(S.bake), new Date(STEPS.length?STEPS[0].t:Date.now())); return; }
   const keys = ["n","bw","h","salt","oil","sugar","yeast","flourW","scale","bake","ddt",
-                "container","friction","tflour","tkitchen","tTom","tMoz"];
+                "container","tflour","tkitchen","tTom","tMoz"];
   if(keys.indexOf(t.id) >= 0){
     S[t.id] = (t.type === "number") ? +t.value : t.value;
     if(t.id === "bake") $("newBake").value = t.value;

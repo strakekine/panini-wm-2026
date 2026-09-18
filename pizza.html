@@ -169,7 +169,7 @@
 <main>
 
 <div class="card">
-  <div class="chead"><h2>Vorlage</h2><div class="hint">Startpunkt, danach alles frei änderbar</div></div>
+  <div class="chead"><h2>Vorlage</h2><div class="hint">Setzt Teig, Vorteig, Gärplan und Kneten</div></div>
   <div class="cbody"><div class="chips" id="presets"></div></div>
 </div>
 
@@ -1524,7 +1524,9 @@ document.addEventListener("click", e => {
 
   if(t.dataset.preset){
     const p = PRESETS.find(x => x.key === t.dataset.preset);
-    if(p){ S = sanitize(Object.assign(S, JSON.parse(JSON.stringify(p.s)))); render(); }
+    /* Eine Vorlage ist ein Rezept: Teig, Vorteig, Gärplan und Knetprogramm werden gesetzt.
+       Küchentemperatur, Waage, Hefesorte und Behälter gehören zur Küche und bleiben. */
+    if(p){ S = sanitize(Object.assign(S, JSON.parse(JSON.stringify(p.s)), { mix: defaults().mix })); render(); }
     return;
   }
   if(t.dataset.pf){

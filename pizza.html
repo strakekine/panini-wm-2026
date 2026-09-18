@@ -748,6 +748,20 @@ function messages(c){
   const W = +S.flourW;
   const maxH = W>=380 ? 96 : W>=325 ? 72 : W>=275 ? 48 : 24;
   const realH = c.totalH + c.prefH;
+
+  /* Rückwärtsplanung kann in der Vergangenheit landen: ein 48-h-Plan für morgen
+     Abend müsste gestern begonnen haben. Läuft der Teig schon (S.run), ist ein
+     Start in der Vergangenheit dagegen der Normalfall. */
+  if(!S.run && S.bake){
+    const jetzt = Date.now();
+    const startT = new Date(S.bake).getTime() - realH*3600e3;
+    if(isFinite(startT) && startT < jetzt - 5*60e3){
+      const nowD = new Date(jetzt);
+      out.push(["bad","Dieser Plan hätte um "+fmtWhen(new Date(startT), nowD)+" beginnen müssen, das ist "+
+        fmtH((jetzt-startT)/3600e3)+" her. Für diese Backzeit brauchst du einen kürzeren Plan — "+
+        "mit diesem hier wäre "+fmtWhen(new Date(jetzt + realH*3600e3), nowD)+" der früheste Backzeitpunkt."]);
+    }
+  }
   if(realH > maxH) out.push(["warn","Gesamtgare "+fmtH(realH)+" ist viel für dieses Mehl. Ab etwa "+maxH+" h wird der Teig schlapp und reißt beim Öffnen. Stärkeres Mehl oder kürzer planen."]);
   if(c.EgBallWarm < 0.8) out.push(["bad","Warme Stückgare sehr kurz. Die Ballen sind noch straff und ziehen sich beim Öffnen zurück — nach dem Kühlschrank brauchen sie 2–3 h bei Raumtemperatur."]);
   else if(c.EgBallWarm > 9) out.push(["bad","Warme Stückgare sehr lang. Die Ballen laufen wahrscheinlich breit und reißen beim Öffnen. Später ballen oder die letzte Warmphase kürzen."]);

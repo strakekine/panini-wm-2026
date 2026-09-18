@@ -105,6 +105,11 @@ Skalierung m^(2/3) ist begründet. Einmal messen: Thermometer in einen
 alle 10 Minuten ablesen. Damit wäre das Herzstück der App auf die echte Küche
 geeicht statt auf eine Schätzung. Das bringt mehr als jede weitere Quellenrunde.
 
+Rückwärtsplanung kann in der Vergangenheit landen (48-h-Plan für morgen Abend).
+`messages()` warnt dann rot und nennt den frühesten möglichen Backzeitpunkt;
+die Vorteigzeit zählt mit. Läuft der Teig schon (`S.run`), ist ein Start in der
+Vergangenheit der Normalfall und die Warnung entfällt.
+
 **Zustand:** ein Objekt `S`, ein `render()`, `persist()` nur nach localStorage.
 `sanitize(S)` läuft bei jedem Eingangsweg (Link, localStorage, Sicherung, Rezept,
 Vorlage). Der Plan-Hash `#p=` steht NUR im Teilen-Link und wird beim Start

@@ -2,14 +2,15 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Teigplaner</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Teigplaner">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0e1116">
-<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%230e1116'/><text x='90' y='125' font-size='95' text-anchor='middle'>🍕</text></svg>">
+<!-- iOS nimmt für das Home-Icon nur PNG, kein SVG -->
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,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">
 <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230e1116'/><text x='50' y='75' font-size='65' text-anchor='middle'>🍕</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -177,12 +178,12 @@
   <div class="chead"><h2>Teig</h2><div class="hint" id="doughHint"></div></div>
   <div class="cbody">
     <div class="fields">
-      <label class="f"><span class="lab">Ballen</span><input type="number" id="n" min="1" max="40" step="1"></label>
-      <label class="f"><span class="lab">Ballengewicht <b id="bwHint"></b></span><input type="number" id="bw" min="80" max="1500" step="5"></label>
-      <label class="f"><span class="lab">Hydration %</span><input type="number" id="h" min="45" max="90" step="0.5"></label>
-      <label class="f"><span class="lab">Salz %</span><input type="number" id="salt" min="0" max="5" step="0.1"></label>
-      <label class="f exp"><span class="lab">Öl %</span><input type="number" id="oil" min="0" max="10" step="0.5"></label>
-      <label class="f exp"><span class="lab">Zucker %</span><input type="number" id="sugar" min="0" max="10" step="0.5"></label>
+      <label class="f"><span class="lab">Ballen</span><input type="number" inputmode="decimal" id="n" min="1" max="40" step="1"></label>
+      <label class="f"><span class="lab">Ballengewicht <b id="bwHint"></b></span><input type="number" inputmode="decimal" id="bw" min="80" max="1500" step="5"></label>
+      <label class="f"><span class="lab">Hydration %</span><input type="number" inputmode="decimal" id="h" min="45" max="90" step="0.5"></label>
+      <label class="f"><span class="lab">Salz %</span><input type="number" inputmode="decimal" id="salt" min="0" max="5" step="0.1"></label>
+      <label class="f exp"><span class="lab">Öl %</span><input type="number" inputmode="decimal" id="oil" min="0" max="10" step="0.5"></label>
+      <label class="f exp"><span class="lab">Zucker %</span><input type="number" inputmode="decimal" id="sugar" min="0" max="10" step="0.5"></label>
       <label class="f"><span class="lab">Hefe</span>
         <select id="yeast">
           <option value="fresh">Frischhefe</option>
@@ -232,10 +233,12 @@
   <div class="cbody">
     <div class="fields" style="margin-bottom:14px">
       <label class="f"><span class="lab">Fertig zum Backen am</span><input type="datetime-local" id="bake"></label>
-      <label class="f exp"><span class="lab">Teigtemperatur nach dem Kneten °C</span><input type="number" id="ddt" min="16" max="30" step="0.5"></label>
+      <label class="f exp"><span class="lab">Teigtemperatur nach dem Kneten °C</span><input type="number" inputmode="decimal" id="ddt" min="16" max="30" step="0.5"></label>
     </div>
     <div id="phases"></div>
     <button class="addbtn" id="addPhase">+ Phase hinzufügen</button>
+    <div class="note">Die Kühlschranktemperatur wiegt schwerer als alles andere im Modell: pro Grad ändert sich die Hefemenge um rund 20 %,
+      zwischen 3 und 8 °C liegt fast Faktor 2. Einmal mit Thermometer messen — Fach und Tür unterscheiden sich um mehrere Grad.</div>
     <div class="ballrow">
       <div class="t">In Ballen teilen …</div>
       <div class="chips" id="ballChips"></div>
@@ -248,8 +251,8 @@
           <option value="0.75">Metallbehälter / Blech</option>
         </select>
       </label>
-      <label class="f"><span class="lab">Mehltemperatur °C</span><input type="number" id="tflour" min="0" max="35" step="0.5"></label>
-      <label class="f"><span class="lab">Küchentemperatur °C</span><input type="number" id="tkitchen" min="5" max="40" step="0.5"></label>
+      <label class="f"><span class="lab">Mehltemperatur °C</span><input type="number" inputmode="decimal" id="tflour" min="0" max="35" step="0.5"></label>
+      <label class="f"><span class="lab">Küchentemperatur °C</span><input type="number" inputmode="decimal" id="tkitchen" min="5" max="40" step="0.5"></label>
     </div>
   </div>
 </div>
@@ -286,9 +289,10 @@
   <div class="cbody">
     <div class="note" style="margin-top:0">Der Teig läuft schon und der Termin wackelt? Neue Backzeit eintragen — der Rechner
       verrechnet, was bis jetzt an Gärung gelaufen ist, und sagt, wie die Restzeit temperiert werden muss.</div>
+    <div class="btnrow" style="margin-top:10px" id="runRow"></div>
     <div class="fields" style="margin-top:12px">
-      <label class="f"><span class="lab">Neue Backzeit</span><input type="datetime-local" id="newBake"></label>
       <label class="f"><span class="lab">Teig angesetzt am</span><input type="datetime-local" id="realStart"></label>
+      <label class="f"><span class="lab">Neue Backzeit</span><input type="datetime-local" id="newBake"></label>
     </div>
     <div id="replanOut" style="margin-top:12px"></div>
   </div>
@@ -307,8 +311,8 @@
   <summary>Belag und Einkauf <span class="hint">skaliert mit</span></summary>
   <div class="cbody">
     <div class="fields" style="margin-bottom:12px">
-      <label class="f"><span class="lab">Tomaten g/Pizza</span><input type="number" id="tTom" min="0" max="300" step="5"></label>
-      <label class="f"><span class="lab">Mozzarella g/Pizza</span><input type="number" id="tMoz" min="0" max="300" step="5"></label>
+      <label class="f"><span class="lab">Tomaten g/Pizza</span><input type="number" inputmode="decimal" id="tTom" min="0" max="300" step="5"></label>
+      <label class="f"><span class="lab">Mozzarella g/Pizza</span><input type="number" inputmode="decimal" id="tMoz" min="0" max="300" step="5"></label>
     </div>
     <table class="ing" id="shop"></table>
     <div class="note">Richtwerte für eine 28-cm-Pizza: 70–90 g passierte Tomaten, 80–100 g Fior di latte gut abgetropft,
@@ -406,6 +410,11 @@
    Zweite Spur "Reifung" (Enzyme, Proteolyse, Aroma) reagiert flacher
    auf Temperatur und läuft in der Kälte relativ gesehen weiter.
 ====================================================== */
+/* Tmin = −6 ist ein notionaler Ratkowsky-Parameter, kein Gefrierpunkt der
+   Hefe. Er ist so gewählt, dass rGas(4)/rGas(20) ≈ 0,15 herauskommt — das
+   ist die Bäckerregel "24 h Kühlschrank ≈ 3–4 h Raumtemperatur". Reines
+   Q10 gäbe 0,26 (zu schnell), Tmin = −1 gäbe 0,06 (zu langsam). Zwischen
+   4 und 14 °C ergibt sich ein effektiver Q10 von 4. */
 const TREF = 21, Q10_GAS = 2.3, Q10_MAT = 1.7;
 const TMIN_GAS = -6, TMIN_MAT = -12, TCOLD = 15;
 const R15_GAS = Math.pow(Q10_GAS, (TCOLD-TREF)/10);
@@ -421,20 +430,19 @@ function rMat(T){
   const f = Math.max(0,(T-TMIN_MAT))/(TCOLD-TMIN_MAT);
   return R15_MAT * f * f;
 }
-/* Umkehrung: welche Temperatur ergibt diese Geschwindigkeit? */
-function tempForRate(r){
-  if(r >= R15_GAS) return TREF + 10*Math.log(r)/Math.log(Q10_GAS);
-  return TMIN_GAS + (TCOLD-TMIN_GAS)*Math.sqrt(Math.max(r,0)/R15_GAS);
-}
 /* Hefemenge: kalibriert auf 8 h bei 20 °C = 0,6 % Frischhefe.
-   Exponent > 1, weil Hefe sich vermehrt: eine doppelt so lange Gare
-   braucht weniger als die halbe Hefemenge. Ergibt 24 h 0,36 %,
-   48 h 0,26 %, 72 h 0,17 % — deckt sich mit gängigen Rezepten. */
+   Exponent > 1: eine doppelt so lange Gare braucht weniger als die halbe
+   Hefemenge — teils weil Hefe sich vermehrt, teils weil ein reifer Teig
+   mit weniger Gas backfertig ist. Die Potenzfunktion ist ein Fit an
+   Rezepte, kein Wachstumsmodell; sie gilt für E zwischen etwa 2 und 30
+   Referenzstunden. Italienische Rechner (Rafcalc) nutzen 1,2 und landen
+   2–3× niedriger — beide Schulen backen gute Pizza, der Endpunkt ist ein
+   anderer. Ergibt 24 h 0,36 %, 48 h 0,26 %, 72 h 0,17 %. */
 const YK = 0.6 * Math.pow(8*rGas(20), 1.55);
-function freshPct(E){ return YK / Math.pow(Math.max(E,0.5), 1.55); }
+function freshPct(E){ return YK / Math.pow(Math.max(E,2), 1.55); }   /* unter E = 2 (≈ 4,5 %) ist die Formel nicht mehr gemeint */
 /* Sauerteig: Anstellgut in % des Mehls, kalibriert auf 20 % bei 8 h / 24 °C. */
 const SK = 20 * Math.pow(8*rGas(24), 1.2);
-function starterPct(E){ return clamp(SK / Math.pow(Math.max(E,0.5), 1.2), 3, 40); }
+function starterPct(E){ return clamp(SK / Math.pow(Math.max(E,2), 1.2), 3, 40); }
 
 /* Newtonsche Abkühlung. tau skaliert mit m^(2/3): ein 250-g-Ballen
    ist in gut einer Stunde durch, 1,5 kg brauchen 3–5 h. */
@@ -442,12 +450,18 @@ function tauH(massG, containerF){
   return 1.1 * Math.pow(Math.max(massG,50)/260, 2/3) * containerF;
 }
 
+/* Biga: die Gasformel unterschätzt den Hefebedarf eines festen, kühlen Vorteigs
+   um rund das Vierfache. Praxisstandard (Giorilli) ist 1 % Frischhefe bei 44 %
+   Hydration, 16–18 h bei 18 °C — daran ist der Faktor geeicht (18 h / 17 °C ≈ 0,9 %). */
+const BIGA_F = 3.5;
 const YCONV = { fresh:1, instant:1/2.8, adry:1/2.0 };
 const YNAME = { fresh:"Frischhefe", instant:"Trockenhefe instant", adry:"Trockenhefe aktiv" };
-function saltF(s){ return Math.max(0.80, 1 - 0.035*Math.max(0,s-2)); }
+function saltF(s){ return clamp(1 - 0.035*(s-2), 0.80, 1.07); }   /* 0 % Salz gärt ~7 % schneller, Kalibrierpunkt bei 2 % */
 function sugarF(z){ return z<=0 ? 1 : (z<=5 ? 1 + 0.03*z : 1.15 - 0.02*(z-5)); }
 function hydF(h){ return h<60 ? 0.93 + 0.012*(h-55) : (h<=70 ? 1 : Math.min(1.08, 1+0.006*(h-70))); }
 function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+/* Zahl oder Ersatzwert — 0 ist eine gültige Zahl (0 °C!), "" und NaN nicht. */
+function numOr(v,d){ return (v === "" || v === null || v === undefined || !isFinite(+v)) ? d : +v; }
 
 const PF = {
   none:   { name:"Direktteig", hyd:0 },
@@ -526,18 +540,35 @@ function setCal(v){ try{ localStorage.setItem(KEY+"_cal", String(clamp(v,0.5,2))
 function getLog(){ try{ return JSON.parse(localStorage.getItem(KEY+"_log")||"[]"); }catch(e){ return []; } }
 function setLog(l){ try{ localStorage.setItem(KEY+"_log", JSON.stringify(l.slice(-20))); }catch(e){} }
 
+/* Alles, was von außen kommt (Link, localStorage, Sicherung, Rezept), läuft hier durch. */
+function sanitize(s){
+  if(!Array.isArray(s.phases) || !s.phases.length) s.phases = [{h:2,t:21},{h:6,t:21}];
+  s.phases = s.phases.map(p => ({ h: clamp(numOr(p && p.h, 2), 0, 120), t: clamp(numOr(p && p.t, 21), -5, 45) }));
+  if(!s.pf || typeof s.pf !== "object" || !PF[s.pf.type]) s.pf = { type:"none" };
+  if(!s.mix || !Array.isArray(s.mix.steps) || !s.mix.steps.length) s.mix = defaults().mix;
+  s.mix.steps = s.mix.steps.filter(st => st && typeof st === "object");
+  if(!s.mix.steps.length) s.mix = defaults().mix;
+  s.ballAfter = clamp(s.ballAfter|0, 0, s.phases.length-1);
+  if(!YCONV[s.yeast]) s.yeast = "fresh";
+  if(s.run && (!s.run.start || !s.run.plan || !Array.isArray(s.run.plan.phases))) delete s.run;
+  return s;
+}
 (function boot(){
   const m = location.hash.match(/p=([A-Za-z0-9+/=_-]+)/);
-  if(m){ const s = decodeState(m[1]); if(s && s.phases) S = Object.assign(defaults(), s); }
+  if(m){
+    const s = decodeState(m[1]); if(s && s.phases) S = Object.assign(defaults(), s);
+    /* Hash sofort entfernen: ein Home-Bildschirm-Lesezeichen speichert die volle URL
+       und würde sonst bei jedem Start diesen Plan statt des letzten Stands laden. */
+    try { history.replaceState(null,"",location.pathname+location.search); } catch(e){}
+  }
   else { try{ const s = JSON.parse(localStorage.getItem(KEY+"_last")||"null"); if(s && s.phases) S = Object.assign(defaults(), s); }catch(e){} }
-  if(!Array.isArray(S.phases) || !S.phases.length) S.phases = [{h:2,t:21},{h:6,t:21}];
-  if(!S.pf || !PF[S.pf.type]) S.pf = { type:"none" };
-  if(!S.mix || !Array.isArray(S.mix.steps) || !S.mix.steps.length) S.mix = defaults().mix;
-  S.ballAfter = clamp(S.ballAfter|0, 0, S.phases.length-1);
+  sanitize(S);
 })();
 function persist(){
   try { localStorage.setItem(KEY+"_last", JSON.stringify(S)); } catch(e){}
-  try { history.replaceState(null,"","#p="+encodeState()); } catch(e){}
+}
+function shareURL(){
+  return location.origin + location.pathname + location.search + "#p=" + encodeState();
 }
 
 /* ===================== Rechnen ===================== */
@@ -550,7 +581,7 @@ function simulate(phases, ballAfter, total, bw, ddt, contF){
     const isBall = i >= ballAfter;
     const tau = tauH(isBall ? bw : total, p.t < 15 ? contF : 1);
     const k = 1 - Math.exp(-dt/tau);
-    const steps = Math.max(1, Math.round(p.h/dt));
+    const steps = Math.round(p.h/dt);
     for(let s=0;s<steps;s++){
       T += (p.t - T)*k;
       const g = rGas(T)*dt;
@@ -563,17 +594,18 @@ function simulate(phases, ballAfter, total, bw, ddt, contF){
   return { Eg, Em, EgBall, EgBallWarm, track, endT:T };
 }
 
-function calc(){
-  const n = clamp(+S.n||1,1,40), bw = clamp(+S.bw||250,80,1500);
+function calc(st){
+  st = st || S;
+  const n = clamp(+st.n||1,1,40), bw = clamp(+st.bw||250,80,1500);
   const total = n*bw;
-  const h = +S.h||62, salt = +S.salt||0, oil = +S.oil||0, sugar = +S.sugar||0;
+  const h = +st.h||62, salt = +st.salt||0, oil = +st.oil||0, sugar = +st.sugar||0;
   const flour = total/(1 + (h+salt+oil+sugar)/100);
   const water = flour*h/100;
 
-  const contF = +S.container||1;
-  const phases = S.phases.map(p=>({ h: clamp(+p.h||0,0,120), t: clamp(+p.t||20,-5,45) }));
-  const ballAfter = clamp(S.ballAfter|0, 0, phases.length-1);
-  const sim = simulate(phases, ballAfter, total, bw, +S.ddt||23, contF);
+  const contF = +st.container||1;
+  const phases = st.phases.map(p=>({ h: clamp(numOr(p.h,0),0,120), t: clamp(numOr(p.t,20),-5,45) }));
+  const ballAfter = clamp(st.ballAfter|0, 0, phases.length-1);
+  const sim = simulate(phases, ballAfter, total, bw, +st.ddt||23, contF);
   const totalH = phases.reduce((a,p)=>a+p.h,0);
 
   const corr = saltF(salt)*sugarF(sugar)*hydF(h);
@@ -581,23 +613,23 @@ function calc(){
   const cal = getCal();
 
   /* --- Vorteig --- */
-  const pfType = (S.pf && S.pf.type) || "none";
-  const pfDef = PF[pfType];
-  const pf = { type:pfType, name:pfDef.name };
-  let mainFlour = flour, mainWater = water, EmatTotal = sim.Em;
+  const pfType = (st.pf && st.pf.type) || "none";
+  const pfDef = PF[pfType] || PF.none;
+  const pf = { type:pfDef === PF.none ? "none" : pfType, name:pfDef.name };
+  let mainFlour = flour, mainWater = water, EmatTotal = sim.Em, EgAll = sim.Eg;
   let yPctTotal = freshPct(Eeff) * cal;   /* Frischhefe in % des Gesamtmehls */
   let yPctMain = yPctTotal, pfYeastG = 0, pfCovered = 0;
 
-  if(pfType === "poolish" || pfType === "biga"){
-    pf.share = clamp(+S.pf.share || pfDef.share, 5, 100);
-    pf.hyd = clamp(+S.pf.hyd || pfDef.hyd, 40, 120);
-    pf.h = clamp(+S.pf.h || pfDef.h, 2, 48);
-    pf.t = clamp(+S.pf.t || pfDef.t, 2, 32);
+  if(pf.type === "poolish" || pf.type === "biga"){
+    pf.share = clamp(+st.pf.share || pfDef.share, 5, 100);
+    pf.hyd = clamp(+st.pf.hyd || pfDef.hyd, 40, 120);
+    pf.h = clamp(+st.pf.h || pfDef.h, 2, 48);
+    pf.t = clamp(+st.pf.t || pfDef.t, 2, 32);
     pf.flour = flour * pf.share/100;
     pf.water = pf.flour * pf.hyd/100;
     pf.Eg = pf.h * rGas(pf.t);
     pf.Em = pf.h * rMat(pf.t);
-    pf.yPct = freshPct(pf.Eg) * cal;                 /* % des Vorteigmehls */
+    pf.yPct = freshPct(pf.Eg) * cal * (pf.type === "biga" ? BIGA_F : 1);   /* % des Vorteigmehls */
     pf.yeastG = pf.flour * pf.yPct/100;
     pf.weight = pf.flour + pf.water + pf.yeastG;
     /* Der reife Vorteig bringt eine vermehrte Hefepopulation mit. */
@@ -607,9 +639,10 @@ function calc(){
     mainFlour = flour - pf.flour;
     mainWater = water - pf.water;
     EmatTotal = sim.Em + pf.Em * (pf.share/100);
+    EgAll = sim.Eg + pf.Eg * (pf.share/100);        /* Reifegrad: Vorteig in Zähler UND Nenner */
     pfYeastG = pf.yeastG;
-  } else if(pfType === "sour"){
-    pf.hyd = clamp(+S.pf.hyd || 100, 50, 150);
+  } else if(pf.type === "sour"){
+    pf.hyd = clamp(+st.pf.hyd || 100, 50, 150);
     pf.pct = starterPct(Eeff) * cal;                 /* mehr Anstellgut = schneller */
     pf.weight = flour * pf.pct/100;
     pf.flour = pf.weight/(1 + pf.hyd/100);
@@ -620,9 +653,10 @@ function calc(){
     EmatTotal = sim.Em * 1.15;                       /* Säuerung reift zusätzlich */
   }
 
-  const yG = flour * (yPctMain * (YCONV[S.yeast]||1))/100;
-  const yPctShown = yPctMain * (YCONV[S.yeast]||1);
-  const pfYeastShown = pfYeastG * (YCONV[S.yeast]||1);
+  const yconv = YCONV[st.yeast] || 1;
+  const yG = flour * (yPctMain * yconv)/100;
+  const yPctShown = yPctMain * yconv;
+  const pfYeastShown = pfYeastG * yconv;
 
   /* Backfenster */
   const rEnd = rGas(sim.endT);
@@ -633,11 +667,11 @@ function calc(){
   return { n,bw,total,flour,water,h,salt,oil,sugar,
     saltG: flour*salt/100, oilG: flour*oil/100, sugarG: flour*sugar/100,
     mainFlour, mainWater, pf, pfCovered, yPctTotal, yPctMain, yPctShown, yG, pfYeastShown,
-    Eg: sim.Eg, Em: EmatTotal, Eeff, EgBall: sim.EgBall, EgBallWarm: sim.EgBallWarm,
+    Eg: sim.Eg, Em: EmatTotal, Eeff, EgBall: sim.EgBall, EgBallWarm: sim.EgBallWarm, endT: sim.endT,
     corr, cal, phases, ballAfter, totalH, track: sim.track,
     ballH: phases.slice(ballAfter).reduce((a,p)=>a+p.h,0),
-    early, late, Rip: EmatTotal/Math.max(sim.Eg,0.01),
-    prefH: (pfType==="poolish"||pfType==="biga") ? pf.h : 0 };
+    early, late, Rip: EmatTotal/Math.max(EgAll,0.01),
+    prefH: (pf.type==="poolish"||pf.type==="biga") ? pf.h : 0 };
 }
 
 /* ===================== Hinweise ===================== */
@@ -647,7 +681,7 @@ function messages(c){
   const maxH = W>=380 ? 96 : W>=325 ? 72 : W>=275 ? 48 : 24;
   const realH = c.totalH + c.prefH;
   if(realH > maxH) out.push(["warn","Gesamtgare "+fmtH(realH)+" ist viel für dieses Mehl. Ab etwa "+maxH+" h wird der Teig schlapp und reißt beim Öffnen. Stärkeres Mehl oder kürzer planen."]);
-  if(c.EgBallWarm < 1.0) out.push(["bad","Warme Stückgare sehr kurz. Die Ballen sind noch straff und ziehen sich beim Öffnen zurück — nach dem Kühlschrank brauchen sie mindestens 2 h bei Raumtemperatur."]);
+  if(c.EgBallWarm < 0.8) out.push(["bad","Warme Stückgare sehr kurz. Die Ballen sind noch straff und ziehen sich beim Öffnen zurück — nach dem Kühlschrank brauchen sie 2–3 h bei Raumtemperatur."]);
   else if(c.EgBallWarm > 9) out.push(["bad","Warme Stückgare sehr lang. Die Ballen laufen wahrscheinlich breit und reißen beim Öffnen. Später ballen oder die letzte Warmphase kürzen."]);
   else if(c.EgBallWarm > 7.5) out.push(["warn","Warme Stückgare am oberen Rand. Ab etwa zwei Stunden vor dem Backen regelmäßig anschauen."]);
   if(c.EgBall > 16) out.push(["warn","Sehr lange Stückgare insgesamt. Ballen in der Box im Auge behalten, sie können zusammenwachsen und breitlaufen."]);
@@ -664,7 +698,7 @@ function messages(c){
   if(c.h > 75) out.push(["warn","Hydration "+c.h+" % ist hoch. Braucht starkes Mehl und geübte Hände beim Öffnen."]);
   if(c.salt > 3.2) out.push(["warn","Salz "+c.salt+" % liegt über dem üblichen Bereich von 2–3 %."]);
   if(c.salt < 1.5) out.push(["warn","Salz "+c.salt+" % ist wenig — der Teig gärt schneller als geplant und schmeckt flach."]);
-  if(c.Rip > 1.55) out.push(["warn","Sehr weit gereift im Verhältnis zur Gasbildung. Aromatisch, aber der Kleber baut ab: der Teig wird weich und schwer zu handhaben."]);
+  if(c.Rip > 1.55) out.push(["info","Sehr weit gereift im Verhältnis zur Gasbildung. Aromatisch, aber der Kleber baut ab: der Teig wird weich und schwer zu handhaben."]);
   if(c.ballAfter === 0) out.push(["info","Sofort nach dem Kneten ballen — ohne Stockgare fehlt dem Teig Struktur. Üblich sind mindestens 1–2 h im Stück."]);
 
   if(c.mainWater < 0) out.push(["bad","Der Vorteig enthält mehr Wasser, als das Rezept insgesamt hat. Vorteig-Anteil senken oder Hydration erhöhen."]);
@@ -686,7 +720,7 @@ function fmtG(v){
   return (Math.round(v*100)/100).toFixed(2).replace(".",",")+" g";
 }
 function fmtH(v){
-  const h = Math.floor(v+1e-6), m = Math.round((v-h)*60);
+  const tm = Math.round(v*60), h = Math.floor(tm/60), m = tm - 60*h;
   if(m === 0) return h+" h";
   if(h === 0) return m+" min";
   return h+" h "+m+" min";
@@ -707,6 +741,8 @@ function tempColor(t){
 }
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
 function kv(a,b){ return '<div class="kv"><span>'+a+'</span><span>'+b+'</span></div>'; }
+function focusIn(el){ return !!el && el.contains(document.activeElement) && document.activeElement !== el; }
+function typing(){ const a = document.activeElement; return !!a && (a.tagName === "INPUT" || a.tagName === "SELECT" || a.tagName === "TEXTAREA"); }
 
 /* ===================== Ablauf bauen ===================== */
 function buildSteps(c, bake){
@@ -783,12 +819,10 @@ function render(){
   const start = new Date(bake.getTime() - c.totalH*3600e3);
   const now = new Date();
 
-  $("n").value = S.n; $("bw").value = S.bw; $("h").value = S.h; $("salt").value = S.salt;
-  $("oil").value = S.oil; $("sugar").value = S.sugar; $("yeast").value = S.yeast;
-  $("flourW").value = S.flourW; $("scale").value = S.scale; $("bake").value = S.bake;
-  $("ddt").value = S.ddt; $("container").value = S.container;
-  $("tflour").value = S.tflour; $("tkitchen").value = S.tkitchen;
-  $("tTom").value = S.tTom; $("tMoz").value = S.tMoz;
+  /* Ein fokussiertes Feld bekommt keinen Wert zugewiesen — sonst wird "6" beim Tippen
+     von "62" überschrieben und ein geleertes Feld springt auf 0. */
+  ["n","bw","h","salt","oil","sugar","yeast","flourW","scale","bake","ddt","container","tflour","tkitchen","tTom","tMoz"]
+    .forEach(id => { const el = $(id); if(el !== document.activeElement) el.value = S[id]; });
   $("bwHint").textContent = c.bw <= 500 ? "≈ " + Math.round(2*Math.sqrt(c.bw/0.42/Math.PI)) + " cm" : "";
   $("doughHint").textContent = Math.round(c.total)+" g Teig";
   $("expGrid").style.display = S.mode === "expert" ? "grid" : "none";
@@ -800,16 +834,18 @@ function render(){
   /* --- Vorteig --- */
   $("pfChips").innerHTML = Object.keys(PF).map(k =>
     '<button class="chip'+(c.pf.type===k?" on":"")+'" data-pf="'+k+'">'+PF[k].name+'</button>').join("");
-  if(c.pf.type === "poolish" || c.pf.type === "biga"){
+  if(focusIn($("pfFields"))){
+    /* wird gerade bearbeitet: nicht neu bauen, sonst verliert das Feld den Fokus */
+  } else if(c.pf.type === "poolish" || c.pf.type === "biga"){
     $("pfFields").innerHTML = '<div class="fields">'+
-      '<label class="f"><span class="lab">Anteil am Mehl %</span><input type="number" id="pfShare" min="5" max="100" step="5" value="'+c.pf.share+'"></label>'+
-      '<label class="f"><span class="lab">Hydration %</span><input type="number" id="pfHyd" min="40" max="120" step="1" value="'+c.pf.hyd+'"'+(c.pf.type==="poolish"?" disabled":"")+'></label>'+
-      '<label class="f"><span class="lab">Reifezeit h</span><input type="number" id="pfH" min="2" max="48" step="0.5" value="'+c.pf.h+'"></label>'+
-      '<label class="f"><span class="lab">Temperatur °C</span><input type="number" id="pfT" min="2" max="32" step="0.5" value="'+c.pf.t+'"></label>'+
+      '<label class="f"><span class="lab">Anteil am Mehl %</span><input type="number" inputmode="decimal" id="pfShare" min="5" max="100" step="5" value="'+c.pf.share+'"></label>'+
+      '<label class="f"><span class="lab">Hydration %</span><input type="number" inputmode="decimal" id="pfHyd" min="40" max="120" step="1" value="'+c.pf.hyd+'"'+(c.pf.type==="poolish"?" disabled":"")+'></label>'+
+      '<label class="f"><span class="lab">Reifezeit h</span><input type="number" inputmode="decimal" id="pfH" min="2" max="48" step="0.5" value="'+c.pf.h+'"></label>'+
+      '<label class="f"><span class="lab">Temperatur °C</span><input type="number" inputmode="decimal" id="pfT" min="2" max="32" step="0.5" value="'+c.pf.t+'"></label>'+
       '</div>';
   } else if(c.pf.type === "sour"){
     $("pfFields").innerHTML = '<div class="fields">'+
-      '<label class="f"><span class="lab">Hydration Anstellgut %</span><input type="number" id="pfHyd" min="50" max="150" step="5" value="'+c.pf.hyd+'"></label>'+
+      '<label class="f"><span class="lab">Hydration Anstellgut %</span><input type="number" inputmode="decimal" id="pfHyd" min="50" max="150" step="5" value="'+c.pf.hyd+'"></label>'+
       '<label class="f"><span class="lab">Berechnete Menge</span><input type="text" value="'+fmtG(c.pf.weight)+" · "+num(c.pf.pct,0)+' % vom Mehl" disabled></label>'+
       '</div>';
   } else $("pfFields").innerHTML = "";
@@ -818,13 +854,23 @@ function render(){
     : '<div class="note" style="margin-top:12px">Ohne Vorteig. Poolish ist der einfachere Einstieg, Biga gibt mehr Aroma und Struktur, will aber starkes Mehl und kühle Reifung.</div>';
 
   /* --- Phasen --- */
+  const phaseLabel = p => p.t <= 10 ? "Kühlschrank" : p.t <= 16 ? "Kühl" : "Raum";
+  if(focusIn($("phases")) && $("phases").children.length === c.phases.length){
+    /* Tippen läuft: nur Beschriftung und Farbpunkt nachziehen, Inputs stehen lassen. */
+    c.phases.forEach((p,i)=>{
+      const row = $("phases").children[i];
+      row.querySelector(".dot").style.background = tempColor(p.t);
+      row.querySelector(".pname > span:nth-child(2)").textContent = phaseLabel(p);
+      row.querySelector(".ptag").textContent = i>=c.ballAfter ? "Stückgare" : "Stockgare";
+    });
+  } else
   $("phases").innerHTML = c.phases.map((p,i)=>{
-    const label = p.t <= 10 ? "Kühlschrank" : p.t <= 16 ? "Kühl" : "Raum";
+    const label = phaseLabel(p);
     return '<div class="phase" data-i="'+i+'">'+
       '<div class="pname"><span class="dot" style="background:'+tempColor(p.t)+'"></span>'+
         '<span>'+label+'</span><span class="ptag">'+(i>=c.ballAfter?"Stückgare":"Stockgare")+'</span></div>'+
-      '<label class="f"><span class="lab">Stunden</span><input type="number" class="ph" data-k="h" min="0" max="120" step="0.25" value="'+p.h+'"></label>'+
-      '<label class="f"><span class="lab">°C</span><input type="number" class="ph" data-k="t" min="-5" max="45" step="0.5" value="'+p.t+'"></label>'+
+      '<label class="f"><span class="lab">Stunden</span><input type="number" inputmode="decimal" class="ph" data-k="h" min="0" max="120" step="0.25" value="'+p.h+'"></label>'+
+      '<label class="f"><span class="lab">°C</span><input type="number" inputmode="decimal" class="ph" data-k="t" min="-5" max="45" step="0.5" value="'+p.t+'"></label>'+
       '<button class="xbtn" data-del="'+i+'"'+(c.phases.length<2?" disabled":"")+'>✕</button>'+
     '</div>';
   }).join("");
@@ -861,9 +907,9 @@ function render(){
   if(c.pf.type !== "sour"){
     rows += row(YNAME[S.yeast]+(hasPf?" (Hauptteig)":""), c.yG < 0.005 ? "—" : fmtG(c.yG), c.yG < 0.005 ? "" : pct(c.yPctShown));
   }
-  const lo = c.yG*0.7, hi = c.yG*1.4;
+  const lo = c.yG*0.5, hi = c.yG*1.5;
   if(c.pf.type === "sour"){
-    rows += '<tr><td class="sub" colspan="3">Anstellgut-Erwartungsbereich '+fmtG(c.pf.weight*0.7)+' – '+fmtG(c.pf.weight*1.4)+
+    rows += '<tr><td class="sub" colspan="3">Anstellgut-Erwartungsbereich '+fmtG(c.pf.weight*0.5)+' – '+fmtG(c.pf.weight*1.5)+
       '. Sauerteig ist deutlich schwerer vorherzusagen als Hefe — plane Puffer ein.</td></tr>';
   } else if(c.yG >= 0.005){
     rows += '<tr><td class="sub" colspan="3">Hefe-Erwartungsbereich '+fmtG(lo)+' – '+fmtG(hi)+
@@ -923,8 +969,9 @@ function render(){
     kv("Reifegrad", num(c.Rip,2)+" × — "+ripLabel) +
     '<div class="meter"><div style="width:'+clamp((c.Rip-0.8)/0.8*100,3,100)+'%"></div></div>';
   $("ripeNote").innerHTML = "„Gärleistung“ rechnet jede Phase auf Stunden bei 21 °C um — damit sind unterschiedliche Pläne vergleichbar. "+
-    "Der <b>Reifegrad</b> ist das Verhältnis von Teigreifung zu Gasbildung: Werte über 1,3 bekommt man nur über längere kalte Phasen oder einen Vorteig, "+
-    "dort arbeiten die Enzyme relativ zur Hefe weiter. Eine reine Raumtemperaturgare bleibt auch nach 24 h bei etwa 1,0.";
+    "Der <b>Reifegrad</b> ist eine Kennzahl ohne Einheit: das Verhältnis von Teigreifung zu Gasbildung. Werte über 1,3 bekommt man nur über längere kalte Phasen, "+
+    "dort arbeiten die Enzyme relativ zur Hefe weiter. Eine reine Raumtemperaturgare bleibt auch nach 24 h bei etwa 1,0, ein Vorteig verschiebt sie kaum. "+
+    "Die Skala ist eine Tendenzanzeige, keine Messgröße.";
 
   /* --- Belag / Einkauf --- */
   const tom = (+S.tTom||0)*c.n, moz = (+S.tMoz||0)*c.n;
@@ -958,8 +1005,11 @@ function drawTimeline(c, start, now){
   const plotW = W - padL - padR, plotTop = top, plotH = H - top - botH;
   const pre = c.prefH, T = (c.totalH + pre) || 1;
   const xs = h => padL + ((h+pre)/T)*plotW;
-  const temps = c.track.map(p=>p.T).concat(c.phases.map(p=>p.t));
-  const tMin = Math.min.apply(null, temps) - 2, tMax = Math.max.apply(null, temps) + 2;
+  let tMin = Infinity, tMax = -Infinity;
+  c.track.forEach(p=>{ if(p.T < tMin) tMin = p.T; if(p.T > tMax) tMax = p.T; });
+  c.phases.forEach(p=>{ if(p.t < tMin) tMin = p.t; if(p.t > tMax) tMax = p.t; });
+  if(!isFinite(tMin)){ tMin = 0; tMax = 30; }
+  tMin -= 2; tMax += 2;
   const ys = t => plotTop + plotH - ((t - tMin)/Math.max(tMax-tMin,1))*plotH;
 
   let g = "";
@@ -1007,8 +1057,22 @@ function drawTimeline(c, start, now){
 
 /* ===================== Umplanen ===================== */
 function renderReplan(c, bake, start){
-  if(!$("realStart").value) $("realStart").value = toLocal(start);
-  if(!$("newBake").value) $("newBake").value = S.bake;
+  const run = S.run;
+  /* Läuft der Teig, wird gegen den eingefrorenen Plan gerechnet, nicht gegen das, was oben gerade steht. */
+  const cp = run ? calc(run.plan) : c;
+  if(run){
+    $("realStart").value = run.start;
+    $("newBake").value = run.newBake || S.bake;
+  } else {
+    if(!$("realStart").value) $("realStart").value = toLocal(start);
+    if(!$("newBake").value) $("newBake").value = S.bake;
+  }
+  $("runRow").innerHTML = run
+    ? '<span class="note" style="margin:0;flex:1">Plan eingefroren seit '+fmtWhen(new Date(run.start), new Date())+' — Änderungen oben ändern die Berechnung hier nicht.</span>'+
+      '<button class="btn ghost sm" id="runStop">AUFHEBEN</button>'
+    : '<button class="btn sm" id="runStart">TEIG IST ANGESETZT</button>'+
+      '<span class="note" style="margin:0;flex:1">Friert den Plan ein und merkt sich Start und Backzeit auch nach einem Neustart der App.</span>';
+
   const rs = new Date($("realStart").value), nb = new Date($("newBake").value);
   const now = new Date();
   const out = $("replanOut");
@@ -1028,24 +1092,33 @@ function renderReplan(c, bake, start){
   /* Was ist bis jetzt gelaufen? Ursprungsplan bis doneH simulieren. */
   const cut = [];
   let left = doneH;
-  for(const p of c.phases){
+  for(const p of cp.phases){
     if(left <= 0) break;
     cut.push({ h: Math.min(p.h, left), t: p.t });
     left -= p.h;
   }
   const overrun = left > 0 ? left : 0;
   if(overrun > 0 && cut.length) cut[cut.length-1].h += overrun;   /* hängt über: letzte Bedingung hält an */
-  const ballIdx = clamp(c.ballAfter, 0, Math.max(cut.length-1,0));
-  const done = simulate(cut, ballIdx, c.total, c.bw, +S.ddt||23, +S.container||1);
-  const Edone = done.Eg * c.corr;
-  const Erem = c.Eeff - Edone;
-  const share = clamp(Edone/Math.max(c.Eeff,0.01)*100, 0, 999);
+  const contF = +(run ? run.plan.container : S.container) || 1;
+  const ddt = +(run ? run.plan.ddt : S.ddt) || 23;
+  /* Ballen-Index NICHT auf die gelaufenen Phasen klemmen — sonst würde der ungeballte
+     Teig mit der Zeitkonstante eines Ballens gerechnet. */
+  const done = simulate(cut, cp.ballAfter, cp.total, cp.bw, ddt, contF);
+  const balled = cut.length - 1 >= cp.ballAfter;
+  const Edone = done.Eg * cp.corr;
+  const Erem = cp.Eeff - Edone;
+  const share = clamp(Edone/Math.max(cp.Eeff,0.01)*100, 0, 999);
+
+  /* Restgärung wird ab der jetzigen Kerntemperatur simuliert, nicht ab Zieltemperatur:
+     ein Ballen aus dem Kühlschrank braucht eine gute Stunde, bis er überhaupt gärt. */
+  const Erest = (phs, ballIdx) => simulate(phs, ballIdx, cp.total, cp.bw, done.endT, contF).Eg * cp.corr;
+  const solve = (fn, lo, hi) => { for(let i=0;i<40;i++){ const m=(lo+hi)/2; if(fn(m) < Erem) lo = m; else hi = m; } return (lo+hi)/2; };
 
   let body = kv("Bisher gelaufen", fmtH(doneH)+" · "+num(share,0)+" % der Gärleistung") +
              kv("Kerntemperatur jetzt", num(done.endT,1)+" °C") +
              kv("Bis zur neuen Backzeit", fmtH(remH));
 
-  const origBake = new Date(S.bake);
+  const origBake = new Date(run ? run.plan.bake : S.bake);
   const shifted = Math.abs(nb - origBake)/60e3;
 
   let msg;
@@ -1055,7 +1128,8 @@ function renderReplan(c, bake, start){
     msg = ["bad","Der Teig hat sein Gärziel schon erreicht. Sofort so kalt wie möglich stellen, das bremst am stärksten — "+
       "und früher backen, wenn es irgendwie geht. Je länger es jetzt dauert, desto weicher wird er."];
   } else {
-    const tAll = tempForRate(Erem/remH);
+    const oneT = T => Erest([{h:remH, t:T}], balled ? 0 : 1);
+    const tAll = oneT(32) < Erem ? 99 : solve(oneT, -5, 32);
     if(tAll >= 16){
       /* Eine Temperatur reicht, kein Kühlschrank nötig. */
       if(tAll <= 26) msg = ["good","Rest einfach bei etwa <b>"+num(tAll,0)+" °C</b> stehen lassen."];
@@ -1064,35 +1138,35 @@ function renderReplan(c, bake, start){
       else msg = ["bad","Nicht mehr aufholbar: für "+fmtWhen(nb,rs)+" wäre der Teig noch zu jung. Später backen, "+
         "oder mit einem straffen, weniger dehnbaren Teig rechnen."];
     } else {
-      /* Kalt parken und rechtzeitig aufwärmen. Die Warmphase wird reserviert. */
-      const warmH = Math.min(c.bw > 400 ? 3 : 2, remH*0.4);
+      /* Kalt parken und rechtzeitig aufwärmen. Die Warmphase (als Ballen bei 21 °C) wird reserviert,
+         die Kaltphase so temperiert, dass die Summe stimmt. */
+      const warmH = Math.min(cp.bw > 400 ? 3 : 2, remH*0.4);
       const coldH = remH - warmH;
-      const Ewarm = warmH * rGas(21) * 0.8;      /* Ballen sind anfangs noch kalt */
-      const Ecold = Erem - Ewarm;
-      if(Ecold <= 0){
+      const twoT = T => Erest([{h:coldH, t:T},{h:warmH, t:21}], balled ? 0 : 1);
+      const outAt = new Date(nb.getTime() - warmH*3600e3);
+      if(twoT(-5) >= Erem){
         msg = ["warn","Der Teig braucht kaum noch Gärung. Bis kurz vor dem Backen so kalt wie möglich lagern und "+
           "die Ballen nur noch <b>"+fmtH(Math.max(remH*0.3,0.5))+"</b> akklimatisieren lassen — sonst wird er zu weich."];
       } else {
-        const tCold = tempForRate(Ecold/coldH);
-        const outAt = new Date(nb.getTime() - warmH*3600e3);
+        const tCold = twoT(16) < Erem ? tAll : solve(twoT, -5, 16);
         if(tCold < 1){
           msg = ["bad","Selbst im Kühlschrank ist das zu lang: bis "+fmtWhen(nb,rs)+" wäre der Teig überreif. "+
             "Entweder früher backen, oder die Ballen jetzt einfrieren — das ist der einzige echte Notaus."];
         } else if(tCold < 9){
           msg = [tCold < 3 ? "warn" : "good","Ab jetzt in den Kühlschrank bei etwa <b>"+num(tCold,0)+" °C</b>, "+
-            "dann um <b>"+fmtWhen(outAt,rs)+"</b> herausnehmen und "+fmtH(warmH)+" akklimatisieren lassen."+
+            "dann um <b>"+fmtWhen(outAt,rs)+"</b> herausnehmen"+(balled ? "" : ", ballen")+" und "+fmtH(warmH)+" bei Raumtemperatur akklimatisieren lassen."+
             (tCold < 3 ? " Kälter als 3 °C schafft kaum ein Haushaltskühlschrank — falls deiner das nicht kann, plane lieber früher zu backen." : "")];
         } else {
           msg = ["good","Rest kühl parken bei etwa <b>"+num(tCold,0)+" °C</b> — Keller oder kühlster Raum, notfalls Kühlschrank "+
-            "mit früherem Herausnehmen. Um <b>"+fmtWhen(outAt,rs)+"</b> auf Raumtemperatur stellen."];
+            "mit früherem Herausnehmen. Um <b>"+fmtWhen(outAt,rs)+"</b> auf Raumtemperatur stellen"+(balled ? "" : " und ballen")+"."];
         }
       }
     }
   }
   out.innerHTML = body + '<div class="msg '+msg[0]+'" style="margin-top:12px"><span class="ic">'+
     (msg[0]==="bad"?"●":msg[0]==="warn"?"▲":"✓")+'</span><span>'+msg[1]+'</span></div>'+
-    '<div class="note">Gerechnet wird gegen die Gärleistung, die dein ursprünglicher Plan insgesamt vorsah: '+
-    'was bis jetzt gelaufen ist, wird abgezogen, der Rest auf die verbleibende Zeit verteilt. '+
+    '<div class="note">Gerechnet wird gegen die Gärleistung, die dein '+(run ? "eingefrorener" : "ursprünglicher")+' Plan insgesamt vorsah: '+
+    'was bis jetzt gelaufen ist, wird abgezogen, der Rest ab der jetzigen Kerntemperatur auf die verbleibende Zeit simuliert. '+
     'Der Vorschlag hält die Summe konstant — er ersetzt nicht den Blick auf den Teig.</div>';
 }
 
@@ -1101,15 +1175,16 @@ function icsDate(d){
   const p = n => String(n).padStart(2,"0");
   return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+"T"+p(d.getHours())+p(d.getMinutes())+"00";
 }
-function downloadICS(){
+async function downloadICS(btn){
   if(!STEPS.length) return;
   const now = new Date();
+  const planId = String(S.bake||"").replace(/\D/g,"");
   let out = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Teigplaner//DE","CALSCALE:GREGORIAN"];
   STEPS.forEach((s,i)=>{
     const end = new Date(s.t.getTime() + 15*60e3);
     out = out.concat([
       "BEGIN:VEVENT",
-      "UID:teigplaner-"+now.getTime()+"-"+i+"@local",
+      "UID:teigplaner-"+planId+"-"+i+"@local",   /* stabil je Plan und Schritt: Re-Import ersetzt statt verdoppelt */
       "DTSTAMP:"+icsDate(now),
       "DTSTART:"+icsDate(s.t),
       "DTEND:"+icsDate(end),
@@ -1119,7 +1194,17 @@ function downloadICS(){
       "END:VEVENT"]);
   });
   out.push("END:VCALENDAR");
-  const blob = new Blob([out.join("\r\n")], {type:"text/calendar;charset=utf-8"});
+  const text = out.join("\r\n");
+  /* Im Home-Bildschirm-Modus von iOS ist ein Blob-Download unzuverlässig — wie bei der
+     Sicherung zuerst das Teilen-Menü, dort landet die Datei direkt im Kalender. */
+  try {
+    const file = new File([text], "teigplan.ics", { type:"text/calendar" });
+    if(navigator.canShare && navigator.canShare({ files:[file] })){
+      await navigator.share({ files:[file], title:"Teigplan" });
+      flash(btn, "GETEILT"); return;
+    }
+  } catch(e){ if(e && e.name === "AbortError") return; }
+  const blob = new Blob([text], {type:"text/calendar;charset=utf-8"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "teigplan.ics";
@@ -1159,6 +1244,19 @@ function renderKitchen(){
   ing += "<br>Wasser ≈ <b>"+Math.round(waterTemp())+" °C</b> · "+c.n+" × "+Math.round(c.bw)+" g";
   $("kIng").innerHTML = ing;
 }
+/* Bildschirm anlassen, solange der Küchenmodus offen ist (Safari ab iOS 16.4). */
+let WAKE = null;
+async function wakeLock(on){
+  try {
+    if(on && navigator.wakeLock && !WAKE){
+      WAKE = await navigator.wakeLock.request("screen");
+      WAKE.addEventListener("release", ()=>{ WAKE = null; });
+    } else if(!on && WAKE){ await WAKE.release(); WAKE = null; }
+  } catch(e){ WAKE = null; }
+}
+document.addEventListener("visibilitychange", ()=>{
+  if(!document.hidden && $("kitchen").classList.contains("show")) wakeLock(true);
+});
 function countdown(ms){
   if(ms <= 0) return "jetzt";
   const h = Math.floor(ms/3600e3), m = Math.floor(ms/60e3)%60;
@@ -1171,8 +1269,8 @@ function renderLog(){
   const cal = getCal(), log = getLog();
   $("calHint").textContent = cal === 1 ? "noch nicht kalibriert" : "Hefe × "+num(cal,2);
   $("logList").innerHTML = (log.length
-    ? log.slice().reverse().map((e,i)=>'<div class="logrow"><span class="d">'+e.d+'</span>'+
-        '<span class="r">'+LOGNAME[e.r]+(e.m?'<br><span style="color:var(--muted);font-size:11.5px">'+esc(e.m)+'</span>':'')+
+    ? log.slice().reverse().map((e,i)=>'<div class="logrow"><span class="d">'+esc(e.d||"")+'</span>'+
+        '<span class="r">'+(LOGNAME[e.r]||esc(e.r||"?"))+(e.m?'<br><span style="color:var(--muted);font-size:11.5px">'+esc(e.m)+'</span>':'')+
         '</span><button data-dellog="'+(log.length-1-i)+'">✕</button></div>').join("")
     : '<div class="note" style="margin:0">Noch keine Einträge.</div>')+
     (cal !== 1 ? '<div class="btnrow" style="margin-top:10px"><button class="btn ghost sm" id="calReset">KALIBRIERUNG ZURÜCKSETZEN</button></div>' : "");
@@ -1244,6 +1342,9 @@ function mixActive(){
 }
 function renderMix(){
   const m = S.mix;
+  if(focusIn($("mixSteps")) && $("mixSteps").children.length === m.steps.length){
+    m.steps.forEach((st,i)=>{ const b = $("mixSteps").children[i].querySelector(".lab b"); if(b) b.textContent = st.rpm+" U/min"; });
+  } else
   $("mixSteps").innerHTML = m.steps.map((st,i)=>{
     const rest = st.k === "rest";
     return '<div class="phase mix" data-i="'+i+'">'+
@@ -1252,8 +1353,8 @@ function renderMix(){
         '<select class="mx" data-k="k">'+
           '<option value="mix"'+(rest?"":" selected")+'>Mischen</option>'+
           '<option value="rest"'+(rest?" selected":"")+'>Rast</option></select></label>'+
-      '<label class="f"><span class="lab">Minuten</span><input type="number" class="mx" data-k="min" min="0" max="60" step="0.5" value="'+st.min+'"></label>'+
-      '<label class="f"><span class="lab">Striche</span><input type="number" class="mx" data-k="st" min="0.5" max="10" step="0.5" value="'+
+      '<label class="f"><span class="lab">Minuten</span><input type="number" inputmode="decimal" class="mx" data-k="min" min="0" max="60" step="0.5" value="'+st.min+'"></label>'+
+      '<label class="f"><span class="lab">Striche</span><input type="number" inputmode="decimal" class="mx" data-k="st" min="0.5" max="10" step="0.5" value="'+
         (rest ? "" : st.st)+'"'+(rest?" disabled":"")+'></label>'+
       '<button class="xbtn" data-delmix="'+i+'"'+(m.steps.length<2?" disabled":"")+'>✕</button>'+
     '</div>';
@@ -1339,7 +1440,7 @@ function applyBackup(raw, btn){
   if(rc) saveRecipes(Object.assign(loadRecipes(), d.recipes));
   if(Array.isArray(d.log)) setLog(d.log);
   if(typeof d.cal === "number") setCal(d.cal);
-  if(d.last && d.last.phases) S = Object.assign(defaults(), d.last);
+  if(d.last && d.last.phases) S = sanitize(Object.assign(defaults(), d.last));
   if(d.exported){ try{ localStorage.setItem(KEY+"_exp", d.exported); }catch(e){} }
   render();
   flash(btn, "GELADEN");
@@ -1378,7 +1479,10 @@ document.addEventListener("input", e => {
   if(t.id === "pfHyd"){ S.pf.hyd = +t.value; render(); return; }
   if(t.id === "pfH"){ S.pf.h = +t.value; render(); return; }
   if(t.id === "pfT"){ S.pf.t = +t.value; render(); return; }
-  if(t.id === "newBake" || t.id === "realStart"){ renderReplan(CALC, new Date(S.bake), new Date(STEPS.length?STEPS[0].t:Date.now())); return; }
+  if(t.id === "newBake" || t.id === "realStart"){
+    if(S.run){ S.run[t.id === "newBake" ? "newBake" : "start"] = t.value; persist(); }
+    renderReplan(CALC, new Date(S.bake), new Date(STEPS.length?STEPS[0].t:Date.now())); return;
+  }
   const keys = ["n","bw","h","salt","oil","sugar","yeast","flourW","scale","bake","ddt",
                 "container","tflour","tkitchen","tTom","tMoz"];
   if(keys.indexOf(t.id) >= 0){
@@ -1406,7 +1510,7 @@ document.addEventListener("click", e => {
   if(t.dataset.mode){ S.mode = t.dataset.mode; render(); return; }
   if(t.dataset.preset){
     const p = PRESETS.find(x => x.key === t.dataset.preset);
-    if(p){ S = Object.assign(S, JSON.parse(JSON.stringify(p.s))); render(); }
+    if(p){ S = sanitize(Object.assign(S, JSON.parse(JSON.stringify(p.s)))); render(); }
     return;
   }
   if(t.dataset.pf){
@@ -1440,10 +1544,17 @@ document.addEventListener("click", e => {
     log.push({ d: new Date().toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"}), r: t.dataset.log,
                 m: mixSummary() });
     setLog(log);
-    if(t.dataset.log === "over") setCal(getCal()*0.85);
+    if(t.dataset.log === "over") setCal(getCal()/1.15);
     if(t.dataset.log === "young") setCal(getCal()*1.15);
     render(); return;
   }
+  if(t.id === "runStart"){
+    /* Plan einfrieren: Umplanen rechnet ab jetzt gegen diese Kopie, egal was oben geändert wird. */
+    const plan = JSON.parse(JSON.stringify(S)); delete plan.run;
+    S.run = { start: $("realStart").value || toLocal(new Date()), newBake: $("newBake").value || S.bake, plan: plan };
+    render(); return;
+  }
+  if(t.id === "runStop"){ delete S.run; render(); return; }
   if(t.id === "calReset"){ setCal(1); render(); return; }
   if(t.dataset.dellog !== undefined){
     const log = getLog(); log.splice(+t.dataset.dellog,1); setLog(log); renderLog(); return;
@@ -1456,10 +1567,11 @@ document.addEventListener("click", e => {
   }
   if(t.dataset.load){
     const s = loadRecipes()[t.dataset.load];
-    if(s){ const keep = S.bake; S = Object.assign(defaults(), s); S.bake = keep; render(); window.scrollTo({top:0,behavior:"smooth"}); }
+    if(s){ const keep = S.bake, run = S.run; S = sanitize(Object.assign(defaults(), s)); S.bake = keep; if(run) S.run = run; render(); window.scrollTo({top:0,behavior:"smooth"}); }
     return;
   }
   if(t.dataset.drop){
+    if(!confirm("Rezept „"+t.dataset.drop+"“ löschen?")) return;
     const r = loadRecipes(); delete r[t.dataset.drop]; saveRecipes(r); renderSaved(); return;
   }
   if(t.id === "expBtn"){ exportBackup(t); return; }
@@ -1476,12 +1588,12 @@ document.addEventListener("click", e => {
     if(raw) applyBackup(raw, t);
     return;
   }
-  if(t.id === "icsBtn"){ downloadICS(); return; }
-  if(t.id === "kitchenBtn"){ $("kitchen").classList.add("show"); renderKitchen(); return; }
-  if(t.id === "kClose"){ $("kitchen").classList.remove("show"); return; }
+  if(t.id === "icsBtn"){ downloadICS(t); return; }
+  if(t.id === "kitchenBtn"){ $("kitchen").classList.add("show"); renderKitchen(); wakeLock(true); return; }
+  if(t.id === "kClose"){ $("kitchen").classList.remove("show"); wakeLock(false); return; }
   if(t.id === "linkBtn"){
     persist();
-    const url = location.href;
+    const url = shareURL();
     const done = () => { t.textContent = "KOPIERT"; setTimeout(()=>{ t.textContent = "LINK"; }, 1400); };
     if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, done);
     else prompt("Link:", url);
@@ -1490,7 +1602,9 @@ document.addEventListener("click", e => {
 });
 
 render();
-setInterval(()=>{ render(); renderKitchen(); }, 30000);
+/* Minütlich nachziehen ("jetzt"-Markierung, Countdown) — aber nie mitten ins Tippen hinein. */
+setInterval(()=>{ if(!typing()) render(); renderKitchen(); }, 30000);
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden){ if(!typing()) render(); renderKitchen(); } });
 })();
 </script>
 </body>

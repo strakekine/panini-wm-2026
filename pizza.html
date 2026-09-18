@@ -122,10 +122,12 @@
   .saved .s button{background:transparent;border:0;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 5px;font-family:inherit}
   .saved .s span{cursor:pointer}
   .note{font-size:12px;color:var(--muted);line-height:1.45;margin-top:10px}
-  .exp, label.f.exp{display:none}
-  body.expert .exp{display:block}
-  body.expert label.f.exp{display:flex}
-  body.expert .exp.row{display:flex}
+  details.more{margin-top:12px}
+  details.more > summary{list-style:none;cursor:pointer;font-size:12.5px;color:var(--muted);font-weight:600;padding:6px 0}
+  details.more > summary::-webkit-details-marker{display:none}
+  details.more > summary::before{content:"▸ ";}
+  details.more[open] > summary::before{content:"▾ ";}
+  details.more > .fields{margin-top:8px}
   .foot{color:var(--muted);font-size:11.5px;text-align:center;padding:18px 12px 0;line-height:1.5}
 
   .logrow{display:flex;gap:8px;align-items:center;font-size:13px;padding:7px 0;border-bottom:1px solid var(--line)}
@@ -156,10 +158,6 @@
     <h1>TEIGPLANER</h1>
     <div class="sub">Gärplan mit beliebig vielen Phasen — du bestimmst, wann geballt wird.</div>
     <div class="bar">
-      <div class="seg" id="modeSeg">
-        <button data-mode="simple">Einfach</button>
-        <button data-mode="expert">Experte</button>
-      </div>
       <button class="btn ghost sm" id="kitchenBtn">KÜCHE</button>
       <button class="btn ghost sm" id="icsBtn">KALENDER</button>
       <button class="btn ghost sm" id="linkBtn">LINK</button>
@@ -182,8 +180,8 @@
       <label class="f"><span class="lab">Ballengewicht <b id="bwHint"></b></span><input type="number" inputmode="decimal" id="bw" min="80" max="1500" step="5"></label>
       <label class="f"><span class="lab">Hydration %</span><input type="number" inputmode="decimal" id="h" min="45" max="90" step="0.5"></label>
       <label class="f"><span class="lab">Salz %</span><input type="number" inputmode="decimal" id="salt" min="0" max="5" step="0.1"></label>
-      <label class="f exp"><span class="lab">Öl %</span><input type="number" inputmode="decimal" id="oil" min="0" max="10" step="0.5"></label>
-      <label class="f exp"><span class="lab">Zucker %</span><input type="number" inputmode="decimal" id="sugar" min="0" max="10" step="0.5"></label>
+      <label class="f"><span class="lab">Öl %</span><input type="number" inputmode="decimal" id="oil" min="0" max="10" step="0.5"></label>
+      <label class="f"><span class="lab">Zucker %</span><input type="number" inputmode="decimal" id="sugar" min="0" max="10" step="0.5"></label>
       <label class="f"><span class="lab">Hefe</span>
         <select id="yeast">
           <option value="fresh">Frischhefe</option>
@@ -191,22 +189,27 @@
           <option value="adry">Trockenhefe aktiv</option>
         </select>
       </label>
-      <label class="f exp"><span class="lab">Mehlstärke</span>
+      <label class="f"><span class="lab">Mehl W-Wert</span>
         <select id="flourW">
-          <option value="230">schwach · W 200–250</option>
-          <option value="275">mittel · W 250–300</option>
-          <option value="325">stark · W 300–350</option>
-          <option value="380">sehr stark · W &gt; 350</option>
-        </select>
-      </label>
-      <label class="f exp"><span class="lab">Waage</span>
-        <select id="scale">
-          <option value="1">1 g</option>
-          <option value="0.1">0,1 g</option>
-          <option value="0.01">0,01 g</option>
+          <option value="230">200–250 schwach</option>
+          <option value="275">250–300 mittel</option>
+          <option value="325">300–350 stark</option>
+          <option value="380">über 350</option>
         </select>
       </label>
     </div>
+    <details class="more"><summary>Weitere Einstellungen</summary>
+      <div class="fields">
+        <label class="f"><span class="lab">Waage</span>
+          <select id="scale">
+            <option value="1">1 g</option>
+            <option value="0.1">0,1 g</option>
+            <option value="0.01">0,01 g</option>
+          </select>
+        </label>
+        <label class="f"><span class="lab">Mehltemperatur °C</span><input type="number" inputmode="decimal" id="tflour" min="0" max="35" step="0.5"></label>
+      </div>
+    </details>
   </div>
 </div>
 
@@ -233,7 +236,8 @@
   <div class="cbody">
     <div class="fields" style="margin-bottom:14px">
       <label class="f"><span class="lab">Fertig zum Backen am</span><input type="datetime-local" id="bake"></label>
-      <label class="f exp"><span class="lab">Teigtemperatur nach dem Kneten °C</span><input type="number" inputmode="decimal" id="ddt" min="16" max="30" step="0.5"></label>
+      <label class="f"><span class="lab">Teigtemperatur nach dem Kneten °C</span><input type="number" inputmode="decimal" id="ddt" min="16" max="30" step="0.5"></label>
+      <label class="f"><span class="lab">Küchentemperatur °C</span><input type="number" inputmode="decimal" id="tkitchen" min="5" max="40" step="0.5"></label>
     </div>
     <div id="phases"></div>
     <button class="addbtn" id="addPhase">+ Phase hinzufügen</button>
@@ -243,17 +247,17 @@
       <div class="t">In Ballen teilen …</div>
       <div class="chips" id="ballChips"></div>
     </div>
-    <div class="fields exp" style="margin-top:14px;display:none" id="expGrid">
-      <label class="f"><span class="lab">Behälter im Kühlschrank</span>
-        <select id="container">
-          <option value="1">Kunststoffbox, geschlossen</option>
-          <option value="0.85">Flache Ballenbox</option>
-          <option value="0.75">Metallbehälter / Blech</option>
-        </select>
-      </label>
-      <label class="f"><span class="lab">Mehltemperatur °C</span><input type="number" inputmode="decimal" id="tflour" min="0" max="35" step="0.5"></label>
-      <label class="f"><span class="lab">Küchentemperatur °C</span><input type="number" inputmode="decimal" id="tkitchen" min="5" max="40" step="0.5"></label>
-    </div>
+    <details class="more"><summary>Weitere Einstellungen</summary>
+      <div class="fields">
+        <label class="f"><span class="lab">Behälter im Kühlschrank</span>
+          <select id="container">
+            <option value="1">Kunststoffbox, geschlossen</option>
+            <option value="0.85">Flache Ballenbox</option>
+            <option value="0.75">Metallbehälter / Blech</option>
+          </select>
+        </label>
+      </div>
+    </details>
   </div>
 </div>
 
@@ -514,7 +518,7 @@ function defaults(){
   d.setMinutes(0,0,0); d.setHours(18);
   return Object.assign({
     bake: toLocal(d), ddt:23, container:"1", tflour:21, tkitchen:21,
-    yeast:"fresh", scale:"0.1", mode:"simple", tTom:85, tMoz:90,
+    yeast:"fresh", scale:"0.1", tTom:85, tMoz:90,
     /* Ooni-Vorgabe aus dem Classic-Teig für den Halo Pro: 10 min bei 120 U/min,
        10 min Rast, 30 s bei 90 U/min. Am Core auf die nächstliegenden Rastungen
        gelegt: 3 Striche = 123 U/min, 1,5 Striche = 85 U/min. */
@@ -550,6 +554,7 @@ function sanitize(s){
   if(!s.mix.steps.length) s.mix = defaults().mix;
   s.ballAfter = clamp(s.ballAfter|0, 0, s.phases.length-1);
   if(!YCONV[s.yeast]) s.yeast = "fresh";
+  delete s.mode;   /* alter Einfach/Experte-Schalter, gibt es nicht mehr */
   if(s.run && (!s.run.start || !s.run.plan || !Array.isArray(s.run.plan.phases))) delete s.run;
   return s;
 }
@@ -812,7 +817,6 @@ function waterTemp(){
 
 /* ===================== Render ===================== */
 function render(){
-  document.body.classList.toggle("expert", S.mode === "expert");
   mixNormalize();
   const c = calc(); CALC = c;
   const bake = new Date(S.bake || Date.now());
@@ -825,8 +829,6 @@ function render(){
     .forEach(id => { const el = $(id); if(el !== document.activeElement) el.value = S[id]; });
   $("bwHint").textContent = c.bw <= 500 ? "≈ " + Math.round(2*Math.sqrt(c.bw/0.42/Math.PI)) + " cm" : "";
   $("doughHint").textContent = Math.round(c.total)+" g Teig";
-  $("expGrid").style.display = S.mode === "expert" ? "grid" : "none";
-  Array.from($("modeSeg").children).forEach(b => b.classList.toggle("on", b.dataset.mode === S.mode));
 
   $("presets").innerHTML = PRESETS.map(p =>
     '<button class="chip" data-preset="'+p.key+'">'+p.name+'</button>').join("");
@@ -1515,7 +1517,6 @@ document.addEventListener("click", e => {
   const t = e.target.closest("button, [data-load], [data-drop]");
   if(!t) return;
 
-  if(t.dataset.mode){ S.mode = t.dataset.mode; render(); return; }
   if(t.dataset.preset){
     const p = PRESETS.find(x => x.key === t.dataset.preset);
     if(p){ S = sanitize(Object.assign(S, JSON.parse(JSON.stringify(p.s)))); render(); }

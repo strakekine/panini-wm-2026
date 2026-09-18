@@ -71,8 +71,9 @@
   .ballrow .t{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:6px}
 
   .tl{width:100%;height:140px;display:block}
-  .tlleg{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:6px}
-  .tlleg i{font-style:normal;color:var(--text);font-weight:700}
+  .tlleg{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:8px}
+  .tlleg span{display:inline-flex;align-items:center;gap:5px}
+  .tlleg svg{width:26px;height:12px;flex:none}
 
   table.ing{width:100%;border-collapse:collapse;font-size:15px}
   table.ing td{padding:7px 0;border-bottom:1px solid var(--line)}
@@ -262,13 +263,15 @@
 </div>
 
 <div class="card">
-  <div class="chead"><h2>Verlauf</h2><div class="hint">Linie = Kerntemperatur</div></div>
+  <div class="chead"><h2>Verlauf</h2><div class="hint">Farbe = Temperatur, blau kalt bis rot warm</div></div>
   <div class="cbody">
+    <svg width="0" height="0" style="position:absolute"><defs><pattern id="hatchLeg" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="5" stroke="#e8ecf1" stroke-width="1.2" opacity="0.55"/></pattern></defs></svg>
     <svg class="tl" id="tl" viewBox="0 0 700 140" preserveAspectRatio="none"></svg>
     <div class="tlleg">
-      <span><i>▬</i> Stockgare</span>
-      <span><i>▭</i> Stückgare</span>
-      <span><i>┊</i> Ballen</span>
+      <span><svg viewBox="0 0 26 12"><rect width="26" height="12" fill="#8a7a3a" opacity="0.35"/></svg> Stockgare, ganzer Teig</span>
+      <span><svg viewBox="0 0 26 12"><rect width="26" height="12" fill="#8a7a3a" opacity="0.35"/><rect width="26" height="12" fill="url(#hatchLeg)"/></svg> Stückgare, in Ballen</span>
+      <span><svg viewBox="0 0 26 12"><line x1="13" y1="0" x2="13" y2="12" stroke="#f4c542" stroke-width="2" stroke-dasharray="3 2"/></svg> hier ballen</span>
+      <span><svg viewBox="0 0 26 12"><path d="M0 9 C 8 9, 10 3, 26 3" fill="none" stroke="#e8ecf1" stroke-width="1.8"/></svg> Kerntemperatur</span>
       <span id="legPf"></span>
       <span id="legNow"></span>
     </div>
@@ -1022,12 +1025,14 @@ function drawTimeline(c, start, now){
   tMin -= 2; tMax += 2;
   const ys = t => plotTop + plotH - ((t - tMin)/Math.max(tMax-tMin,1))*plotH;
 
-  let g = "";
+  /* Stückgare wird schraffiert — nur ein Deckkraft-Unterschied war auf dem Handy nicht zu erkennen. */
+  let g = '<defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">'+
+          '<line x1="0" y1="0" x2="0" y2="8" stroke="#e8ecf1" stroke-width="1.4" opacity="0.45"/></pattern></defs>';
   if(pre > 0){
     const x1 = xs(0);
     g += '<rect x="'+padL+'" y="'+plotTop+'" width="'+Math.max(x1-padL,1).toFixed(1)+'" height="'+plotH+'" fill="#4a5a7a" opacity="0.30"/>';
     if(x1-padL > 40) g += '<text x="'+((padL+x1)/2).toFixed(1)+'" y="'+(plotTop+plotH/2)+'" fill="#c9d2dd" font-size="10.5" font-family="Barlow" font-weight="700" text-anchor="middle">'+c.pf.name.toUpperCase()+'</text>';
-    document.getElementById("legPf").innerHTML = '<i style="color:#8ea4c8">▨</i> Vorteig';
+    document.getElementById("legPf").innerHTML = '<svg viewBox="0 0 26 12"><rect width="26" height="12" fill="#4a5a7a" opacity="0.6"/></svg> Vorteig';
   } else document.getElementById("legPf").textContent = "";
 
   let acc = 0;
@@ -1035,8 +1040,8 @@ function drawTimeline(c, start, now){
     const x0 = xs(acc), x1 = xs(acc+p.h);
     const isBall = i >= c.ballAfter;
     g += '<rect x="'+x0.toFixed(1)+'" y="'+plotTop+'" width="'+Math.max(x1-x0,1).toFixed(1)+'" height="'+plotH+'" '+
-         'fill="'+tempColor(p.t)+'" opacity="'+(isBall?0.40:0.22)+'"/>';
-    if(isBall) g += '<rect x="'+x0.toFixed(1)+'" y="'+plotTop+'" width="'+Math.max(x1-x0,1).toFixed(1)+'" height="3" fill="'+tempColor(p.t)+'"/>';
+         'fill="'+tempColor(p.t)+'" opacity="'+(isBall?0.40:0.28)+'"/>';
+    if(isBall) g += '<rect x="'+x0.toFixed(1)+'" y="'+plotTop+'" width="'+Math.max(x1-x0,1).toFixed(1)+'" height="'+plotH+'" fill="url(#hatch)"/>';
     g += '<line x1="'+x0.toFixed(1)+'" y1="'+plotTop+'" x2="'+x0.toFixed(1)+'" y2="'+(plotTop+plotH)+'" stroke="#0e1116" stroke-width="1"/>';
     if(x1-x0 > 34) g += '<text x="'+((x0+x1)/2).toFixed(1)+'" y="'+(plotTop+plotH-6)+'" fill="#c9d2dd" font-size="10" font-family="Barlow" text-anchor="middle">'+num(p.t,0)+'°</text>';
     acc += p.h;
@@ -1054,7 +1059,7 @@ function drawTimeline(c, start, now){
   const nowH = (now - start)/3600e3;
   if(nowH > -pre && nowH < c.totalH){
     g += '<line x1="'+xs(nowH).toFixed(1)+'" y1="'+plotTop+'" x2="'+xs(nowH).toFixed(1)+'" y2="'+(plotTop+plotH)+'" stroke="#3ecf6a" stroke-width="1.5"/>';
-    document.getElementById("legNow").innerHTML = '<i style="color:#3ecf6a">┃</i> jetzt';
+    document.getElementById("legNow").innerHTML = '<svg viewBox="0 0 26 12"><line x1="13" y1="0" x2="13" y2="12" stroke="#3ecf6a" stroke-width="2"/></svg> jetzt';
   } else document.getElementById("legNow").textContent = "";
 
   const first = new Date(start.getTime() - pre*3600e3);

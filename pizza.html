@@ -564,7 +564,9 @@ function toLocal(d){
   return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+"T"+p(d.getHours())+":"+p(d.getMinutes());
 }
 function encodeState(){
-  try { return btoa(unescape(encodeURIComponent(JSON.stringify(S)))).replace(/=+$/,""); }
+  /* Der Link teilt einen Plan. Ein laufender Teig mit fremder Startzeit hat darin nichts verloren. */
+  const plan = Object.assign({}, S); delete plan.run;
+  try { return btoa(unescape(encodeURIComponent(JSON.stringify(plan)))).replace(/=+$/,""); }
   catch(e){ return ""; }
 }
 function decodeState(str){
@@ -1808,12 +1810,22 @@ document.addEventListener("click", e => {
   if(t.id === "saveBtn"){
     const name = ($("recName").value||"").trim();
     if(!name){ $("recName").focus(); return; }
-    const r = loadRecipes(); r[name] = JSON.parse(JSON.stringify(S)); saveRecipes(r);
+    /* Ein Rezept ist ein Plan, kein laufender Teig: S.run bleibt draußen. Sonst bringt
+       ein während der Gare gespeichertes Rezept beim Laden die alte Startzeit mit. */
+    const rec = JSON.parse(JSON.stringify(S)); delete rec.run;
+    const r = loadRecipes(); r[name] = rec; saveRecipes(r);
     $("recName").value = ""; renderSaved(); return;
   }
   if(t.dataset.load){
     const s = loadRecipes()[t.dataset.load];
-    if(s){ const keep = S.bake, run = S.run; S = sanitize(Object.assign(defaults(), s)); S.bake = keep; if(run) S.run = run; render(); window.scrollTo({top:0,behavior:"smooth"}); }
+    if(s){
+      /* Backzeit und laufender Teig gehören zur Küche, nicht zum Rezept. Ältere Rezepte
+         können noch ein S.run enthalten — das wird verworfen, nie übernommen. */
+      const keep = S.bake, run = S.run;
+      S = sanitize(Object.assign(defaults(), s)); S.bake = keep;
+      delete S.run; if(run) S.run = run;
+      render(); window.scrollTo({top:0,behavior:"smooth"});
+    }
     return;
   }
   if(t.dataset.drop){

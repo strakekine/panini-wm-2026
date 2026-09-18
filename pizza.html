@@ -437,16 +437,28 @@ function rMat(T){
   const f = Math.max(0,(T-TMIN_MAT))/(TCOLD-TMIN_MAT);
   return R15_MAT * f * f;
 }
-/* Hefemenge: kalibriert auf 8 h bei 20 °C = 0,6 % Frischhefe.
+/* Hefemenge. Ankerpunkt war 0,6 % Frischhefe bei 8 h / 20 °C, eine
+   angelsächsische Hobby-Linie. Der Abgleich mit Quellen hat sie nicht
+   bestätigt: AVPN-Disciplinare 0,17 %, Rafcalc 0,20 %, pizza.it 0,20 %,
+   Ooni-Faustregel 0,10 % für 24 h/18 °C — nur die Ooni-Rezeptseiten liegen
+   mit 1,7–3,3 % weit darüber, nehmen aber für 24 h und 72 h dieselbe Menge
+   und backen nach Augenmaß statt auf eine Uhrzeit. Deshalb der Anker
+   geteilt durch 1,45.
+   Der Grund ist die Asymmetrie der Fehler: zu wenig Hefe heißt später
+   backen, zu viel heißt überreifer Teig. Ein Rechner, der auf eine feste
+   Backzeit plant, muss nach unten danebenliegen. Auch nach der Teilung
+   liegt er noch über dem Disciplinare — der Hobbybäcker hat keinen
+   25-°C-Raum und keine sechsstündige Ballenreserve.
    Exponent > 1: eine doppelt so lange Gare braucht weniger als die halbe
    Hefemenge — teils weil Hefe sich vermehrt, teils weil ein reifer Teig
    mit weniger Gas backfertig ist. Die Potenzfunktion ist ein Fit an
    Rezepte, kein Wachstumsmodell; sie gilt für E zwischen etwa 2 und 30
-   Referenzstunden. Italienische Rechner (Rafcalc) nutzen 1,2 und landen
-   2–3× niedriger — beide Schulen backen gute Pizza, der Endpunkt ist ein
-   anderer. Ergibt 24 h 0,36 %, 48 h 0,26 %, 72 h 0,17 %. */
-const YK = 0.6 * Math.pow(8*rGas(20), 1.55);
-function freshPct(E){ return YK / Math.pow(Math.max(E,2), 1.55); }   /* unter E = 2 (≈ 4,5 %) ist die Formel nicht mehr gemeint */
+   Referenzstunden. Rafcalc nutzt 1,2, ist aber für einphasige
+   Raumtemperaturgare gebaut; 1,55 trägt die Kaltstaffel 24/48/72 h.
+   Ergibt (über calc, mit Abkühlung ab 23 °C): 8 h/20 °C 0,39 %,
+   24 h kalt 0,25 %, 48 h 0,18 %, 72 h 0,12 %. */
+const YK = (0.6/1.45) * Math.pow(8*rGas(20), 1.55);
+function freshPct(E){ return YK / Math.pow(Math.max(E,2), 1.55); }   /* unter E = 2 (≈ 3,1 %) ist die Formel nicht mehr gemeint */
 /* Sauerteig: Anstellgut in % des Mehls, kalibriert auf 20 % bei 8 h / 24 °C. */
 const SK = 20 * Math.pow(8*rGas(24), 1.2);
 function starterPct(E){ return clamp(SK / Math.pow(Math.max(E,2), 1.2), 3, 40); }
@@ -457,10 +469,12 @@ function tauH(massG, containerF){
   return 1.1 * Math.pow(Math.max(massG,50)/260, 2/3) * containerF;
 }
 
-/* Biga: die Gasformel unterschätzt den Hefebedarf eines festen, kühlen Vorteigs
-   um rund das Vierfache. Praxisstandard (Giorilli) ist 1 % Frischhefe bei 44 %
-   Hydration, 16–18 h bei 18 °C — daran ist der Faktor geeicht (18 h / 17 °C ≈ 0,9 %). */
-const BIGA_F = 3.5;
+/* Biga: die Gasformel unterschätzt den Hefebedarf eines festen, kühlen Vorteigs.
+   Praxisstandard (Giorilli) ist 1 % Frischhefe bei 44 % Hydration, 16–18 h bei
+   18 °C — daran ist der Faktor geeicht (18 h / 17 °C ≈ 0,88 %). Eigener Anker,
+   unabhängig vom Hefe-Anker: als der durch 1,45 geteilt wurde, musste dieser
+   Faktor mit 1,45 multipliziert werden (3,5 → 5,075), damit die Biga bleibt. */
+const BIGA_F = 5.075;
 const YCONV = { fresh:1, instant:1/2.8, adry:1/2.0 };
 const YNAME = { fresh:"Frischhefe", instant:"Trockenhefe instant", adry:"Trockenhefe aktiv" };
 function saltF(s){ return clamp(1 - 0.035*(s-2), 0.80, 1.07); }   /* 0 % Salz gärt ~7 % schneller, Kalibrierpunkt bei 2 % */

@@ -100,10 +100,25 @@ Bereichs zu nehmen (0,7×): zu wenig Hefe heißt später backen, zu viel ist hin
   1,55 heraus.
 
 **Nächster sinnvoller Schritt am Modell:** τ = 1,1 h ist geraten, nur die
-Skalierung m^(2/3) ist begründet. Einmal messen: Thermometer in einen
-250-g-Ballen und in den großen Klumpen, beide von 23 °C in den Kühlschrank,
-alle 10 Minuten ablesen. Damit wäre das Herzstück der App auf die echte Küche
-geeicht statt auf eine Schätzung. Das bringt mehr als jede weitere Quellenrunde.
+Skalierung m^(2/3) ist begründet. Damit wäre das Herzstück der App auf die echte
+Küche geeicht statt auf eine Schätzung — das bringt mehr als jede weitere
+Quellenrunde. Messprotokoll, so knapp wie es geht:
+
+- **Kein echter Teig nötig, aber Teig-Ersatz.** Mehl und Wasser bei 62 % grob
+  verrühren, ohne Hefe, Salz und Kneten. Dichte, Wärmekapazität und Leitfähigkeit
+  stimmen damit; Gluten und Gärung spielen fürs Abkühlen keine Rolle. **Wasser als
+  Ersatz taugt nicht**: c ≈ 4,2 gegen 2,8 kJ/kg·K, dazu wälzt es innen um. Zwei
+  Fehler in Gegenrichtung, Summe unbekannt — schlechter als nicht messen.
+- **Eine einzige Ablesung genügt.** τ ist die Zeit, bis der Abstand zur
+  Kühlschranktemperatur auf 37 % gefallen ist. Von 23 °C aus heißt die Marke
+  11,0 °C bei 4 °C Kühlschrank, 11,6 bei 5, 12,3 bei 6, 12,9 bei 7. Uhrzeit
+  notieren, fertig.
+- **Vorhersage des Modells** (Kunststoffbox geschlossen, Faktor 1,0): 250 g nach
+  64 min, 280 g nach 69 min, 1680 g nach 229 min. Der Ballen allein bringt 80 % —
+  eine Stunde, ein Thermometer. Der große Klumpen prüft zusätzlich den Exponenten
+  m^(2/3) und dauert vier Stunden.
+- Fühler in die Mitte, und dieselbe Box mit demselben Deckel wie beim Backen — der
+  Behälter steckt als eigener Faktor in `tauH`.
 
 Rückwärtsplanung kann in der Vergangenheit landen (48-h-Plan für morgen Abend).
 `messages()` warnt dann rot und nennt den frühesten möglichen Backzeitpunkt;

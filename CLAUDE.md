@@ -118,6 +118,17 @@ Plan mit echter Startzeit ("Jetzt geknetet" am Knetschritt im Ablauf); Umplanen
 rechnet dagegen und simuliert den Rest ab der aktuellen Kerntemperatur per
 Bisektion über `simulate`.
 
+Weicht der echte Knetzeitpunkt ab, hängt die **Anzeige am echten Start**: Ablauf,
+Zeitstrahl, Küchenmodus und Kalender verschieben sich als Ganzes, das Rezept bleibt
+unverändert (24 h geplant sind 24 h im Ablauf). Das ist Absicht — nur so taugt der
+Eintrag im Backprotokoll noch als Rezept. Über dem Ablauf steht dann eine gelbe
+Warnung mit dem neuen Fertig-Zeitpunkt und dem Verweis auf Umplanen, und die
+Umplanen-Karte klappt einmal von selbst auf (`replanAufgeklappt` verhindert, dass
+sie das bei jedem 30-s-Render wieder tut). `S.bake` bleibt der Zieltermin;
+`bakeShown` ist der verschobene. Die Entscheidung — Rezept genau einhalten und
+später essen, oder pünktlich backen und die Differenz in der Kühlphase auffangen —
+gehört dem Nutzer und wird ihm nicht abgenommen.
+
 Umplanen prüft die **Abweichung der Restzeit**, nicht ob die Backzeit verschoben
 wurde — sonst fällt ein verspäteter Knetstart bei unveränderter Backzeit durchs
 Raster (war so, ist behoben). Bis 4 h Abweichung greift `kuehlAusgleich()`: alle

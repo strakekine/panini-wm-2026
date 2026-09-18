@@ -289,6 +289,7 @@
 
 <div class="card">
   <div class="chead"><h2>Ablauf</h2><div class="hint" id="windowHint"></div></div>
+  <div id="shiftNote"></div>
   <div class="cbody"><ol class="steps" id="steps"></ol></div>
 </div>
 
@@ -556,7 +557,7 @@ function defaults(){
   }, JSON.parse(JSON.stringify(PRESETS[0].s)));
 }
 let S = defaults();
-let STEPS = [], CALC = null;
+let STEPS = [], CALC = null, replanAufgeklappt = false;
 
 function toLocal(d){
   const p = n => String(n).padStart(2,"0");
@@ -908,8 +909,17 @@ function waterTemp(){
 function render(){
   mixNormalize();
   const c = calc(); CALC = c;
-  const bake = new Date(S.bake || Date.now());
-  const start = new Date(bake.getTime() - c.totalH*3600e3);
+  const bake = new Date(S.bake || Date.now());          /* der Zieltermin, unverändert */
+  /* Läuft der Teig, hängt die ANZEIGE am echten Knetzeitpunkt: Das Rezept bleibt das
+     Rezept (24 h geplant sind 24 h im Ablauf), es verschiebt sich nur als Ganzes.
+     Die Alternative — pünktlich backen und die Differenz in der Kühlphase auffangen —
+     steht in der Umplanen-Karte. Die Entscheidung gehört dem Nutzer: sie hängt daran,
+     ob um 19:00 Gäste am Tisch sitzen. */
+  const planStart = new Date(bake.getTime() - c.totalH*3600e3);
+  const echtStart = S.run && !isNaN(new Date(S.run.start)) ? new Date(S.run.start) : null;
+  const versatz = echtStart ? (echtStart - planStart)/3600e3 : 0;
+  const bakeShown = new Date(bake.getTime() + versatz*3600e3);
+  const start = new Date(bakeShown.getTime() - c.totalH*3600e3);
   const now = new Date();
 
   /* Ein fokussiertes Feld bekommt keinen Wert zugewiesen — sonst wird "6" beim Tippen
@@ -1007,7 +1017,7 @@ function render(){
       '. Der Wert oben ist der Startpunkt, nicht die Wahrheit.</td></tr>';
   }
   $("ing").innerHTML = rows;
-  renderYOv(c, bake);
+  renderYOv(c, bakeShown);
   $("totalHint").textContent = c.n+" × "+Math.round(c.bw)+" g = "+Math.round(c.total)+" g Teig";
 
   const tw = waterTemp();
@@ -1026,14 +1036,20 @@ function render(){
     'problematisch ist nur direkter Kontakt von unverdünntem Salz mit Frischhefe.</span></div>';
   $("yeastNote").innerHTML = note;
 
-  /* --- Ablauf --- */
-  STEPS = buildSteps(c, bake);
+  /* --- Ablauf ---
+     Läuft der Teig, wird der Ablauf am ECHTEN Knetzeitpunkt aufgehängt: Das Rezept
+     bleibt damit das Rezept (24 h geplant sind 24 h im Ablauf), es verschiebt sich
+     nur als Ganzes. Die Alternative — pünktlich backen und die Differenz in der
+     Kühlphase auffangen — steht in der Umplanen-Karte, und dorthin zeigt die
+     Warnung unter der Überschrift. Die Entscheidung gehört dem Nutzer: sie hängt
+     daran, ob um 19:00 Gäste am Tisch sitzen. */
+  STEPS = buildSteps(c, bakeShown);
   const ref = STEPS[0].t;
   const nowMs = now.getTime();
   $("steps").innerHTML = STEPS.map((s,i)=>{
     const next = STEPS[i+1];
     const isNow = nowMs >= s.t.getTime() && (!next || nowMs < next.t.getTime()) &&
-                  nowMs >= ref.getTime() && nowMs <= bake.getTime()+3600e3;
+                  nowMs >= ref.getTime() && nowMs <= bakeShown.getTime()+3600e3;
     /* Am Knetschritt hängt der einzige Knopf des Ablaufs: einmal tippen, wenn der Teig
        aus der Maschine kommt. Ab da kennt die App den echten Start. */
     const knead = !s.knead ? "" : (S.run
@@ -1046,6 +1062,19 @@ function render(){
       '<span class="tx">'+s.title+(s.sub?'<small>'+s.sub+'</small>':'')+knead+'</span></li>';
   }).join("");
   $("windowHint").textContent = "Start " + WD[ref.getDay()] + " " + fmtClock(ref);
+  $("shiftNote").innerHTML = Math.abs(versatz) < 0.25 ? "" :
+    '<div style="padding:10px 12px 0"><div class="msg warn" style="margin:0"><span class="ic">▲</span><span>'+
+    'Du hast <b>'+fmtH(Math.abs(versatz))+(versatz > 0 ? " später" : " früher")+'</b> geknetet als geplant. '+
+    'Der Ablauf zeigt das Rezept unverändert, nur um '+fmtH(Math.abs(versatz))+' verschoben — fertig wärst du damit '+
+    'um <b>'+fmtWhen(bakeShown, ref)+'</b> statt um '+fmtWhen(bake, ref)+'.<br>'+
+    'Willst du bei <b>'+fmtWhen(bake, ref)+'</b> bleiben, steht in <b>Umplanen</b>, wie du die '+
+    fmtH(Math.abs(versatz))+' in der Kühlphase auffängst.</span></div></div>';
+
+  /* Umplanen einmal von selbst aufklappen, wenn es etwas zu entscheiden gibt —
+     aber nicht bei jedem 30-s-Render wieder, falls der Nutzer sie zugeklappt hat. */
+  if(Math.abs(versatz) >= 0.25){
+    if(!replanAufgeklappt){ $("replanCard").open = true; replanAufgeklappt = true; }
+  } else replanAufgeklappt = false;
 
   /* --- Einschätzung --- */
   const msgs = messages(c);

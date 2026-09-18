@@ -1219,6 +1219,43 @@ function drawTimeline(c, start, now){
   document.getElementById("tl").innerHTML = g;
 }
 
+/* ===================== Umplanen =====================
+   Kleine Abweichungen fängt man nicht durch Umrechnen des ganzen Rests auf,
+   sondern in der Kühlphase: eine Stunde Kühlschrank kostet rund ein Achtel
+   einer Stunde bei Raumtemperatur. Deshalb bleiben alle Phasendauern wie
+   geplant, nur die Kühlzeit wird kürzer oder länger. Praktisch heißt das:
+   in den Kühlschrank verschiebt sich mit dem echten Kneten, herausnehmen
+   bleibt bei der ursprünglich geplanten Uhrzeit (Backzeit minus Warmphase).
+====================================================== */
+function kuehlAusgleich(cp, rs, nb, doneH, abw){
+  if(Math.abs(abw) > 4) return null;
+  let ci = -1, laengste = 0;
+  cp.phases.forEach((p,i)=>{ if(p.t < 15 && p.h > laengste){ laengste = p.h; ci = i; } });
+  if(ci < 0) return null;                                   /* kein Kühlschritt im Plan */
+  const vor  = cp.phases.slice(0,ci).reduce((a,p)=>a+p.h,0);
+  const nach = cp.phases.slice(ci+1).reduce((a,p)=>a+p.h,0);
+  if(doneH > vor + laengste - Math.abs(abw) - 0.25) return null;   /* Kühlphase praktisch vorbei */
+  const rein = new Date(rs.getTime() + vor*3600e3);
+  const raus = new Date(nb.getTime() - nach*3600e3);
+  const neu = (raus - rein)/3600e3;
+  if(neu < 0.5) return null;
+  const kosten = Math.abs(abw) * rGas(cp.phases[ci].t) * cp.corr / Math.max(cp.Eeff,0.01) * 100;
+  const weniger = abw < 0;
+  const jetzt = Date.now();
+  return ["good",
+    "Du hast <b>"+fmtH(Math.abs(abw))+(weniger ? " weniger" : " mehr")+"</b> Zeit als der Plan vorsah. "+
+    "Das fängst du am einfachsten im Kühlschrank auf — dort kostet eine Stunde am wenigsten.<br>"+
+    (rein.getTime() > jetzt + 5*60e3
+      ? "Alles wie geplant weiterlaufen lassen, <b>"+fmtWhen(rein,new Date(jetzt))+"</b> in den Kühlschrank. "
+      : "")+
+    "<b>"+fmtWhen(raus,new Date(jetzt))+"</b> wieder herausnehmen — das ist die ursprünglich geplante Uhrzeit, "+
+    "danach läuft alles unverändert. Die Kühlzeit wird dadurch "+fmtH(Math.abs(abw))+
+    (weniger ? " kürzer" : " länger")+", unterm Strich rund "+num(kosten,1)+" % "+
+    (weniger ? "weniger" : "mehr")+" Gärleistung. "+
+    (kosten < 4 ? "Das merkst du nicht."
+      : "Verkraftbar, aber schau dir die Ballen vor dem Backen genauer an.")];
+}
+
 /* ===================== Umplanen ===================== */
 function renderReplan(c, bake, start){
   const run = S.run;
@@ -1282,15 +1319,23 @@ function renderReplan(c, bake, start){
              kv("Kerntemperatur jetzt", num(done.endT,1)+" °C") +
              kv("Bis zur neuen Backzeit", fmtH(remH));
 
-  const origBake = new Date(run ? run.plan.bake : S.bake);
-  const shifted = Math.abs(nb - origBake)/60e3;
+  /* Nicht die Backzeit vergleichen, sondern die verbleibende Zeit gegen das, was der
+     Plan ab jetzt noch vorsah — sonst fällt ein verspäteter Knetstart durchs Raster. */
+  const restPlan = cp.totalH - doneH;
+  const abweichung = remH - restPlan;
+  body += kv("Gegenüber Plan", Math.abs(abweichung) < 0.08 ? "passt"
+    : (abweichung > 0 ? "+" : "−")+fmtH(Math.abs(abweichung))+(abweichung > 0 ? " mehr Zeit" : " weniger Zeit"));
+
+  const einfach = kuehlAusgleich(cp, rs, nb, doneH, abweichung);
 
   let msg;
-  if(shifted < 30 && Erem > 0.2){
-    msg = ["good","Nichts zu tun — die Backzeit ist praktisch unverändert. Weiter nach dem Plan oben."];
+  if(Math.abs(abweichung) < 0.5 && Erem > 0.2){
+    msg = ["good","Nichts zu tun — du liegst im Plan. Weiter nach dem Ablauf oben."];
   } else if(Erem <= 0.2){
     msg = ["bad","Der Teig hat sein Gärziel schon erreicht. Sofort so kalt wie möglich stellen, das bremst am stärksten — "+
       "und früher backen, wenn es irgendwie geht. Je länger es jetzt dauert, desto weicher wird er."];
+  } else if(einfach){
+    msg = einfach;
   } else {
     const oneT = T => Erest([{h:remH, t:T}], balled ? 0 : 1);
     const tAll = oneT(32) < Erem ? 99 : solve(oneT, -5, 32);

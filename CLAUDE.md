@@ -118,6 +118,15 @@ Plan mit echter Startzeit ("Jetzt geknetet" am Knetschritt im Ablauf); Umplanen
 rechnet dagegen und simuliert den Rest ab der aktuellen Kerntemperatur per
 Bisektion über `simulate`.
 
+Umplanen prüft die **Abweichung der Restzeit**, nicht ob die Backzeit verschoben
+wurde — sonst fällt ein verspäteter Knetstart bei unveränderter Backzeit durchs
+Raster (war so, ist behoben). Bis 4 h Abweichung greift `kuehlAusgleich()`: alle
+Phasendauern bleiben, nur die längste Kühlphase wird kürzer oder länger, weil
+eine Stunde Kühlschrank rund ein Achtel einer Stunde Raumtemperatur kostet.
+Praktisch: in den Kühlschrank verschiebt sich mit dem echten Kneten, herausnehmen
+bleibt bei der geplanten Uhrzeit (Backzeit minus Warmphase). Darüber hinaus
+greift die alte Bisektion über den ganzen Rest.
+
 **iPhone-Regeln:** Ein fokussiertes Feld bekommt nie `.value` zugewiesen, und
 Container mit fokussiertem Input werden nicht per innerHTML neu gebaut (sonst
 klappt die Tastatur bei jedem Zeichen ein). Der 30-s-Timer rendert nicht während

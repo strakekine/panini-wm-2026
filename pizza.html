@@ -779,9 +779,14 @@ function messages(c){
     out.push(["info","Mit deiner Menge ("+num(c.yFac,2)+"×) reicht der Gärplan nicht bis zur Backreife. "+
       "Die Einschätzung rechnet deshalb mit "+fmtH(c.fertig-c.totalH)+" mehr in der letzten Phase — "+
       "entweder später backen oder die Phase im Gärplan verlängern."]);
-  if(c.yOv && c.fertig < c.totalH - 0.75)
-    out.push(["warn","Du nimmst mehr "+(c.pf.type==="sour"?"Anstellgut":"Hefe")+" als vorgeschlagen ("+num(c.yFac,2)+"×). "+
-      "Der Teig ist dadurch rund "+fmtH(c.totalH-c.fertig)+" vor der geplanten Backzeit fertig und gärt bis dahin weiter."]);
+  if(c.yOv && c.fertig < c.totalH - 0.75){
+    const ueber = c.Eg/Math.max(c.Eziel,0.01);
+    out.push([ueber > 1.6 ? "bad" : "warn",
+      "Du nimmst mehr "+(c.pf.type==="sour"?"Anstellgut":"Hefe")+" als vorgeschlagen ("+num(c.yFac,2)+"×). "+
+      "Der Teig ist dadurch rund "+fmtH(c.totalH-c.fertig)+" vor der geplanten Backzeit fertig und gärt bis dahin weiter — "+
+      "er bekommt am Ende das "+num(ueber,1)+"-fache der nötigen Gärleistung."+
+      (ueber > 1.6 ? " In der Größenordnung ist der Teig zur Backzeit hinüber, nicht nur etwas weit." : "")]);
+  }
   if(c.cal !== 1) out.push(["info","Deine Kalibrierung aus dem Backprotokoll ist aktiv: Hefemenge × "+c.cal.toFixed(2).replace(".",",")+"."]);
   return out;
 }
@@ -1048,7 +1053,8 @@ function render(){
     (c.yOv ? kv("Backbereit", fmtWhen(fertigD, start) + (verl ? " · "+fmtH(verl)+" nach Plan" :
        (c.fertig < c.totalH - 0.05 ? " · "+fmtH(c.totalH-c.fertig)+" vor Plan" : " · wie geplant"))) : "") +
     kv("davon Stückgare", fmtH(c.ballH)) +
-    kv("Gärleistung gesamt", num(c.Eeff)+" Std. bei 21 °C") +
+    kv("Gärleistung gesamt", num(c.Eeff)+" Std. bei 21 °C" +
+       (c.fertig < c.totalH - 0.05 ? " · nötig wären "+num(c.Eziel*c.corr) : "")) +
     kv("davon in den Ballen", num(c.EgBall)+" Std. · warm "+num(c.EgBallWarm)) +
     ((c.pf.type==="poolish"||c.pf.type==="biga")
       ? kv("Vorteig deckt", pct(c.pfCovered)+" von "+pct(c.yPctTotal)) : "") +
@@ -1057,7 +1063,9 @@ function render(){
   $("ripeNote").innerHTML = "„Gärleistung“ rechnet jede Phase auf Stunden bei 21 °C um — damit sind unterschiedliche Pläne vergleichbar. "+
     "Der <b>Reifegrad</b> ist eine Kennzahl ohne Einheit: das Verhältnis von Teigreifung zu Gasbildung. Werte über 1,3 bekommt man nur über längere kalte Phasen, "+
     "dort arbeiten die Enzyme relativ zur Hefe weiter. Eine reine Raumtemperaturgare bleibt auch nach 24 h bei etwa 1,0, ein Vorteig verschiebt sie kaum. "+
-    "Die Skala ist eine Tendenzanzeige, keine Messgröße.";
+    "Die Skala ist eine Tendenzanzeige, keine Messgröße. Von der <b>Hefemenge</b> hängt sie nicht ab: mehr Hefe "+
+    "beschleunigt Gasbildung und Reifung im selben Maß, das Verhältnis bleibt. Was sie verschiebt, sind Temperatur "+
+    "und Dauer der Phasen.";
 
   /* --- Belag / Einkauf --- */
   const tom = (+S.tTom||0)*c.n, moz = (+S.tMoz||0)*c.n;

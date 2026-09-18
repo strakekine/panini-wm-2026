@@ -132,6 +132,12 @@ Hefe heißt, dasselbe Ziel erst bei mehr Gärleistung zu erreichen
 Einschätzung bis dahin verlängert (letzte Phase läuft weiter, sie ist immer eine
 Ballenphase). Stückgare, Gärleistung, Reifegrad und die Warnungen rechnen mit dem
 verlängerten Plan — sonst beschreiben sie einen Ablauf, den niemand so backt.
+Umgekehrt wird NICHT gekürzt: Ist der Teig durch mehr Hefe früher fertig,
+gebacken wird trotzdem zur geplanten Zeit, der Teig erlebt also den ganzen Plan.
+Dort zeigt die Gärleistung stattdessen zusätzlich, wie viel nötig gewesen wäre,
+und die Warnung beziffert den Überschuss (ab 1,6× wird sie rot). Der Reifegrad
+hängt prinzipiell nicht an der Hefemenge: mehr Hefe beschleunigt beide Spuren
+gleich, das Verhältnis bleibt. Das steht so auch im Erklärtext unter der Kachel.
 Sie gilt nur für den
 Plan, für den sie gedacht war, und wird von jeder Vorlage gelöscht. Das Feld
 liegt in `#yOvBox` außerhalb der Zutatentabelle, weil die bei jedem Render neu

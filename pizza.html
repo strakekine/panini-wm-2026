@@ -65,6 +65,7 @@
   .xbtn{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:10px 0;font-size:15px;cursor:pointer;font-family:inherit}
   .xbtn:active{transform:scale(.94)}
   .addbtn{background:var(--panel2);border:1px dashed var(--line);color:var(--muted);border-radius:10px;padding:10px;width:100%;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;margin-top:2px}
+  .phase.mix{grid-template-columns:1fr 72px 72px 36px}
   .ballrow{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
   .ballrow .t{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:6px}
 
@@ -337,8 +338,26 @@
 <details class="card">
   <summary>Backprotokoll <span class="hint" id="calHint"></span></summary>
   <div class="cbody">
-    <div class="note" style="margin-top:0">Nach dem Backen eintragen, wie der Teig war. Der Rechner zieht die Hefemenge
-      für die nächsten Pläne entsprechend nach — das ist die einzige Kalibrierung, die deine Küche wirklich kennt.</div>
+    <div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:2px">Knetprogramm</div>
+    <div class="fields" style="margin-bottom:10px">
+      <label class="f"><span class="lab">Maschine</span>
+        <select id="mixDev">
+          <option value="core">Ooni Halo Core</option>
+          <option value="pro">Ooni Halo Pro</option>
+          <option value="other">Andere Maschine</option>
+          <option value="hand">Von Hand</option>
+        </select>
+      </label>
+    </div>
+    <div id="mixSteps"></div>
+    <button class="addbtn" id="addMix">+ Knetschritt</button>
+    <div id="mixInfo"></div>
+
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
+      <div class="note" style="margin-top:0">Nach dem Backen eintragen, wie der Teig war. Der Rechner zieht die Hefemenge
+        für die nächsten Pläne entsprechend nach — das ist die einzige Kalibrierung, die deine Küche wirklich kennt.
+        Das Knetprogramm von oben wird beim Eintrag mitgespeichert.</div>
+    </div>
     <div class="btnrow" style="margin-top:10px">
       <button class="btn ghost sm" data-log="young">zu jung</button>
       <button class="btn ghost sm" data-log="good">genau richtig</button>
@@ -496,7 +515,10 @@ function defaults(){
   d.setMinutes(0,0,0); d.setHours(18);
   return Object.assign({
     bake: toLocal(d), ddt:23, container:"1", friction:"1", tflour:21, tkitchen:21,
-    yeast:"fresh", scale:"0.1", mode:"simple", tTom:85, tMoz:90
+    yeast:"fresh", scale:"0.1", mode:"simple", tTom:85, tMoz:90,
+    /* Ooni-Vorgabe aus dem Classic-Teig für den Halo Pro:
+       10 min bei 25 % / 120 U/min, 10 min Rast, 30 s bei 15 % / 90 U/min. */
+    mix:{ dev:"core", steps:[ {k:"mix",min:10,rpm:120}, {k:"rest",min:10}, {k:"mix",min:0.5,rpm:90} ] }
   }, JSON.parse(JSON.stringify(PRESETS[0].s)));
 }
 let S = defaults();
@@ -524,6 +546,7 @@ function setLog(l){ try{ localStorage.setItem(KEY+"_log", JSON.stringify(l.slice
   else { try{ const s = JSON.parse(localStorage.getItem(KEY+"_last")||"null"); if(s && s.phases) S = Object.assign(defaults(), s); }catch(e){} }
   if(!Array.isArray(S.phases) || !S.phases.length) S.phases = [{h:2,t:21},{h:6,t:21}];
   if(!S.pf || !PF[S.pf.type]) S.pf = { type:"none" };
+  if(!S.mix || !Array.isArray(S.mix.steps) || !S.mix.steps.length) S.mix = defaults().mix;
   S.ballAfter = clamp(S.ballAfter|0, 0, S.phases.length-1);
 })();
 function persist(){
@@ -726,7 +749,8 @@ function buildSteps(c, bake){
   steps.push({ t:start,
     title: c.pf.type==="none" ? "Wasser, Salz und Hefe verrühren, Mehl zugeben, kneten"
                               : "Hauptteig kneten: "+c.pf.name+", Wasser, Salz und Mehl",
-    sub:"Zielteigtemperatur "+num(+S.ddt,1)+" °C · Schüttwasser ≈ "+Math.round(tw)+" °C" });
+    sub:(S.mix && S.mix.dev !== "hand" ? MIXDEV[S.mix.dev]+": "+mixSummary()+" · " : "")+
+        "Zielteigtemperatur "+num(+S.ddt,1)+" °C · Schüttwasser ≈ "+Math.round(tw)+" °C" });
 
   let t = new Date(start.getTime());
   c.phases.forEach((p,i)=>{
@@ -922,6 +946,7 @@ function render(){
     row("Parmesan", fmtG(5*c.n), "5 g")+
     row("Basilikum", c.n*2+" Blätter", "");
 
+  renderMix();
   renderLog();
   renderSaved();
   renderBackupInfo();
@@ -1149,7 +1174,8 @@ function renderLog(){
   $("calHint").textContent = cal === 1 ? "noch nicht kalibriert" : "Hefe × "+num(cal,2);
   $("logList").innerHTML = (log.length
     ? log.slice().reverse().map((e,i)=>'<div class="logrow"><span class="d">'+e.d+'</span>'+
-        '<span class="r">'+LOGNAME[e.r]+'</span><button data-dellog="'+(log.length-1-i)+'">✕</button></div>').join("")
+        '<span class="r">'+LOGNAME[e.r]+(e.m?'<br><span style="color:var(--muted);font-size:11.5px">'+esc(e.m)+'</span>':'')+
+        '</span><button data-dellog="'+(log.length-1-i)+'">✕</button></div>').join("")
     : '<div class="note" style="margin:0">Noch keine Einträge.</div>')+
     (cal !== 1 ? '<div class="btnrow" style="margin-top:10px"><button class="btn ghost sm" id="calReset">KALIBRIERUNG ZURÜCKSETZEN</button></div>' : "");
 }
@@ -1162,6 +1188,69 @@ function renderSaved(){
   $("saved").innerHTML = names.length
     ? names.map(n => '<div class="s"><span data-load="'+esc(n)+'">'+esc(n)+'</span><button data-drop="'+esc(n)+'">✕</button></div>').join("")
     : '<div class="note" style="margin:0">Noch nichts gesichert.</div>';
+}
+
+/* ===================== Knetprogramm =====================
+   Standard ist Oonis eigene Vorgabe aus dem Classic-Teig für den Halo Pro:
+   10 min bei 25 % / 120 U/min, 10 min Rast, dann 30 s bei 15 % / 90 U/min.
+   Die Prozentangaben aus Ooni-Rezepten lassen sich nicht übertragen — der
+   Halo Core dreht bis 300 U/min, der Pro bis 345. Deshalb ist die Drehzahl
+   die führende Größe.
+========================================================= */
+const MIXDEV = { core:"Ooni Halo Core", pro:"Ooni Halo Pro", other:"Maschine", hand:"Von Hand" };
+function fmtMin(v){
+  if(v < 1) return Math.round(v*60)+" s";
+  const m = Math.floor(v), sec = Math.round((v-m)*60);
+  return sec ? m+":"+String(sec).padStart(2,"0")+" min" : m+" min";
+}
+function mixSummary(){
+  const m = S.mix || defaults().mix;
+  return m.steps.map(st => st.k === "rest"
+    ? fmtMin(+st.min||0)+" Rast"
+    : fmtMin(+st.min||0)+" @ "+(+st.rpm||0)+" U/min").join(" · ");
+}
+function mixTotal(){
+  const m = S.mix || defaults().mix;
+  return m.steps.reduce((a,st)=>a+(+st.min||0),0);
+}
+function mixActive(){
+  const m = S.mix || defaults().mix;
+  return m.steps.reduce((a,st)=>a+(st.k==="rest"?0:(+st.min||0)),0);
+}
+function renderMix(){
+  const m = S.mix;
+  $("mixDev").value = m.dev;
+  const hand = m.dev === "hand";
+  $("mixSteps").innerHTML = m.steps.map((st,i)=>{
+    const rest = st.k === "rest";
+    return '<div class="phase mix" data-i="'+i+'">'+
+      '<label class="f"><span class="lab">Schritt '+(i+1)+'</span>'+
+        '<select class="mx" data-k="k">'+
+          '<option value="mix"'+(rest?"":" selected")+'>'+(hand?"Kneten":"Mischen")+'</option>'+
+          '<option value="rest"'+(rest?" selected":"")+'>Rast</option></select></label>'+
+      '<label class="f"><span class="lab">Minuten</span><input type="number" class="mx" data-k="min" min="0" max="60" step="0.5" value="'+st.min+'"></label>'+
+      '<label class="f"><span class="lab">U/min</span><input type="number" class="mx" data-k="rpm" min="0" max="345" step="5" value="'+
+        (rest||hand ? "" : (st.rpm||""))+'"'+(rest||hand?" disabled":"")+'></label>'+
+      '<button class="xbtn" data-delmix="'+i+'"'+(m.steps.length<2?" disabled":"")+'>✕</button>'+
+    '</div>';
+  }).join("");
+  const rest = mixTotal() - mixActive();
+  let info = '<div class="note">'+fmtMin(mixTotal())+' insgesamt'+
+    (rest > 0 ? ', davon '+fmtMin(mixActive())+' kneten' : '')+' · '+mixSummary()+'</div>';
+  if(m.dev === "core" || m.dev === "pro"){
+    info += '<div class="msg info"><span class="ic">·</span><span>Standard ist Oonis Vorgabe aus dem Classic-Teig '+
+      '(dort für den Halo Pro angegeben): 10 min bei 120 U/min, 10 min Rast mit geschlossenem Spritzschutz, '+
+      'dann 30 s bei 90 U/min zum Glätten. '+
+      (m.dev === "core"
+        ? 'Dein Core dreht bis 300 U/min, der Pro bis 345 — die <b>Prozentangaben</b> aus Ooni-Rezepten stimmen an deinem Rad also nicht, die <b>Drehzahl</b> schon.'
+        : 'Am Pro entsprechen 120 U/min etwa 25 % und 90 U/min etwa 15 %.')+
+      '</span></div>';
+  }
+  if(mixActive() >= 12 && m.dev !== "hand"){
+    info += '<div class="msg warn"><span class="ic">▲</span><span>Langes Kneten wärmt den Teig spürbar auf. '+
+      'Stell unter <b>Experte → Kneten</b> passend ein, damit die Schüttwassertemperatur stimmt.</span></div>';
+  }
+  $("mixInfo").innerHTML = info;
 }
 
 /* ===================== Sicherung =====================
@@ -1244,6 +1333,13 @@ document.addEventListener("input", e => {
     S.phases[+t.closest(".phase").dataset.i][t.dataset.k] = +t.value;
     render(); return;
   }
+  if(t.classList.contains("mx")){
+    const i = +t.closest(".phase").dataset.i, k = t.dataset.k;
+    S.mix.steps[i][k] = (k === "k") ? t.value : +t.value;
+    if(k === "k" && t.value === "mix" && !S.mix.steps[i].rpm) S.mix.steps[i].rpm = 120;
+    render(); return;
+  }
+  if(t.id === "mixDev"){ S.mix.dev = t.value; render(); return; }
   if(t.id === "pfShare"){ S.pf.share = +t.value; render(); return; }
   if(t.id === "pfHyd"){ S.pf.hyd = +t.value; render(); return; }
   if(t.id === "pfH"){ S.pf.h = +t.value; render(); return; }
@@ -1295,6 +1391,11 @@ document.addEventListener("click", e => {
     }
     return;
   }
+  if(t.id === "addMix"){ S.mix.steps.push({ k:"mix", min:1, rpm:120 }); render(); return; }
+  if(t.dataset.delmix !== undefined){
+    if(S.mix.steps.length > 1){ S.mix.steps.splice(+t.dataset.delmix,1); render(); }
+    return;
+  }
   if(t.id === "addPhase"){
     const last = S.phases[S.phases.length-1];
     S.phases.push({ h:2, t: last && last.t <= 10 ? 21 : 6 });
@@ -1302,7 +1403,8 @@ document.addEventListener("click", e => {
   }
   if(t.dataset.log){
     const log = getLog();
-    log.push({ d: new Date().toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"}), r: t.dataset.log });
+    log.push({ d: new Date().toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"}), r: t.dataset.log,
+                m: mixSummary(), dev: S.mix ? S.mix.dev : "" });
     setLog(log);
     if(t.dataset.log === "over") setCal(getCal()*0.85);
     if(t.dataset.log === "young") setCal(getCal()*1.15);

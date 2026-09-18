@@ -8,7 +8,8 @@ Vier voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
 - **`pizza.html`** — Pizzateig-Rechner und Gärplaner: beliebig viele Gärphasen mit
   eigener Temperatur, frei wählbarer Ballen-Zeitpunkt, Vorteige (Poolish, Biga,
   Sauerteig), Rückwärtsplanung auf die Backzeit, Umplanen während der laufenden
-  Gare, Kalender-Export und Küchenmodus. Auch Einzeldatei.
+  Gare, Knetprogramm für Spiralkneter, Backprotokoll mit Kalibrierung,
+  Kalender-Export und Küchenmodus. Auch Einzeldatei.
   Das Gärmodell steht oben im `<script>` und ist gegen bekannte Rezepte kalibriert —
   wer dort Konstanten anfasst, prüft die Hefemengen für 8 h, 24 h, 48 h und 72 h
   nach, sonst kippt die ganze Staffel.

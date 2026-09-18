@@ -169,7 +169,7 @@
 <main>
 
 <div class="card">
-  <div class="chead"><h2>Vorlage</h2><div class="hint">Setzt Teig, Vorteig, Gärplan und Kneten</div></div>
+  <div class="chead"><h2>Vorlage</h2><div class="hint">Setzt Teig, Vorteig, Gärplan, Teigtemperatur und Kneten</div></div>
   <div class="cbody"><div class="chips" id="presets"></div></div>
 </div>
 
@@ -480,37 +480,40 @@ const PF = {
             tip:"Anstellgut 8–12 h vor dem Ansetzen füttern, damit es auf dem Höhepunkt ist. Die Menge rechnet der Planer aus dem Gärplan." }
 };
 
-/* ===================== Vorlagen ===================== */
+/* ===================== Vorlagen =====================
+   ddt = Zielteigtemperatur nach dem Kneten. Same-Day wärmer, damit die kurze
+   Gare zügig anläuft; lange Kaltführung kühler, damit der Teig im Kühlschrank
+   schneller herunterkommt; Biga/Sauerteig etwas wärmer für den Vorteig-Anschluss. */
 const PRESETS = [
   { key:"nap24a", name:"Napoletana 24 h · kalte Stockgare",
-    s:{ n:6,bw:250,h:62,salt:2.8,oil:0,sugar:0,flourW:"325",
+    s:{ ddt:23,n:6,bw:250,h:62,salt:2.8,oil:0,sugar:0,flourW:"325",
         phases:[{h:2,t:21},{h:19,t:6},{h:3,t:21}], ballAfter:2, pf:{type:"none"} } },
   { key:"nap24b", name:"Napoletana 24 h · Ballen im Kühlschrank",
-    s:{ n:6,bw:250,h:62,salt:2.8,oil:0,sugar:0,flourW:"325",
+    s:{ ddt:23,n:6,bw:250,h:62,salt:2.8,oil:0,sugar:0,flourW:"325",
         phases:[{h:2,t:21},{h:19,t:6},{h:3,t:21}], ballAfter:1, pf:{type:"none"} } },
   { key:"nap48", name:"Napoletana 48 h kalt",
-    s:{ n:6,bw:260,h:63,salt:2.8,oil:0,sugar:0,flourW:"325",
+    s:{ ddt:22,n:6,bw:260,h:63,salt:2.8,oil:0,sugar:0,flourW:"325",
         phases:[{h:2,t:21},{h:42,t:5},{h:4,t:21}], ballAfter:1, pf:{type:"none"} } },
   { key:"nap8", name:"Napoletana 8 h · same day",
-    s:{ n:6,bw:250,h:60,salt:2.8,oil:0,sugar:0,flourW:"275",
+    s:{ ddt:25,n:6,bw:250,h:60,salt:2.8,oil:0,sugar:0,flourW:"275",
         phases:[{h:2,t:22},{h:6,t:22}], ballAfter:1, pf:{type:"none"} } },
   { key:"poolish", name:"Poolish 16 h + 8 h",
-    s:{ n:6,bw:250,h:65,salt:2.8,oil:0,sugar:0,flourW:"325",
+    s:{ ddt:23,n:6,bw:250,h:65,salt:2.8,oil:0,sugar:0,flourW:"325",
         phases:[{h:2,t:21},{h:4,t:21},{h:2,t:21}], ballAfter:1,
         pf:{type:"poolish",share:30,hyd:100,h:16,t:19} } },
   { key:"biga", name:"Biga 18 h + 6 h",
-    s:{ n:6,bw:260,h:65,salt:2.8,oil:0,sugar:0,flourW:"380",
+    s:{ ddt:24,n:6,bw:260,h:65,salt:2.8,oil:0,sugar:0,flourW:"380",
         phases:[{h:2,t:21},{h:3,t:21},{h:1.5,t:21}], ballAfter:1,
         pf:{type:"biga",share:60,hyd:48,h:18,t:17} } },
   { key:"sour", name:"Sauerteig 24 h",
-    s:{ n:6,bw:260,h:65,salt:2.8,oil:0,sugar:0,flourW:"325",
+    s:{ ddt:24,n:6,bw:260,h:65,salt:2.8,oil:0,sugar:0,flourW:"325",
         phases:[{h:4,t:22},{h:16,t:6},{h:4,t:21}], ballAfter:1,
         pf:{type:"sour",hyd:100} } },
   { key:"ny", name:"New York 48 h",
-    s:{ n:5,bw:290,h:63,salt:2.5,oil:2,sugar:1.5,flourW:"325",
+    s:{ ddt:22,n:5,bw:290,h:63,salt:2.5,oil:2,sugar:1.5,flourW:"325",
         phases:[{h:1,t:21},{h:44,t:5},{h:3,t:21}], ballAfter:1, pf:{type:"none"} } },
   { key:"teglia", name:"Teglia / Blech 24 h",
-    s:{ n:2,bw:800,h:75,salt:2.5,oil:2,sugar:0,flourW:"325",
+    s:{ ddt:24,n:2,bw:800,h:75,salt:2.5,oil:2,sugar:0,flourW:"325",
         phases:[{h:3,t:21},{h:18,t:6},{h:4,t:22}], ballAfter:1, pf:{type:"none"} } }
 ];
 

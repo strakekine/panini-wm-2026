@@ -516,9 +516,10 @@ function defaults(){
   return Object.assign({
     bake: toLocal(d), ddt:23, container:"1", friction:"1", tflour:21, tkitchen:21,
     yeast:"fresh", scale:"0.1", mode:"simple", tTom:85, tMoz:90,
-    /* Ooni-Vorgabe aus dem Classic-Teig für den Halo Pro:
-       10 min bei 25 % / 120 U/min, 10 min Rast, 30 s bei 15 % / 90 U/min. */
-    mix:{ dev:"core", steps:[ {k:"mix",min:10,rpm:120}, {k:"rest",min:10}, {k:"mix",min:0.5,rpm:90} ] }
+    /* Ooni-Vorgabe aus dem Classic-Teig für den Halo Pro: 10 min bei 120 U/min,
+       10 min Rast, 30 s bei 90 U/min. Am Core auf die nächstliegenden Rastungen
+       gelegt: 3 Striche = 123 U/min, 1,5 Striche = 85 U/min. */
+    mix:{ dev:"core", steps:[ {k:"mix",min:10,st:3}, {k:"rest",min:10}, {k:"mix",min:0.5,st:1.5} ] }
   }, JSON.parse(JSON.stringify(PRESETS[0].s)));
 }
 let S = defaults();
@@ -1198,6 +1199,37 @@ function renderSaved(){
    die führende Größe.
 ========================================================= */
 const MIXDEV = { core:"Ooni Halo Core", pro:"Ooni Halo Pro", other:"Maschine", hand:"Von Hand" };
+/* Halo Core: 20 Rastungen in 5-%-Schritten, 60–300 U/min. Zehn Striche, die
+   halb und ganz leuchten — ein halber Strich ist eine Rastung.
+   Zwischen den dokumentierten Eckwerten linear interpoliert; beim Halo Pro
+   trifft dieselbe Rechnung alle in Ooni-Rezepten genannten Paare exakt. */
+const CORE_MIN = 60, CORE_MAX = 300, CORE_STEPS = 20;
+const CORE_INC = (CORE_MAX - CORE_MIN)/(CORE_STEPS - 1);
+function rpmForStripes(st){
+  const n = clamp(Math.round(st*2), 1, CORE_STEPS);        /* Rastung 1..20 */
+  return Math.round(CORE_MIN + (n-1)*CORE_INC);
+}
+function stripesForRpm(rpm){
+  const n = clamp(Math.round((rpm - CORE_MIN)/CORE_INC) + 1, 1, CORE_STEPS);
+  return n/2;
+}
+function fmtSt(st){
+  return (st % 1 === 0 ? String(st) : String(st).replace(".",",")) + " Strich" + (st === 1 ? "" : "e");
+}
+/* Schritte halten je nach Maschine Striche oder Drehzahl — hier angleichen. */
+function mixNormalize(){
+  const m = S.mix;
+  m.steps.forEach(st => {
+    if(st.k === "rest") return;
+    if(m.dev === "core"){
+      if(typeof st.st !== "number") st.st = stripesForRpm(+st.rpm || 120);
+      st.st = clamp(Math.round(st.st*2)/2, 0.5, 10);
+      st.rpm = rpmForStripes(st.st);
+    } else if(typeof st.rpm !== "number"){
+      st.rpm = rpmForStripes(+st.st || 3);
+    }
+  });
+}
 function fmtMin(v){
   if(v < 1) return Math.round(v*60)+" s";
   const m = Math.floor(v), sec = Math.round((v-m)*60);
@@ -1205,9 +1237,13 @@ function fmtMin(v){
 }
 function mixSummary(){
   const m = S.mix || defaults().mix;
+  const core = m.dev === "core", hand = m.dev === "hand";
   return m.steps.map(st => st.k === "rest"
     ? fmtMin(+st.min||0)+" Rast"
-    : fmtMin(+st.min||0)+" @ "+(+st.rpm||0)+" U/min").join(" · ");
+    : hand ? fmtMin(+st.min||0)+" kneten"
+    : fmtMin(+st.min||0)+" @ "+(core
+        ? fmtSt(+st.st||0)+" ("+(+st.rpm||0)+" U/min)"
+        : (+st.rpm||0)+" U/min")).join(" · ");
 }
 function mixTotal(){
   const m = S.mix || defaults().mix;
@@ -1219,32 +1255,44 @@ function mixActive(){
 }
 function renderMix(){
   const m = S.mix;
+  mixNormalize();
   $("mixDev").value = m.dev;
-  const hand = m.dev === "hand";
+  const hand = m.dev === "hand", core = m.dev === "core";
   $("mixSteps").innerHTML = m.steps.map((st,i)=>{
     const rest = st.k === "rest";
+    const head = "Schritt "+(i+1)+(!rest && !hand && core ? ' <b style="color:var(--gold)">'+st.rpm+' U/min</b>' : "");
     return '<div class="phase mix" data-i="'+i+'">'+
-      '<label class="f"><span class="lab">Schritt '+(i+1)+'</span>'+
+      '<label class="f"><span class="lab">'+head+'</span>'+
         '<select class="mx" data-k="k">'+
           '<option value="mix"'+(rest?"":" selected")+'>'+(hand?"Kneten":"Mischen")+'</option>'+
           '<option value="rest"'+(rest?" selected":"")+'>Rast</option></select></label>'+
       '<label class="f"><span class="lab">Minuten</span><input type="number" class="mx" data-k="min" min="0" max="60" step="0.5" value="'+st.min+'"></label>'+
-      '<label class="f"><span class="lab">U/min</span><input type="number" class="mx" data-k="rpm" min="0" max="345" step="5" value="'+
-        (rest||hand ? "" : (st.rpm||""))+'"'+(rest||hand?" disabled":"")+'></label>'+
+      (hand
+        ? '<label class="f"><span class="lab">&nbsp;</span><input type="text" value="—" disabled></label>'
+        : core
+        ? '<label class="f"><span class="lab">Striche</span><input type="number" class="mx" data-k="st" min="0.5" max="10" step="0.5" value="'+
+            (rest ? "" : st.st)+'"'+(rest?" disabled":"")+'></label>'
+        : '<label class="f"><span class="lab">U/min</span><input type="number" class="mx" data-k="rpm" min="0" max="345" step="5" value="'+
+            (rest ? "" : (st.rpm||""))+'"'+(rest?" disabled":"")+'></label>')+
       '<button class="xbtn" data-delmix="'+i+'"'+(m.steps.length<2?" disabled":"")+'>✕</button>'+
     '</div>';
   }).join("");
   const rest = mixTotal() - mixActive();
   let info = '<div class="note">'+fmtMin(mixTotal())+' insgesamt'+
     (rest > 0 ? ', davon '+fmtMin(mixActive())+' kneten' : '')+' · '+mixSummary()+'</div>';
-  if(m.dev === "core" || m.dev === "pro"){
-    info += '<div class="msg info"><span class="ic">·</span><span>Standard ist Oonis Vorgabe aus dem Classic-Teig '+
-      '(dort für den Halo Pro angegeben): 10 min bei 120 U/min, 10 min Rast mit geschlossenem Spritzschutz, '+
-      'dann 30 s bei 90 U/min zum Glätten. '+
-      (m.dev === "core"
-        ? 'Dein Core dreht bis 300 U/min, der Pro bis 345 — die <b>Prozentangaben</b> aus Ooni-Rezepten stimmen an deinem Rad also nicht, die <b>Drehzahl</b> schon.'
-        : 'Am Pro entsprechen 120 U/min etwa 25 % und 90 U/min etwa 15 %.')+
-      '</span></div>';
+  if(core){
+    info += '<div class="msg info"><span class="ic">·</span><span>Am Core ist ein <b>halber Strich eine Rastung</b> '+
+      '(20 Stufen, 60–300 U/min), ein ganzer Strich also rund 25 U/min. Standard ist Oonis Vorgabe aus dem '+
+      'Classic-Teig — dort für den Halo Pro mit 120 und 90 U/min angegeben, hier auf die nächstliegenden '+
+      'Rastungen deines Rads gelegt: <b>3 Striche</b> und <b>1,5 Striche</b>. '+
+      'Die <b>Prozentangaben</b> aus Ooni-Rezepten stimmen an deinem Rad nicht, weil der Pro bis 345 U/min dreht. '+
+      'Die Werte zwischen 60 und 300 sind linear interpoliert, nicht nachgemessen.</span></div>'+
+      '<div class="note">Striche → U/min: '+
+      [0.5,1,2,3,4,5,6,7,8,9,10].map(v => (v===0.5?"½":v)+" = "+rpmForStripes(v)).join(" · ")+'</div>';
+  } else if(m.dev === "pro"){
+    info += '<div class="msg info"><span class="ic">·</span><span>Standard ist Oonis Vorgabe aus dem Classic-Teig: '+
+      '10 min bei 120 U/min (25 %), 10 min Rast mit geschlossenem Spritzschutz, dann 30 s bei 90 U/min (15 %) '+
+      'zum Glätten.</span></div>';
   }
   if(mixActive() >= 12 && m.dev !== "hand"){
     info += '<div class="msg warn"><span class="ic">▲</span><span>Langes Kneten wärmt den Teig spürbar auf. '+
@@ -1336,7 +1384,12 @@ document.addEventListener("input", e => {
   if(t.classList.contains("mx")){
     const i = +t.closest(".phase").dataset.i, k = t.dataset.k;
     S.mix.steps[i][k] = (k === "k") ? t.value : +t.value;
-    if(k === "k" && t.value === "mix" && !S.mix.steps[i].rpm) S.mix.steps[i].rpm = 120;
+    if(k === "st") S.mix.steps[i].rpm = rpmForStripes(+t.value);
+    if(k === "k" && t.value === "mix"){
+      const st = S.mix.steps[i];
+      if(typeof st.st !== "number") st.st = 3;
+      if(!st.rpm) st.rpm = rpmForStripes(st.st);
+    }
     render(); return;
   }
   if(t.id === "mixDev"){ S.mix.dev = t.value; render(); return; }
@@ -1391,7 +1444,7 @@ document.addEventListener("click", e => {
     }
     return;
   }
-  if(t.id === "addMix"){ S.mix.steps.push({ k:"mix", min:1, rpm:120 }); render(); return; }
+  if(t.id === "addMix"){ S.mix.steps.push({ k:"mix", min:1, st:3, rpm:rpmForStripes(3) }); render(); return; }
   if(t.dataset.delmix !== undefined){
     if(S.mix.steps.length > 1){ S.mix.steps.splice(+t.dataset.delmix,1); render(); }
     return;

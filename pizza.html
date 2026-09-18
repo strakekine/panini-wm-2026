@@ -282,6 +282,7 @@
   <div class="chead"><h2>Zutaten</h2><div class="hint" id="totalHint"></div></div>
   <div class="cbody">
     <table class="ing" id="ing"></table>
+    <div id="yOvBox"></div>
     <div id="yeastNote"></div>
   </div>
 </div>
@@ -337,6 +338,15 @@
       <li class="ok">Ballen lässt sich ohne starkes Zurückschnappen öffnen</li>
       <li class="ok">Weich und elastisch, nicht klebrig-schmierig</li>
     </ul>
+    <div style="font-size:13px;font-weight:700;margin:12px 0 2px">Noch nicht so weit</div>
+    <ul class="check">
+      <li>Delle springt schnell und vollständig zurück</li>
+      <li>Oberfläche straff und glatt, kaum Blasen, Ballen steht hoch und kompakt</li>
+      <li>Zieht sich beim Öffnen sofort wieder zusammen, reißt eher in der Mitte</li>
+      <li>Fühlt sich fest an, nicht weich-nachgiebig</li>
+    </ul>
+    <div class="note" style="margin-top:6px">Das ist der harmlose Fall: einfach stehen lassen und später nochmal schauen.
+      Wärmer stellen beschleunigt, ist aber schwerer zu treffen — lieber Zeit geben.</div>
     <div style="font-size:13px;font-weight:700;margin:12px 0 2px">Überreif</div>
     <ul class="check">
       <li>Oberfläche eingefallen oder runzelig, Ballen läuft flach auseinander</li>
@@ -574,6 +584,7 @@ function sanitize(s){
   if(!s.mix.steps.length) s.mix = defaults().mix;
   s.ballAfter = clamp(s.ballAfter|0, 0, s.phases.length-1);
   if(!YCONV[s.yeast]) s.yeast = "fresh";
+  if(typeof s.yOv !== "number" || !isFinite(s.yOv) || s.yOv <= 0) delete s.yOv;
   delete s.mode;   /* alter Einfach/Experte-Schalter, gibt es nicht mehr */
   if(s.run && (!s.run.start || !s.run.plan || !Array.isArray(s.run.plan.phases))) delete s.run;
   return s;
@@ -683,11 +694,26 @@ function calc(st){
   const yPctShown = yPctMain * yconv;
   const pfYeastShown = pfYeastG * yconv;
 
-  /* Backfenster */
+  /* Eigene Hefemenge: weniger Hefe heißt, dasselbe Ziel erst bei mehr Gärleistung
+     zu erreichen. yPct ~ E^-EXP, also E ~ yPct^(-1/EXP). Damit verschiebt sich das
+     Backfenster mit — sonst wäre die eingetippte Zahl bloß Kosmetik. */
+  const EXP = pf.type === "sour" ? 1.2 : 1.55;
+  const yRec = pf.type === "sour" ? pf.weight : yG;          /* was das Modell vorschlägt */
+  const yOv  = (typeof st.yOv === "number" && st.yOv > 0 && yRec > 0.0001) ? st.yOv : null;
+  const yFac = yOv ? clamp(yOv/yRec, 0.1, 10) : 1;
+  const Eziel = sim.Eg / Math.pow(yFac, 1/EXP);
+
+  /* Backfenster, gemessen an Eziel statt am Planende */
   const rEnd = rGas(sim.endT);
-  let early = totalH;
-  for(const pt of sim.track){ if(pt.Eg >= 0.90*sim.Eg){ early = pt.x; break; } }
-  const late = Math.min(totalH + (0.13*sim.Eg)/Math.max(rEnd,0.02), totalH + 14);
+  const zeitFuer = (E) => {
+    for(const pt of sim.track){ if(pt.Eg >= E) return pt.x; }
+    return Math.min(totalH + (E - sim.Eg)/Math.max(rEnd,0.02), totalH + 48);
+  };
+  const fertig = zeitFuer(Eziel);
+  const early = zeitFuer(0.90*Eziel);
+  /* Fenster schließt 13 % Gärleistung nach "fertig", aber höchstens 14 h danach:
+     bei kalt endenden Plänen wäre es sonst absurd weit offen. */
+  const late  = Math.min(zeitFuer(1.13*Eziel), fertig + 14);
 
   return { n,bw,total,flour,water,h,salt,oil,sugar,
     saltG: flour*salt/100, oilG: flour*oil/100, sugarG: flour*sugar/100,
@@ -695,7 +721,7 @@ function calc(st){
     Eg: sim.Eg, Em: EmatTotal, Eeff, EgBall: sim.EgBall, EgBallWarm: sim.EgBallWarm, endT: sim.endT,
     corr, cal, phases, ballAfter, totalH, track: sim.track,
     ballH: phases.slice(ballAfter).reduce((a,p)=>a+p.h,0),
-    early, late, Rip: EmatTotal/Math.max(EgAll,0.01),
+    early, late, fertig, yRec, yOv, yFac, Eziel, Rip: EmatTotal/Math.max(EgAll,0.01),
     prefH: (pf.type==="poolish"||pf.type==="biga") ? pf.h : 0 };
 }
 
@@ -732,6 +758,9 @@ function messages(c){
   if(c.pf.type === "biga" && c.pf.t > 20) out.push(["warn","Biga bei "+c.pf.t+" °C ist warm. Klassisch sind 16–18 °C; wärmer wird sie schnell sauer statt aromatisch."]);
   if((c.pf.type==="poolish"||c.pf.type==="biga") && c.yPctMain <= 0.0005)
     out.push(["good","Der Vorteig trägt den ganzen Teig — im Hauptteig ist keine zusätzliche Hefe nötig."]);
+  if(c.yOv && c.fertig < c.totalH - 0.75)
+    out.push(["warn","Du nimmst mehr "+(c.pf.type==="sour"?"Anstellgut":"Hefe")+" als vorgeschlagen ("+num(c.yFac,2)+"×). "+
+      "Der Teig ist dadurch rund "+fmtH(c.totalH-c.fertig)+" vor der geplanten Backzeit fertig und gärt bis dahin weiter."]);
   if(c.cal !== 1) out.push(["info","Deine Kalibrierung aus dem Backprotokoll ist aktiv: Hefemenge × "+c.cal.toFixed(2).replace(".",",")+"."]);
   return out;
 }
@@ -938,6 +967,7 @@ function render(){
       '. Der Wert oben ist der Startpunkt, nicht die Wahrheit.</td></tr>';
   }
   $("ing").innerHTML = rows;
+  renderYOv(c, bake);
   $("totalHint").textContent = c.n+" × "+Math.round(c.bw)+" g = "+Math.round(c.total)+" g Teig";
 
   const tw = waterTemp();
@@ -1027,6 +1057,60 @@ function render(){
   renderBackupInfo();
   renderReplan(c, bake, start);
   persist();
+}
+
+/* ===================== Eigene Hefemenge =====================
+   Das Feld liegt bewusst außerhalb der Zutatentabelle: die wird bei jedem
+   Render neu gebaut, ein Eingabefeld darin würde auf dem iPhone bei jedem
+   Zeichen die Tastatur einklappen. Ist das Feld fokussiert, wird nur der
+   Hinweistext aktualisiert, nicht der Kasten.
+============================================================== */
+function yOvInfo(c, bake){
+  const einheit = c.pf.type === "sour" ? "Anstellgut" : "Hefe";
+  if(!c.yOv){
+    return '<div class="note" style="margin-top:6px">Leer lassen heißt: Vorschlag oben nehmen. '+
+      'Trägst du eine andere Menge ein, verschiebt sich das Backfenster entsprechend mit.</div>';
+  }
+  const diff = c.fertig - c.totalH;
+  const start = new Date(bake.getTime() - c.totalH*3600e3);
+  const fertigD = new Date(start.getTime() + c.fertig*3600e3);
+  const kopf = fmtG(c.yOv)+" statt "+fmtG(c.yRec)+" ("+num(c.yFac,2)+"×)";
+  if(Math.abs(diff) < 0.25){
+    return '<div class="msg info" style="margin-top:8px"><span class="ic">·</span><span>'+kopf+
+      ' — am Zeitplan ändert das praktisch nichts.</span></div>';
+  }
+  if(diff > 0){
+    return '<div class="msg info" style="margin-top:8px"><span class="ic">🕐</span><span>'+kopf+
+      '. Weniger '+einheit+' heißt mehr Zeit: backbereit erst gegen <b>'+fmtWhen(fertigD,start)+
+      '</b>, also rund '+fmtH(diff)+' nach deiner geplanten Backzeit. Der harmlose Fall — '+
+      'du backst einfach später.</span></div>';
+  }
+  return '<div class="msg warn" style="margin-top:8px"><span class="ic">▲</span><span>'+kopf+
+    '. Mehr '+einheit+' heißt weniger Zeit: backbereit schon gegen <b>'+fmtWhen(fertigD,start)+
+    '</b>, also rund '+fmtH(-diff)+' vor deiner Backzeit. Bis dahin gärt er weiter und wird '+
+    'überreif — entweder früher backen oder die letzte Warmphase kürzen.</span></div>';
+}
+function renderYOv(c, bake){
+  const box = $("yOvBox");
+  if(!c || c.yRec < 0.005){ box.innerHTML = ""; return; }
+  /* Nur sperren, wenn wirklich im Feld getippt wird — ein Klick auf den
+     Zurück-Knopf im selben Kasten darf den Kasten neu bauen, sonst bliebe
+     die alte Zahl stehen. */
+  if(focusIn(box) && typing()){
+    const info = box.querySelector(".yovinfo");
+    if(info) info.innerHTML = yOvInfo(c, bake);
+    return;
+  }
+  box.innerHTML =
+    '<div class="btnrow" style="margin-top:10px">'+
+      '<span style="font-size:12px;color:var(--muted);font-weight:600;align-self:center">Eigene Menge</span>'+
+      '<input type="number" id="yOv" inputmode="decimal" min="0" step="0.05" '+
+        'style="width:86px;flex:none" value="'+(c.yOv ? String(Math.round(c.yOv*100)/100) : "")+
+        '" placeholder="'+String(Math.round(c.yRec*100)/100)+'">'+
+      '<span style="font-size:13px;color:var(--muted);align-self:center">g</span>'+
+      (c.yOv ? '<button class="btn ghost sm" id="yOvReset">ZURÜCK</button>' : '')+
+    '</div>'+
+    '<div class="yovinfo">'+yOvInfo(c, bake)+'</div>';
 }
 
 /* ===================== Zeitstrahl ===================== */
@@ -1507,6 +1591,11 @@ document.addEventListener("input", e => {
     }
     render(); return;
   }
+  if(t.id === "yOv"){
+    const v = parseFloat(String(t.value).replace(",","."));
+    if(isFinite(v) && v > 0) S.yOv = v; else delete S.yOv;
+    render(); return;
+  }
   if(t.id === "pfShare"){ S.pf.share = +t.value; render(); return; }
   if(t.id === "pfHyd"){ S.pf.hyd = +t.value; render(); return; }
   if(t.id === "pfH"){ S.pf.h = +t.value; render(); return; }
@@ -1543,7 +1632,8 @@ document.addEventListener("click", e => {
     const p = PRESETS.find(x => x.key === t.dataset.preset);
     /* Eine Vorlage ist ein Rezept: Teig, Vorteig, Gärplan und Knetprogramm werden gesetzt.
        Küchentemperatur, Waage, Hefesorte und Behälter gehören zur Küche und bleiben. */
-    if(p){ S = sanitize(Object.assign(S, JSON.parse(JSON.stringify(p.s)), { mix: defaults().mix })); render(); }
+    if(p){ delete S.yOv;   /* eigene Hefemenge gilt nur für den Plan, den sie gemeint hat */
+           S = sanitize(Object.assign(S, JSON.parse(JSON.stringify(p.s)), { mix: defaults().mix })); render(); }
     return;
   }
   if(t.dataset.pf){
@@ -1567,6 +1657,7 @@ document.addEventListener("click", e => {
     if(S.mix.steps.length > 1){ S.mix.steps.splice(+t.dataset.delmix,1); render(); }
     return;
   }
+  if(t.id === "yOvReset"){ delete S.yOv; render(); return; }
   if(t.id === "addPhase"){
     const last = S.phases[S.phases.length-1];
     S.phases.push({ h:2, t: last && last.t <= 10 ? 21 : 6 });

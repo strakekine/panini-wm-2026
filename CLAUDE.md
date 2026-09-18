@@ -125,6 +125,14 @@ Vorteig, Gärplan, Zielteigtemperatur und Knetprogramm; Küchentemperatur, Waage
 Hefesorte, Behälter und Belag bleiben (gehören zur Küche). Gespeicherte Rezepte
 bringen dagegen alles mit. Selten genutzte Felder liegen in "Weitere
 Einstellungen" am Kartenende.
+`S.yOv` ist eine selbst eingetippte Hefemenge in Gramm. Sie ersetzt den
+Vorschlag nicht stillschweigend, sondern verschiebt das Backfenster: weniger
+Hefe heißt, dasselbe Ziel erst bei mehr Gärleistung zu erreichen
+(E ~ yPct^(-1/EXP), EXP = 1,55 bzw. 1,2 bei Sauerteig). Sie gilt nur für den
+Plan, für den sie gedacht war, und wird von jeder Vorlage gelöscht. Das Feld
+liegt in `#yOvBox` außerhalb der Zutatentabelle, weil die bei jedem Render neu
+gebaut wird; gesperrt wird es nur mit `focusIn(box) && typing()`, sonst würde
+der Zurück-Knopf im selben Kasten den alten Wert stehen lassen.
 
 **Testen:** Keine Tests im Repo. Playwright ist global installiert
 (`/opt/node22/lib/node_modules/playwright/index.mjs`, Chromium unter

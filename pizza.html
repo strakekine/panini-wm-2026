@@ -289,9 +289,9 @@
   <div class="cbody">
     <div class="note" style="margin-top:0">Der Teig läuft schon und der Termin wackelt? Neue Backzeit eintragen — der Rechner
       verrechnet, was bis jetzt an Gärung gelaufen ist, und sagt, wie die Restzeit temperiert werden muss.</div>
-    <div class="btnrow" style="margin-top:10px" id="runRow"></div>
+    <div id="runRow" style="margin-top:10px"></div>
     <div class="fields" style="margin-top:12px">
-      <label class="f"><span class="lab">Teig angesetzt am</span><input type="datetime-local" id="realStart"></label>
+      <label class="f"><span class="lab">Geknetet am</span><input type="datetime-local" id="realStart"></label>
       <label class="f"><span class="lab">Neue Backzeit</span><input type="datetime-local" id="newBake"></label>
     </div>
     <div id="replanOut" style="margin-top:12px"></div>
@@ -768,7 +768,7 @@ function buildSteps(c, bake){
       sub:"8–12 h vorher, damit es beim Ansetzen auf dem Höhepunkt ist" });
   }
 
-  steps.push({ t:start,
+  steps.push({ t:start, knead:true,
     title: c.pf.type==="none" ? "Wasser, Salz und Hefe verrühren, Mehl zugeben, kneten"
                               : "Hauptteig kneten: "+c.pf.name+", Wasser, Salz und Mehl",
     sub:MIXNAME+": "+mixSummary()+" · "+
@@ -942,8 +942,16 @@ function render(){
     const next = STEPS[i+1];
     const isNow = nowMs >= s.t.getTime() && (!next || nowMs < next.t.getTime()) &&
                   nowMs >= ref.getTime() && nowMs <= bake.getTime()+3600e3;
+    /* Am Knetschritt hängt der einzige Knopf des Ablaufs: einmal tippen, wenn der Teig
+       aus der Maschine kommt. Ab da kennt die App den echten Start. */
+    const knead = !s.knead ? "" : (S.run
+      ? '<small style="color:var(--good)">✓ Geknetet '+fmtWhen(new Date(S.run.start), ref)+' — die App rechnet ab dieser Uhrzeit. '+
+        '<button class="chip" id="runStop" style="padding:3px 9px;font-size:11.5px;margin-left:4px">zurücksetzen</button></small>'
+      : '<div style="margin-top:6px"><button class="btn sm" id="runStart">JETZT GEKNETET</button>'+
+        '<small>Tippen, sobald der Teig aus der Maschine kommt. Dann weiß die App, wann die Gare wirklich begonnen hat — '+
+        'für die „jetzt“-Markierung und fürs Umplanen, auch wenn du die App zwischendurch schließt.</small></div>');
     return '<li class="'+(isNow?"now ":"")+(s.pf?"pf":"")+'"><span class="tm">'+fmtWhen(s.t, ref)+'</span>'+
-      '<span class="tx">'+s.title+(s.sub?'<small>'+s.sub+'</small>':'')+'</span></li>';
+      '<span class="tx">'+s.title+(s.sub?'<small>'+s.sub+'</small>':'')+knead+'</span></li>';
   }).join("");
   $("windowHint").textContent = "Start " + WD[ref.getDay()] + " " + fmtClock(ref);
 
@@ -1068,10 +1076,10 @@ function renderReplan(c, bake, start){
     if(!$("newBake").value) $("newBake").value = S.bake;
   }
   $("runRow").innerHTML = run
-    ? '<span class="note" style="margin:0;flex:1">Plan eingefroren seit '+fmtWhen(new Date(run.start), new Date())+' — Änderungen oben ändern die Berechnung hier nicht.</span>'+
-      '<button class="btn ghost sm" id="runStop">AUFHEBEN</button>'
-    : '<button class="btn sm" id="runStart">TEIG IST ANGESETZT</button>'+
-      '<span class="note" style="margin:0;flex:1">Friert den Plan ein und merkt sich Start und Backzeit auch nach einem Neustart der App.</span>';
+    ? '<div class="msg good"><span class="ic">✓</span><span>Geknetet '+fmtWhen(new Date(run.start), new Date())+'. Gerechnet wird mit dem Gärplan, '+
+      'wie er in dem Moment war — du kannst oben gefahrlos probieren, ohne die laufende Gare zu verwirren.</span></div>'
+    : '<div class="msg info"><span class="ic">·</span><span>Noch kein echter Start bekannt: Die App nimmt an, du hast pünktlich nach Plan geknetet. '+
+      'Stimmt das nicht, trag die Uhrzeit unten ein — oder tipp beim nächsten Mal im Ablauf auf „Jetzt geknetet“.</span></div>';
 
   const rs = new Date($("realStart").value), nb = new Date($("newBake").value);
   const now = new Date();
@@ -1551,10 +1559,10 @@ document.addEventListener("click", e => {
   if(t.id === "runStart"){
     /* Plan einfrieren: Umplanen rechnet ab jetzt gegen diese Kopie, egal was oben geändert wird. */
     const plan = JSON.parse(JSON.stringify(S)); delete plan.run;
-    S.run = { start: $("realStart").value || toLocal(new Date()), newBake: $("newBake").value || S.bake, plan: plan };
+    S.run = { start: toLocal(new Date()), newBake: S.bake, plan: plan };
     render(); return;
   }
-  if(t.id === "runStop"){ delete S.run; render(); return; }
+  if(t.id === "runStop"){ if(confirm("Startzeit vergessen? Danach rechnet die App wieder mit dem geplanten Start.")) { delete S.run; render(); } return; }
   if(t.id === "calReset"){ setCal(1); render(); return; }
   if(t.dataset.dellog !== undefined){
     const log = getLog(); log.splice(+t.dataset.dellog,1); setLog(log); renderLog(); return;

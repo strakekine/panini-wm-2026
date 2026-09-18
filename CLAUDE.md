@@ -59,6 +59,52 @@ Arbeitsbranch), Pull Requests sind ihm zu umständlich.
   darum 0,39 % statt der analytischen 0,41 %. Das ist kein Fehler, sondern der
   Unterschied zwischen Anker und Simulation.
 
+**Offene Frage zum Hefeniveau — nicht ohne echten Teig anfassen.**
+Der Exponent 1,55 ist belegt und gilt als geklärt: Das AVPN-Disciplinare nennt
+8 h und 24 h bei derselben Temperatur (23 °C) mit 5-fachem Hefeunterschied, das
+ergibt einen impliziten Exponenten von 1,46. Unser Modell kommt an denselben
+zwei Punkten auf 5,49, also 1,55. Der Vergleich ist unabhängig von der
+Bezugsgröße, weil sich diese im Verhältnis herauskürzt. Rafcalcs 1,2 ist damit
+für unseren Zweck zu flach und als Maßstab erledigt (zwei verschiedene Formeln
+Japi1/Japi2, Temperaturterm mit hydrationsabhängigen Nullstellen, empirisch
+ohne dokumentierten Kalibrierbereich).
+
+Das **Niveau** ist dagegen weiter offen. Bei 8 h/23 °C rechnen wir 2,94 g
+Frischhefe je kg Mehl. Wie weit das über AVPN liegt, hängt davon ab, worauf
+sich deren Zahl bezieht — und das ist strittig:
+- 1,5 g je kg Mehl → wir 1,96×
+- 3 g je Liter Wasser bei 1,75 kg Mehl → wir 1,72×
+- 1,5 g je Liter Wasser bei 1,75 kg Mehl → wir 3,43×
+Die dritte Lesart ist die wahrscheinlichste: Nur mit ihr ergeben die übrigen
+Werte derselben Tabelle 2,9 % Salz und 57 % Hydration, also die AVPN-Spezifikation.
+Liest man die Zeile wie zitiert (1000 g Mehl), kämen 5 % Salz und 75–84 %
+Hydration heraus, was unmöglich ist. Zwei Rechercheläufe haben zur selben
+Quelle 1,5 g und 3 g gemeldet, Faktor 2 auseinander.
+
+Konsequenz: **Nicht nachjustieren.** Der Anker wurde schon einmal um 1,45
+gesenkt, weil alle rechnenden Quellen in dieselbe Richtung zeigten. Ein zweites
+Mal wegen einer Quelle zu senken, deren Bezugsgröße unklar ist, wäre Fitting an
+Rauschen. Die Quellen widersprechen sich inzwischen stärker untereinander, als
+wir von ihnen abweichen. Nächster echter Datenpunkt ist das Backprotokoll.
+Für den ersten Teig gilt die Empfehlung, das untere Ende des angezeigten
+Bereichs zu nehmen (0,7×): zu wenig Hefe heißt später backen, zu viel ist hin.
+
+**Zwei Einwände, die nachgerechnet falsch sind — nicht "reparieren":**
+- „4 h/24 °C müsste gegenüber 8 h/20 °C über Faktor 4 liegen, liegt aber bei
+  2,04." Das unterstellt eine separierbare Formel aus Zeit mal Temperatur. Das
+  Modell integriert beides zu E und wendet den Exponenten darauf an;
+  (E₈/E₄)^1,55 = 2,04, exakt der ausgegebene Wert.
+- „Der implizite Exponent zwischen 8 h und 24 h bei 20 °C ist 1,48, nicht 1,55."
+  Artefakt des Starts bei 23 °C: Die Aufwärmphase fällt beim kurzen Plan
+  anteilig stärker ins Gewicht. Bei gleicher Temperatur (23 °C) kommen sauber
+  1,55 heraus.
+
+**Nächster sinnvoller Schritt am Modell:** τ = 1,1 h ist geraten, nur die
+Skalierung m^(2/3) ist begründet. Einmal messen: Thermometer in einen
+250-g-Ballen und in den großen Klumpen, beide von 23 °C in den Kühlschrank,
+alle 10 Minuten ablesen. Damit wäre das Herzstück der App auf die echte Küche
+geeicht statt auf eine Schätzung. Das bringt mehr als jede weitere Quellenrunde.
+
 **Zustand:** ein Objekt `S`, ein `render()`, `persist()` nur nach localStorage.
 `sanitize(S)` läuft bei jedem Eingangsweg (Link, localStorage, Sicherung, Rezept,
 Vorlage). Der Plan-Hash `#p=` steht NUR im Teilen-Link und wird beim Start

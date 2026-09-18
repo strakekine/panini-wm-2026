@@ -356,7 +356,20 @@
       <button class="btn" id="saveBtn">SICHERN</button>
     </div>
     <div class="saved" id="saved"></div>
-    <div class="note">Rezepte und Backprotokoll liegen nur in diesem Browser. Über „Link“ oben lässt sich ein Plan teilen oder als Lesezeichen ablegen.</div>
+    <div class="note">Rezepte, Backprotokoll und Kalibrierung liegen nur in diesem Browser. Über „Link“ oben lässt sich ein einzelner Plan teilen oder als Lesezeichen ablegen.</div>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
+      <div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:8px">Sicherung</div>
+      <div class="btnrow">
+        <button class="btn ghost sm" id="expBtn">SPEICHERN</button>
+        <button class="btn ghost sm" id="impBtn">LADEN</button>
+        <input type="file" id="impFile" accept=".json,application/json" style="display:none">
+      </div>
+      <div class="btnrow" style="margin-top:8px">
+        <button class="btn ghost sm" id="expTxtBtn" style="font-size:13px">ALS TEXT KOPIEREN</button>
+        <button class="btn ghost sm" id="impTxtBtn" style="font-size:13px">TEXT EINFÜGEN</button>
+      </div>
+      <div id="backupInfo"></div>
+    </div>
   </div>
 </div>
 
@@ -911,6 +924,7 @@ function render(){
 
   renderLog();
   renderSaved();
+  renderBackupInfo();
   renderReplan(c, bake, start);
   persist();
 }
@@ -1150,6 +1164,79 @@ function renderSaved(){
     : '<div class="note" style="margin:0">Noch nichts gesichert.</div>';
 }
 
+/* ===================== Sicherung =====================
+   Eine Webseite kann nicht selbst in iCloud schreiben. Auf iOS reichen
+   wir die Datei ans Teilen-Menü weiter — dort führt "In Dateien sichern"
+   nach iCloud Drive. Sonst ganz normaler Download. Zusätzlich ein
+   Textweg über die Zwischenablage, falls beides klemmt.
+====================================================== */
+function backupData(){
+  return { app:"teigplaner", v:1, exported:new Date().toISOString(),
+           cal:getCal(), log:getLog(), recipes:loadRecipes(), last:S };
+}
+function backupName(){
+  return "teigplaner-"+new Date().toISOString().slice(0,10)+".json";
+}
+async function exportBackup(btn){
+  const json = JSON.stringify(backupData(), null, 2);
+  const name = backupName();
+  try {
+    const file = new File([json], name, { type:"application/json" });
+    if(navigator.canShare && navigator.canShare({ files:[file] })){
+      await navigator.share({ files:[file], title:"Teigplaner-Sicherung" });
+      flash(btn, "GESICHERT"); markExported(); return;
+    }
+  } catch(e){ if(e && e.name === "AbortError") return; }
+  try {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([json], { type:"application/json" }));
+    a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+    flash(btn, "GESICHERT"); markExported();
+  } catch(e){ flash(btn, "GEHT NICHT"); }
+}
+function markExported(){
+  try{ localStorage.setItem(KEY+"_exp", new Date().toISOString()); }catch(e){}
+  renderBackupInfo();
+}
+function flash(btn, txt){
+  if(!btn) return;
+  const old = btn.textContent; btn.textContent = txt;
+  setTimeout(()=>{ btn.textContent = old; }, 1600);
+}
+function applyBackup(raw, btn){
+  let d;
+  try { d = JSON.parse(raw); } catch(e){ alert("Das ist keine gültige Sicherungsdatei."); return; }
+  if(!d || d.app !== "teigplaner"){ alert("Diese Datei stammt nicht vom Teigplaner."); return; }
+  const rc = d.recipes && typeof d.recipes === "object" ? Object.keys(d.recipes).length : 0;
+  const lc = Array.isArray(d.log) ? d.log.length : 0;
+  const when = d.exported ? new Date(d.exported).toLocaleDateString("de-DE") : "unbekannt";
+  const have = Object.keys(loadRecipes()).length;
+  if(!confirm("Sicherung vom "+when+" laden?\n\n"+rc+" Rezepte, "+lc+" Protokolleinträge"+
+      (d.cal && d.cal !== 1 ? ", Kalibrierung × "+num(d.cal,2) : "")+
+      "\n\nGleichnamige Rezepte werden überschrieben"+
+      (have ? " ("+have+" vorhanden)" : "")+", Protokoll und Kalibrierung ersetzt.")) return;
+  if(rc) saveRecipes(Object.assign(loadRecipes(), d.recipes));
+  if(Array.isArray(d.log)) setLog(d.log);
+  if(typeof d.cal === "number") setCal(d.cal);
+  if(d.last && d.last.phases) S = Object.assign(defaults(), d.last);
+  if(d.exported){ try{ localStorage.setItem(KEY+"_exp", d.exported); }catch(e){} }
+  render();
+  flash(btn, "GELADEN");
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+function renderBackupInfo(){
+  const rc = Object.keys(loadRecipes()).length, lc = getLog().length;
+  const exp = localStorage.getItem(KEY+"_exp");
+  let txt = rc+" Rezept"+(rc===1?"":"e")+" · "+lc+" Protokolleintr"+(lc===1?"ag":"äge");
+  if(getCal() !== 1) txt += " · Kalibrierung × "+num(getCal(),2);
+  txt += exp ? " · zuletzt gesichert am "+new Date(exp).toLocaleDateString("de-DE") : " · noch nie gesichert";
+  const el = $("backupInfo");
+  if(el) el.innerHTML = '<div class="note">'+txt+'.<br>„Sichern“ öffnet auf dem iPhone das Teilen-Menü — dort <b>In Dateien sichern</b> '+
+    'und als Ort <b>iCloud Drive</b> wählen. „Laden“ öffnet den Dateien-Picker, wo iCloud Drive unter „Durchsuchen“ liegt.</div>';
+}
+
 /* ===================== Events ===================== */
 document.addEventListener("input", e => {
   const t = e.target;
@@ -1169,6 +1256,17 @@ document.addEventListener("input", e => {
     if(t.id === "bake") $("newBake").value = t.value;
     render();
   }
+});
+
+document.addEventListener("change", e => {
+  if(e.target.id !== "impFile") return;
+  const f = e.target.files && e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = () => applyBackup(String(r.result), $("impBtn"));
+  r.onerror = () => alert("Datei konnte nicht gelesen werden.");
+  r.readAsText(f);
+  e.target.value = "";
 });
 
 document.addEventListener("click", e => {
@@ -1227,6 +1325,20 @@ document.addEventListener("click", e => {
   }
   if(t.dataset.drop){
     const r = loadRecipes(); delete r[t.dataset.drop]; saveRecipes(r); renderSaved(); return;
+  }
+  if(t.id === "expBtn"){ exportBackup(t); return; }
+  if(t.id === "impBtn"){ $("impFile").click(); return; }
+  if(t.id === "expTxtBtn"){
+    const json = JSON.stringify(backupData());
+    const ok = () => { flash(t, "KOPIERT"); markExported(); };
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(json).then(ok, ()=>prompt("Text kopieren:", json));
+    else prompt("Text kopieren:", json);
+    return;
+  }
+  if(t.id === "impTxtBtn"){
+    const raw = prompt("Gesicherten Text hier einfügen:");
+    if(raw) applyBackup(raw, t);
+    return;
   }
   if(t.id === "icsBtn"){ downloadICS(); return; }
   if(t.id === "kitchenBtn"){ $("kitchen").classList.add("show"); renderKitchen(); return; }

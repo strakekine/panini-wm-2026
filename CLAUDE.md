@@ -179,3 +179,82 @@ per `nth-child`, die Chips werden bei jedem Render neu gebaut), Tippen mit
 `type()` zeichenweise prüfen (`fill()` sieht Fokusverlust nicht), Konsolenfehler
 zu `fonts.googleapis.com` ignorieren (Proxy), Dialoge mit `page.on('dialog')`.
 
+
+## Offene Arbeit (Stand 18.09.2026)
+
+**Kleiner, unstrittiger Bug:** `saveBtn` legt `JSON.parse(JSON.stringify(S))` als
+Rezept ab — samt `S.run`. Ein Rezept, das während einer laufenden Gare gespeichert
+wurde, bringt beim Laden die alte Startzeit mit, und die App hält einen Teig für
+laufend, der längst gegessen ist (`Object.assign(defaults(), s)` zieht `s.run` mit,
+und `if(run) S.run = run` überschreibt das nur, wenn gerade selbst einer läuft).
+Fix: `run` beim Speichern entfernen.
+
+**Zwei Tabs statt eines Zustands — vom Nutzer entworfen, angenommen.**
+Heute bedient ein `S` zwei Aufgaben gleichzeitig. Läuft ein Teig und ändert man
+oben den Plan, beschreibt der Ablauf einen anderen Teig als den im Kühlschrank:
+Ablauf, Zeitstrahl, Küchenmodus und Kalender hängen an `S`, nur Umplanen rechnet
+gegen `run.plan`. Die vorher diskutierte Warnbanner-Lösung behandelt das Symptom;
+die Tabs treffen die Ursache und sind deshalb der beschlossene Weg.
+
+Das Datenmodell trägt es schon: `S` ist der Planen-Zustand, `S.run = {start,
+newBake, plan}` der Backen-Zustand. Kein Migrieren nötig, `_last` bleibt wie es ist.
+
+- **Planen:** Teig, Vorteig, Gärplan, Ballen-Zeitpunkt, Kneten, Backzeit,
+  theoretischer Ablauf, Vorlagen, gespeicherte Rezepte, Teilen-Link. Immer
+  editierbar, auch wenn ein Teig läuft. Knopf „Diesen Teig jetzt kneten".
+- **Backen:** rechnet aus `run.plan` + `run.start`. Ablauf, Zeitstrahl, „läuft seit
+  X, Y % der Gärleistung", Umplanen, Küchenmodus, Kalender, Backprotokoll. Der Plan
+  ist hier nicht editierbar, nur über Umplanen (Backzeit und echte Knetzeit).
+- Beim Start: läuft ein Teig → Backen, sonst → Planen.
+- „Jetzt kneten", während schon einer läuft → Nachfrage, nie stillschweigend
+  überschreiben.
+- Neuer Knopf „Gebacken": schreibt ins Backprotokoll und räumt den Backen-Tab frei.
+  Heute gibt es nur „Startzeit vergessen".
+
+Offen und vom Nutzer zu entscheiden: **ein Teig gleichzeitig oder mehrere.**
+Empfehlung ist einer — mehrere bringen Liste, Auswahl und doppelten Zustand.
+
+**Vorgeschlagen, noch nicht beantwortet:**
+- Feld im Backprotokoll für die *gemessene* Teigtemperatur nach dem Kneten, das
+  `knetWaerme()` rückwärts eicht (heute `1 + Arbeit/250`, für sein Programm 6,1 °C).
+  Erst damit stimmt das angezeigte Schüttwasser für die Halo Core.
+- Hinweis am Knetschritt: reißt der Teig im Fenstertest, erst 15 min ruhen lassen
+  statt weiterkneten; bei Stockgare über 2 h zwei Dehnen-und-Falten-Schritte in der
+  ersten Stunde. Steht bisher nirgends in der App.
+
+## pizzalovers.se — geklärt, nicht neu aufrollen
+
+Ihr Rechner ist unser Rechner ohne Abkühlkurve. Nachgebaut — gleiches Hefegesetz,
+aber sofortiger Temperatursprung statt `simulate` — trifft er ihre Werte auf rund
+7 %: für 6×280 g, 62 %, 5 h/25 + 16 h/6 + 6 h/25 sagt der Nachbau 1,01 g,
+pizzalovers zeigt 0,94 g, wir rechnen 1,00 g.
+
+Daraus das Muster — bei Raumtemperatur deckungsgleich, im Kühlschrank auseinander,
+und zwar in beide Richtungen je nach Ballen-Zeitpunkt:
+
+| Plan (6×280 g, 62 %) | unser | pizzalovers |
+|---|---|---|
+| 8 h / 20 °C | 4,21 g | 4,21 g |
+| 5/25 + 16/6 + 6/25, Ballen nach P2 | 1,00 g | 1,01 g |
+| 24 h/4 + 3 h/21, Ballen sofort (kalt) | 6,04 g | 5,36 g |
+| 24 h/4 + 3 h/21, Ballen nach der Kälte | 3,85 g | 5,36 g |
+| 48 h/4 + 4 h/21, Ballen nach der Kälte | 2,00 g | 2,39 g |
+| 72 h/4 + 4 h/21, Ballen nach der Kälte | 1,39 g | 1,57 g |
+
+Kleine Ballen kühlen schnell aus und brauchen mehr Hefe als ihr Rechner sagt, ein
+großer Klumpen kühlt langsam und braucht weniger. Genau das kann pizzalovers nicht
+ausdrücken, weil er den Ballen-Zeitpunkt nicht kennt — das ist der Daseinsgrund
+dieser App. Die ganze Spanne hängt an τ = 1,1 h, der einzigen geratenen Konstante.
+
+Nebenbefund: Für 24 h kalt + 3 h Raum mit Ballen von Anfang an rechnen wir 6,04 g,
+praktisch die 6 g der Ooni-App. Sieht danach aus, als ginge Ooni von Ballen im
+Kühlschrank aus. Das löst den alten 1,58×-Streit auf — nicht verschiedene Modelle,
+sondern verschiedene Annahmen darüber, was im Kühlschrank liegt.
+
+Die Domain ist vom Netz-Proxy dieser Umgebung blockiert (403 beim CONNECT), Zahlen
+kommen nur per Screenshot vom Nutzer.
+
+**Erster echter Teig läuft:** geknetet 18.09.2026 gegen 16:00, 6×280 g, 62 %, 3 %
+Salz, 5 h/25 °C + 16 h/6 °C + 6 h/25 °C, Ballen nach Phase 2, 1,00 g Frischhefe,
+Backzeit 19.09. um 19:00. Das Ergebnis gehört ins Backprotokoll und ist der erste
+Datenpunkt zum offenen Hefeniveau.

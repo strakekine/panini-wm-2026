@@ -127,11 +127,38 @@ Vergangenheit der Normalfall und die Warnung entfällt.
 
 **Zustand:** ein Objekt `S`, ein `render()`, `persist()` nur nach localStorage.
 `sanitize(S)` läuft bei jedem Eingangsweg (Link, localStorage, Sicherung, Rezept,
-Vorlage). Der Plan-Hash `#p=` steht NUR im Teilen-Link und wird beim Start
-entfernt: iOS-Lesezeichen speichern die URL samt Hash. `S.run` = eingefrorener
-Plan mit echter Startzeit ("Jetzt geknetet" am Knetschritt im Ablauf); Umplanen
-rechnet dagegen und simuliert den Rest ab der aktuellen Kerntemperatur per
-Bisektion über `simulate`.
+Vorlage) und prüft `S.run.plan` gleich mit. Der Plan-Hash `#p=` steht NUR im
+Teilen-Link und wird beim Start entfernt: iOS-Lesezeichen speichern die URL samt
+Hash. `S.run = {start, newBake, plan, id, bake0, orig?}` = eingefrorener Plan mit
+echter Startzeit ("Jetzt geknetet" am Knetschritt im Ablauf). Rezept, Teilen-Link
+und Vorlage tragen `run` nie mit; beim Laden eines Rezepts wird ein darin liegendes
+`run` (Altbestand) verworfen.
+
+**Zwei Tabs, eine DOM.** `VIEW = "plan" | "run"` (nicht gespeichert; beim Start
+Backen, falls ein Teig läuft). Karten tragen eine Klasse: `v-plan` (Vorlage, Teig,
+Vorteig, Kneten, Gärplan, Belag, Rezepte), `v-run` (Statuskarte „Läuft", Umplanen,
+Fertig oder nicht, Gebacken), `v-shared` (Verlauf, Zutaten, Ablauf, Einschätzung),
+`v-log` (Backprotokoll, nur im Backen-Tab), `v-norun` (Hinweis, wenn kein Teig
+läuft). Sichtbarkeit rein per CSS über `body[data-view]` und `body[data-run]`.
+`render()` baut die Planen-Karten immer aus `S` (`renderPlanCards`), die geteilten
+Karten aus der jeweiligen Sicht: `planView(c)` hängt an `S.bake`, `runView(run)`
+an `run.start`. `RUN` wird bei jedem Render gerechnet, egal welcher Tab offen ist —
+Küchenmodus und Kalender im Backen-Tab hängen daran. Helfer, die früher direkt in
+`S` griffen (`buildSteps`, `messages`, `mixSummary`, `waterTemp`, `knetWaerme`),
+nehmen den Zustand als Parameter; sonst zeigt der Backen-Tab das Knetprogramm des
+nächsten Teigs. Kalender-UIDs nutzen `run.id` (= Backzeit beim Start), damit ein
+Export vor dem Kneten durch den späteren ersetzt und über Umplanen nicht
+verdoppelt wird.
+
+Übergänge: „Jetzt geknetet" friert `S` als `run.plan` ein und wechselt nach Backen;
+läuft schon einer, gibt es eine Nachfrage, nie stilles Überschreiben. „Gebacken?"
+(drei Bewertungen) schreibt den ganzen Plan samt echter Knetzeit, Backzeit,
+verwendeter Hefe und ggf. dem ursprünglichen Plan (`orig`) ins Backprotokoll, zieht
+`cal` nach, löscht `run` und wechselt nach Planen. Protokolleinträge mit Plan haben
+„↺" und landen damit als Plan im Planen-Tab. „Teig verwerfen" löscht ohne Eintrag.
+Ohne laufenden Teig lässt sich im Backen-Tab nachträglich bewerten (`noStart`,
+nimmt den Plan aus Planen). Ein Teig gleichzeitig — mehrere wurden mit dem Nutzer
+besprochen und verworfen; `run` → `runs[]` wäre in `sanitize` billig nachzurüsten.
 
 Weicht der echte Knetzeitpunkt ab, hängt die **Anzeige am echten Start**: Ablauf,
 Zeitstrahl, Küchenmodus und Kalender verschieben sich als Ganzes, das Rezept bleibt
@@ -139,8 +166,10 @@ unverändert (24 h geplant sind 24 h im Ablauf). Das ist Absicht — nur so taug
 Eintrag im Backprotokoll noch als Rezept. Über dem Ablauf steht dann eine gelbe
 Warnung mit dem neuen Fertig-Zeitpunkt und dem Verweis auf Umplanen, und die
 Umplanen-Karte klappt einmal von selbst auf (`replanAufgeklappt` verhindert, dass
-sie das bei jedem 30-s-Render wieder tut). `S.bake` bleibt der Zieltermin;
-`bakeShown` ist der verschobene. Die Entscheidung — Rezept genau einhalten und
+sie das bei jedem 30-s-Render wieder tut). `run.plan.bake` bleibt der Zieltermin;
+`bakeShown` ist der verschobene. Im Planen-Tab schweigt die rote
+Vergangenheits-Warnung, solange dort noch der Plan mit der Backzeit steht, die
+gerade läuft (`run.bake0`). Die Entscheidung — Rezept genau einhalten und
 später essen, oder pünktlich backen und die Differenz in der Kühlphase auffangen —
 gehört dem Nutzer und wird ihm nicht abgenommen.
 
@@ -152,6 +181,19 @@ eine Stunde Kühlschrank rund ein Achtel einer Stunde Raumtemperatur kostet.
 Praktisch: in den Kühlschrank verschiebt sich mit dem echten Kneten, herausnehmen
 bleibt bei der geplanten Uhrzeit (Backzeit minus Warmphase). Darüber hinaus
 greift die alte Bisektion über den ganzen Rest.
+
+**Umplanen übernehmen:** Jeder Vorschlag, der ein konkreter Plan ist, liegt als
+`REPLAN = {phases, ballAfter, bake}` bereit, und ein Knopf schreibt ihn in
+`run.plan` (Original beim ersten Mal nach `run.orig`). Kühlausgleich: dieselben
+Phasen, nur die Kühlphase anders lang. Bisektion: die gelaufenen Phasen (`cut`,
+bis jetzt) plus der Rest ab jetzt; noch nicht geballt → Ballen-Zeitpunkt bleibt,
+falls er in den Rest fällt, sonst am Beginn der Warmphase (`splitAt`). Benachbarte
+Phasen gleicher Temperatur werden zusammengelegt, außer an der Ballengrenze
+(`mergePhases`). Die Restphasen für die Rechnung und die für den Plan sind
+dieselben (`restOf`), damit Vorschlag und Plan nicht auseinanderlaufen. Invariante
+nach Übernehmen: Summe der Phasen = neue Backzeit − Knetzeit, also `versatz` = 0
+und die gelbe Warnung verschwindet. Nicht übernehmbar: „Gärziel schon erreicht",
+„nicht aufholbar", „einfrieren".
 
 **iPhone-Regeln:** Ein fokussiertes Feld bekommt nie `.value` zugewiesen, und
 Container mit fokussiertem Input werden nicht per innerHTML neu gebaut (sonst
@@ -193,49 +235,32 @@ Seite per `file://` laden, 390 px breit; Presets nacheinander klicken (Locator
 per `nth-child`, die Chips werden bei jedem Render neu gebaut), Tippen mit
 `type()` zeichenweise prüfen (`fill()` sieht Fokusverlust nicht), Konsolenfehler
 zu `fonts.googleapis.com` ignorieren (Proxy), Dialoge mit `page.on('dialog')`.
+Zugeklappte `details` (Umplanen, Backprotokoll) liefern in `innerText()` leeren
+Text und lassen sich nicht anklicken — vorher `open = true` setzen oder
+`textContent()` lesen. Für Umplanen-Tests `realStart`/`newBake` per
+`el.value = …; el.dispatchEvent(new Event("input",{bubbles:true}))` setzen.
 
 
 ## Offene Arbeit (Stand 18.09.2026)
 
-**Kleiner, unstrittiger Bug:** `saveBtn` legt `JSON.parse(JSON.stringify(S))` als
-Rezept ab — samt `S.run`. Ein Rezept, das während einer laufenden Gare gespeichert
-wurde, bringt beim Laden die alte Startzeit mit, und die App hält einen Teig für
-laufend, der längst gegessen ist (`Object.assign(defaults(), s)` zieht `s.run` mit,
-und `if(run) S.run = run` überschreibt das nur, wenn gerade selbst einer läuft).
-Fix: `run` beim Speichern entfernen.
-
-**Zwei Tabs statt eines Zustands — vom Nutzer entworfen, angenommen.**
-Heute bedient ein `S` zwei Aufgaben gleichzeitig. Läuft ein Teig und ändert man
-oben den Plan, beschreibt der Ablauf einen anderen Teig als den im Kühlschrank:
-Ablauf, Zeitstrahl, Küchenmodus und Kalender hängen an `S`, nur Umplanen rechnet
-gegen `run.plan`. Die vorher diskutierte Warnbanner-Lösung behandelt das Symptom;
-die Tabs treffen die Ursache und sind deshalb der beschlossene Weg.
-
-Das Datenmodell trägt es schon: `S` ist der Planen-Zustand, `S.run = {start,
-newBake, plan}` der Backen-Zustand. Kein Migrieren nötig, `_last` bleibt wie es ist.
-
-- **Planen:** Teig, Vorteig, Gärplan, Ballen-Zeitpunkt, Kneten, Backzeit,
-  theoretischer Ablauf, Vorlagen, gespeicherte Rezepte, Teilen-Link. Immer
-  editierbar, auch wenn ein Teig läuft. Knopf „Diesen Teig jetzt kneten".
-- **Backen:** rechnet aus `run.plan` + `run.start`. Ablauf, Zeitstrahl, „läuft seit
-  X, Y % der Gärleistung", Umplanen, Küchenmodus, Kalender, Backprotokoll. Der Plan
-  ist hier nicht editierbar, nur über Umplanen (Backzeit und echte Knetzeit).
-- Beim Start: läuft ein Teig → Backen, sonst → Planen.
-- „Jetzt kneten", während schon einer läuft → Nachfrage, nie stillschweigend
-  überschreiben.
-- Neuer Knopf „Gebacken": schreibt ins Backprotokoll und räumt den Backen-Tab frei.
-  Heute gibt es nur „Startzeit vergessen".
-
-Offen und vom Nutzer zu entscheiden: **ein Teig gleichzeitig oder mehrere.**
-Empfehlung ist einer — mehrere bringen Liste, Auswahl und doppelten Zustand.
+Erledigt in dieser Runde: Speicher-Bug (`run` in Rezept, Rezept-Laden und
+Teilen-Link), Zwei-Tab-Umbau Planen/Backen mit Statuskarte, „Gebacken?",
+Backprotokoll mit ganzem Plan und „↺", Umplanen übernehmen, Hinweise am
+Knetschritt (Fenstertest → 15 min ruhen; Stockgare über 2 h → zweimal dehnen und
+falten in der ersten Stunde).
 
 **Vorgeschlagen, noch nicht beantwortet:**
-- Feld im Backprotokoll für die *gemessene* Teigtemperatur nach dem Kneten, das
+- Feld in der Statuskarte für die *gemessene* Teigtemperatur nach dem Kneten, das
   `knetWaerme()` rückwärts eicht (heute `1 + Arbeit/250`, für sein Programm 6,1 °C).
-  Erst damit stimmt das angezeigte Schüttwasser für die Halo Core.
-- Hinweis am Knetschritt: reißt der Teig im Fenstertest, erst 15 min ruhen lassen
-  statt weiterkneten; bei Stockgare über 2 h zwei Dehnen-und-Falten-Schritte in der
-  ersten Stunde. Steht bisher nirgends in der App.
+  Ein Grad Teigtemperatur daneben heißt drei Grad Knetwärme daneben, weil die
+  Teigtemperatur das Mittel aus Mehl, Wasser und Küche plus Knetwärme ist. Als
+  Faktor wie `cal` ablegen, gleitend gemittelt. Erst damit stimmt das angezeigte
+  Schüttwasser für die Halo Core.
+- „Vorteig jetzt angesetzt" als zweiter Anker (`run.stage`): heute ist der
+  Poolish-Reifeschritt im Küchenmodus nie erreichbar, weil der Start beim Kneten
+  liegt. Nur, wenn er regelmäßig Vorteige macht.
+- Erinnerungen ohne Kalender gehen nicht: Web Push braucht auf dem iOS-Home-
+  Bildschirm einen Push-Server. Der Kalender bleibt der Weg.
 
 ## pizzalovers.se — geklärt, nicht neu aufrollen
 

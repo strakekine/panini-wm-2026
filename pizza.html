@@ -25,15 +25,36 @@
   html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Barlow,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
   body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
   header{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,var(--panel),rgba(22,27,34,.94));backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-  .wrap{max-width:880px;margin:0 auto;padding:12px 14px 10px}
-  h1{font-family:'Bebas Neue',sans-serif;letter-spacing:1.5px;margin:0;font-size:28px;color:var(--gold)}
+  .wrap{max-width:880px;margin:0 auto;padding:10px 14px 8px}
+  h1{font-family:'Bebas Neue',sans-serif;letter-spacing:1.5px;margin:0;font-size:26px;color:var(--gold);line-height:1.1}
   .sub{color:var(--muted);font-size:12.5px;margin-top:2px}
   main{max-width:880px;margin:0 auto;padding:10px 12px 90px}
 
   .seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-  .seg button{background:transparent;color:var(--muted);border:0;padding:9px 12px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer}
+  .seg button{background:transparent;color:var(--muted);border:0;padding:9px 10px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;letter-spacing:.3px}
   .seg button.on{background:var(--accent);color:#1a1300}
-  .bar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+  .top .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .top .acts .btn.sm{padding:7px 10px;font-size:14.5px}
+  .bar{display:flex;gap:6px;margin-top:8px;align-items:center}
+  .bar .seg{flex:1}
+  .bar .seg button{flex:1;text-align:center}
+  .seg button .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--good);margin-left:6px;vertical-align:middle}
+  .seg button.on .dot{background:#1a1300}
+  a{color:var(--gold)}
+
+  /* Zwei Sichten, eine DOM: Planen hängt an S, Backen an S.run.plan.
+     Karten tragen eine Klasse, die sagt, wo sie hingehören. */
+  body[data-view="run"] .v-plan{display:none}
+  body[data-view="plan"] .v-run, body[data-run="0"] .v-run{display:none}
+  body[data-view="run"][data-run="0"] .v-shared{display:none}
+  body[data-view="plan"] .v-norun, body[data-run="1"] .v-norun{display:none}
+  body[data-view="plan"] .v-log{display:none}
+  .status{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .status .st{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 10px;min-width:0}
+  .status .st .l{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+  .status .st .v{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.8px;margin-top:2px;line-height:1.1}
+  .status .st .s{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.35}
 
   .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin:12px 0;overflow:hidden}
   .chead{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--panel2);border-bottom:1px solid var(--line)}
@@ -156,24 +177,28 @@
 
 <header>
   <div class="wrap">
-    <h1>TEIGPLANER</h1>
-    <div class="sub">Gärplan mit beliebig vielen Phasen — du bestimmst, wann geballt wird.</div>
+    <div class="top">
+      <h1>TEIGPLANER</h1>
+      <div class="acts">
+        <button class="btn ghost sm v-run" id="kitchenBtn">KÜCHE</button>
+        <button class="btn ghost sm v-shared" id="icsBtn">KALENDER</button>
+        <button class="btn ghost sm v-plan" id="linkBtn">LINK</button>
+      </div>
+    </div>
     <div class="bar">
-      <button class="btn ghost sm" id="kitchenBtn">KÜCHE</button>
-      <button class="btn ghost sm" id="icsBtn">KALENDER</button>
-      <button class="btn ghost sm" id="linkBtn">LINK</button>
+      <div class="seg" id="tabs"><button data-view="plan" id="tabPlan">PLANEN</button><button data-view="run" id="tabRun">BACKEN</button></div>
     </div>
   </div>
 </header>
 
 <main>
 
-<div class="card">
+<div class="card v-plan">
   <div class="chead"><h2>Vorlage</h2><div class="hint">Setzt Teig, Vorteig, Gärplan, Teigtemperatur und Kneten</div></div>
   <div class="cbody"><div class="chips" id="presets"></div></div>
 </div>
 
-<div class="card">
+<div class="card v-plan">
   <div class="chead"><h2>Teig</h2><div class="hint" id="doughHint"></div></div>
   <div class="cbody">
     <div class="fields">
@@ -214,7 +239,7 @@
   </div>
 </div>
 
-<div class="card">
+<div class="card v-plan">
   <div class="chead"><h2>Vorteig</h2><div class="hint">Aroma und Struktur, die ein Direktteig nicht schafft</div></div>
   <div class="cbody">
     <div class="chips" id="pfChips"></div>
@@ -223,7 +248,7 @@
   </div>
 </div>
 
-<div class="card">
+<div class="card v-plan">
   <div class="chead"><h2>Kneten</h2><div class="hint">Ooni Halo Core</div></div>
   <div class="cbody">
     <div id="mixSteps"></div>
@@ -232,7 +257,7 @@
   </div>
 </div>
 
-<div class="card">
+<div class="card v-plan">
   <div class="chead"><h2>Gärplan</h2><div class="hint">Backzeit ist der Fixpunkt</div></div>
   <div class="cbody">
     <div class="fields" style="margin-bottom:14px">
@@ -262,7 +287,24 @@
   </div>
 </div>
 
-<div class="card">
+<div class="card v-run">
+  <div class="chead"><h2>Läuft</h2><div class="hint" id="runHint"></div></div>
+  <div class="cbody">
+    <div class="status" id="runStatus"></div>
+    <div id="runNow"></div>
+  </div>
+</div>
+
+<div class="card v-norun">
+  <div class="chead"><h2>Kein Teig läuft</h2></div>
+  <div class="cbody">
+    <div class="note" style="margin-top:0">Sobald du im Planen-Tab am Knetschritt auf <b>Jetzt geknetet</b> tippst, erscheint der Teig hier:
+      Ablauf mit echten Uhrzeiten, Küchenmodus, Umplanen und am Ende der Eintrag ins Backprotokoll.</div>
+    <div class="btnrow" style="margin-top:10px"><button class="btn ghost sm" data-view="plan">ZUM PLANEN</button></div>
+  </div>
+</div>
+
+<div class="card v-shared">
   <div class="chead"><h2>Verlauf</h2><div class="hint">Farbe = Temperatur, blau kalt bis rot warm</div></div>
   <div class="cbody">
     <svg width="0" height="0" style="position:absolute"><defs><pattern id="hatchLeg" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="5" stroke="#e8ecf1" stroke-width="1.2" opacity="0.55"/></pattern></defs></svg>
@@ -278,7 +320,7 @@
   </div>
 </div>
 
-<div class="card">
+<div class="card v-shared">
   <div class="chead"><h2>Zutaten</h2><div class="hint" id="totalHint"></div></div>
   <div class="cbody">
     <table class="ing" id="ing"></table>
@@ -287,18 +329,18 @@
   </div>
 </div>
 
-<div class="card">
+<div class="card v-shared">
   <div class="chead"><h2>Ablauf</h2><div class="hint" id="windowHint"></div></div>
   <div id="shiftNote"></div>
   <div class="cbody"><ol class="steps" id="steps"></ol></div>
 </div>
 
-<details class="card" id="replanCard">
-  <summary>Umplanen <span class="hint">Backzeit verschiebt sich</span></summary>
+<details class="card v-run" id="replanCard">
+  <summary>Umplanen <span class="hint">Backzeit oder Knetzeit weicht ab</span></summary>
   <div class="cbody">
-    <div class="note" style="margin-top:0">Der Teig läuft schon und der Termin wackelt? Neue Backzeit eintragen — der Rechner
-      verrechnet, was bis jetzt an Gärung gelaufen ist, und sagt, wie die Restzeit temperiert werden muss.</div>
-    <div id="runRow" style="margin-top:10px"></div>
+    <div class="note" style="margin-top:0">Der Termin wackelt oder du hast später geknetet als geplant? Neue Backzeit eintragen — der Rechner
+      verrechnet, was bis jetzt an Gärung gelaufen ist, und sagt, wie die Restzeit temperiert werden muss.
+      Mit <b>Übernehmen</b> wird der Vorschlag zum Plan dieses Teigs: Ablauf, Küche und Kalender folgen.</div>
     <div class="fields" style="margin-top:12px">
       <label class="f"><span class="lab">Geknetet am</span><input type="datetime-local" id="realStart"></label>
       <label class="f"><span class="lab">Neue Backzeit</span><input type="datetime-local" id="newBake"></label>
@@ -307,7 +349,7 @@
   </div>
 </details>
 
-<div class="card">
+<div class="card v-shared">
   <div class="chead"><h2>Einschätzung</h2></div>
   <div class="cbody">
     <div id="msgs"></div>
@@ -316,7 +358,7 @@
   </div>
 </div>
 
-<details class="card">
+<details class="card v-plan">
   <summary>Belag und Einkauf <span class="hint">skaliert mit</span></summary>
   <div class="cbody">
     <div class="fields" style="margin-bottom:12px">
@@ -329,8 +371,8 @@
   </div>
 </details>
 
-<div class="card">
-  <div class="chead"><h2>Fertig oder nicht?</h2><div class="hint">Am Teig entscheiden</div></div>
+<details class="card v-run">
+  <summary>Fertig oder nicht? <span class="hint">am Teig entscheiden</span></summary>
   <div class="cbody">
     <div style="font-size:13px;font-weight:700;margin-bottom:2px">Backbereit</div>
     <ul class="check">
@@ -357,24 +399,41 @@
     </ul>
     <div class="note">Verdopplung ist kein brauchbares Ziel für Pizzateig — kalt geführte Ballen erreichen sie nie, warm geführte sind oft schon drüber.</div>
   </div>
+</details>
+
+<div class="card v-run">
+  <div class="chead"><h2>Gebacken?</h2><div class="hint">Am Teig entscheiden, dann eintragen</div></div>
+  <div class="cbody">
+    <div class="note" style="margin-top:0">Wie war der Teig beim Öffnen? Der Eintrag landet mit dem kompletten Plan im Backprotokoll,
+      die Hefemenge für die nächsten Pläne wird nachgezogen, und der Backen-Tab ist wieder frei.</div>
+    <div class="btnrow" style="margin-top:10px">
+      <button class="btn ghost sm" data-baked="young">zu jung</button>
+      <button class="btn sm" data-baked="good">genau richtig</button>
+      <button class="btn ghost sm" data-baked="over">überreif</button>
+    </div>
+    <div class="note">Falsch getippt oder Teig weggeworfen? <a href="#" id="runDrop">Teig verwerfen</a> — ohne Eintrag.</div>
+  </div>
 </div>
 
-<details class="card">
+<details class="card v-log">
   <summary>Backprotokoll <span class="hint" id="calHint"></span></summary>
   <div class="cbody">
-    <div class="note" style="margin-top:0">Nach dem Backen eintragen, wie der Teig war. Der Rechner zieht die Hefemenge
-      für die nächsten Pläne entsprechend nach — das ist die einzige Kalibrierung, die deine Küche wirklich kennt.
-      Das Knetprogramm wird beim Eintrag mitgespeichert.</div>
-    <div class="btnrow" style="margin-top:10px">
-      <button class="btn ghost sm" data-log="young">zu jung</button>
-      <button class="btn ghost sm" data-log="good">genau richtig</button>
-      <button class="btn ghost sm" data-log="over">überreif</button>
+    <div class="note" style="margin-top:0">Jeder Eintrag hält fest, was wirklich gebacken wurde: Plan, Hefemenge, echte Knetzeit.
+      Der Rechner zieht die Hefemenge für die nächsten Pläne nach — das ist die einzige Kalibrierung, die deine Küche wirklich kennt.
+      Mit ↺ landet ein Eintrag als Plan im Planen-Tab.</div>
+    <div class="v-norun" style="margin-top:10px">
+      <div class="note" style="margin:0 0 6px">Ohne Startzeit nachtragen — nimmt den Plan, der gerade im Planen-Tab steht:</div>
+      <div class="btnrow">
+        <button class="btn ghost sm" data-log="young">zu jung</button>
+        <button class="btn ghost sm" data-log="good">genau richtig</button>
+        <button class="btn ghost sm" data-log="over">überreif</button>
+      </div>
     </div>
     <div id="logList" style="margin-top:10px"></div>
   </div>
 </details>
 
-<div class="card">
+<div class="card v-plan">
   <div class="chead"><h2>Rezepte</h2></div>
   <div class="cbody">
     <div class="btnrow">
@@ -558,6 +617,10 @@ function defaults(){
 }
 let S = defaults();
 let STEPS = [], CALC = null, replanAufgeklappt = false;
+/* VIEW = welcher Tab offen ist (nicht gespeichert: beim Start Backen, falls ein Teig läuft).
+   RUN = die Sicht auf den laufenden Teig, immer gerechnet, weil Küchenmodus und Timer sie brauchen.
+   REPLAN = der aktuelle Umplanen-Vorschlag als Gärplan, den "Übernehmen" in S.run.plan schreibt. */
+let VIEW = "plan", RUN = null, REPLAN = null;
 
 function toLocal(d){
   const p = n => String(n).padStart(2,"0");
@@ -590,6 +653,13 @@ function sanitize(s){
   if(typeof s.yOv !== "number" || !isFinite(s.yOv) || s.yOv <= 0) delete s.yOv;
   delete s.mode;   /* alter Einfach/Experte-Schalter, gibt es nicht mehr */
   if(s.run && (!s.run.start || !s.run.plan || !Array.isArray(s.run.plan.phases))) delete s.run;
+  if(s.run){
+    /* Der eingefrorene Plan ist selbst ein Zustand und läuft durch dieselbe Prüfung. */
+    const p = s.run.plan; delete p.run;
+    s.run.plan = sanitize(Object.assign(defaults(), p));
+    if(!s.run.id) s.run.id = String(s.run.plan.bake||"").replace(/\D/g,"");   /* Kalender-UIDs bleiben über Umplanen stabil */
+    if(!s.run.bake0) s.run.bake0 = s.run.plan.bake;                              /* Backzeit beim Start, für die Planen-Warnung */
+  }
   return s;
 }
 (function boot(){
@@ -602,6 +672,7 @@ function sanitize(s){
   }
   else { try{ const s = JSON.parse(localStorage.getItem(KEY+"_last")||"null"); if(s && s.phases) S = Object.assign(defaults(), s); }catch(e){} }
   sanitize(S);
+  VIEW = S.run ? "run" : "plan";
 })();
 function persist(){
   try { localStorage.setItem(KEY+"_last", JSON.stringify(S)); } catch(e){}
@@ -746,18 +817,20 @@ function calc(st){
 }
 
 /* ===================== Hinweise ===================== */
-function messages(c){
+function messages(c, st, isRun){
+  st = st || S;
   const out = [];
-  const W = +S.flourW;
+  const W = +st.flourW;
   const maxH = W>=380 ? 96 : W>=325 ? 72 : W>=275 ? 48 : 24;
   const realH = c.totalH + c.prefH;
 
   /* Rückwärtsplanung kann in der Vergangenheit landen: ein 48-h-Plan für morgen
-     Abend müsste gestern begonnen haben. Läuft der Teig schon (S.run), ist ein
-     Start in der Vergangenheit dagegen der Normalfall. */
-  if(!S.run && S.bake){
+     Abend müsste gestern begonnen haben. Im Backen-Tab ist ein Start in der
+     Vergangenheit dagegen der Normalfall — und im Planen-Tab schweigt die Warnung,
+     solange dort noch der Plan steht, der gerade läuft. */
+  if(!isRun && st.bake && !(S.run && S.run.bake0 === st.bake)){
     const jetzt = Date.now();
-    const startT = new Date(S.bake).getTime() - realH*3600e3;
+    const startT = new Date(st.bake).getTime() - realH*3600e3;
     if(isFinite(startT) && startT < jetzt - 5*60e3){
       const nowD = new Date(jetzt);
       out.push(["bad","Dieser Plan hätte um "+fmtWhen(new Date(startT), nowD)+" beginnen müssen, das ist "+
@@ -776,7 +849,7 @@ function messages(c){
     else if(p.t > 27) out.push(["warn","Phase "+(i+1)+" bei "+p.t+" °C ist warm — der Teig verzeiht wenig, häufiger prüfen."]);
     if(p.t < 2) out.push(["warn","Phase "+(i+1)+" bei "+p.t+" °C: nahezu keine Gärung mehr, die Schätzung ist dort sehr unsicher."]);
     if(p.t < 12){
-      const tau = tauH(i >= c.ballAfter ? c.bw : c.total, +S.container||1);
+      const tau = tauH(i >= c.ballAfter ? c.bw : c.total, +st.container||1);
       if(p.h < tau*1.2) out.push(["warn","Phase "+(i+1)+": "+fmtH(p.h)+" reichen nicht, damit "+(i>=c.ballAfter?"die Ballen":"der Teig")+" wirklich auf "+p.t+" °C herunterkommen (Zeitkonstante etwa "+fmtH(tau)+"). Es gärt weiter, als die Temperaturangabe vermuten lässt — genau das steckt in der Hefemenge drin."]);
     }
   });
@@ -788,7 +861,7 @@ function messages(c){
 
   if(c.mainWater < 0) out.push(["bad","Der Vorteig enthält mehr Wasser, als das Rezept insgesamt hat. Vorteig-Anteil senken oder Hydration erhöhen."]);
   else if(c.mainWater < c.mainFlour*0.35) out.push(["warn","Für den Hauptteig bleibt sehr wenig Wasser übrig. Das lässt sich kaum noch vermischen — Vorteig-Anteil senken."]);
-  if(c.pf.type === "biga" && +S.flourW < 325) out.push(["warn","Biga verlangt ein starkes Mehl. Mit diesem Mehl wird der Teig nach 18 h Vorteig plus Hauptgare wahrscheinlich zu weich."]);
+  if(c.pf.type === "biga" && W < 325) out.push(["warn","Biga verlangt ein starkes Mehl. Mit diesem Mehl wird der Teig nach 18 h Vorteig plus Hauptgare wahrscheinlich zu weich."]);
   if(c.pf.type === "biga" && c.pf.t > 20) out.push(["warn","Biga bei "+c.pf.t+" °C ist warm. Klassisch sind 16–18 °C; wärmer wird sie schnell sauer statt aromatisch."]);
   if((c.pf.type==="poolish"||c.pf.type==="biga") && c.yPctMain <= 0.0005)
     out.push(["good","Der Vorteig trägt den ganzen Teig — im Hauptteig ist keine zusätzliche Hefe nötig."]);
@@ -841,11 +914,14 @@ function kv(a,b){ return '<div class="kv"><span>'+a+'</span><span>'+b+'</span></
 function focusIn(el){ return !!el && el.contains(document.activeElement) && document.activeElement !== el; }
 function typing(){ const a = document.activeElement; return !!a && (a.tagName === "INPUT" || a.tagName === "SELECT" || a.tagName === "TEXTAREA"); }
 
-/* ===================== Ablauf bauen ===================== */
-function buildSteps(c, bake){
+/* ===================== Ablauf bauen =====================
+   st = der Zustand, aus dem gerechnet wird (S oder S.run.plan); run = der
+   laufende Teig, falls der Ablauf ihn beschreibt. */
+function buildSteps(c, bake, st, run){
+  st = st || S;
   const start = new Date(bake.getTime() - c.totalH*3600e3);
   const steps = [];
-  const tw = waterTemp();
+  const tw = waterTemp(st);
 
   if(c.pf.type === "poolish" || c.pf.type === "biga"){
     const pfStart = new Date(start.getTime() - c.pf.h*3600e3);
@@ -868,9 +944,11 @@ function buildSteps(c, bake){
   steps.push({ t:start, knead:true,
     title: c.pf.type==="none" ? "Wasser, Salz und Hefe verrühren, Mehl zugeben, kneten"
                               : "Hauptteig kneten: "+c.pf.name+", Wasser, Salz und Mehl",
-    sub:MIXNAME+": "+mixSummary()+" · "+
-        "Zielteigtemperatur "+num(+S.ddt,1)+" °C · Schüttwasser ≈ "+Math.round(tw)+" °C" });
+    sub:MIXNAME+": "+mixSummary(st)+" · "+
+        "Zielteigtemperatur "+num(+st.ddt,1)+" °C · Schüttwasser ≈ "+Math.round(tw)+" °C"+
+        "<br>Reißt der Teig im Fenstertest, erst 15 min ruhen lassen statt weiterzukneten — der Kleber entspannt sich von allein." });
 
+  const stockH = c.phases.slice(0, c.ballAfter).reduce((a,p)=>a+p.h,0);
   let t = new Date(start.getTime());
   c.phases.forEach((p,i)=>{
     if(i === c.ballAfter){
@@ -883,7 +961,9 @@ function buildSteps(c, bake){
                 : "bei "+num(p.t,0)+" °C stehen lassen";
     const from = new Date(t);
     t = new Date(t.getTime() + p.h*3600e3);
-    steps.push({ t:from, title:kind+" "+fmtH(p.h)+" — "+place, sub:"bis "+fmtWhen(t, start) });
+    const falten = (i === 0 && c.ballAfter > 0 && stockH > 2 && p.t > 16)
+      ? " · in der ersten Stunde zweimal dehnen und falten, das gibt dem Teig Struktur" : "";
+    steps.push({ t:from, title:kind+" "+fmtH(p.h)+" — "+place, sub:"bis "+fmtWhen(t, start)+falten });
   });
 
   const earlyD = new Date(start.getTime() + c.early*3600e3);
@@ -898,32 +978,149 @@ function buildSteps(c, bake){
    entspricht. Rastphasen zählen nicht mit. Eine Faustformel, keine Messung —
    wer die Teigtemperatur nach dem Kneten misst und daneben liegt, korrigiert
    die Zielteigtemperatur oder das Schüttwasser entsprechend. */
-function knetWaerme(){
-  const work = (S.mix ? S.mix.steps : []).reduce((a,st)=>
-    a + (st.k === "rest" ? 0 : (+st.min||0)*(+st.rpm||0)), 0);
+function knetWaerme(st){
+  st = st || S;
+  const work = (st.mix ? st.mix.steps : []).reduce((a,x)=>
+    a + (x.k === "rest" ? 0 : (+x.min||0)*(+x.rpm||0)), 0);
   return clamp(1 + work/250, 1, 12);
 }
-function waterTemp(){
-  return clamp(3*(+S.ddt) - (+S.tflour) - (+S.tkitchen) - knetWaerme(), -5, 60);
+function waterTemp(st){
+  st = st || S;
+  return clamp(3*(+st.ddt) - (+st.tflour) - (+st.tkitchen) - knetWaerme(st), -5, 60);
 }
 
-/* ===================== Render ===================== */
+/* ===================== Render =====================
+   Zwei Sichten, eine DOM. Die Planen-Karten hängen immer an S; die geteilten
+   Karten (Verlauf, Zutaten, Ablauf, Einschätzung) rechnen je nach Sicht aus S
+   oder aus dem eingefrorenen Plan des laufenden Teigs (S.run.plan) und hängen
+   die Zeiten an die Backzeit bzw. an die echte Knetzeit.
+====================================================== */
+function planView(c){
+  const bake = new Date(S.bake || Date.now());
+  const start = new Date(bake.getTime() - c.totalH*3600e3);
+  return { c, st:S, run:null, bake, start, bakeShown:bake, versatz:0, steps: buildSteps(c, bake, S, null) };
+}
+/* Läuft der Teig, hängt die ANZEIGE am echten Knetzeitpunkt: Das Rezept bleibt das
+   Rezept (24 h geplant sind 24 h im Ablauf), es verschiebt sich nur als Ganzes.
+   Die Alternative — pünktlich backen und die Differenz in der Kühlphase auffangen —
+   steht in der Umplanen-Karte. Die Entscheidung gehört dem Nutzer: sie hängt daran,
+   ob um 19:00 Gäste am Tisch sitzen. */
+function runView(run){
+  const st = run.plan, c = calc(st);
+  const bake = new Date(st.bake || Date.now());
+  const planStart = new Date(bake.getTime() - c.totalH*3600e3);
+  const rs = new Date(run.start);
+  const start = isNaN(rs) ? planStart : rs;
+  const versatz = (start - planStart)/3600e3;
+  const bakeShown = new Date(bake.getTime() + versatz*3600e3);
+  return { c, st, run, bake, start, bakeShown, versatz, steps: buildSteps(c, bakeShown, st, run) };
+}
+
 function render(){
   mixNormalize();
-  const c = calc(); CALC = c;
-  const bake = new Date(S.bake || Date.now());          /* der Zieltermin, unverändert */
-  /* Läuft der Teig, hängt die ANZEIGE am echten Knetzeitpunkt: Das Rezept bleibt das
-     Rezept (24 h geplant sind 24 h im Ablauf), es verschiebt sich nur als Ganzes.
-     Die Alternative — pünktlich backen und die Differenz in der Kühlphase auffangen —
-     steht in der Umplanen-Karte. Die Entscheidung gehört dem Nutzer: sie hängt daran,
-     ob um 19:00 Gäste am Tisch sitzen. */
-  const planStart = new Date(bake.getTime() - c.totalH*3600e3);
-  const echtStart = S.run && !isNaN(new Date(S.run.start)) ? new Date(S.run.start) : null;
-  const versatz = echtStart ? (echtStart - planStart)/3600e3 : 0;
-  const bakeShown = new Date(bake.getTime() + versatz*3600e3);
-  const start = new Date(bakeShown.getTime() - c.totalH*3600e3);
+  const run = S.run || null;
+  if(VIEW !== "run") VIEW = "plan";
+  document.body.dataset.view = VIEW;
+  document.body.dataset.run = run ? "1" : "0";
+  $("tabPlan").classList.toggle("on", VIEW === "plan");
+  $("tabRun").classList.toggle("on", VIEW === "run");
+  $("tabRun").innerHTML = "BACKEN" + (run ? '<span class="dot"></span>' : "");
   const now = new Date();
 
+  const cP = calc(S);
+  renderPlanCards(cP);
+
+  /* Der laufende Teig wird immer gerechnet, egal welcher Tab offen ist:
+     Küchenmodus und 30-s-Timer brauchen ihn. */
+  RUN = run ? runView(run) : null;
+
+  const isRun = VIEW === "run";
+  if(isRun && !run){
+    STEPS = []; CALC = null;
+    renderLog(); persist(); return;
+  }
+  const v = isRun ? RUN : planView(cP);
+  const c = v.c, st = v.st, bake = v.bake, start = v.start, bakeShown = v.bakeShown, versatz = v.versatz;
+  STEPS = v.steps; CALC = c;
+
+  drawTimeline(c, start, now);
+  renderIngredients(c, st, isRun);
+  if(isRun) renderYOvUsed(c); else renderYOv(cP, bakeShown);
+
+  /* --- Ablauf --- */
+  const ref = STEPS[0].t;
+  const nowMs = now.getTime();
+  $("steps").innerHTML = STEPS.map((s,i)=>{
+    const next = STEPS[i+1];
+    const isNow = isRun && nowMs >= s.t.getTime() && (!next || nowMs < next.t.getTime()) &&
+                  nowMs >= ref.getTime() && nowMs <= bakeShown.getTime()+3600e3;
+    /* Am Knetschritt hängt der einzige Knopf des Ablaufs: einmal tippen, wenn der Teig
+       aus der Maschine kommt. Ab da lebt der Teig im Backen-Tab. */
+    const knead = !s.knead ? "" : (isRun
+      ? '<small style="color:var(--good)">✓ Geknetet '+fmtWhen(start, ref)+' — ab hier rechnet die App mit der echten Uhrzeit. '+
+        'Stimmt sie nicht, unter Umplanen korrigieren.</small>'
+      : '<div style="margin-top:6px"><button class="btn sm" id="runStart">JETZT GEKNETET</button>'+
+        '<small>Tippen, sobald der Teig aus der Maschine kommt. Der Teig wandert damit in den Backen-Tab, hier kannst du weiter planen. '+
+        'Schon länger her? Trotzdem tippen und im Backen-Tab unter Umplanen die Uhrzeit korrigieren.</small></div>');
+    return '<li class="'+(isNow?"now ":"")+(s.pf?"pf":"")+'"><span class="tm">'+fmtWhen(s.t, ref)+'</span>'+
+      '<span class="tx">'+s.title+(s.sub?'<small>'+s.sub+'</small>':'')+knead+'</span></li>';
+  }).join("");
+  $("windowHint").textContent = "Start " + WD[ref.getDay()] + " " + fmtClock(ref);
+  $("shiftNote").innerHTML = (!isRun || Math.abs(versatz) < 0.25) ? "" :
+    '<div style="padding:10px 12px 0"><div class="msg warn" style="margin:0"><span class="ic">▲</span><span>'+
+    'Du hast <b>'+fmtH(Math.abs(versatz))+(versatz > 0 ? " später" : " früher")+'</b> geknetet als geplant. '+
+    'Der Ablauf zeigt das Rezept unverändert, nur um '+fmtH(Math.abs(versatz))+' verschoben — fertig wärst du damit '+
+    'um <b>'+fmtWhen(bakeShown, ref)+'</b> statt um '+fmtWhen(bake, ref)+'.<br>'+
+    'Willst du bei <b>'+fmtWhen(bake, ref)+'</b> bleiben, steht in <b>Umplanen</b>, wie du die '+
+    fmtH(Math.abs(versatz))+' in der Kühlphase auffängst.</span></div></div>';
+
+  /* Umplanen einmal von selbst aufklappen, wenn es etwas zu entscheiden gibt —
+     aber nicht bei jedem 30-s-Render wieder, falls der Nutzer sie zugeklappt hat. */
+  if(isRun && Math.abs(versatz) >= 0.25){
+    if(!replanAufgeklappt){ $("replanCard").open = true; replanAufgeklappt = true; }
+  } else replanAufgeklappt = false;
+
+  /* --- Einschätzung --- */
+  const msgs = messages(c, st, isRun);
+  $("msgs").innerHTML = msgs.length
+    ? msgs.map(m => '<div class="msg '+m[0]+'"><span class="ic">'+
+        (m[0]==="bad"?"●":m[0]==="warn"?"▲":m[0]==="good"?"✓":"·")+'</span><span>'+m[1]+'</span></div>').join("")
+    : '<div class="msg info"><span class="ic">✓</span><span>Plan sieht stimmig aus. Trotzdem gilt: am Teig entscheiden, nicht an der Uhr.</span></div>';
+
+  const ripLabel = c.Rip < 0.95 ? "jung · wenig Aroma, straff"
+    : c.Rip < 1.15 ? "ausgewogen"
+    : c.Rip < 1.35 ? "aromatisch · typisch kalte Führung"
+    : c.Rip < 1.55 ? "weit gereift · weich, sehr aromatisch"
+    : "sehr weit · Kleberabbau wahrscheinlich";
+  const verl = c.fertig > c.totalH + 0.05 ? c.fertig - c.totalH : 0;
+  const fertigD = new Date(start.getTime() + c.fertig*3600e3);
+  $("indices").innerHTML =
+    kv("Gesamtgare", fmtH(c.totalH + verl) + (verl ? " (Plan "+fmtH(c.totalH)+" + "+fmtH(verl)+")" : "") +
+       (c.prefH ? " + "+fmtH(c.prefH)+" Vorteig" : "")) +
+    (c.yOv ? kv("Backbereit", fmtWhen(fertigD, start) + (verl ? " · "+fmtH(verl)+" nach Plan" :
+       (c.fertig < c.totalH - 0.05 ? " · "+fmtH(c.totalH-c.fertig)+" vor Plan" : " · wie geplant"))) : "") +
+    kv("davon Stückgare", fmtH(c.ballH)) +
+    kv("Gärleistung gesamt", num(c.Eeff)+" Std. bei 21 °C" +
+       (c.fertig < c.totalH - 0.05 ? " · nötig wären "+num(c.Eziel*c.corr) : "")) +
+    kv("davon in den Ballen", num(c.EgBall)+" Std. · warm "+num(c.EgBallWarm)) +
+    ((c.pf.type==="poolish"||c.pf.type==="biga")
+      ? kv("Vorteig deckt", pct(c.pfCovered)+" von "+pct(c.yPctTotal)) : "") +
+    kv("Reifegrad", num(c.Rip,2)+" × — "+ripLabel) +
+    '<div class="meter"><div style="width:'+clamp((c.Rip-0.8)/0.8*100,3,100)+'%"></div></div>';
+  $("ripeNote").innerHTML = "„Gärleistung“ rechnet jede Phase auf Stunden bei 21 °C um — damit sind unterschiedliche Pläne vergleichbar. "+
+    "Der <b>Reifegrad</b> ist eine Kennzahl ohne Einheit: das Verhältnis von Teigreifung zu Gasbildung. Werte über 1,3 bekommt man nur über längere kalte Phasen, "+
+    "dort arbeiten die Enzyme relativ zur Hefe weiter. Eine reine Raumtemperaturgare bleibt auch nach 24 h bei etwa 1,0, ein Vorteig verschiebt sie kaum. "+
+    "Die Skala ist eine Tendenzanzeige, keine Messgröße. Von der <b>Hefemenge</b> hängt sie nicht ab: mehr Hefe "+
+    "beschleunigt Gasbildung und Reifung im selben Maß, das Verhältnis bleibt. Was sie verschiebt, sind Temperatur "+
+    "und Dauer der Phasen.";
+
+  if(isRun){ renderStatus(v, now); renderReplan(v); }
+  renderLog();
+  persist();
+}
+
+/* Alles, was nur im Planen-Tab steht und an S hängt. */
+function renderPlanCards(c){
   /* Ein fokussiertes Feld bekommt keinen Wert zugewiesen — sonst wird "6" beim Tippen
      von "62" überschrieben und ein geleertes Feld springt auf 0. */
   ["n","bw","h","salt","oil","sugar","yeast","flourW","scale","bake","ddt","container","tflour","tkitchen","tTom","tMoz"]
@@ -981,138 +1178,8 @@ function render(){
     '<button class="chip'+(c.ballAfter===i?" on":"")+'" data-ball="'+i+'">'+
       (i===0 ? "sofort nach dem Kneten" : "nach Phase "+i)+'</button>').join("");
 
-  drawTimeline(c, start, now);
-
-  /* --- Zutaten --- */
-  const hasPf = c.pf.type !== "none";
-  let rows = "";
-  const row = (a,b,p,cls) => '<tr'+(cls?' class="'+cls+'"':'')+'><td>'+a+'</td><td class="n">'+b+'</td><td class="p">'+(p||"")+'</td></tr>';
-  if(c.pf.type === "poolish" || c.pf.type === "biga"){
-    rows += '<tr class="sec"><td colspan="3">'+c.pf.name.toUpperCase()+" · "+num(c.pf.share,0)+' % DES MEHLS</td></tr>';
-    rows += row("Mehl", fmtG(c.pf.flour), "");
-    rows += row("Wasser", fmtG(c.pf.water), num(c.pf.hyd,0)+" %");
-    rows += row(YNAME[S.yeast], fmtG(c.pfYeastShown), pct(c.pf.yPct*(YCONV[S.yeast]||1)));
-    rows += '<tr class="sec"><td colspan="3">HAUPTTEIG</td></tr>';
-    rows += row("Mehl", fmtG(c.mainFlour), "");
-    rows += row("Wasser", fmtG(c.mainWater), "");
-    rows += row(c.pf.name, fmtG(c.pf.weight), "");
-  } else if(c.pf.type === "sour"){
-    rows += row("Mehl", fmtG(c.mainFlour), "");
-    rows += row("Wasser", fmtG(c.mainWater), "");
-    rows += row("Anstellgut", fmtG(c.pf.weight), num(c.pf.pct,0)+" %");
-  } else {
-    rows += row("Mehl", fmtG(c.flour), "100 %");
-    rows += row("Wasser", fmtG(c.water), num(c.h,1)+" %");
-  }
-  rows += row("Salz", fmtG(c.saltG), num(c.salt,1)+" %");
-  if(c.sugar > 0) rows += row("Zucker", fmtG(c.sugarG), num(c.sugar,1)+" %");
-  if(c.oil > 0) rows += row("Öl", fmtG(c.oilG), num(c.oil,1)+" %");
-  if(c.pf.type !== "sour"){
-    rows += row(YNAME[S.yeast]+(hasPf?" (Hauptteig)":""), c.yG < 0.005 ? "—" : fmtG(c.yG), c.yG < 0.005 ? "" : pct(c.yPctShown));
-  }
-  const lo = c.yG*0.5, hi = c.yG*1.5;
-  if(c.pf.type === "sour"){
-    rows += '<tr><td class="sub" colspan="3">Anstellgut-Erwartungsbereich '+fmtG(c.pf.weight*0.5)+' – '+fmtG(c.pf.weight*1.5)+
-      '. Sauerteig ist deutlich schwerer vorherzusagen als Hefe — plane Puffer ein.</td></tr>';
-  } else if(c.yG >= 0.005){
-    rows += '<tr><td class="sub" colspan="3">Hefe-Erwartungsbereich '+fmtG(lo)+' – '+fmtG(hi)+
-      '. Der Wert oben ist der Startpunkt, nicht die Wahrheit.</td></tr>';
-  }
-  $("ing").innerHTML = rows;
-  renderYOv(c, bakeShown);
-  $("totalHint").textContent = c.n+" × "+Math.round(c.bw)+" g = "+Math.round(c.total)+" g Teig";
-
-  const tw = waterTemp();
-  const sc = +S.scale;
-  let note = '<div class="msg info" style="margin-top:10px"><span class="ic">🌡</span><span>'+
-    'Schüttwasser mit etwa <b>'+Math.round(tw)+' °C</b> ansetzen, damit der Teig bei '+num(+S.ddt,1)+' °C aus der Maschine kommt.'+
-    (tw < 6 ? ' Das heißt in der Praxis: kaltes Wasser mit ein paar Eiswürfeln.' : '')+
-    (tw > 38 ? ' So warm ist ungewöhnlich — prüf mal Mehl- und Küchentemperatur.' : '')+'</span></div>';
-  const smallest = Math.min.apply(null, [c.yG, c.pfYeastShown].filter(v => v > 0.0001).concat([99]));
-  if(smallest < sc*3 && smallest < 99){
-    note += '<div class="msg warn"><span class="ic">⚖</span><span>'+fmtG(smallest)+
-      ' ist für eine '+S.scale.replace(".",",")+'-g-Waage zu wenig. Löse <b>1 g Hefe in 20 ml Wasser</b> und nimm davon <b>'+
-      Math.round(smallest*20)+' ml</b>. Diese Menge vom Schüttwasser abziehen.</span></div>';
-  }
-  note += '<div class="msg info"><span class="ic">🧂</span><span>Salz und Hefe dürfen zusammen im Schüttwasser gelöst werden — '+
-    'problematisch ist nur direkter Kontakt von unverdünntem Salz mit Frischhefe.</span></div>';
-  $("yeastNote").innerHTML = note;
-
-  /* --- Ablauf ---
-     Läuft der Teig, wird der Ablauf am ECHTEN Knetzeitpunkt aufgehängt: Das Rezept
-     bleibt damit das Rezept (24 h geplant sind 24 h im Ablauf), es verschiebt sich
-     nur als Ganzes. Die Alternative — pünktlich backen und die Differenz in der
-     Kühlphase auffangen — steht in der Umplanen-Karte, und dorthin zeigt die
-     Warnung unter der Überschrift. Die Entscheidung gehört dem Nutzer: sie hängt
-     daran, ob um 19:00 Gäste am Tisch sitzen. */
-  STEPS = buildSteps(c, bakeShown);
-  const ref = STEPS[0].t;
-  const nowMs = now.getTime();
-  $("steps").innerHTML = STEPS.map((s,i)=>{
-    const next = STEPS[i+1];
-    const isNow = nowMs >= s.t.getTime() && (!next || nowMs < next.t.getTime()) &&
-                  nowMs >= ref.getTime() && nowMs <= bakeShown.getTime()+3600e3;
-    /* Am Knetschritt hängt der einzige Knopf des Ablaufs: einmal tippen, wenn der Teig
-       aus der Maschine kommt. Ab da kennt die App den echten Start. */
-    const knead = !s.knead ? "" : (S.run
-      ? '<small style="color:var(--good)">✓ Geknetet '+fmtWhen(new Date(S.run.start), ref)+' — die App rechnet ab dieser Uhrzeit. '+
-        '<button class="chip" id="runStop" style="padding:3px 9px;font-size:11.5px;margin-left:4px">zurücksetzen</button></small>'
-      : '<div style="margin-top:6px"><button class="btn sm" id="runStart">JETZT GEKNETET</button>'+
-        '<small>Tippen, sobald der Teig aus der Maschine kommt. Dann weiß die App, wann die Gare wirklich begonnen hat — '+
-        'für die „jetzt“-Markierung und fürs Umplanen, auch wenn du die App zwischendurch schließt.</small></div>');
-    return '<li class="'+(isNow?"now ":"")+(s.pf?"pf":"")+'"><span class="tm">'+fmtWhen(s.t, ref)+'</span>'+
-      '<span class="tx">'+s.title+(s.sub?'<small>'+s.sub+'</small>':'')+knead+'</span></li>';
-  }).join("");
-  $("windowHint").textContent = "Start " + WD[ref.getDay()] + " " + fmtClock(ref);
-  $("shiftNote").innerHTML = Math.abs(versatz) < 0.25 ? "" :
-    '<div style="padding:10px 12px 0"><div class="msg warn" style="margin:0"><span class="ic">▲</span><span>'+
-    'Du hast <b>'+fmtH(Math.abs(versatz))+(versatz > 0 ? " später" : " früher")+'</b> geknetet als geplant. '+
-    'Der Ablauf zeigt das Rezept unverändert, nur um '+fmtH(Math.abs(versatz))+' verschoben — fertig wärst du damit '+
-    'um <b>'+fmtWhen(bakeShown, ref)+'</b> statt um '+fmtWhen(bake, ref)+'.<br>'+
-    'Willst du bei <b>'+fmtWhen(bake, ref)+'</b> bleiben, steht in <b>Umplanen</b>, wie du die '+
-    fmtH(Math.abs(versatz))+' in der Kühlphase auffängst.</span></div></div>';
-
-  /* Umplanen einmal von selbst aufklappen, wenn es etwas zu entscheiden gibt —
-     aber nicht bei jedem 30-s-Render wieder, falls der Nutzer sie zugeklappt hat. */
-  if(Math.abs(versatz) >= 0.25){
-    if(!replanAufgeklappt){ $("replanCard").open = true; replanAufgeklappt = true; }
-  } else replanAufgeklappt = false;
-
-  /* --- Einschätzung --- */
-  const msgs = messages(c);
-  $("msgs").innerHTML = msgs.length
-    ? msgs.map(m => '<div class="msg '+m[0]+'"><span class="ic">'+
-        (m[0]==="bad"?"●":m[0]==="warn"?"▲":m[0]==="good"?"✓":"·")+'</span><span>'+m[1]+'</span></div>').join("")
-    : '<div class="msg info"><span class="ic">✓</span><span>Plan sieht stimmig aus. Trotzdem gilt: am Teig entscheiden, nicht an der Uhr.</span></div>';
-
-  const ripLabel = c.Rip < 0.95 ? "jung · wenig Aroma, straff"
-    : c.Rip < 1.15 ? "ausgewogen"
-    : c.Rip < 1.35 ? "aromatisch · typisch kalte Führung"
-    : c.Rip < 1.55 ? "weit gereift · weich, sehr aromatisch"
-    : "sehr weit · Kleberabbau wahrscheinlich";
-  const verl = c.fertig > c.totalH + 0.05 ? c.fertig - c.totalH : 0;
-  const fertigD = new Date(start.getTime() + c.fertig*3600e3);
-  $("indices").innerHTML =
-    kv("Gesamtgare", fmtH(c.totalH + verl) + (verl ? " (Plan "+fmtH(c.totalH)+" + "+fmtH(verl)+")" : "") +
-       (c.prefH ? " + "+fmtH(c.prefH)+" Vorteig" : "")) +
-    (c.yOv ? kv("Backbereit", fmtWhen(fertigD, start) + (verl ? " · "+fmtH(verl)+" nach Plan" :
-       (c.fertig < c.totalH - 0.05 ? " · "+fmtH(c.totalH-c.fertig)+" vor Plan" : " · wie geplant"))) : "") +
-    kv("davon Stückgare", fmtH(c.ballH)) +
-    kv("Gärleistung gesamt", num(c.Eeff)+" Std. bei 21 °C" +
-       (c.fertig < c.totalH - 0.05 ? " · nötig wären "+num(c.Eziel*c.corr) : "")) +
-    kv("davon in den Ballen", num(c.EgBall)+" Std. · warm "+num(c.EgBallWarm)) +
-    ((c.pf.type==="poolish"||c.pf.type==="biga")
-      ? kv("Vorteig deckt", pct(c.pfCovered)+" von "+pct(c.yPctTotal)) : "") +
-    kv("Reifegrad", num(c.Rip,2)+" × — "+ripLabel) +
-    '<div class="meter"><div style="width:'+clamp((c.Rip-0.8)/0.8*100,3,100)+'%"></div></div>';
-  $("ripeNote").innerHTML = "„Gärleistung“ rechnet jede Phase auf Stunden bei 21 °C um — damit sind unterschiedliche Pläne vergleichbar. "+
-    "Der <b>Reifegrad</b> ist eine Kennzahl ohne Einheit: das Verhältnis von Teigreifung zu Gasbildung. Werte über 1,3 bekommt man nur über längere kalte Phasen, "+
-    "dort arbeiten die Enzyme relativ zur Hefe weiter. Eine reine Raumtemperaturgare bleibt auch nach 24 h bei etwa 1,0, ein Vorteig verschiebt sie kaum. "+
-    "Die Skala ist eine Tendenzanzeige, keine Messgröße. Von der <b>Hefemenge</b> hängt sie nicht ab: mehr Hefe "+
-    "beschleunigt Gasbildung und Reifung im selben Maß, das Verhältnis bleibt. Was sie verschiebt, sind Temperatur "+
-    "und Dauer der Phasen.";
-
   /* --- Belag / Einkauf --- */
+  const row = (a,b,p) => '<tr><td>'+a+'</td><td class="n">'+b+'</td><td class="p">'+(p||"")+'</td></tr>';
   const tom = (+S.tTom||0)*c.n, moz = (+S.tMoz||0)*c.n;
   $("shop").innerHTML =
     '<tr class="sec"><td colspan="3">TEIG</td></tr>'+
@@ -1131,13 +1198,122 @@ function render(){
     row("Basilikum", c.n*2+" Blätter", "");
 
   renderMix();
-  renderLog();
   renderSaved();
   renderBackupInfo();
-  renderReplan(c, bake, start);
-  persist();
 }
 
+/* Zutatentabelle und Hinweise darunter — in beiden Sichten, aus dem jeweiligen Zustand. */
+function renderIngredients(c, st, isRun){
+  const hasPf = c.pf.type !== "none";
+  const yn = YNAME[st.yeast] || YNAME.fresh, yconv = YCONV[st.yeast] || 1;
+  let rows = "";
+  const row = (a,b,p,cls) => '<tr'+(cls?' class="'+cls+'"':'')+'><td>'+a+'</td><td class="n">'+b+'</td><td class="p">'+(p||"")+'</td></tr>';
+  if(c.pf.type === "poolish" || c.pf.type === "biga"){
+    rows += '<tr class="sec"><td colspan="3">'+c.pf.name.toUpperCase()+" · "+num(c.pf.share,0)+' % DES MEHLS</td></tr>';
+    rows += row("Mehl", fmtG(c.pf.flour), "");
+    rows += row("Wasser", fmtG(c.pf.water), num(c.pf.hyd,0)+" %");
+    rows += row(yn, fmtG(c.pfYeastShown), pct(c.pf.yPct*yconv));
+    rows += '<tr class="sec"><td colspan="3">HAUPTTEIG</td></tr>';
+    rows += row("Mehl", fmtG(c.mainFlour), "");
+    rows += row("Wasser", fmtG(c.mainWater), "");
+    rows += row(c.pf.name, fmtG(c.pf.weight), "");
+  } else if(c.pf.type === "sour"){
+    rows += row("Mehl", fmtG(c.mainFlour), "");
+    rows += row("Wasser", fmtG(c.mainWater), "");
+    rows += row("Anstellgut", fmtG(c.pf.weight), num(c.pf.pct,0)+" %");
+  } else {
+    rows += row("Mehl", fmtG(c.flour), "100 %");
+    rows += row("Wasser", fmtG(c.water), num(c.h,1)+" %");
+  }
+  rows += row("Salz", fmtG(c.saltG), num(c.salt,1)+" %");
+  if(c.sugar > 0) rows += row("Zucker", fmtG(c.sugarG), num(c.sugar,1)+" %");
+  if(c.oil > 0) rows += row("Öl", fmtG(c.oilG), num(c.oil,1)+" %");
+  if(c.pf.type !== "sour"){
+    rows += row(yn+(hasPf?" (Hauptteig)":""), c.yG < 0.005 ? "—" : fmtG(c.yG), c.yG < 0.005 ? "" : pct(c.yPctShown));
+  }
+  const lo = c.yG*0.5, hi = c.yG*1.5;
+  if(c.pf.type === "sour"){
+    rows += '<tr><td class="sub" colspan="3">Anstellgut-Erwartungsbereich '+fmtG(c.pf.weight*0.5)+' – '+fmtG(c.pf.weight*1.5)+
+      '. Sauerteig ist deutlich schwerer vorherzusagen als Hefe — plane Puffer ein.</td></tr>';
+  } else if(c.yG >= 0.005){
+    rows += '<tr><td class="sub" colspan="3">Hefe-Erwartungsbereich '+fmtG(lo)+' – '+fmtG(hi)+
+      '. Der Wert oben ist der Startpunkt, nicht die Wahrheit.</td></tr>';
+  }
+  $("ing").innerHTML = rows;
+  $("totalHint").textContent = c.n+" × "+Math.round(c.bw)+" g = "+Math.round(c.total)+" g Teig";
+
+  const tw = waterTemp(st);
+  const sc = +st.scale || 0.1;
+  let note = isRun ? "" : '<div class="msg info" style="margin-top:10px"><span class="ic">🌡</span><span>'+
+    'Schüttwasser mit etwa <b>'+Math.round(tw)+' °C</b> ansetzen, damit der Teig bei '+num(+st.ddt,1)+' °C aus der Maschine kommt.'+
+    (tw < 6 ? ' Das heißt in der Praxis: kaltes Wasser mit ein paar Eiswürfeln.' : '')+
+    (tw > 38 ? ' So warm ist ungewöhnlich — prüf mal Mehl- und Küchentemperatur.' : '')+'</span></div>';
+  const smallest = Math.min.apply(null, [c.yG, c.pfYeastShown].filter(v => v > 0.0001).concat([99]));
+  if(!isRun && smallest < sc*3 && smallest < 99){
+    note += '<div class="msg warn"><span class="ic">⚖</span><span>'+fmtG(smallest)+
+      ' ist für eine '+String(sc).replace(".",",")+'-g-Waage zu wenig. Löse <b>1 g Hefe in 20 ml Wasser</b> und nimm davon <b>'+
+      Math.round(smallest*20)+' ml</b>. Diese Menge vom Schüttwasser abziehen.</span></div>';
+  }
+  if(!isRun) note += '<div class="msg info"><span class="ic">🧂</span><span>Salz und Hefe dürfen zusammen im Schüttwasser gelöst werden — '+
+    'problematisch ist nur direkter Kontakt von unverdünntem Salz mit Frischhefe.</span></div>';
+  $("yeastNote").innerHTML = note;
+}
+
+/* ===================== Laufender Teig: Statuskarte ===================== */
+/* Was ist bis jetzt gelaufen? Den eingefrorenen Plan bis doneH simulieren.
+   Wird von Statuskarte und Umplanen gemeinsam genutzt. */
+function runStatus(cp, run){
+  const rs = new Date(run.start), now = new Date();
+  const doneH = Math.max(0, (now - rs)/3600e3);
+  const cut = [];
+  let left = doneH;
+  for(const p of cp.phases){
+    if(left <= 0) break;
+    cut.push({ h: Math.min(p.h, left), t: p.t });
+    left -= p.h;
+  }
+  if(left > 0 && cut.length) cut[cut.length-1].h += left;   /* hängt über: letzte Bedingung hält an */
+  const contF = +cp.container || +run.plan.container || 1;
+  const ddt = +run.plan.ddt || 23;
+  /* Ballen-Index NICHT auf die gelaufenen Phasen klemmen — sonst würde der ungeballte
+     Teig mit der Zeitkonstante eines Ballens gerechnet. */
+  const done = simulate(cut, cp.ballAfter, cp.total, cp.bw, ddt, contF);
+  const balled = cut.length - 1 >= cp.ballAfter;
+  const Edone = done.Eg * cp.corr;
+  const Erem = cp.Eeff - Edone;
+  const share = clamp(Edone/Math.max(cp.Eeff,0.01)*100, 0, 999);
+  const phaseIdx = Math.max(0, Math.min(cut.length-1, cp.phases.length-1));
+  return { rs, now, doneH, cut, done, balled, Edone, Erem, share, contF, ddt, phaseIdx, overrun: left > 0 ? left : 0 };
+}
+function renderStatus(v, now){
+  const c = v.c, q = runStatus(c, v.run);
+  const p = c.phases[q.phaseIdx];
+  const kind = q.phaseIdx >= c.ballAfter ? "Stückgare" : "Stockgare";
+  const where = p.t <= 10 ? "im Kühlschrank" : p.t <= 16 ? "kühl" : "bei Raumtemperatur";
+  const earlyD = new Date(v.start.getTime() + c.early*3600e3);
+  const lateD  = new Date(v.start.getTime() + c.late*3600e3);
+  const remH = (v.bakeShown - now)/3600e3;
+  $("runHint").textContent = c.n+" × "+Math.round(c.bw)+" g · "+num(c.h,0)+" %";
+  $("runStatus").innerHTML =
+    '<div class="st"><div class="l">Läuft seit</div><div class="v">'+fmtH(q.doneH)+'</div><div class="s">geknetet '+fmtWhen(q.rs, now)+'</div></div>'+
+    '<div class="st"><div class="l">Gärleistung</div><div class="v">'+num(q.share,0)+' %</div><div class="s">'+num(q.Edone)+' von '+num(c.Eeff)+' Std. bei 21 °C</div></div>'+
+    '<div class="st"><div class="l">Kerntemperatur</div><div class="v">≈ '+num(q.done.endT,1)+' °C</div><div class="s">'+
+      (q.overrun > 0 ? "Plan ist abgelaufen" : kind+" "+where+", Phase "+(q.phaseIdx+1)+" von "+c.phases.length)+'</div></div>'+
+    '<div class="st"><div class="l">Backen</div><div class="v">'+fmtWhen(v.bakeShown, now)+'</div><div class="s">'+
+      (remH > 0 ? "in "+fmtH(remH)+" · " : "")+'Fenster '+fmtWhen(earlyD, v.bakeShown)+' – '+fmtWhen(lateD, v.bakeShown)+'</div></div>';
+  let cur = -1;
+  for(let i=0;i<v.steps.length;i++){ if(now.getTime() >= v.steps[i].t.getTime()) cur = i; }
+  const nx = v.steps[cur+1];
+  $("runNow").innerHTML = (cur >= 0 ? '<div class="note" style="margin-top:10px"><b style="color:var(--text)">Jetzt:</b> '+v.steps[cur].title+'</div>' : "")+
+    (nx ? '<div class="note" style="margin-top:4px"><b style="color:var(--text)">Als Nächstes '+fmtWhen(nx.t, now)+':</b> '+nx.title+'</div>' : "");
+}
+function renderYOvUsed(c){
+  const box = $("yOvBox");
+  box.innerHTML = c.yOv
+    ? '<div class="note" style="margin-top:8px">Verwendet wurden <b>'+fmtG(c.yOv)+'</b> statt der vorgeschlagenen '+fmtG(c.yRec)+
+      ' ('+num(c.yFac,2)+'×). Backfenster und Einschätzung rechnen damit.</div>'
+    : "";
+}
 /* ===================== Eigene Hefemenge =====================
    Das Feld liegt bewusst außerhalb der Zutatentabelle: die wird bei jedem
    Render neu gebaut, ein Eingabefeld darin würde auf dem iPhone bei jedem
@@ -1257,6 +1433,7 @@ function drawTimeline(c, start, now){
    geplant, nur die Kühlzeit wird kürzer oder länger. Praktisch heißt das:
    in den Kühlschrank verschiebt sich mit dem echten Kneten, herausnehmen
    bleibt bei der ursprünglich geplanten Uhrzeit (Backzeit minus Warmphase).
+   Liefert neben dem Text auch den geänderten Gärplan für "Übernehmen".
 ====================================================== */
 function kuehlAusgleich(cp, rs, nb, doneH, abw){
   if(Math.abs(abw) > 4) return null;
@@ -1273,7 +1450,8 @@ function kuehlAusgleich(cp, rs, nb, doneH, abw){
   const kosten = Math.abs(abw) * rGas(cp.phases[ci].t) * cp.corr / Math.max(cp.Eeff,0.01) * 100;
   const weniger = abw < 0;
   const jetzt = Date.now();
-  return ["good",
+  const phases = cp.phases.map((p,i)=>({ h: i === ci ? neu : p.h, t: p.t }));
+  return { msg:["good",
     "Du hast <b>"+fmtH(Math.abs(abw))+(weniger ? " weniger" : " mehr")+"</b> Zeit als der Plan vorsah. "+
     "Das fängst du am einfachsten im Kühlschrank auf — dort kostet eine Stunde am wenigsten.<br>"+
     (rein.getTime() > jetzt + 5*60e3
@@ -1284,36 +1462,51 @@ function kuehlAusgleich(cp, rs, nb, doneH, abw){
     (weniger ? " kürzer" : " länger")+", unterm Strich rund "+num(kosten,1)+" % "+
     (weniger ? "weniger" : "mehr")+" Gärleistung. "+
     (kosten < 4 ? "Das merkst du nicht."
-      : "Verkraftbar, aber schau dir die Ballen vor dem Backen genauer an.")];
+      : "Verkraftbar, aber schau dir die Ballen vor dem Backen genauer an.")],
+    phases, ballAfter: cp.ballAfter };
 }
 
-/* ===================== Umplanen ===================== */
-function renderReplan(c, bake, start){
-  const run = S.run;
-  /* Läuft der Teig, wird gegen den eingefrorenen Plan gerechnet, nicht gegen das, was oben gerade steht. */
-  const cp = run ? calc(run.plan) : c;
-  if(run){
-    $("realStart").value = run.start;
-    $("newBake").value = run.newBake || S.bake;
-  } else {
-    if(!$("realStart").value) $("realStart").value = toLocal(start);
-    if(!$("newBake").value) $("newBake").value = S.bake;
+/* Phase, in die der Zeitpunkt x (Stunden ab Start) fällt, dort teilen; liefert den
+   Index der Phase, die bei x beginnt. Liegt x auf einer Grenze, wird nichts geteilt. */
+function splitAt(phases, x){
+  let acc = 0;
+  for(let i=0;i<phases.length;i++){
+    if(Math.abs(x - acc) < 1/60) return i;
+    if(x < acc + phases[i].h - 1/60){
+      const p = phases[i];
+      phases.splice(i, 1, { h: x - acc, t: p.t }, { h: acc + p.h - x, t: p.t });
+      return i+1;
+    }
+    acc += phases[i].h;
   }
-  $("runRow").innerHTML = run
-    ? '<div class="msg good"><span class="ic">✓</span><span>Geknetet '+fmtWhen(new Date(run.start), new Date())+'. Gerechnet wird mit dem Gärplan, '+
-      'wie er in dem Moment war — du kannst oben gefahrlos probieren, ohne die laufende Gare zu verwirren.</span></div>'
-    : '<div class="msg info"><span class="ic">·</span><span>Noch kein echter Start bekannt: Die App nimmt an, du hast pünktlich nach Plan geknetet. '+
-      'Stimmt das nicht, trag die Uhrzeit unten ein — oder tipp beim nächsten Mal im Ablauf auf „Jetzt geknetet“.</span></div>';
+  return phases.length - 1;
+}
+/* Benachbarte Phasen mit gleicher Temperatur zusammenlegen, außer an der Ballengrenze.
+   Sonst stünde im Ablauf "5 h Kühlschrank" direkt neben "13 h Kühlschrank". */
+function mergePhases(phases, ba){
+  const out = []; let nb = ba;
+  phases.forEach((p,i)=>{
+    const last = out[out.length-1];
+    if(last && Math.abs(last.t - p.t) < 0.01 && i !== ba){ last.h += p.h; if(i < ba) nb--; }
+    else out.push({ h:p.h, t:p.t });
+  });
+  out.forEach(p => { p.h = Math.round(p.h*60)/60; });
+  return { phases: out, ballAfter: clamp(nb, 0, out.length-1) };
+}
 
-  const rs = new Date($("realStart").value), nb = new Date($("newBake").value);
-  const now = new Date();
+function renderReplan(v){
+  const cp = v.c, run = v.run, st = v.st;
+  REPLAN = null;
+  if($("realStart") !== document.activeElement) $("realStart").value = run.start;
+  if($("newBake") !== document.activeElement) $("newBake").value = run.newBake || st.bake;
   const out = $("replanOut");
-  if(isNaN(rs) || isNaN(nb)){ out.innerHTML = ""; return; }
-
-  const doneH = (now - rs)/3600e3;
-  if(doneH <= 0){
-    out.innerHTML = '<div class="msg info"><span class="ic">·</span><span>Der Teig läuft noch nicht. Ändere oben einfach die Backzeit — '+
-      'der ganze Plan verschiebt sich mit.</span></div>';
+  const q = runStatus(cp, run);
+  const nb = new Date(run.newBake || st.bake);
+  const nbStr = run.newBake || st.bake;
+  if(isNaN(q.rs) || isNaN(nb)){ out.innerHTML = ""; return; }
+  const now = q.now;
+  if((now - q.rs) <= 0){
+    out.innerHTML = '<div class="msg warn"><span class="ic">▲</span><span>Die Knetzeit liegt in der Zukunft — stimmt die Uhrzeit oben?</span></div>';
     return;
   }
   const remH = (nb - now)/3600e3;
@@ -1321,68 +1514,82 @@ function renderReplan(c, bake, start){
     out.innerHTML = '<div class="msg bad"><span class="ic">●</span><span>Die neue Backzeit liegt in der Vergangenheit.</span></div>';
     return;
   }
-  /* Was ist bis jetzt gelaufen? Ursprungsplan bis doneH simulieren. */
-  const cut = [];
-  let left = doneH;
-  for(const p of cp.phases){
-    if(left <= 0) break;
-    cut.push({ h: Math.min(p.h, left), t: p.t });
-    left -= p.h;
-  }
-  const overrun = left > 0 ? left : 0;
-  if(overrun > 0 && cut.length) cut[cut.length-1].h += overrun;   /* hängt über: letzte Bedingung hält an */
-  const contF = +(run ? run.plan.container : S.container) || 1;
-  const ddt = +(run ? run.plan.ddt : S.ddt) || 23;
-  /* Ballen-Index NICHT auf die gelaufenen Phasen klemmen — sonst würde der ungeballte
-     Teig mit der Zeitkonstante eines Ballens gerechnet. */
-  const done = simulate(cut, cp.ballAfter, cp.total, cp.bw, ddt, contF);
-  const balled = cut.length - 1 >= cp.ballAfter;
-  const Edone = done.Eg * cp.corr;
-  const Erem = cp.Eeff - Edone;
-  const share = clamp(Edone/Math.max(cp.Eeff,0.01)*100, 0, 999);
-
-  /* Restgärung wird ab der jetzigen Kerntemperatur simuliert, nicht ab Zieltemperatur:
-     ein Ballen aus dem Kühlschrank braucht eine gute Stunde, bis er überhaupt gärt. */
-  const Erest = (phs, ballIdx) => simulate(phs, ballIdx, cp.total, cp.bw, done.endT, contF).Eg * cp.corr;
-  const solve = (fn, lo, hi) => { for(let i=0;i<40;i++){ const m=(lo+hi)/2; if(fn(m) < Erem) lo = m; else hi = m; } return (lo+hi)/2; };
-
-  let body = kv("Bisher gelaufen", fmtH(doneH)+" · "+num(share,0)+" % der Gärleistung") +
-             kv("Kerntemperatur jetzt", num(done.endT,1)+" °C") +
-             kv("Bis zur neuen Backzeit", fmtH(remH));
+  const doneH = q.doneH, Erem = q.Erem;
 
   /* Nicht die Backzeit vergleichen, sondern die verbleibende Zeit gegen das, was der
      Plan ab jetzt noch vorsah — sonst fällt ein verspäteter Knetstart durchs Raster. */
   const restPlan = cp.totalH - doneH;
-  const abweichung = remH - restPlan;
-  body += kv("Gegenüber Plan", Math.abs(abweichung) < 0.08 ? "passt"
-    : (abweichung > 0 ? "+" : "−")+fmtH(Math.abs(abweichung))+(abweichung > 0 ? " mehr Zeit" : " weniger Zeit"));
+  const abw = remH - restPlan;
+  let body = kv("Bisher gelaufen", fmtH(doneH)+" · "+num(q.share,0)+" % der Gärleistung") +
+             kv("Kerntemperatur jetzt", num(q.done.endT,1)+" °C") +
+             kv("Bis zur neuen Backzeit", fmtH(remH)) +
+             kv("Gegenüber Plan", Math.abs(abw) < 0.08 ? "passt"
+               : (abw > 0 ? "+" : "−")+fmtH(Math.abs(abw))+(abw > 0 ? " mehr Zeit" : " weniger Zeit"));
 
-  const einfach = kuehlAusgleich(cp, rs, nb, doneH, abweichung);
+  /* Restgärung wird ab der jetzigen Kerntemperatur simuliert, nicht ab Zieltemperatur:
+     ein Ballen aus dem Kühlschrank braucht eine gute Stunde, bis er überhaupt gärt.
+     Der Rest wird als Phasen ab jetzt gebaut — dieselben Phasen, die "Übernehmen"
+     in den Plan schreibt, damit Rechnung und Plan nicht auseinanderlaufen. */
+  const ballAt = cp.phases.slice(0, cp.ballAfter).reduce((a,p)=>a+p.h,0);
+  const restOf = (segs, ballH) => {
+    const rest = segs.map(s => ({ h:s.h, t:s.t }));
+    let ballIdx = 0;
+    if(!q.balled){
+      const x = clamp(ballH, 0, remH);
+      ballIdx = splitAt(rest, x);
+      if(x >= remH - 1/60) ballIdx = rest.length;          /* nie geballt im Rest */
+    }
+    return { rest, ballIdx };
+  };
+  const Erest = (segs, ballH) => { const r = restOf(segs, ballH); return simulate(r.rest, r.ballIdx, cp.total, cp.bw, q.done.endT, q.contF).Eg * cp.corr; };
+  const solve = (fn, lo, hi) => { for(let i=0;i<40;i++){ const m=(lo+hi)/2; if(fn(m) < Erem) lo = m; else hi = m; } return (lo+hi)/2; };
+  const proposal = (segs, ballH, label) => {
+    const r = restOf(segs, ballH);
+    const all = q.cut.map(p=>({h:p.h,t:p.t})).concat(r.rest);
+    const ba = q.balled ? cp.ballAfter : q.cut.length + r.ballIdx;
+    const m = mergePhases(all, Math.min(ba, all.length-1));
+    return { phases: m.phases, ballAfter: m.ballAfter, bake: nbStr, label: label || "ÜBERNEHMEN" };
+  };
+  /* Noch nicht geballt: geplanter Ballen-Zeitpunkt bleibt, wenn er in den Rest fällt —
+     sonst so spät, dass noch eine Warmphase als Ballen bleibt. */
+  const warmH = Math.min(cp.bw > 400 ? 3 : 2, remH*0.4);
+  const ballDefault = clamp(ballAt - doneH, 0, Math.max(remH - warmH, 0));
+
+  const einfach = kuehlAusgleich(cp, q.rs, nb, doneH, abw);
 
   let msg;
-  if(Math.abs(abweichung) < 0.5 && Erem > 0.2){
+  if(Math.abs(abw) < 0.5 && Erem > 0.2){
     msg = ["good","Nichts zu tun — du liegst im Plan. Weiter nach dem Ablauf oben."];
+    /* Trotzdem übernehmbar: die paar Minuten landen in der letzten Phase, damit der
+       Ablauf die echte Backzeit zeigt und die gelbe Warnung verschwindet. */
+    const last = cp.phases[cp.phases.length-1];
+    if(Math.abs(abw) >= 1/60 && last.h + abw >= 0.25){
+      const phases = cp.phases.map((p,i)=>({ h: i === cp.phases.length-1 ? p.h + abw : p.h, t: p.t }));
+      REPLAN = { phases, ballAfter: cp.ballAfter, bake: nbStr, label:"BACKZEIT ÜBERNEHMEN" };
+    }
   } else if(Erem <= 0.2){
     msg = ["bad","Der Teig hat sein Gärziel schon erreicht. Sofort so kalt wie möglich stellen, das bremst am stärksten — "+
       "und früher backen, wenn es irgendwie geht. Je länger es jetzt dauert, desto weicher wird er."];
   } else if(einfach){
-    msg = einfach;
+    msg = einfach.msg;
+    REPLAN = { phases: einfach.phases, ballAfter: einfach.ballAfter, bake: nbStr, label:"ÜBERNEHMEN" };
   } else {
-    const oneT = T => Erest([{h:remH, t:T}], balled ? 0 : 1);
+    const oneT = T => Erest([{h:remH, t:T}], ballDefault);
     const tAll = oneT(32) < Erem ? 99 : solve(oneT, -5, 32);
+    const ballHint = q.balled ? "" : " Ballen "+fmtWhen(new Date(q.rs.getTime() + (doneH+ballDefault)*3600e3), now)+".";
     if(tAll >= 16){
       /* Eine Temperatur reicht, kein Kühlschrank nötig. */
-      if(tAll <= 26) msg = ["good","Rest einfach bei etwa <b>"+num(tAll,0)+" °C</b> stehen lassen."];
+      if(tAll <= 26) msg = ["good","Rest einfach bei etwa <b>"+num(tAll,0)+" °C</b> stehen lassen."+ballHint];
       else if(tAll <= 31) msg = ["warn","Es wird knapp — der Teig müsste bei etwa <b>"+num(tAll,0)+" °C</b> stehen, "+
-        "um rechtzeitig fertig zu werden. Warmer Ort, aber gut beobachten."];
-      else msg = ["bad","Nicht mehr aufholbar: für "+fmtWhen(nb,rs)+" wäre der Teig noch zu jung. Später backen, "+
+        "um rechtzeitig fertig zu werden. Warmer Ort, aber gut beobachten."+ballHint];
+      else msg = ["bad","Nicht mehr aufholbar: für "+fmtWhen(nb,q.rs)+" wäre der Teig noch zu jung. Später backen, "+
         "oder mit einem straffen, weniger dehnbaren Teig rechnen."];
+      if(tAll <= 31) REPLAN = proposal([{h:remH, t:Math.round(tAll)}], ballDefault);
     } else {
       /* Kalt parken und rechtzeitig aufwärmen. Die Warmphase (als Ballen bei 21 °C) wird reserviert,
          die Kaltphase so temperiert, dass die Summe stimmt. */
-      const warmH = Math.min(cp.bw > 400 ? 3 : 2, remH*0.4);
       const coldH = remH - warmH;
-      const twoT = T => Erest([{h:coldH, t:T},{h:warmH, t:21}], balled ? 0 : 1);
+      const twoT = T => Erest([{h:coldH, t:T},{h:warmH, t:21}], coldH);
       const outAt = new Date(nb.getTime() - warmH*3600e3);
       if(twoT(-5) >= Erem){
         msg = ["warn","Der Teig braucht kaum noch Gärung. Bis kurz vor dem Backen so kalt wie möglich lagern und "+
@@ -1390,24 +1597,43 @@ function renderReplan(c, bake, start){
       } else {
         const tCold = twoT(16) < Erem ? tAll : solve(twoT, -5, 16);
         if(tCold < 1){
-          msg = ["bad","Selbst im Kühlschrank ist das zu lang: bis "+fmtWhen(nb,rs)+" wäre der Teig überreif. "+
+          msg = ["bad","Selbst im Kühlschrank ist das zu lang: bis "+fmtWhen(nb,q.rs)+" wäre der Teig überreif. "+
             "Entweder früher backen, oder die Ballen jetzt einfrieren — das ist der einzige echte Notaus."];
         } else if(tCold < 9){
           msg = [tCold < 3 ? "warn" : "good","Ab jetzt in den Kühlschrank bei etwa <b>"+num(tCold,0)+" °C</b>, "+
-            "dann um <b>"+fmtWhen(outAt,rs)+"</b> herausnehmen"+(balled ? "" : ", ballen")+" und "+fmtH(warmH)+" bei Raumtemperatur akklimatisieren lassen."+
+            "dann um <b>"+fmtWhen(outAt,q.rs)+"</b> herausnehmen"+(q.balled ? "" : ", ballen")+" und "+fmtH(warmH)+" bei Raumtemperatur akklimatisieren lassen."+
             (tCold < 3 ? " Kälter als 3 °C schafft kaum ein Haushaltskühlschrank — falls deiner das nicht kann, plane lieber früher zu backen." : "")];
+          REPLAN = proposal([{h:coldH, t:Math.round(tCold)},{h:warmH, t:21}], coldH);
         } else {
           msg = ["good","Rest kühl parken bei etwa <b>"+num(tCold,0)+" °C</b> — Keller oder kühlster Raum, notfalls Kühlschrank "+
-            "mit früherem Herausnehmen. Um <b>"+fmtWhen(outAt,rs)+"</b> auf Raumtemperatur stellen"+(balled ? "" : " und ballen")+"."];
+            "mit früherem Herausnehmen. Um <b>"+fmtWhen(outAt,q.rs)+"</b> auf Raumtemperatur stellen"+(q.balled ? "" : " und ballen")+"."];
+          REPLAN = proposal([{h:coldH, t:Math.round(tCold)},{h:warmH, t:21}], coldH);
         }
       }
     }
   }
   out.innerHTML = body + '<div class="msg '+msg[0]+'" style="margin-top:12px"><span class="ic">'+
     (msg[0]==="bad"?"●":msg[0]==="warn"?"▲":"✓")+'</span><span>'+msg[1]+'</span></div>'+
-    '<div class="note">Gerechnet wird gegen die Gärleistung, die dein '+(run ? "eingefrorener" : "ursprünglicher")+' Plan insgesamt vorsah: '+
+    (REPLAN ? '<div class="btnrow" style="margin-top:10px"><button class="btn sm" id="replanApply">'+REPLAN.label+'</button>'+
+      '<span class="note" style="margin:0;flex:1;min-width:160px">Schreibt den Vorschlag in den laufenden Plan. Ablauf, Küche und Kalender folgen; '+
+      'der ursprüngliche Plan bleibt fürs Backprotokoll erhalten.</span></div>' : "")+
+    '<div class="note">Gerechnet wird gegen die Gärleistung, die dein eingefrorener Plan insgesamt vorsah: '+
     'was bis jetzt gelaufen ist, wird abgezogen, der Rest ab der jetzigen Kerntemperatur auf die verbleibende Zeit simuliert. '+
     'Der Vorschlag hält die Summe konstant — er ersetzt nicht den Blick auf den Teig.</div>';
+}
+function applyReplan(){
+  const run = S.run;
+  if(!run || !REPLAN) return;
+  if(!run.orig) run.orig = { phases: JSON.parse(JSON.stringify(run.plan.phases)), ballAfter: run.plan.ballAfter, bake: run.plan.bake };
+  run.plan.phases = REPLAN.phases;
+  run.plan.ballAfter = REPLAN.ballAfter;
+  run.plan.bake = REPLAN.bake;
+  run.newBake = REPLAN.bake;
+  run.changed = (run.changed || 0) + 1;
+  sanitize(S);
+  REPLAN = null;
+  $("replanCard").open = false;
+  render();
 }
 
 /* ===================== Kalender ===================== */
@@ -1418,7 +1644,9 @@ function icsDate(d){
 async function downloadICS(btn){
   if(!STEPS.length) return;
   const now = new Date();
-  const planId = String(S.bake||"").replace(/\D/g,"");
+  /* Im Backen-Tab die ID des Teigs (bleibt über Umplanen gleich), sonst die Backzeit des Plans.
+     Beim Start übernimmt der Teig die ID des Plans — der Export vor dem Kneten wird so ersetzt, nicht verdoppelt. */
+  const planId = (VIEW === "run" && S.run) ? S.run.id : String(S.bake||"").replace(/\D/g,"");
   let out = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Teigplaner//DE","CALSCALE:GREGORIAN"];
   STEPS.forEach((s,i)=>{
     const end = new Date(s.t.getTime() + 15*60e3);
@@ -1454,20 +1682,21 @@ async function downloadICS(btn){
 
 /* ===================== Küchenmodus ===================== */
 function renderKitchen(){
-  if(!$("kitchen").classList.contains("show") || !STEPS.length || !CALC) return;
+  if(!$("kitchen").classList.contains("show") || !RUN || !RUN.steps.length) return;
+  const KS = RUN.steps, st = RUN.st;
   const now = Date.now();
   let cur = 0;
-  for(let i=0;i<STEPS.length;i++){ if(now >= STEPS[i].t.getTime()) cur = i; }
-  const s = STEPS[cur], nx = STEPS[cur+1];
-  const started = now >= STEPS[0].t.getTime();
+  for(let i=0;i<KS.length;i++){ if(now >= KS[i].t.getTime()) cur = i; }
+  const s = KS[cur], nx = KS[cur+1];
+  const started = now >= KS[0].t.getTime();
   $("kNow").innerHTML = '<div class="klabel">'+(started?"Jetzt":"Geplanter Start")+'</div>'+
     '<div class="kbig">'+s.title+'</div>'+
     (s.sub?'<div class="ksub">'+s.sub+'</div>':'')+
     (nx ? '<div class="kcount">'+countdown(nx.t.getTime()-now)+'</div>' : '');
   $("kNext").innerHTML = nx
-    ? '<div class="klabel">Als Nächstes · '+fmtWhen(nx.t, STEPS[0].t)+'</div><div class="ksub" style="color:var(--text);font-size:18px;margin-top:4px">'+nx.title+'</div>'
+    ? '<div class="klabel">Als Nächstes · '+fmtWhen(nx.t, KS[0].t)+'</div><div class="ksub" style="color:var(--text);font-size:18px;margin-top:4px">'+nx.title+'</div>'
     : '<div class="klabel">Fertig</div>';
-  const c = CALC;
+  const c = RUN.c;
   let ing = "";
   if(c.pf.type === "poolish" || c.pf.type === "biga"){
     ing += c.pf.name+": <b>"+fmtG(c.pf.flour)+"</b> Mehl · <b>"+fmtG(c.pf.water)+"</b> Wasser · <b>"+fmtG(c.pf.yeastG)+"</b> Hefe<br>";
@@ -1478,10 +1707,10 @@ function renderKitchen(){
     ing += "<b>"+fmtG(c.flour)+"</b> Mehl · <b>"+fmtG(c.water)+"</b> Wasser<br>";
   }
   ing += "<b>"+fmtG(c.saltG)+"</b> Salz";
-  if(c.pf.type !== "sour" && c.yG >= 0.005) ing += " · <b>"+fmtG(c.yG)+"</b> "+YNAME[S.yeast];
+  if(c.pf.type !== "sour" && (c.yOv || c.yG >= 0.005)) ing += " · <b>"+fmtG(c.yOv || c.yG)+"</b> "+YNAME[st.yeast];
   if(c.oil > 0) ing += " · <b>"+fmtG(c.oilG)+"</b> Öl";
   if(c.sugar > 0) ing += " · <b>"+fmtG(c.sugarG)+"</b> Zucker";
-  ing += "<br>Wasser ≈ <b>"+Math.round(waterTemp())+" °C</b> · "+c.n+" × "+Math.round(c.bw)+" g";
+  ing += "<br>Wasser ≈ <b>"+Math.round(waterTemp(st))+" °C</b> · "+c.n+" × "+Math.round(c.bw)+" g";
   $("kIng").innerHTML = ing;
 }
 /* Bildschirm anlassen, solange der Küchenmodus offen ist (Safari ab iOS 16.4). */
@@ -1509,9 +1738,14 @@ function renderLog(){
   const cal = getCal(), log = getLog();
   $("calHint").textContent = cal === 1 ? "noch nicht kalibriert" : "Hefe × "+num(cal,2);
   $("logList").innerHTML = (log.length
-    ? log.slice().reverse().map((e,i)=>'<div class="logrow"><span class="d">'+esc(e.d||"")+'</span>'+
-        '<span class="r">'+(LOGNAME[e.r]||esc(e.r||"?"))+(e.m?'<br><span style="color:var(--muted);font-size:11.5px">'+esc(e.m)+'</span>':'')+
-        '</span><button data-dellog="'+(log.length-1-i)+'">✕</button></div>').join("")
+    ? log.slice().reverse().map((e,i)=>{
+        const idx = log.length-1-i;
+        const hasPlan = e.plan && Array.isArray(e.plan.phases);
+        const sub = hasPlan ? planSummary(e.plan, e.yG) + (e.orig ? " · umgeplant" : "") + (e.noStart ? " · ohne Startzeit" : "") : (e.m||"");
+        return '<div class="logrow"><span class="d">'+esc(e.d||"")+'</span>'+
+        '<span class="r">'+(LOGNAME[e.r]||esc(e.r||"?"))+(sub?'<br><span style="color:var(--muted);font-size:11.5px">'+esc(sub)+'</span>':'')+
+        '</span>'+(hasPlan ? '<button data-relog="'+idx+'" title="nochmal so planen">↺</button>' : '')+
+        '<button data-dellog="'+idx+'">✕</button></div>'; }).join("")
     : '<div class="note" style="margin:0">Noch keine Einträge.</div>')+
     (cal !== 1 ? '<div class="btnrow" style="margin-top:10px"><button class="btn ghost sm" id="calReset">KALIBRIERUNG ZURÜCKSETZEN</button></div>' : "");
 }
@@ -1566,8 +1800,8 @@ function fmtMin(v){
   const m = Math.floor(v), sec = Math.round((v-m)*60);
   return sec ? m+":"+String(sec).padStart(2,"0")+" min" : m+" min";
 }
-function mixSummary(){
-  const m = S.mix || defaults().mix;
+function mixSummary(st){
+  const m = (st || S).mix || defaults().mix;
   return m.steps.map(st => st.k === "rest"
     ? fmtMin(+st.min||0)+" Rast"
     : fmtMin(+st.min||0)+" @ "+fmtSt(+st.st||0)+" ("+(+st.rpm || rpmForStripes(+st.st||3))+" U/min)").join(" · ");
@@ -1680,7 +1914,7 @@ function applyBackup(raw, btn){
   if(rc) saveRecipes(Object.assign(loadRecipes(), d.recipes));
   if(Array.isArray(d.log)) setLog(d.log);
   if(typeof d.cal === "number") setCal(d.cal);
-  if(d.last && d.last.phases) S = sanitize(Object.assign(defaults(), d.last));
+  if(d.last && d.last.phases){ S = sanitize(Object.assign(defaults(), d.last)); VIEW = S.run ? "run" : "plan"; }
   if(d.exported){ try{ localStorage.setItem(KEY+"_exp", d.exported); }catch(e){} }
   render();
   flash(btn, "GELADEN");
@@ -1695,6 +1929,40 @@ function renderBackupInfo(){
   const el = $("backupInfo");
   if(el) el.innerHTML = '<div class="note">'+txt+'.<br>„In Datei sichern“ öffnet auf dem iPhone das Teilen-Menü — dort <b>In Dateien sichern</b> '+
     'und als Ort <b>iCloud Drive</b> wählen. „Aus Datei laden“ öffnet den Dateien-Picker, wo iCloud Drive unter „Durchsuchen“ liegt.</div>';
+}
+
+/* ===================== Teig starten / beenden ===================== */
+function startRun(){
+  if(S.run && !confirm("Es läuft schon ein Teig, geknetet "+fmtWhen(new Date(S.run.start), new Date())+".\n\n"+
+     "Ersetzen? Der alte wird ohne Protokolleintrag verworfen. Willst du ihn eintragen, tipp erst im Backen-Tab unter „Gebacken?“ auf eine Bewertung.")) return;
+  /* Plan einfrieren: der Backen-Tab rechnet ab jetzt gegen diese Kopie, egal was in Planen geändert wird. */
+  const plan = JSON.parse(JSON.stringify(S)); delete plan.run;
+  S.run = { start: toLocal(new Date()), newBake: S.bake, plan: plan,
+            id: String(S.bake||"").replace(/\D/g,""), bake0: S.bake };
+  VIEW = "run"; replanAufgeklappt = false;
+  render(); window.scrollTo({ top:0, behavior:"smooth" });
+}
+function planSummary(p, yG){
+  const ph = (p.phases||[]).map(x => fmtH(+x.h||0)+"/"+num(+x.t||0,0)+"°").join(" + ");
+  const pf = p.pf && p.pf.type && p.pf.type !== "none" ? " · "+(PF[p.pf.type]||{}).name : "";
+  return (p.n||"?")+"×"+Math.round(+p.bw||0)+" g · "+num(+p.h||0,0)+" % · "+ph+
+    " · Ballen "+((p.ballAfter|0) === 0 ? "sofort" : "nach Phase "+(p.ballAfter|0))+pf+
+    (yG ? " · "+fmtG(yG)+" "+(p.pf && p.pf.type === "sour" ? "Anstellgut" : (YNAME[p.yeast]||"Hefe")) : "");
+}
+function bakedLog(r){
+  const run = S.run; if(!run) return;
+  const c = calc(run.plan);
+  const log = getLog();
+  log.push({ d: new Date().toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"}), r: r,
+             m: mixSummary(run.plan), plan: JSON.parse(JSON.stringify(run.plan)),
+             start: run.start, bake: run.plan.bake, yG: c.pf.type === "sour" ? c.pf.weight : (c.yOv || c.yG),
+             orig: run.orig || null, ts: new Date().toISOString() });
+  setLog(log);
+  if(r === "over") setCal(getCal()/1.15);
+  if(r === "young") setCal(getCal()*1.15);
+  delete S.run;
+  VIEW = "plan";
+  render(); window.scrollTo({ top:0, behavior:"smooth" });
 }
 
 /* ===================== Events ===================== */
@@ -1725,14 +1993,13 @@ document.addEventListener("input", e => {
   if(t.id === "pfH"){ S.pf.h = +t.value; render(); return; }
   if(t.id === "pfT"){ S.pf.t = +t.value; render(); return; }
   if(t.id === "newBake" || t.id === "realStart"){
-    if(S.run){ S.run[t.id === "newBake" ? "newBake" : "start"] = t.value; persist(); }
-    renderReplan(CALC, new Date(S.bake), new Date(STEPS.length?STEPS[0].t:Date.now())); return;
+    if(S.run && t.value){ S.run[t.id === "newBake" ? "newBake" : "start"] = t.value; render(); }
+    return;
   }
   const keys = ["n","bw","h","salt","oil","sugar","yeast","flourW","scale","bake","ddt",
                 "container","tflour","tkitchen","tTom","tMoz"];
   if(keys.indexOf(t.id) >= 0){
     S[t.id] = (t.type === "number") ? +t.value : t.value;
-    if(t.id === "bake") $("newBake").value = t.value;
     render();
   }
 });
@@ -1749,9 +2016,12 @@ document.addEventListener("change", e => {
 });
 
 document.addEventListener("click", e => {
-  const t = e.target.closest("button, [data-load], [data-drop]");
+  const t = e.target.closest("button, a, [data-load], [data-drop]");
   if(!t) return;
 
+  if(t.dataset.view){
+    VIEW = t.dataset.view; render(); window.scrollTo({ top:0, behavior:"smooth" }); return;
+  }
   if(t.dataset.preset){
     const p = PRESETS.find(x => x.key === t.dataset.preset);
     /* Eine Vorlage ist ein Rezept: Teig, Vorteig, Gärplan und Knetprogramm werden gesetzt.
@@ -1788,24 +2058,38 @@ document.addEventListener("click", e => {
     render(); return;
   }
   if(t.dataset.log){
-    const log = getLog();
+    /* Nachtrag ohne Startzeit: nimmt den Plan aus Planen. */
+    const log = getLog(), c = calc(S);
+    const plan = JSON.parse(JSON.stringify(S)); delete plan.run;
     log.push({ d: new Date().toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"}), r: t.dataset.log,
-                m: mixSummary() });
+                m: mixSummary(S), plan: plan, bake: S.bake, yG: c.pf.type === "sour" ? c.pf.weight : (c.yOv || c.yG),
+                ts: new Date().toISOString(), noStart: true });
     setLog(log);
     if(t.dataset.log === "over") setCal(getCal()/1.15);
     if(t.dataset.log === "young") setCal(getCal()*1.15);
     render(); return;
   }
-  if(t.id === "runStart"){
-    /* Plan einfrieren: Umplanen rechnet ab jetzt gegen diese Kopie, egal was oben geändert wird. */
-    const plan = JSON.parse(JSON.stringify(S)); delete plan.run;
-    S.run = { start: toLocal(new Date()), newBake: S.bake, plan: plan };
-    render(); return;
+  if(t.dataset.baked){ bakedLog(t.dataset.baked); return; }
+  if(t.id === "runStart"){ startRun(); return; }
+  if(t.id === "runDrop"){
+    e.preventDefault();
+    if(confirm("Teig verwerfen? Der Backen-Tab wird frei, ins Backprotokoll kommt nichts.")){ delete S.run; VIEW = "plan"; render(); window.scrollTo({ top:0, behavior:"smooth" }); }
+    return;
   }
-  if(t.id === "runStop"){ if(confirm("Startzeit vergessen? Danach rechnet die App wieder mit dem geplanten Start.")) { delete S.run; render(); } return; }
+  if(t.id === "replanApply"){ applyReplan(); return; }
   if(t.id === "calReset"){ setCal(1); render(); return; }
   if(t.dataset.dellog !== undefined){
     const log = getLog(); log.splice(+t.dataset.dellog,1); setLog(log); renderLog(); return;
+  }
+  if(t.dataset.relog !== undefined){
+    const e2 = getLog()[+t.dataset.relog];
+    if(e2 && e2.plan && e2.plan.phases){
+      const keep = S.bake, run = S.run;
+      S = sanitize(Object.assign(defaults(), JSON.parse(JSON.stringify(e2.plan)))); S.bake = keep;
+      delete S.run; if(run) S.run = run;
+      VIEW = "plan"; render(); window.scrollTo({ top:0, behavior:"smooth" });
+    }
+    return;
   }
   if(t.id === "saveBtn"){
     const name = ($("recName").value||"").trim();
@@ -1847,7 +2131,7 @@ document.addEventListener("click", e => {
     return;
   }
   if(t.id === "icsBtn"){ downloadICS(t); return; }
-  if(t.id === "kitchenBtn"){ $("kitchen").classList.add("show"); renderKitchen(); wakeLock(true); return; }
+  if(t.id === "kitchenBtn"){ if(!RUN) return; $("kitchen").classList.add("show"); renderKitchen(); wakeLock(true); return; }
   if(t.id === "kClose"){ $("kitchen").classList.remove("show"); wakeLock(false); return; }
   if(t.id === "linkBtn"){
     persist();
@@ -1860,6 +2144,7 @@ document.addEventListener("click", e => {
 });
 
 render();
+
 /* Minütlich nachziehen ("jetzt"-Markierung, Countdown) — aber nie mitten ins Tippen hinein. */
 setInterval(()=>{ if(!typing()) render(); renderKitchen(); }, 30000);
 document.addEventListener("visibilitychange", ()=>{ if(!document.hidden){ if(!typing()) render(); renderKitchen(); } });

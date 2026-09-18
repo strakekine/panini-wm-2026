@@ -338,17 +338,7 @@
 <details class="card">
   <summary>Backprotokoll <span class="hint" id="calHint"></span></summary>
   <div class="cbody">
-    <div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:2px">Knetprogramm</div>
-    <div class="fields" style="margin-bottom:10px">
-      <label class="f"><span class="lab">Maschine</span>
-        <select id="mixDev">
-          <option value="core">Ooni Halo Core</option>
-          <option value="pro">Ooni Halo Pro</option>
-          <option value="other">Andere Maschine</option>
-          <option value="hand">Von Hand</option>
-        </select>
-      </label>
-    </div>
+    <div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:8px">Knetprogramm — Ooni Halo Core</div>
     <div id="mixSteps"></div>
     <button class="addbtn" id="addMix">+ Knetschritt</button>
     <div id="mixInfo"></div>
@@ -519,7 +509,7 @@ function defaults(){
     /* Ooni-Vorgabe aus dem Classic-Teig für den Halo Pro: 10 min bei 120 U/min,
        10 min Rast, 30 s bei 90 U/min. Am Core auf die nächstliegenden Rastungen
        gelegt: 3 Striche = 123 U/min, 1,5 Striche = 85 U/min. */
-    mix:{ dev:"core", steps:[ {k:"mix",min:10,st:3}, {k:"rest",min:10}, {k:"mix",min:0.5,st:1.5} ] }
+    mix:{ steps:[ {k:"mix",min:10,st:3}, {k:"rest",min:10}, {k:"mix",min:0.5,st:1.5} ] }
   }, JSON.parse(JSON.stringify(PRESETS[0].s)));
 }
 let S = defaults();
@@ -750,7 +740,7 @@ function buildSteps(c, bake){
   steps.push({ t:start,
     title: c.pf.type==="none" ? "Wasser, Salz und Hefe verrühren, Mehl zugeben, kneten"
                               : "Hauptteig kneten: "+c.pf.name+", Wasser, Salz und Mehl",
-    sub:(S.mix && S.mix.dev !== "hand" ? MIXDEV[S.mix.dev]+": "+mixSummary()+" · " : "")+
+    sub:MIXNAME+": "+mixSummary()+" · "+
         "Zielteigtemperatur "+num(+S.ddt,1)+" °C · Schüttwasser ≈ "+Math.round(tw)+" °C" });
 
   let t = new Date(start.getTime());
@@ -781,6 +771,7 @@ function waterTemp(){
 /* ===================== Render ===================== */
 function render(){
   document.body.classList.toggle("expert", S.mode === "expert");
+  mixNormalize();
   const c = calc(); CALC = c;
   const bake = new Date(S.bake || Date.now());
   const start = new Date(bake.getTime() - c.totalH*3600e3);
@@ -1198,7 +1189,7 @@ function renderSaved(){
    Halo Core dreht bis 300 U/min, der Pro bis 345. Deshalb ist die Drehzahl
    die führende Größe.
 ========================================================= */
-const MIXDEV = { core:"Ooni Halo Core", pro:"Ooni Halo Pro", other:"Maschine", hand:"Von Hand" };
+const MIXNAME = "Ooni Halo Core";
 /* Halo Core: 20 Rastungen in 5-%-Schritten, 60–300 U/min. Zehn Striche, die
    halb und ganz leuchten — ein halber Strich ist eine Rastung.
    Zwischen den dokumentierten Eckwerten linear interpoliert; beim Halo Pro
@@ -1216,18 +1207,14 @@ function stripesForRpm(rpm){
 function fmtSt(st){
   return (st % 1 === 0 ? String(st) : String(st).replace(".",",")) + " Strich" + (st === 1 ? "" : "e");
 }
-/* Schritte halten je nach Maschine Striche oder Drehzahl — hier angleichen. */
+/* Ältere Programme hielten reine Drehzahlen — auf die nächste Rastung legen. */
 function mixNormalize(){
-  const m = S.mix;
-  m.steps.forEach(st => {
+  if(S.mix.dev !== undefined) delete S.mix.dev;   /* Altlast aus der Geräteauswahl */
+  S.mix.steps.forEach(st => {
     if(st.k === "rest") return;
-    if(m.dev === "core"){
-      if(typeof st.st !== "number") st.st = stripesForRpm(+st.rpm || 120);
-      st.st = clamp(Math.round(st.st*2)/2, 0.5, 10);
-      st.rpm = rpmForStripes(st.st);
-    } else if(typeof st.rpm !== "number"){
-      st.rpm = rpmForStripes(+st.st || 3);
-    }
+    if(typeof st.st !== "number") st.st = stripesForRpm(+st.rpm || 120);
+    st.st = clamp(Math.round(st.st*2)/2, 0.5, 10);
+    st.rpm = rpmForStripes(st.st);
   });
 }
 function fmtMin(v){
@@ -1237,13 +1224,9 @@ function fmtMin(v){
 }
 function mixSummary(){
   const m = S.mix || defaults().mix;
-  const core = m.dev === "core", hand = m.dev === "hand";
   return m.steps.map(st => st.k === "rest"
     ? fmtMin(+st.min||0)+" Rast"
-    : hand ? fmtMin(+st.min||0)+" kneten"
-    : fmtMin(+st.min||0)+" @ "+(core
-        ? fmtSt(+st.st||0)+" ("+(+st.rpm||0)+" U/min)"
-        : (+st.rpm||0)+" U/min")).join(" · ");
+    : fmtMin(+st.min||0)+" @ "+fmtSt(+st.st||0)+" ("+(+st.rpm || rpmForStripes(+st.st||3))+" U/min)").join(" · ");
 }
 function mixTotal(){
   const m = S.mix || defaults().mix;
@@ -1255,32 +1238,24 @@ function mixActive(){
 }
 function renderMix(){
   const m = S.mix;
-  mixNormalize();
-  $("mixDev").value = m.dev;
-  const hand = m.dev === "hand", core = m.dev === "core";
   $("mixSteps").innerHTML = m.steps.map((st,i)=>{
     const rest = st.k === "rest";
-    const head = "Schritt "+(i+1)+(!rest && !hand && core ? ' <b style="color:var(--gold)">'+st.rpm+' U/min</b>' : "");
     return '<div class="phase mix" data-i="'+i+'">'+
-      '<label class="f"><span class="lab">'+head+'</span>'+
+      '<label class="f"><span class="lab">Schritt '+(i+1)+
+        (rest ? "" : ' <b style="color:var(--gold)">'+st.rpm+' U/min</b>')+'</span>'+
         '<select class="mx" data-k="k">'+
-          '<option value="mix"'+(rest?"":" selected")+'>'+(hand?"Kneten":"Mischen")+'</option>'+
+          '<option value="mix"'+(rest?"":" selected")+'>Mischen</option>'+
           '<option value="rest"'+(rest?" selected":"")+'>Rast</option></select></label>'+
       '<label class="f"><span class="lab">Minuten</span><input type="number" class="mx" data-k="min" min="0" max="60" step="0.5" value="'+st.min+'"></label>'+
-      (hand
-        ? '<label class="f"><span class="lab">&nbsp;</span><input type="text" value="—" disabled></label>'
-        : core
-        ? '<label class="f"><span class="lab">Striche</span><input type="number" class="mx" data-k="st" min="0.5" max="10" step="0.5" value="'+
-            (rest ? "" : st.st)+'"'+(rest?" disabled":"")+'></label>'
-        : '<label class="f"><span class="lab">U/min</span><input type="number" class="mx" data-k="rpm" min="0" max="345" step="5" value="'+
-            (rest ? "" : (st.rpm||""))+'"'+(rest?" disabled":"")+'></label>')+
+      '<label class="f"><span class="lab">Striche</span><input type="number" class="mx" data-k="st" min="0.5" max="10" step="0.5" value="'+
+        (rest ? "" : st.st)+'"'+(rest?" disabled":"")+'></label>'+
       '<button class="xbtn" data-delmix="'+i+'"'+(m.steps.length<2?" disabled":"")+'>✕</button>'+
     '</div>';
   }).join("");
   const rest = mixTotal() - mixActive();
   let info = '<div class="note">'+fmtMin(mixTotal())+' insgesamt'+
     (rest > 0 ? ', davon '+fmtMin(mixActive())+' kneten' : '')+' · '+mixSummary()+'</div>';
-  if(core){
+  {
     info += '<div class="msg info"><span class="ic">·</span><span>Am Core ist ein <b>halber Strich eine Rastung</b> '+
       '(20 Stufen, 60–300 U/min), ein ganzer Strich also rund 25 U/min. Standard ist Oonis Vorgabe aus dem '+
       'Classic-Teig — dort für den Halo Pro mit 120 und 90 U/min angegeben, hier auf die nächstliegenden '+
@@ -1289,12 +1264,8 @@ function renderMix(){
       'Die Werte zwischen 60 und 300 sind linear interpoliert, nicht nachgemessen.</span></div>'+
       '<div class="note">Striche → U/min: '+
       [0.5,1,2,3,4,5,6,7,8,9,10].map(v => (v===0.5?"½":v)+" = "+rpmForStripes(v)).join(" · ")+'</div>';
-  } else if(m.dev === "pro"){
-    info += '<div class="msg info"><span class="ic">·</span><span>Standard ist Oonis Vorgabe aus dem Classic-Teig: '+
-      '10 min bei 120 U/min (25 %), 10 min Rast mit geschlossenem Spritzschutz, dann 30 s bei 90 U/min (15 %) '+
-      'zum Glätten.</span></div>';
   }
-  if(mixActive() >= 12 && m.dev !== "hand"){
+  if(mixActive() >= 12){
     info += '<div class="msg warn"><span class="ic">▲</span><span>Langes Kneten wärmt den Teig spürbar auf. '+
       'Stell unter <b>Experte → Kneten</b> passend ein, damit die Schüttwassertemperatur stimmt.</span></div>';
   }
@@ -1392,7 +1363,6 @@ document.addEventListener("input", e => {
     }
     render(); return;
   }
-  if(t.id === "mixDev"){ S.mix.dev = t.value; render(); return; }
   if(t.id === "pfShare"){ S.pf.share = +t.value; render(); return; }
   if(t.id === "pfHyd"){ S.pf.hyd = +t.value; render(); return; }
   if(t.id === "pfH"){ S.pf.h = +t.value; render(); return; }
@@ -1457,7 +1427,7 @@ document.addEventListener("click", e => {
   if(t.dataset.log){
     const log = getLog();
     log.push({ d: new Date().toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"}), r: t.dataset.log,
-                m: mixSummary(), dev: S.mix ? S.mix.dev : "" });
+                m: mixSummary() });
     setLog(log);
     if(t.dataset.log === "over") setCal(getCal()*0.85);
     if(t.dataset.log === "young") setCal(getCal()*1.15);

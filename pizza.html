@@ -265,6 +265,14 @@
       <label class="f"><span class="lab">Teigtemperatur nach dem Kneten °C</span><input type="number" inputmode="decimal" id="ddt" min="16" max="30" step="0.5"></label>
       <label class="f"><span class="lab">Küchentemperatur °C</span><input type="number" inputmode="decimal" id="tkitchen" min="5" max="40" step="0.5"></label>
     </div>
+    <div class="ballrow" style="margin-bottom:14px">
+      <div class="t">Oder: Zeit vorgeben, Plan vorschlagen lassen</div>
+      <div class="fields">
+        <label class="f"><span class="lab">Ich habe … Stunden</span><input type="number" inputmode="decimal" id="genH" min="4" max="96" step="1" placeholder="z. B. 24"></label>
+        <label class="f"><span class="lab">Kühlschrank °C</span><input type="number" inputmode="decimal" id="genT" min="0" max="12" step="0.5"></label>
+      </div>
+      <div id="genOut"></div>
+    </div>
     <div id="phases"></div>
     <button class="addbtn" id="addPhase">+ Phase hinzufügen</button>
     <div class="note">Die Kühlschranktemperatur wiegt schwerer als alles andere im Modell: pro Grad ändert sich die Hefemenge um rund 20 %,
@@ -714,6 +722,54 @@ function persist(){
 }
 function shareURL(){
   return location.origin + location.pathname + location.search + "#p=" + encodeState();
+}
+
+/* ===================== Planvorschlag =====================
+   Warum kein "Optimum": Der Reifegrad wächst monoton mit dem Kaltanteil, eine Suche
+   nach dem Maximum liefert darum immer "so kalt wie möglich, so kurz warm wie
+   erlaubt" — also nur die untere Schranke, die wir selbst gesetzt haben. Ehrlicher
+   ist: Die Warmphase aus der Physik ableiten (der Teig muss aus der Kälte erst auf
+   Temperatur kommen), den Rest kalt geben und die Alternativen mit ihren Kennzahlen
+   danebenstellen, statt eine Zahl als "ideal" zu verkaufen.
+=========================================================== */
+/* Zeit, bis die Masse von der Kälte auf 2 K unter Küchentemperatur ist, plus eine
+   Stunde, damit sie dort auch noch gärt und nicht nur ankommt. */
+function warmBrauchtH(massG, containerF, tKalt, tWarm){
+  const d0 = Math.max(tWarm - tKalt, 1);
+  const t = tauH(massG, containerF) * Math.log(d0/2);
+  return Math.max(2, Math.round((t + 1)*2)/2);
+}
+function planVorschlaege(H, tKalt){
+  const tWarm = clamp(numOr(S.tkitchen, 21), 5, 40);
+  const cf = +S.container || 1;
+  const gesamt = (+S.n||1) * (+S.bw||250);
+  const warmBall = warmBrauchtH(+S.bw||250, cf, tKalt, tWarm);
+  const roh = [];
+  const dazu = (name, phases, ballAfter, hinweis) => {
+    if(phases.some(p => p.h < 0.5)) return;
+    roh.push({ name, phases, ballAfter, hinweis });
+  };
+  /* 1) Standard: alles kalt, am Ende geballt und aufgewärmt. */
+  dazu("Klumpen kalt, danach ballen", [{h:H-warmBall, t:tKalt},{h:warmBall, t:tWarm}], 1,
+       "Der Standard. Der Klumpen kühlt langsam aus und gärt dabei nach, das spart Hefe. Am Backtag musst du ballen.");
+  /* 2) Kurze Stockgare warm vorweg — mehr Struktur, etwas weniger Reifegrad. */
+  dazu("2 h Stockgare, dann kalt", [{h:2, t:tWarm},{h:H-2-warmBall, t:tKalt},{h:warmBall, t:tWarm}], 2,
+       "Die warme Stockgare gibt dem Gluten mehr Struktur, kostet dafür Kaltzeit.");
+  /* 3) Ballen schon vor der Kälte: kleine Ballen kühlen schnell aus und brauchen
+        deutlich mehr Hefe — dafür sind sie am Backtag schneller auf Temperatur. */
+  dazu("Ballen schon im Kühlschrank", [{h:H-warmBall, t:tKalt},{h:warmBall, t:tWarm}], 0,
+       "Am Backtag nichts mehr zu tun. Kleine Ballen kühlen schnell aus — das hebt den Reifegrad, kostet aber deutlich mehr Hefe.");
+  /* 4) Nur warm, wenn die Zeit kurz ist. */
+  if(H <= 10) dazu("Durchgehend bei "+num(tWarm,0)+" °C", [{h:2, t:tWarm},{h:H-2, t:tWarm}], 1,
+       "Ohne Kühlschrank. Schnell, aber am wenigsten Aroma.");
+  return roh.map(v => {
+    const st = Object.assign({}, S, { phases:v.phases, ballAfter:v.ballAfter });
+    delete st.run; delete st.yOv;
+    const c = calc(st);
+    return Object.assign({}, v, { Rip:c.Rip, yG:c.yG, warm:v.phases[v.phases.length-1].h });
+  });   /* KEIN Sortieren nach Reifegrad: der steigt fast zwangsläufig mit der Kälte
+             und würde die hefehungrigste Variante nach oben schieben. Die Reihenfolge
+             ist eine Empfehlung, die Zahlen daneben sind die Begründung. */
 }
 
 /* ===================== Rechnen ===================== */
@@ -1256,6 +1312,7 @@ function renderPlanCards(c){
     row("Parmesan", fmtG(5*c.n), "5 g")+
     row("Basilikum", c.n*2+" Blätter", "");
 
+  renderGen();
   renderMix();
   renderSaved();
   renderBackupInfo();
@@ -1823,6 +1880,48 @@ function renderLog(){
       : "");
 }
 
+let GEN = [];
+function renderGen(){
+  const box = $("genOut"); if(!box) return;
+  if(!$("genT").value){                       /* Kühlschrank aus dem bestehenden Plan übernehmen */
+    const kalt = S.phases.filter(p => p.t < 12).map(p => p.t);
+    if($("genT") !== document.activeElement) $("genT").value = kalt.length ? Math.min.apply(null, kalt) : 6;
+  }
+  const H = numOr($("genH").value, 0);
+  if(H < 4){ box.innerHTML = ""; GEN = []; return; }
+  const tK = clamp(numOr($("genT").value, 6), 0, 12);
+  GEN = planVorschlaege(H, tK);
+  if(!GEN.length){
+    box.innerHTML = '<div class="msg bad" style="margin-top:10px"><span class="ic">●</span><span>'+
+      fmtH(H)+' reichen nicht: Allein das Aufwärmen aus dem Kühlschrank dauert länger. '+
+      'Nimm mehr Zeit oder plan ohne Kühlschrank.</span></div>';
+    return;
+  }
+  const warn =
+    H < 8  ? '<div class="msg warn" style="margin-top:10px"><span class="ic">▲</span><span>Unter 8 Stunden braucht der Teig viel Hefe ('+
+             fmtG(GEN[0].yG)+' im Standardplan) und das Backfenster wird eng. Machbar, aber kein Plan, der verzeiht.</span></div>'
+    : H > 72 ? '<div class="msg warn" style="margin-top:10px"><span class="ic">▲</span><span>Über 72 Stunden gewinnst du kaum noch Aroma, '+
+             'der Teig wird aber im Gluten schwächer und reißt beim Aufziehen leichter.</span></div>'
+    : "";
+  box.innerHTML = warn + GEN.map((v,i) =>
+    '<div class="phase" style="align-items:flex-start">'+
+      '<div class="pname" style="flex:1 1 auto;min-width:0">'+
+        '<span class="dot" style="background:'+tempColor(v.phases[0].t)+'"></span>'+
+        '<span style="white-space:normal">'+esc(v.name)+
+          '<br><span style="color:var(--muted);font-size:11.5px">'+
+            v.phases.map(p => num(p.h,1)+" h/"+num(p.t,0)+"°").join(" + ")+
+            ' · Reifegrad '+num(v.Rip,2)+' · '+fmtG(v.yG)+' Hefe'+
+          '</span>'+
+          '<br><span style="color:var(--muted);font-size:11.5px">'+esc(v.hinweis)+'</span>'+
+        '</span></div>'+
+      '<button class="btn ghost sm" data-gen="'+i+'">ÜBERNEHMEN</button>'+
+    '</div>').join("")+
+    '<div class="note">Reihenfolge ist eine Empfehlung, keine Rangliste. Der Reifegrad steigt fast zwangsläufig mit der Kälte — '+
+    'blind auf ihn zu optimieren führt zu der Variante mit der meisten Hefe, nicht zur besten Pizza. '+
+    'Die Warmphase am Ende ist ohnehin keine Geschmacksfrage, sondern die Zeit, die der Teig braucht, um aus der Kälte auf '+
+    'Temperatur zu kommen: '+fmtH(GEN[0].warm)+' bei '+fmtG(+S.bw||250)+' Ballen.</div>';
+}
+
 /* ===================== Rezepte ===================== */
 function loadRecipes(){ try{ return JSON.parse(localStorage.getItem(KEY)||"{}"); }catch(e){ return {}; } }
 function saveRecipes(r){ try{ localStorage.setItem(KEY, JSON.stringify(r)); }catch(e){} }
@@ -2063,6 +2162,7 @@ document.addEventListener("input", e => {
     render(); return;
   }
   if(t.id === "pfShare"){ S.pf.share = +t.value; render(); return; }
+  if(t.id === "genH" || t.id === "genT"){ renderGen(); return; }
   if(t.id === "pfHyd"){ S.pf.hyd = +t.value; render(); return; }
   if(t.classList.contains("pfph")){
     S.pf.phases[+t.closest(".phase").dataset.pfi][t.dataset.k] = +t.value;
@@ -2116,6 +2216,13 @@ document.addEventListener("click", e => {
   if(t.dataset.pfdel !== undefined){
     if(S.pf.phases && S.pf.phases.length > 1){ S.pf.phases.splice(+t.dataset.pfdel, 1); render(); }
     return;
+  }
+  if(t.dataset.gen !== undefined){
+    const v = GEN[+t.dataset.gen]; if(!v) return;
+    S.phases = JSON.parse(JSON.stringify(v.phases));
+    S.ballAfter = v.ballAfter;
+    delete S.yOv;                 /* eigene Hefemenge galt für den alten Plan */
+    render(); return;
   }
   if(t.id === "addPfPhase"){
     const letzte = S.pf.phases[S.pf.phases.length-1];

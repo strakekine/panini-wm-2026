@@ -292,6 +292,31 @@ Protokolleinträge haben ein Feld `note` (Freitext, max. 300 Zeichen): beim Bewe
 eines Inline-Feldes, weil `renderLog()` die Liste per innerHTML neu baut und ein
 fokussiertes Feld darin gegen die iPhone-Regeln verstiesse.
 
+**Planvorschlag („Ich habe … Stunden").** Im Planen-Tab oben in der Gärplan-Karte,
+kein eigener Tab: Es ist ein Generator, der `S.phases` und `S.ballAfter` füllt, kein
+Modus — ein dritter Tab hätte Teig, Hefe und Ablauf gedoppelt.
+
+**Kein Optimum, und das ist der Punkt.** Der Reifegrad wächst monoton mit dem
+Kaltanteil, weil die Reifungsspur (Q10 = 1,7) in der Kälte langsamer abfällt als die
+Gasspur (Q10 = 2,3). Eine Suche nach dem Maximum liefert deshalb immer „so kalt wie
+möglich, so kurz warm wie erlaubt" — also nur die untere Schranke, die wir selbst
+gesetzt haben. Schlimmer: Sortiert man die Vorschläge nach Reifegrad, gewinnt
+„Ballen schon im Kühlschrank" (kleine Ballen kühlen schneller aus → 1,41 statt 1,31
+bei 24 h), und das ist ausgerechnet die Variante mit 44 % mehr Hefe. **Die Liste ist
+darum bewusst NICHT sortiert**, die Reihenfolge ist eine Empfehlung und die Zahlen
+daneben sind die Begründung. Wer hier eine Rangfolge einbaut, baut den Fehler wieder
+ein.
+
+Stattdessen kommt die Warmphase aus der Physik: `warmBrauchtH()` = Zeit, bis die
+Masse nach Newton auf 2 K unter Küchentemperatur ist, plus eine Stunde, damit sie
+dort auch noch gärt. Gerechnet mit dem **Ballengewicht**, weil in allen Vorschlägen
+die letzte Phase eine Ballenphase ist. Der Rest der verfügbaren Zeit wird kalt.
+Warnungen: unter 8 h wird die Hefemenge unhandlich und das Fenster eng, über 72 h
+kaum noch Aromagewinn bei schwächerem Gluten, und wenn die Aufwärmzeit allein schon
+länger ist als die verfügbare Zeit, gibt es gar keinen Vorschlag.
+`#genH`/`#genT` liegen ausserhalb von `#genOut`, damit das Tippen den Neuaufbau der
+Liste nicht blockiert. Übernehmen löscht `S.yOv` (galt für den alten Plan).
+
 **Testen:** Keine Tests im Repo. Playwright ist global installiert
 (`/opt/node22/lib/node_modules/playwright/index.mjs`, Chromium unter
 `/opt/pw-browsers`). Modell in Node prüfen: Skript-Teile zwischen den Markern

@@ -1800,8 +1800,19 @@ async function downloadICS(btn){
   });
   out.push("END:VCALENDAR");
   const text = out.join("\r\n");
-  /* Im Home-Bildschirm-Modus von iOS ist ein Blob-Download unzuverlässig — wie bei der
-     Sicherung zuerst das Teilen-Menü, dort landet die Datei direkt im Kalender. */
+  /* Zuerst die Datei direkt öffnen, OHNE download-Attribut: iOS übergibt sie dann an den
+     Kalender und zeigt die Vorschau mit allen Terminen und "Alle hinzufügen".
+     navigator.share öffnet stattdessen die Teilen-Leiste mit Kontakten — technisch
+     dasselbe Ergebnis, aber zwei Tipps mehr und ohne Vorschau, was man exportiert.
+     Teilen bleibt als Auffanglösung, wenn das Öffnen blockiert wird. */
+  /* blob: statt data: — das direkte Öffnen einer data:-URL blockieren Safari und Chrome
+     aus Sicherheitsgründen, es sähe nur so aus, als klappte es. */
+  const blobUrl = URL.createObjectURL(new Blob([text], {type:"text/calendar;charset=utf-8"}));
+  try {
+    const w = window.open(blobUrl, "_blank");
+    setTimeout(()=>URL.revokeObjectURL(blobUrl), 60000);   /* erst spät: iOS liest die Datei verzögert */
+    if(w){ flash(btn, "KALENDER"); return; }
+  } catch(e){}
   try {
     const file = new File([text], "teigplan.ics", { type:"text/calendar" });
     if(navigator.canShare && navigator.canShare({ files:[file] })){

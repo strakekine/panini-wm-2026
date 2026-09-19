@@ -230,8 +230,15 @@ passiert: beim Zurück-Knopf im Hefe-Kasten und bei "+ Phase" im Vorteig. Ein El
 setzt — der Küchenmodus brauchte darum eigene `env(safe-area-inset-*)`, sonst lag sein
 SCHLIESSEN-Knopf unter Statusleiste und Dynamic Island und war nicht erreichbar. Sein
 Kopf ist zusätzlich `sticky`, damit der Ausgang nach der Zutatenliste nicht weg ist.
-Kalender und Sicherung
-gehen über `navigator.share` mit Datei, Download nur als Fallback. Küchenmodus
+Der **Kalender** öffnet die
+`.ics` zuerst direkt über eine `blob:`-URL in einem neuen Tab, ohne `download`-Attribut:
+iOS übergibt sie dann an den Kalender und zeigt die Vorschau mit allen Terminen und
+„Alle hinzufügen". `navigator.share` öffnet stattdessen die Teilen-Leiste mit Kontakten
+— dasselbe Ergebnis, aber zwei Tipps mehr und ohne Vorschau. Teilen ist nur noch
+Auffanglösung, wenn `window.open` blockiert wird, Download danach. **`data:` geht
+nicht**: Top-Level-Navigation dorthin blockieren Safari und Chrome, es sähe nur so aus,
+als klappte es. Die Sicherung
+geht weiter über `navigator.share` mit Datei, Download nur als Fallback. Küchenmodus
 hält Wake Lock. Home-Icon ist PNG (iOS nimmt kein SVG).
 
 **Bedienung:** Ein Modus, kein Einfach/Experte mehr. Vorlagen setzen Teig,

@@ -242,12 +242,14 @@ passiert: beim Zurück-Knopf im Hefe-Kasten und bei "+ Phase" im Vorteig. Ein El
 setzt — der Küchenmodus brauchte darum eigene `env(safe-area-inset-*)`, sonst lag sein
 SCHLIESSEN-Knopf unter Statusleiste und Dynamic Island und war nicht erreichbar. Sein
 Kopf ist zusätzlich `sticky`, damit der Ausgang nach der Zutatenliste nicht weg ist.
-Beim **Seitenkopf** liegt der Abstand aus demselben Grund nicht am `body`, sondern in
-`.wrap` (`padding-top: calc(14px + env(safe-area-inset-top))`): Der Kopf ist `sticky`
-und soll selbst bis unter die Statusleiste reichen und sie mit seinem Hintergrund
-füllen. Mit `padding-top` am `body` klebte der Titel an der Kante und der Kopf schob
-sich beim Scrollen unter die Uhr. Sein Hintergrund ist flach, nicht verlaufend — der
-Verlauf las sich am oberen Rand wie ein Schatten.
+Beim **Seitenkopf** gilt das Gegenteil, und das ist am Gerät geprüft: Der
+Sicherheitsabstand bleibt am `body`. **Ausprobiert und verworfen**, ihn nach `.wrap` zu
+holen (`padding-top: calc(14px + env(safe-area-inset-top))`), damit der `sticky` Kopf
+die Statusleiste selbst füllt — im Browser schön, im Home-Bildschirm-Modus sass der
+Kopf erst sehr tief und rutschte beim Scrollen hoch, weil iOS den Inset dort schon im
+Viewport mitzählt. Der Kopf-Hintergrund ist dagegen flach statt verlaufend geblieben:
+Der Verlauf von hell nach dunkel las sich am oberen Rand wie ein aufgelegter Schatten,
+und Farbe kann keine Sprünge verursachen.
 Die **Sicherung** geht über `navigator.share` mit Datei, Download nur als Fallback.
 Der **Kalender unterscheidet die Umgebung** (`navigator.standalone` bzw.
 `display-mode: standalone`), weil beide sich verschieden verhalten — beides am Gerät

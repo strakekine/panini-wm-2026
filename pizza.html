@@ -23,13 +23,15 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Barlow,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-  /* Oben KEIN body-Abstand: der Kopf soll selbst bis unter die Statusleiste reichen und
-     sie mit seinem eigenen Hintergrund füllen (wie eine native App). Sonst klebt der Titel
-     an der Kante, und beim Scrollen schiebt sich der klebende Kopf unter die Uhr. */
-  body{padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
   /* Flacher Hintergrund statt Verlauf: der Verlauf las sich wie ein Schatten am oberen Rand. */
   header{position:sticky;top:0;z-index:20;background:rgba(22,27,34,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-  .wrap{max-width:880px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top)) 14px 10px}
+  /* AUSPROBIERT UND VERWORFEN: den Sicherheitsabstand vom body hierher zu holen
+     (padding-top: calc(14px + env(safe-area-inset-top))), damit der klebende Kopf die
+     Statusleiste selbst füllt. Im Browser schön, im Home-Bildschirm-Modus sass der Kopf
+     erst sehr tief und rutschte beim Scrollen hoch — iOS zählt den Inset dort offenbar
+     schon im Viewport mit. Abstand bleibt am body, hier nur ein paar Pixel mehr Luft. */
+  .wrap{max-width:880px;margin:0 auto;padding:14px 14px 10px}
   h1{font-family:'Bebas Neue',sans-serif;letter-spacing:1.5px;margin:0;font-size:26px;color:var(--gold);line-height:1.1}
   .sub{color:var(--muted);font-size:12.5px;margin-top:2px}
   main{max-width:880px;margin:0 auto;padding:10px 12px 90px}

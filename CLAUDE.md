@@ -49,15 +49,38 @@ Arbeitsbranch), Pull Requests sind ihm zu umständlich.
   Untergrenze E = 2 (entspricht 3,1 %).
 - Kerntemperatur nach Newton, τ = 1,1 h · (m/260 g)^(2/3) · Behälterfaktor.
   Das ist das Alleinstellungsmerkmal (Ballen vor/nach der Kälte), nicht anfassen.
-- Wer Konstanten ändert, prüft — alle Werte **über `calc()` gemessen**, also mit
-  Abkühlung ab Zielteigtemperatur 23 °C, nicht analytisch: 8 h/20 °C ≈ 0,39 %,
-  2/21+19/6+3/21 mit Ballen nach der Kälte ≈ 0,25 %, davor ≈ 0,33 %, 48 h kalt
-  ≈ 0,18 %, 72 h ≈ 0,12 %, Biga 18 h/17 °C Vorteighefe ≈ 0,88 %, Biga-Preset
-  Reifegrad ≈ 1,05, 100 % Biga + 4 h ohne Zusatzhefe, rGas(4)/rGas(20) ≈ 0,15.
-  Achtung: Der Anker `0,6/1,45` im Code ist analytisch gerechnet (E = 8·rGas(20)).
-  `calc()` startet bei 23 °C und kühlt ab, kommt also auf ein leicht höheres E —
-  darum 0,39 % statt der analytischen 0,41 %. Das ist kein Fehler, sondern der
-  Unterschied zwischen Anker und Simulation.
+- Wer Konstanten ändert, prüft gegen die Tabelle unten. Alle Werte sind **über
+  `calc()` gemessen**, also mit Abkühlung ab Zielteigtemperatur, nicht analytisch.
+  Gelesen wird `yPctTotal` (Frischhefe in % des Gesamtmehls; bei Frischhefe ohne
+  Vorteig identisch mit `yPctShown`). Basis, wo nichts anderes steht: 6 × 250 g,
+  62 % Hydration, **2,8 % Salz** (geht über `saltF` ein), kein Öl/Zucker, ddt 23,
+  Behälter "1", Frischhefe, kein Vorteig, `getCal()` = 1. Kurzschreibweise
+  „2/21" = 2 h bei 21 °C.
+
+  | Fall | Eingaben | Soll |
+  |---|---|---|
+  | rGas(4)/rGas(20) | — | 0,150 |
+  | 8 h/20 °C | 2/20 + 6/20, Ballen nach P1 | 0,389 % |
+  | 24 h, Ballen nach der Kälte | 2/21 + 19/6 + 3/21, Ballen nach P2 | 0,247 % |
+  | 24 h, Ballen davor | dito, Ballen nach P1 | 0,327 % |
+  | 48 h kalt | Preset `nap48`: 2/21 + 42/5 + 4/21, Ballen nach P1, 6 × 260 g, 63 %, ddt 22 | 0,184 % |
+  | 72 h kalt | 2/21 + 68/5 + 4/21, Ballen nach P1 | 0,115 % |
+  | Biga Vorteighefe | Preset `biga`, `pf.yPct` (18 h/17 °C, in % des Vorteigmehls) | 0,880 % |
+  | Biga Reifegrad | Preset `biga`, `Rip` | 1,05 |
+  | 100 % Biga + 4 h | 2/21 + 2/21, Ballen nach P1, Biga share 100, hyd 48, 18 h/17 °C, `yPctMain` | 0 |
+  | Erster echter Teig | 6 × 280 g, 62 %, 3 % Salz, 5/25 + 16/6 + 6/25, Ballen nach P2, `yG` | 1,00 g |
+
+  Die Kurzformen sind absichtlich nicht das, was sie zu sein scheinen: „48 h kalt"
+  ist der Preset, nicht 48/4 + 3/21 (das gäbe 0,224 %), und „72 h" hat 2 h
+  Stockgare vorweg (72/4 + 4/21 gäbe 0,136 %). Beides ist kein Modellfehler,
+  sondern ein anderer Plan.
+  Achtung zum 8-h-Fall: Der Anker `0,6/1,45` im Code ist analytisch gerechnet
+  (E = 8·rGas(20)) und entspricht 0,410 %. Die 0,389 % kommen nur zustande, weil
+  der Teig die ersten 2 h als 1,5-kg-Klumpen (τ ≈ 3,5 h) über 20 °C bleibt und so
+  mehr E sammelt. Mit Ballen von Anfang an (250 g, τ ≈ 1,1 h) ist er nach einer
+  Stunde auf 20 °C, und `calc()` liefert exakt die analytischen 0,410 %. Wer den
+  Fall also mit `ballAfter 0` oder als eine Phase 8/20 nachrechnet, bekommt 0,410
+  und hat nichts kaputtgemacht.
 
 **Offene Frage zum Hefeniveau — nicht ohne echten Teig anfassen.**
 Der Exponent 1,55 ist belegt und gilt als geklärt: Das AVPN-Disciplinare nennt

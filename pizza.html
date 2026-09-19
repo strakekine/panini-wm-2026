@@ -1800,31 +1800,44 @@ async function downloadICS(btn){
   });
   out.push("END:VCALENDAR");
   const text = out.join("\r\n");
-  /* Download zuerst — genau so war es bis 203110a, und so kam beim Nutzer die
-     Kalender-Vorschau mit allen Terminen. Die damalige Umstellung auf navigator.share
-     war mit "Blob-Download ist im Home-Bildschirm-Modus unzuverlässig" begründet; auf
-     seinem Geraet stimmte das nicht, share zeigt dort nur die Teilen-Leiste mit
-     Kontakten. Teilen bleibt als Auffanglösung dahinter.
-     AUSPROBIERT UND VERWORFEN: window.open auf eine blob:-URL ohne download-Attribut —
-     im Home-Bildschirm-Modus kommt nur eine leere Seite, am Geraet getestet. Und data:
-     scheidet aus, Top-Level-Navigation dorthin blockieren Safari und Chrome.
-     Wer hier etwas ändert, testet zuerst auf dem iPhone. */
-  try {
+  const blobDatei = () => {
     const blob = new Blob([text], {type:"text/calendar;charset=utf-8"});
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = "teigplan.ics";
     document.body.appendChild(a); a.click();
     setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
-    flash(btn, "KALENDER"); return;
-  } catch(e){}
-  try {
+  };
+  const teilen = async () => {
     const file = new File([text], "teigplan.ics", { type:"text/calendar" });
-    if(navigator.canShare && navigator.canShare({ files:[file] })){
-      await navigator.share({ files:[file], title:"Teigplan" });
-      flash(btn, "GETEILT"); return;
+    if(!(navigator.canShare && navigator.canShare({ files:[file] }))) return false;
+    await navigator.share({ files:[file], title:"Teigplan" });
+    return true;
+  };
+  /* Die beiden Umgebungen verhalten sich verschieden, darum wird unterschieden statt
+     eins von beidem gewählt — beides am Geraet geprüft:
+     - In Safari öffnet ein Download die .ics direkt im Kalender, mit Vorschau und
+       "Alle hinzufügen". Das ist der bequeme Weg.
+     - Vom Home-Bildschirm liefert derselbe Download nur eine weisse Seite. Dort bleibt
+       nur navigator.share, also die Teilen-Leiste; der Kalender steht darin unter
+       "Mehr anzeigen". Unschön, aber das Einzige, was dort funktioniert.
+     AUSPROBIERT UND VERWORFEN: window.open auf die blob:-URL ohne download-Attribut
+     (weisse Seite) und data:-URLs (Top-Level-Navigation dorthin blockieren Safari und
+     Chrome). Wer hier etwas ändert, testet BEIDE Umgebungen auf dem iPhone — im
+     Browser sieht jede Variante aus, als klappte sie. */
+  const homescreen = window.navigator.standalone === true ||
+    (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+  try {
+    if(homescreen){
+      if(await teilen()){ flash(btn, "GETEILT"); return; }
+      blobDatei();                       /* Notnagel, falls Teilen fehlt */
+    } else {
+      blobDatei(); flash(btn, "KALENDER"); return;
     }
-  } catch(e){ if(e && e.name === "AbortError") return; }
+  } catch(e){
+    if(e && e.name === "AbortError") return;
+    try { blobDatei(); } catch(e2){}
+  }
 }
 
 /* ===================== Küchenmodus ===================== */

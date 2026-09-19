@@ -231,16 +231,24 @@ setzt — der Küchenmodus brauchte darum eigene `env(safe-area-inset-*)`, sonst
 SCHLIESSEN-Knopf unter Statusleiste und Dynamic Island und war nicht erreichbar. Sein
 Kopf ist zusätzlich `sticky`, damit der Ausgang nach der Zutatenliste nicht weg ist.
 Die **Sicherung** geht über `navigator.share` mit Datei, Download nur als Fallback.
-Der **Kalender umgekehrt: Download zuerst**, Teilen als Auffanglösung. Das war bis
-`203110a` so und hat beim Nutzer die Kalender-Vorschau mit allen Terminen gebracht;
-die damalige Umstellung auf `share` war mit „Blob-Download ist im
-Home-Bildschirm-Modus unzuverlässig" begründet, was auf seinem Gerät nicht stimmte —
-`share` zeigt dort nur die Teilen-Leiste mit Kontakten. **Zwei Wege sind am Gerät
+Der **Kalender unterscheidet die Umgebung** (`navigator.standalone` bzw.
+`display-mode: standalone`), weil beide sich verschieden verhalten — beides am Gerät
+geprüft, nicht aus der Doku abgeleitet:
+
+- **In Safari** öffnet ein Download der `.ics` sie direkt im Kalender, mit Vorschau
+  und „Alle hinzufügen". Dort also Download.
+- **Vom Home-Bildschirm** liefert derselbe Download nur eine **weisse Seite**. Dort
+  bleibt nur `navigator.share`, also die Teilen-Leiste; der Kalender steht darin unter
+  „Mehr anzeigen". Unschön, aber das Einzige, was dort funktioniert.
+
+Der alte Kommentar „Blob-Download ist im Home-Bildschirm-Modus unzuverlässig" war
+also richtig — nur galt er eben nicht für Safari, und die Umstellung auf `share` für
+beide Fälle hat die Vorschau im Browser mitgenommen. **Zwei weitere Wege sind am Gerät
 getestet und gescheitert, nicht noch einmal probieren:** `window.open` auf eine
-`blob:`-URL ohne `download`-Attribut liefert im Home-Bildschirm-Modus eine leere
-Seite, und `data:` scheidet aus, weil Safari und Chrome die Top-Level-Navigation
-dorthin blockieren. Wer hier etwas ändert, testet zuerst auf dem iPhone — im Browser
-sieht beides aus, als klappte es. Küchenmodus
+`blob:`-URL ohne `download`-Attribut liefert im Home-Bildschirm-Modus ebenfalls eine
+weisse Seite, und `data:` scheidet aus, weil Safari und Chrome die
+Top-Level-Navigation dorthin blockieren. Wer hier etwas ändert, testet **beide**
+Umgebungen auf dem iPhone — im Browser sieht jede Variante aus, als klappte sie. Küchenmodus
 hält Wake Lock. Home-Icon ist PNG (iOS nimmt kein SVG).
 
 **Bedienung:** Ein Modus, kein Einfach/Experte mehr. Vorlagen setzen Teig,

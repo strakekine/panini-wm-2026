@@ -143,6 +143,18 @@ Quellenrunde. Messprotokoll, so knapp wie es geht:
 - Fühler in die Mitte, und dieselbe Box mit demselben Deckel wie beim Backen — der
   Behälter steckt als eigener Faktor in `tauH`.
 
+**Die Backzeit zieht nach**, statt auf einem alten Wert stehen zu bleiben:
+`frueheste(st)` = jetzt + Plandauer (Vorteig zählt mit), aufgerundet auf die halbe
+Stunde — die Antwort auf „wenn ich jetzt anfange, wann ist er fertig".
+`backzeitNachziehen(st)` setzt sie **nur**, wenn der Plan sonst vor jetzt beginnen
+müsste; eine selbst gewählte Zeit, die noch passt, bleibt stehen. Sonst überschriebe
+jeder Vorlagenklick den Termin, auf den man plant. Angewendet beim Start (nach dem
+Laden, nicht davor — sonst ist `S` noch leer), beim Vorlagenklick und beim Übernehmen
+eines Planvorschlags. Ausgenommen der laufende Teig: Steht im Planen-Tab noch
+`run.bake0`, bleibt sie unberührt. Geprüft wird „Plan müsste vor jetzt beginnen",
+nicht „Backzeit vorbei" — eine Backzeit heute Abend liegt in der Zukunft, reicht für
+einen 27-h-Plan aber trotzdem nicht.
+
 Rückwärtsplanung kann in der Vergangenheit landen (48-h-Plan für morgen Abend).
 `messages()` warnt dann rot und nennt den frühesten möglichen Backzeitpunkt;
 die Vorteigzeit zählt mit. Läuft der Teig schon (`S.run`), ist ein Start in der

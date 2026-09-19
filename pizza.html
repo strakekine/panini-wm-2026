@@ -722,6 +722,15 @@ function sanitize(s){
   }
   else { try{ const s = JSON.parse(localStorage.getItem(KEY+"_last")||"null"); if(s && s.phases) S = Object.assign(defaults(), s); }catch(e){} }
   sanitize(S);
+  /* Eine Backzeit, die für den gespeicherten Plan nicht mehr reicht, macht den
+     Planen-Tab unbrauchbar: rote Warnung, Ablauf in der Vergangenheit. Beim Start
+     nachziehen — ausser es ist noch die Zeit des laufenden Teigs, die dort absichtlich
+     stehen bleibt (siehe run.bake0). Geprüft wird nicht "Backzeit vorbei", sondern
+     "Plan müsste vor jetzt beginnen": Eine Backzeit heute Abend liegt zwar in der
+     Zukunft, reicht für einen 27-h-Plan aber trotzdem nicht. */
+  try {
+    if(!(S.run && S.bake === S.run.bake0)) S.bake = backzeitNachziehen(S);
+  } catch(e){}
   VIEW = S.run ? "run" : "plan";
 })();
 function persist(){
@@ -729,6 +738,28 @@ function persist(){
 }
 function shareURL(){
   return location.origin + location.pathname + location.search + "#p=" + encodeState();
+}
+
+/* Frühestmögliche Backzeit für einen Plan: jetzt + Plandauer (Vorteig zählt mit),
+   aufgerundet auf die nächste halbe Stunde. Beantwortet die Frage "wenn ich jetzt
+   anfange, wann ist er fertig" — und genau die stellt sich beim Planen. */
+function frueheste(st){
+  const c = calc(st);
+  const d = new Date(Date.now() + (c.totalH + (c.prefH||0))*3600e3);
+  d.setSeconds(0,0);
+  d.setMinutes(d.getMinutes() % 30 ? (d.getMinutes() < 30 ? 30 : 60) : d.getMinutes());
+  return toLocal(d);
+}
+/* Backzeit nur nachziehen, wenn sie unbrauchbar geworden ist: in der Vergangenheit,
+   oder der neue Plan müsste vor jetzt beginnen. Eine selbst gesetzte Zeit, die noch
+   passt, bleibt stehen — sonst überschreibt jeder Vorlagenklick den Termin, auf den
+   man plant. */
+function backzeitNachziehen(st){
+  const b = new Date(st.bake);
+  if(isNaN(b)) return frueheste(st);
+  const c = calc(st);
+  const start = b.getTime() - (c.totalH + (c.prefH||0))*3600e3;
+  return start < Date.now() ? frueheste(st) : st.bake;
 }
 
 /* ===================== Planvorschlag =====================
@@ -2251,7 +2282,9 @@ document.addEventListener("click", e => {
     /* Eine Vorlage ist ein Rezept: Teig, Vorteig, Gärplan und Knetprogramm werden gesetzt.
        Küchentemperatur, Waage, Hefesorte und Behälter gehören zur Küche und bleiben. */
     if(p){ delete S.yOv;   /* eigene Hefemenge gilt nur für den Plan, den sie gemeint hat */
-           S = sanitize(Object.assign(S, JSON.parse(JSON.stringify(p.s)), { mix: defaults().mix })); render(); }
+           S = sanitize(Object.assign(S, JSON.parse(JSON.stringify(p.s)), { mix: defaults().mix }));
+           S.bake = backzeitNachziehen(S);   /* 48-h-Vorlage auf eine Backzeit von morgen ergibt sonst nur eine rote Warnung */
+           render(); }
     return;
   }
   if(t.dataset.pf){
@@ -2270,6 +2303,7 @@ document.addEventListener("click", e => {
     S.phases = JSON.parse(JSON.stringify(v.phases));
     S.ballAfter = v.ballAfter;
     delete S.yOv;                 /* eigene Hefemenge galt für den alten Plan */
+    S.bake = backzeitNachziehen(S);
     render(); return;
   }
   if(t.id === "addPfPhase"){

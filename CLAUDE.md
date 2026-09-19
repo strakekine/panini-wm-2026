@@ -242,14 +242,22 @@ passiert: beim Zurück-Knopf im Hefe-Kasten und bei "+ Phase" im Vorteig. Ein El
 setzt — der Küchenmodus brauchte darum eigene `env(safe-area-inset-*)`, sonst lag sein
 SCHLIESSEN-Knopf unter Statusleiste und Dynamic Island und war nicht erreichbar. Sein
 Kopf ist zusätzlich `sticky`, damit der Ausgang nach der Zutatenliste nicht weg ist.
-Beim **Seitenkopf** gilt das Gegenteil, und das ist am Gerät geprüft: Der
-Sicherheitsabstand bleibt am `body`. **Ausprobiert und verworfen**, ihn nach `.wrap` zu
-holen (`padding-top: calc(14px + env(safe-area-inset-top))`), damit der `sticky` Kopf
-die Statusleiste selbst füllt — im Browser schön, im Home-Bildschirm-Modus sass der
-Kopf erst sehr tief und rutschte beim Scrollen hoch, weil iOS den Inset dort schon im
-Viewport mitzählt. Der Kopf-Hintergrund ist dagegen flach statt verlaufend geblieben:
-Der Verlauf von hell nach dunkel las sich am oberen Rand wie ein aufgelegter Schatten,
-und Farbe kann keine Sprünge verursachen.
+Beim **Seitenkopf** ist der Andockpunkt das Problem, nicht der Abstand. Der Abstand
+bleibt am `body`; der `sticky` Kopf dockt mit `top: env(safe-area-inset-top)` an der
+**Unterkante der Statusleiste** an, nicht an der Bildschirmkante. Im Browser belegt die
+Browserleiste diesen Platz, dort ist der Inset 0 und nichts ändert sich — im
+Home-Bildschirm-Modus gibt es sie nicht, und mit `top:0` schob sich der Kopf beim
+Scrollen hinter die Uhr. Dazu deckt `body::before` (fixed, Höhe = Inset, z-index 21)
+den Streifen ab, damit dort keine Karten durchlaufen.
+
+**Ausprobiert und verworfen:** den Inset vom `body` nach `.wrap` zu holen. Im Browser
+schön, im Home-Bildschirm-Modus sass der Kopf erst sehr tief und rutschte beim Scrollen
+hoch. Der Kopf-Hintergrund ist flach statt verlaufend: Der Verlauf von hell nach dunkel
+las sich am oberen Rand wie ein aufgelegter Schatten, und Farbe kann keine Sprünge
+verursachen. Prüfen lässt sich das im Browser nur, indem man `body{padding-top}`,
+`body::before{height}` und `header{top}` per Stylesheet auf einen festen Wert (z. B.
+47 px) setzt — `env()` ist dort immer 0, und ohne diese Simulation sieht jede Variante
+richtig aus.
 Die **Sicherung** geht über `navigator.share` mit Datei, Download nur als Fallback.
 Der **Kalender unterscheidet die Umgebung** (`navigator.standalone` bzw.
 `display-mode: standalone`), weil beide sich verschieden verhalten — beides am Gerät

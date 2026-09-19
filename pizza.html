@@ -24,8 +24,16 @@
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Barlow,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
   body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  /* Deckt den Streifen hinter der Statusleiste ab, damit dort beim Scrollen nicht der
+     Karteninhalt durchläuft. Ohne Inset (Browser, Desktop) ist der Streifen 0 hoch. */
+  body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);
+    background:var(--bg);z-index:21;pointer-events:none}
   /* Flacher Hintergrund statt Verlauf: der Verlauf las sich wie ein Schatten am oberen Rand. */
-  header{position:sticky;top:0;z-index:20;background:rgba(22,27,34,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  /* Andockpunkt ist die Unterkante der Statusleiste, nicht die Bildschirmkante: Im
+     Home-Bildschirm-Modus gibt es keine Browserleiste, die den Platz belegt — mit top:0
+     schob sich der Kopf beim Scrollen hinter die Uhr. Im Browser ist der Inset 0, dort
+     ändert sich dadurch nichts. */
+  header{position:sticky;top:env(safe-area-inset-top);z-index:20;background:rgba(22,27,34,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
   /* AUSPROBIERT UND VERWORFEN: den Sicherheitsabstand vom body hierher zu holen
      (padding-top: calc(14px + env(safe-area-inset-top))), damit der klebende Kopf die
      Statusleiste selbst füllt. Im Browser schön, im Home-Bildschirm-Modus sass der Kopf

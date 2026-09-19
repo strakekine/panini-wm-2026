@@ -298,6 +298,7 @@
 <div class="card v-run">
   <div class="chead"><h2>Läuft</h2><div class="hint" id="runHint"></div></div>
   <div class="cbody">
+    <div id="runDone"></div>
     <div class="status" id="runStatus"></div>
     <div id="runNow"></div>
   </div>
@@ -1417,6 +1418,20 @@ function renderStatus(v, now){
       (q.overrun > 0 ? "Plan ist abgelaufen" : kind+" "+where+", Phase "+(q.phaseIdx+1)+" von "+c.phases.length)+'</div></div>'+
     '<div class="st"><div class="l">Backen</div><div class="v">'+fmtWhen(v.bakeShown, now)+'</div><div class="s">'+
       (remH > 0 ? "in "+fmtH(remH)+" · " : "")+'Fenster '+fmtWhen(earlyD, v.bakeShown)+' – '+fmtWhen(lateD, v.bakeShown)+'</div></div>';
+  /* Nach dem Backfenster zählt die App sonst stumm weiter — 28 h, 50 h, 200 h — und
+     der Protokolleintrag bleibt aus. Ohne Einträge kalibriert sich nichts, also wird
+     hier deutlich gefragt, mit den Knöpfen gleich dabei. */
+  const vorbeiH = (now - lateD)/3600e3;
+  $("runDone").innerHTML = vorbeiH <= 0 ? "" :
+    '<div class="msg warn" style="margin:0 0 12px"><span class="ic">▲</span><span>'+
+      '<b>Dieser Teig ist durch.</b> Das Backfenster ist seit '+fmtH(vorbeiH)+' vorbei. '+
+      'Trag ein, wie er war — dann ist der Backen-Tab wieder frei und die Hefemenge zieht nach. '+
+      'Die Notiz kannst du später mit ✎ am Eintrag ergänzen.'+
+      '<div class="btnrow" style="margin-top:10px">'+
+        '<button class="btn ghost sm" data-baked="young">zu jung</button>'+
+        '<button class="btn sm" data-baked="good">genau richtig</button>'+
+        '<button class="btn ghost sm" data-baked="over">überreif</button>'+
+      '</div></span></div>';
   let cur = -1;
   for(let i=0;i<v.steps.length;i++){ if(now.getTime() >= v.steps[i].t.getTime()) cur = i; }
   const nx = v.steps[cur+1];
@@ -2126,7 +2141,11 @@ function bakedLog(r){
   const run = S.run; if(!run) return;
   const c = calc(run.plan);
   const log = getLog();
-  log.push({ d: new Date().toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"}), r: r,
+  /* Datum aus dem echten Knetstart: Daran hängt die ganze App (Ablauf, Zeitstrahl,
+     Küchenmodus), und dort hat die Arbeit begonnen. Der Klickzeitpunkt kann Tage
+     später liegen, wenn das Bewerten liegen bleibt. */
+  const dTag = new Date(run.start);
+  log.push({ d: (isNaN(dTag) ? new Date() : dTag).toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"}), r: r,
              m: mixSummary(run.plan), plan: JSON.parse(JSON.stringify(run.plan)),
              start: run.start, bake: run.plan.bake, yG: c.pf.type === "sour" ? c.pf.weight : (c.yOv || c.yG),
              orig: run.orig || null, ts: new Date().toISOString(),

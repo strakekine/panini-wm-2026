@@ -287,6 +287,19 @@ Küchenproblem, sondern ein Exponentenproblem — und das gehört nachgerechnet,
 weiter verschoben. Genau dafür steht oben „erst ändern, wenn kurze Pläne überreif
 und lange zu jung ausfallen".
 
+**Nach dem Backfenster** (`now > start + c.late`) steht oben im Backen-Tab eine
+Warnung „Dieser Teig ist durch" mit den drei Bewertungsknöpfen darin (`#runDone`).
+Vorher zählte die App stumm weiter — 28 h, 50 h, 200 h —, der Protokolleintrag blieb
+aus, und ohne Einträge kalibriert sich nichts. Die ganze Automatik hängt an diesem
+einen Knopf, also wird an der Stelle gefragt, an der man hinsieht. Achtung beim
+Testen: Das Fenster endet nicht bei der Backzeit, sondern bei `c.late` (113 % der
+Zielgärleistung, höchstens fertig + 14 h) — ein Teig, der 28 h läuft, kann bei einem
+27-h-Plan noch drin sein.
+
+Das Datum eines Protokolleintrags kommt aus `run.start`, dem echten Knetstart, nicht
+aus dem Klickzeitpunkt. Daran hängt die ganze App, und dort hat die Arbeit begonnen;
+das Bewerten kann Tage später passieren.
+
 Protokolleinträge haben ein Feld `note` (Freitext, max. 300 Zeichen): beim Bewerten
 über `#bakedNote`, nachträglich über „✎" am Eintrag per `prompt()`. `prompt()` statt
 eines Inline-Feldes, weil `renderLog()` die Liste per innerHTML neu baut und ein

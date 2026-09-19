@@ -221,7 +221,11 @@ und die gelbe Warnung verschwindet. Nicht übernehmbar: „Gärziel schon erreic
 **iPhone-Regeln:** Ein fokussiertes Feld bekommt nie `.value` zugewiesen, und
 Container mit fokussiertem Input werden nicht per innerHTML neu gebaut (sonst
 klappt die Tastatur bei jedem Zeichen ein). Der 30-s-Timer rendert nicht während
-des Tippens. Zahlenfelder haben `inputmode="decimal"`. Kalender und Sicherung
+des Tippens. Zahlenfelder haben `inputmode="decimal"`. Sitzt in einem Kasten, der
+per innerHTML neu gebaut wird, auch ein **Knopf**, reicht `focusIn(box)` nicht —
+der geklickte Knopf gilt sonst als Bearbeitung und der Neuaufbau unterbleibt, die
+Änderung erscheint nicht. Immer `focusIn(box) && typing()`. Das ist zweimal
+passiert: beim Zurück-Knopf im Hefe-Kasten und bei "+ Phase" im Vorteig. Kalender und Sicherung
 gehen über `navigator.share` mit Datei, Download nur als Fallback. Küchenmodus
 hält Wake Lock. Home-Icon ist PNG (iOS nimmt kein SVG).
 
@@ -248,6 +252,22 @@ Plan, für den sie gedacht war, und wird von jeder Vorlage gelöscht. Das Feld
 liegt in `#yOvBox` außerhalb der Zutatentabelle, weil die bei jedem Render neu
 gebaut wird; gesperrt wird es nur mit `focusIn(box) && typing()`, sonst würde
 der Zurück-Knopf im selben Kasten den alten Wert stehen lassen.
+
+**Vorteig-Phasen.** `pf.phases = [{h,t}, ...]` (höchstens 4), wie der Hauptteig.
+Grund: Der verbreitete Ooni-Ablauf "Biga erst bei Raumtemperatur, dann in den
+Kühlschrank" war vorher nicht eintragbar — man hätte eine Mischtemperatur schätzen
+müssen. Jede Phase ab der zweiten wird ein eigener Schritt im Ablauf ("Biga in den
+Kühlschrank"), sonst stünde der Wechsel nirgends und die Phasen brächten nichts.
+`pf.h` ist die Summe, `pf.t` die wärmste Phase (nur für die Biga-Warnung).
+Alte Pläne, Rezepte und Teilen-Links mit `pf.h`/`pf.t` laufen weiter: `pfPhases()`
+macht daraus eine einzelne Phase, `sanitize` schreibt sie zurück und löscht `h`/`t`.
+
+Der Vorteig wird **weiterhin analytisch gerechnet**, ohne Abkühlkurve
+(`Σ h·rGas(t)`), anders als der Hauptteig. Das ist Absicht: Poolish ist flüssig und
+wälzt um, Biga steht flach und dünn, und so bleiben alle Sollwerte exakt erhalten —
+einphasig rechnet das neue Format Ziffer für Ziffer wie das alte. Am ungenauesten
+ist es dort, wo eine große, feste Biga kalt gestellt wird; wer das ändert, ändert
+den Biga-Anker mit und muss neu kalibrieren.
 
 **Testen:** Keine Tests im Repo. Playwright ist global installiert
 (`/opt/node22/lib/node_modules/playwright/index.mjs`, Chromium unter

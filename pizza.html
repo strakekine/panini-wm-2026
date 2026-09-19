@@ -556,13 +556,27 @@ function numOr(v,d){ return (v === "" || v === null || v === undefined || !isFin
 
 const PF = {
   none:   { name:"Direktteig", hyd:0 },
-  poolish:{ name:"Poolish",    hyd:100, share:30, h:16, t:19,
+  poolish:{ name:"Poolish",    hyd:100, share:30, h:16, t:19, phases:[{h:16,t:19}],
             tip:"Flüssig, mild, macht den Teig dehnbar. Reif ist er, wenn die Oberfläche blubbert und sich wölbt — kurz bevor sie in der Mitte einfällt." },
-  biga:   { name:"Biga",       hyd:48,  share:50, h:18, t:17,
+  biga:   { name:"Biga",       hyd:48,  share:50, h:18, t:17, phases:[{h:18,t:17}],
             tip:"Fest und krümelig, kräftiger im Aroma, gibt luftig-knusprigen Rand. Mag ein starkes Mehl und will kühl stehen, nicht warm." },
   sour:   { name:"Sauerteig",  hyd:100, share:0,  h:0,  t:0,
             tip:"Anstellgut 8–12 h vor dem Ansetzen füttern, damit es auf dem Höhepunkt ist. Die Menge rechnet der Planer aus dem Gärplan." }
 };
+
+/* Der Vorteig hat eigene Phasen wie der Hauptteig. Ohne das lässt sich der
+   verbreitete Ablauf "erst Raumtemperatur, dann Kühlschrank" nicht eintragen —
+   man müsste eine Mischtemperatur schätzen, und die wäre geraten.
+   Gerechnet wird der Vorteig weiterhin ANALYTISCH, ohne Abkühlkurve: Poolish ist
+   flüssig und wälzt um, Biga steht flach und dünn. Das hält alle Sollwerte exakt.
+   Am ungenauesten ist es dort, wo eine große, feste Biga kalt gestellt wird.
+   Alte Pläne und Teilen-Links mit h/t laufen hier durch und werden eine Phase. */
+function pfPhases(o, d){
+  const src = (o && Array.isArray(o.phases) && o.phases.length) ? o.phases
+            : [{ h:(o && +o.h) || d.h, t:(o && o.t !== undefined) ? +o.t : d.t }];
+  return src.slice(0,4).map(p => ({ h: clamp(numOr(p && p.h, d.h), 0, 48),
+                                    t: clamp(numOr(p && p.t, d.t), -5, 32) }));
+}
 
 /* ===================== Vorlagen =====================
    ddt = Zielteigtemperatur nach dem Kneten. Same-Day wärmer, damit die kurze
@@ -645,6 +659,10 @@ function sanitize(s){
   if(!Array.isArray(s.phases) || !s.phases.length) s.phases = [{h:2,t:21},{h:6,t:21}];
   s.phases = s.phases.map(p => ({ h: clamp(numOr(p && p.h, 2), 0, 120), t: clamp(numOr(p && p.t, 21), -5, 45) }));
   if(!s.pf || typeof s.pf !== "object" || !PF[s.pf.type]) s.pf = { type:"none" };
+  if(s.pf.type === "poolish" || s.pf.type === "biga"){
+    s.pf.phases = pfPhases(s.pf, PF[s.pf.type]);   /* macht aus altem h/t eine Phase */
+    delete s.pf.h; delete s.pf.t;
+  } else delete s.pf.phases;
   if(!s.mix || !Array.isArray(s.mix.steps) || !s.mix.steps.length) s.mix = defaults().mix;
   s.mix.steps = s.mix.steps.filter(st => st && typeof st === "object");
   if(!s.mix.steps.length) s.mix = defaults().mix;
@@ -733,12 +751,13 @@ function calc(st){
   if(pf.type === "poolish" || pf.type === "biga"){
     pf.share = clamp(+st.pf.share || pfDef.share, 5, 100);
     pf.hyd = clamp(+st.pf.hyd || pfDef.hyd, 40, 120);
-    pf.h = clamp(+st.pf.h || pfDef.h, 2, 48);
-    pf.t = clamp(+st.pf.t || pfDef.t, 2, 32);
+    pf.phases = pfPhases(st.pf, pfDef);
+    pf.h = pf.phases.reduce((a,p) => a + p.h, 0);
+    pf.t = pf.phases.reduce((m,p) => Math.max(m, p.t), -99);   /* wärmste Phase, für die Warnung */
     pf.flour = flour * pf.share/100;
     pf.water = pf.flour * pf.hyd/100;
-    pf.Eg = pf.h * rGas(pf.t);
-    pf.Em = pf.h * rMat(pf.t);
+    pf.Eg = pf.phases.reduce((a,p) => a + p.h*rGas(p.t), 0);
+    pf.Em = pf.phases.reduce((a,p) => a + p.h*rMat(p.t), 0);
     pf.yPct = freshPct(pf.Eg) * cal * (pf.type === "biga" ? BIGA_F : 1);   /* % des Vorteigmehls */
     pf.yeastG = pf.flour * pf.yPct/100;
     pf.weight = pf.flour + pf.water + pf.yeastG;
@@ -925,11 +944,23 @@ function buildSteps(c, bake, st, run){
 
   if(c.pf.type === "poolish" || c.pf.type === "biga"){
     const pfStart = new Date(start.getTime() - c.pf.h*3600e3);
+    const p0 = c.pf.phases[0];
     steps.push({ t:pfStart, pf:true,
       title:c.pf.name+" ansetzen — "+fmtG(c.pf.flour)+" Mehl, "+fmtG(c.pf.water)+" Wasser, "+fmtG(c.pf.yeastG)+" Hefe",
-      sub:c.pf.h+" h bei "+num(c.pf.t,0)+" °C · "+(c.pf.type==="biga"
+      sub:num(p0.h,1)+" h bei "+num(p0.t,0)+" °C · "+(c.pf.type==="biga"
         ? "nur grob vermengen, es bleibt krümelig"
         : "glatt verrühren, Konsistenz wie Pfannkuchenteig") });
+    /* Jede weitere Vorteigphase wird ein eigener Schritt — sonst steht der Wechsel
+       in den Kühlschrank nirgends, und genau dafür gibt es die Phasen. */
+    let tPf = pfStart.getTime() + p0.h*3600e3;
+    for(let i = 1; i < c.pf.phases.length; i++){
+      const ph = c.pf.phases[i], vor = c.pf.phases[i-1];
+      steps.push({ t:new Date(tPf), pf:true,
+        title:c.pf.name+(ph.t < vor.t - 0.5 ? " in den Kühlschrank"
+                       : ph.t > vor.t + 0.5 ? " herausnehmen" : " steht weiter"),
+        sub:num(ph.h,1)+" h bei "+num(ph.t,0)+" °C" });
+      tPf += ph.h*3600e3;
+    }
     steps.push({ t:start, pf:true, title:c.pf.name+" ist reif",
       sub:c.pf.type==="biga"
         ? "riecht süßlich-hefig, hat sichtbar Volumen, zieht Fäden beim Auseinanderbrechen"
@@ -1134,15 +1165,26 @@ function renderPlanCards(c){
   /* --- Vorteig --- */
   $("pfChips").innerHTML = Object.keys(PF).map(k =>
     '<button class="chip'+(c.pf.type===k?" on":"")+'" data-pf="'+k+'">'+PF[k].name+'</button>').join("");
-  if(focusIn($("pfFields"))){
-    /* wird gerade bearbeitet: nicht neu bauen, sonst verliert das Feld den Fokus */
+  if(focusIn($("pfFields")) && typing()){
+    /* Es wird getippt: nicht neu bauen, sonst verliert das Feld den Fokus.
+       Der Zusatz typing() ist nötig, seit Knöpfe im Kasten sitzen — sonst gilt der
+       geklickte "+ Phase"-Knopf als Bearbeitung und die neue Zeile erscheint nicht. */
   } else if(c.pf.type === "poolish" || c.pf.type === "biga"){
     $("pfFields").innerHTML = '<div class="fields">'+
       '<label class="f"><span class="lab">Anteil am Mehl %</span><input type="number" inputmode="decimal" id="pfShare" min="5" max="100" step="5" value="'+c.pf.share+'"></label>'+
       '<label class="f"><span class="lab">Hydration %</span><input type="number" inputmode="decimal" id="pfHyd" min="40" max="120" step="1" value="'+c.pf.hyd+'"'+(c.pf.type==="poolish"?" disabled":"")+'></label>'+
-      '<label class="f"><span class="lab">Reifezeit h</span><input type="number" inputmode="decimal" id="pfH" min="2" max="48" step="0.5" value="'+c.pf.h+'"></label>'+
-      '<label class="f"><span class="lab">Temperatur °C</span><input type="number" inputmode="decimal" id="pfT" min="2" max="32" step="0.5" value="'+c.pf.t+'"></label>'+
-      '</div>';
+      '</div>'+
+      '<div class="note" style="margin:12px 0 6px">Reifung: eine Phase oder mehrere — etwa erst Raumtemperatur, dann Kühlschrank.</div>'+
+      c.pf.phases.map((ph,i) =>
+        '<div class="phase" data-pfi="'+i+'">'+
+          '<div class="pname"><span class="dot" style="background:'+tempColor(ph.t)+'"></span>'+
+            '<span>'+(ph.t<=10?"Kühlschrank":ph.t<=16?"Kühl":"Raum")+'</span></div>'+
+          '<label class="f"><span class="lab">Stunden</span><input type="number" inputmode="decimal" class="pfph" data-k="h" min="0" max="48" step="0.5" value="'+ph.h+'"></label>'+
+          '<label class="f"><span class="lab">°C</span><input type="number" inputmode="decimal" class="pfph" data-k="t" min="-5" max="32" step="0.5" value="'+ph.t+'"></label>'+
+          '<button class="xbtn" data-pfdel="'+i+'"'+(c.pf.phases.length<2?" disabled":"")+'>✕</button>'+
+        '</div>').join("")+
+      (c.pf.phases.length < 4 ? '<button class="addbtn" id="addPfPhase">+ Phase hinzufügen</button>' : '')+
+      '<div class="note" style="margin-top:6px">Gesamt '+fmtH(c.pf.h)+'.</div>';
   } else if(c.pf.type === "sour"){
     $("pfFields").innerHTML = '<div class="fields">'+
       '<label class="f"><span class="lab">Hydration Anstellgut %</span><input type="number" inputmode="decimal" id="pfHyd" min="50" max="150" step="5" value="'+c.pf.hyd+'"></label>'+
@@ -1990,8 +2032,10 @@ document.addEventListener("input", e => {
   }
   if(t.id === "pfShare"){ S.pf.share = +t.value; render(); return; }
   if(t.id === "pfHyd"){ S.pf.hyd = +t.value; render(); return; }
-  if(t.id === "pfH"){ S.pf.h = +t.value; render(); return; }
-  if(t.id === "pfT"){ S.pf.t = +t.value; render(); return; }
+  if(t.classList.contains("pfph")){
+    S.pf.phases[+t.closest(".phase").dataset.pfi][t.dataset.k] = +t.value;
+    render(); return;
+  }
   if(t.id === "newBake" || t.id === "realStart"){
     if(S.run && t.value){ S.run[t.id === "newBake" ? "newBake" : "start"] = t.value; render(); }
     return;
@@ -2034,7 +2078,16 @@ document.addEventListener("click", e => {
     const k = t.dataset.pf, d = PF[k];
     S.pf = k === "none" ? { type:"none" }
       : k === "sour" ? { type:"sour", hyd:100 }
-      : { type:k, share:d.share, hyd:d.hyd, h:d.h, t:d.t };
+      : { type:k, share:d.share, hyd:d.hyd, phases:JSON.parse(JSON.stringify(d.phases)) };
+    render(); return;
+  }
+  if(t.dataset.pfdel !== undefined){
+    if(S.pf.phases && S.pf.phases.length > 1){ S.pf.phases.splice(+t.dataset.pfdel, 1); render(); }
+    return;
+  }
+  if(t.id === "addPfPhase"){
+    const letzte = S.pf.phases[S.pf.phases.length-1];
+    S.pf.phases.push({ h:8, t: letzte.t > 12 ? 6 : 19 });   /* warm -> kalt, kalt -> warm */
     render(); return;
   }
   if(t.dataset.ball !== undefined){ S.ballAfter = +t.dataset.ball; render(); return; }

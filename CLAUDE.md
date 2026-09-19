@@ -269,6 +269,29 @@ einphasig rechnet das neue Format Ziffer für Ziffer wie das alte. Am ungenauest
 ist es dort, wo eine große, feste Biga kalt gestellt wird; wer das ändert, ändert
 den Biga-Anker mit und muss neu kalibrieren.
 
+**Kalibrierung.** `cal` wird **aus dem Protokoll abgeleitet**, nicht angehäuft:
+`1,15^(Mittel der letzten 5 Bewertungen)`, mit young = +1, good = 0, over = −1,
+begrenzt auf 0,5–2. Angehäuft war sie zu nervös — fünfmal „genau richtig" zählten
+nicht gegen einen einzelnen „zu jung", der die Hefe sofort um 15 % hob, also um
+etwa eine Backfensterbreite; und ein gelöschter Fehlklick liess seine Korrektur
+trotzdem stehen. Abgeleitet wiegt ein Ausreisser unter fünf noch 3 %, „genau
+richtig" zieht aktiv Richtung 1,0, und Löschen korrigiert mit. `CAL` ist gecacht
+(`refreshCal()` in `setLog()` und im Boot), weil `calc()` `getCal()` oft ruft.
+`d.cal` aus alten Sicherungen wird beim Import **ignoriert** — der Wert ergibt sich
+aus dem mitimportierten Protokoll und wäre sonst doppelt gezählt.
+
+Die Deckelung bei ±15 % (alle fünf Bewertungen einig) ist Absicht und wird als
+Warnung angezeigt: `cal` soll kleine Küchenabweichungen ausgleichen, nicht ein
+falsches Modell zukleistern. Wer dauerhaft am Anschlag steht, hat kein
+Küchenproblem, sondern ein Exponentenproblem — und das gehört nachgerechnet, nicht
+weiter verschoben. Genau dafür steht oben „erst ändern, wenn kurze Pläne überreif
+und lange zu jung ausfallen".
+
+Protokolleinträge haben ein Feld `note` (Freitext, max. 300 Zeichen): beim Bewerten
+über `#bakedNote`, nachträglich über „✎" am Eintrag per `prompt()`. `prompt()` statt
+eines Inline-Feldes, weil `renderLog()` die Liste per innerHTML neu baut und ein
+fokussiertes Feld darin gegen die iPhone-Regeln verstiesse.
+
 **Testen:** Keine Tests im Repo. Playwright ist global installiert
 (`/opt/node22/lib/node_modules/playwright/index.mjs`, Chromium unter
 `/opt/pw-browsers`). Modell in Node prüfen: Skript-Teile zwischen den Markern

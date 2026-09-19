@@ -406,6 +406,8 @@
   <div class="cbody">
     <div class="note" style="margin-top:0">Wie war der Teig beim Öffnen? Der Eintrag landet mit dem kompletten Plan im Backprotokoll,
       die Hefemenge für die nächsten Pläne wird nachgezogen, und der Backen-Tab ist wieder frei.</div>
+    <label class="f" style="margin-top:10px"><span class="lab">Notiz — Rand, Boden, Aufziehen (später änderbar)</span>
+      <input type="text" id="bakedNote" maxlength="300" placeholder="z. B. Rand luftig, Boden zu blass, liess sich leicht aufziehen"></label>
     <div class="btnrow" style="margin-top:10px">
       <button class="btn ghost sm" data-baked="young">zu jung</button>
       <button class="btn sm" data-baked="good">genau richtig</button>
@@ -649,10 +651,24 @@ function encodeState(){
 function decodeState(str){
   try { return JSON.parse(decodeURIComponent(escape(atob(str)))); } catch(e){ return null; }
 }
-function getCal(){ const v = parseFloat(localStorage.getItem(KEY+"_cal")); return isFinite(v) ? clamp(v,0.5,2) : 1; }
-function setCal(v){ try{ localStorage.setItem(KEY+"_cal", String(clamp(v,0.5,2))); }catch(e){} }
+/* Kalibrierung wird NICHT angehäuft, sondern aus den letzten Bewertungen abgeleitet.
+   Angehäuft war sie zu nervös: fünfmal "genau richtig" zählten nicht gegen einen
+   einzelnen "zu jung", der die Hefe sofort um 15 % hob — etwa eine Backfensterbreite.
+   Und ein gelöschter Fehlklick liess seine Korrektur trotzdem stehen.
+   Abgeleitet zieht "genau richtig" den Wert aktiv Richtung 1,0, ein Ausreisser unter
+   fünf wiegt ein Fünftel, und Löschen korrigiert automatisch mit. */
+const CALSTEP = 1.15, CALN = 5, CALSCORE = { young:1, good:0, over:-1 };
+let CAL = 1;
+function calFromLog(log){
+  const s = (log||[]).filter(e => e && CALSCORE[e.r] !== undefined).slice(-CALN);
+  if(!s.length) return 1;
+  const m = s.reduce((a,e) => a + CALSCORE[e.r], 0) / s.length;
+  return clamp(Math.pow(CALSTEP, m), 0.5, 2);
+}
+function refreshCal(){ CAL = calFromLog(getLog()); }
+function getCal(){ return CAL; }   /* gecacht: calc() ruft das oft */
 function getLog(){ try{ return JSON.parse(localStorage.getItem(KEY+"_log")||"[]"); }catch(e){ return []; } }
-function setLog(l){ try{ localStorage.setItem(KEY+"_log", JSON.stringify(l.slice(-20))); }catch(e){} }
+function setLog(l){ try{ localStorage.setItem(KEY+"_log", JSON.stringify(l.slice(-20))); }catch(e){} refreshCal(); }
 
 /* Alles, was von außen kommt (Link, localStorage, Sicherung, Rezept), läuft hier durch. */
 function sanitize(s){
@@ -681,6 +697,7 @@ function sanitize(s){
   return s;
 }
 (function boot(){
+  refreshCal();   /* Kalibrierung steckt im Protokoll, nicht in einem eigenen Wert */
   const m = location.hash.match(/p=([A-Za-z0-9+/=_-]+)/);
   if(m){
     const s = decodeState(m[1]); if(s && s.phases) S = Object.assign(defaults(), s);
@@ -1778,18 +1795,32 @@ function countdown(ms){
 const LOGNAME = { young:"zu jung", good:"genau richtig", over:"überreif" };
 function renderLog(){
   const cal = getCal(), log = getLog();
-  $("calHint").textContent = cal === 1 ? "noch nicht kalibriert" : "Hefe × "+num(cal,2);
+  const bew = log.filter(e => e && CALSCORE[e.r] !== undefined).length;
+  /* "noch nicht kalibriert" war falsch, sobald eine Bewertung vorlag: "genau richtig"
+     IST eine Kalibrierung, sie bestätigt nur den Wert. */
+  $("calHint").textContent = !bew ? "noch keine Bewertung"
+    : cal === 1 ? "bestätigt · keine Korrektur"
+    : "Hefe × "+num(cal,2)+" · aus "+Math.min(bew,CALN)+" Bewertung"+(Math.min(bew,CALN)>1?"en":"");
   $("logList").innerHTML = (log.length
     ? log.slice().reverse().map((e,i)=>{
         const idx = log.length-1-i;
         const hasPlan = e.plan && Array.isArray(e.plan.phases);
         const sub = hasPlan ? planSummary(e.plan, e.yG) + (e.orig ? " · umgeplant" : "") + (e.noStart ? " · ohne Startzeit" : "") : (e.m||"");
+        const notiz = e.note ? '<br><span style="font-size:11.5px">📝 '+esc(e.note)+'</span>' : '';
         return '<div class="logrow"><span class="d">'+esc(e.d||"")+'</span>'+
-        '<span class="r">'+(LOGNAME[e.r]||esc(e.r||"?"))+(sub?'<br><span style="color:var(--muted);font-size:11.5px">'+esc(sub)+'</span>':'')+
-        '</span>'+(hasPlan ? '<button data-relog="'+idx+'" title="nochmal so planen">↺</button>' : '')+
+        '<span class="r">'+(LOGNAME[e.r]||esc(e.r||"?"))+(sub?'<br><span style="color:var(--muted);font-size:11.5px">'+esc(sub)+'</span>':'')+notiz+
+        '</span><button data-notelog="'+idx+'" title="Notiz">✎</button>'+
+        (hasPlan ? '<button data-relog="'+idx+'" title="nochmal so planen">↺</button>' : '')+
         '<button data-dellog="'+idx+'">✕</button></div>'; }).join("")
     : '<div class="note" style="margin:0">Noch keine Einträge.</div>')+
-    (cal !== 1 ? '<div class="btnrow" style="margin-top:10px"><button class="btn ghost sm" id="calReset">KALIBRIERUNG ZURÜCKSETZEN</button></div>' : "");
+    (cal !== 1 ? '<div class="note" style="margin-top:10px">Zurücksetzen geht über die Einträge: Die Kalibrierung ist der Durchschnitt der letzten '+CALN+' Bewertungen, löschst du eine, rechnet sie sich neu.</div>' : "")+
+    /* Am Anschlag ist nicht die Küche schuld, sondern das Modell — das gehört gesagt,
+       nicht stillschweigend weggerechnet. */
+    (Math.abs(Math.log(cal)/Math.log(CALSTEP)) > 0.999
+      ? '<div class="msg warn" style="margin-top:10px"><span class="ic">▲</span><span>Die Kalibrierung steht am Anschlag: '+
+        (cal > 1 ? "alle" : "alle")+' letzten Bewertungen zeigen in dieselbe Richtung, mehr als ×'+num(CALSTEP,2)+
+        ' korrigiert sie nicht. Dann liegt es nicht an deiner Küche, sondern am Modell — das gehört nachgerechnet, nicht weiter verschoben.</span></div>'
+      : "");
 }
 
 /* ===================== Rezepte ===================== */
@@ -1955,7 +1986,8 @@ function applyBackup(raw, btn){
       (have ? " ("+have+" vorhanden)" : "")+", Protokoll und Kalibrierung ersetzt.")) return;
   if(rc) saveRecipes(Object.assign(loadRecipes(), d.recipes));
   if(Array.isArray(d.log)) setLog(d.log);
-  if(typeof d.cal === "number") setCal(d.cal);
+  /* d.cal aus alten Sicherungen wird ignoriert: der Wert leitet sich aus dem
+     mitimportierten Protokoll ab und wäre sonst doppelt gezählt. */
   if(d.last && d.last.phases){ S = sanitize(Object.assign(defaults(), d.last)); VIEW = S.run ? "run" : "plan"; }
   if(d.exported){ try{ localStorage.setItem(KEY+"_exp", d.exported); }catch(e){} }
   render();
@@ -1998,10 +2030,10 @@ function bakedLog(r){
   log.push({ d: new Date().toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"}), r: r,
              m: mixSummary(run.plan), plan: JSON.parse(JSON.stringify(run.plan)),
              start: run.start, bake: run.plan.bake, yG: c.pf.type === "sour" ? c.pf.weight : (c.yOv || c.yG),
-             orig: run.orig || null, ts: new Date().toISOString() });
-  setLog(log);
-  if(r === "over") setCal(getCal()/1.15);
-  if(r === "young") setCal(getCal()*1.15);
+             orig: run.orig || null, ts: new Date().toISOString(),
+             note: (($("bakedNote") && $("bakedNote").value) || "").trim().slice(0,300) || undefined });
+  if($("bakedNote")) $("bakedNote").value = "";
+  setLog(log);   /* setLog zieht die Kalibrierung nach */
   delete S.run;
   VIEW = "plan";
   render(); window.scrollTo({ top:0, behavior:"smooth" });
@@ -2116,10 +2148,10 @@ document.addEventListener("click", e => {
     const plan = JSON.parse(JSON.stringify(S)); delete plan.run;
     log.push({ d: new Date().toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"}), r: t.dataset.log,
                 m: mixSummary(S), plan: plan, bake: S.bake, yG: c.pf.type === "sour" ? c.pf.weight : (c.yOv || c.yG),
-                ts: new Date().toISOString(), noStart: true });
+                ts: new Date().toISOString(), noStart: true,
+                note: (($("bakedNote") && $("bakedNote").value) || "").trim().slice(0,300) || undefined });
+    if($("bakedNote")) $("bakedNote").value = "";
     setLog(log);
-    if(t.dataset.log === "over") setCal(getCal()/1.15);
-    if(t.dataset.log === "young") setCal(getCal()*1.15);
     render(); return;
   }
   if(t.dataset.baked){ bakedLog(t.dataset.baked); return; }
@@ -2130,7 +2162,13 @@ document.addEventListener("click", e => {
     return;
   }
   if(t.id === "replanApply"){ applyReplan(); return; }
-  if(t.id === "calReset"){ setCal(1); render(); return; }
+  if(t.dataset.notelog !== undefined){
+    const log = getLog(), i = +t.dataset.notelog, e = log[i]; if(!e) return;
+    const v = prompt("Notiz zum Teig — Rand, Boden, Aufziehen:", e.note || "");
+    if(v === null) return;                       /* Abbrechen lässt die alte Notiz stehen */
+    if(v.trim()) e.note = v.trim().slice(0,300); else delete e.note;
+    setLog(log); renderLog(); return;
+  }
   if(t.dataset.dellog !== undefined){
     const log = getLog(); log.splice(+t.dataset.dellog,1); setLog(log); renderLog(); return;
   }

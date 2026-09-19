@@ -230,17 +230,17 @@ passiert: beim Zurück-Knopf im Hefe-Kasten und bei "+ Phase" im Vorteig. Ein El
 setzt — der Küchenmodus brauchte darum eigene `env(safe-area-inset-*)`, sonst lag sein
 SCHLIESSEN-Knopf unter Statusleiste und Dynamic Island und war nicht erreichbar. Sein
 Kopf ist zusätzlich `sticky`, damit der Ausgang nach der Zutatenliste nicht weg ist.
-Kalender und Sicherung
-gehen über `navigator.share` mit Datei, Download nur als Fallback. **Der Kalender kann
-keine Vorschau zeigen, das ist geprüft und erledigt:** `navigator.share` öffnet immer
-die Teilen-Leiste mit Kontakten, nie die Kalender-Ansicht mit „Alle hinzufügen". Der
-naheliegende Ausweg, die `.ics` per `window.open` über eine `blob:`-URL direkt zu
-öffnen, liefert im Home-Bildschirm-Modus **eine leere Seite** — am Geraet getestet,
-schlechter als das Teilen-Menü, wieder zurückgebaut. `data:` scheidet ebenfalls aus,
-Top-Level-Navigation dorthin blockieren Safari und Chrome. Wer es erneut versucht,
-testet zuerst auf dem iPhone. Praktischer Weg für den Nutzer: im Teilen-Menü unter
-„Mehr anzeigen" den Kalender wählen, oder „In Dateien sichern" und die Datei dort
-antippen. Küchenmodus
+Die **Sicherung** geht über `navigator.share` mit Datei, Download nur als Fallback.
+Der **Kalender umgekehrt: Download zuerst**, Teilen als Auffanglösung. Das war bis
+`203110a` so und hat beim Nutzer die Kalender-Vorschau mit allen Terminen gebracht;
+die damalige Umstellung auf `share` war mit „Blob-Download ist im
+Home-Bildschirm-Modus unzuverlässig" begründet, was auf seinem Gerät nicht stimmte —
+`share` zeigt dort nur die Teilen-Leiste mit Kontakten. **Zwei Wege sind am Gerät
+getestet und gescheitert, nicht noch einmal probieren:** `window.open` auf eine
+`blob:`-URL ohne `download`-Attribut liefert im Home-Bildschirm-Modus eine leere
+Seite, und `data:` scheidet aus, weil Safari und Chrome die Top-Level-Navigation
+dorthin blockieren. Wer hier etwas ändert, testet zuerst auf dem iPhone — im Browser
+sieht beides aus, als klappte es. Küchenmodus
 hält Wake Lock. Home-Icon ist PNG (iOS nimmt kein SVG).
 
 **Bedienung:** Ein Modus, kein Einfach/Experte mehr. Vorlagen setzen Teig,

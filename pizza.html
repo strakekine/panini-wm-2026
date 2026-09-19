@@ -1800,16 +1800,24 @@ async function downloadICS(btn){
   });
   out.push("END:VCALENDAR");
   const text = out.join("\r\n");
-  /* Zuerst die Datei direkt öffnen, OHNE download-Attribut: iOS übergibt sie dann an den
-     Kalender und zeigt die Vorschau mit allen Terminen und "Alle hinzufügen".
-     navigator.share öffnet stattdessen die Teilen-Leiste mit Kontakten — technisch
-     dasselbe Ergebnis, aber zwei Tipps mehr und ohne Vorschau, was man exportiert.
-     Teilen bleibt als Auffanglösung, wenn das Öffnen blockiert wird. */
-  /* AUSPROBIERT UND VERWORFEN: window.open auf eine blob:-URL, um iOS die Datei direkt
-     an den Kalender zu geben (Vorschau mit "Alle hinzufügen" statt Teilen-Leiste).
-     Im Home-Bildschirm-Modus kommt dabei nur eine leere Seite — schlechter als das
-     Teilen-Menü. data: geht ohnehin nicht, das blockieren Safari und Chrome.
-     Nicht noch einmal versuchen, ohne auf dem Geraet zu testen. */
+  /* Download zuerst — genau so war es bis 203110a, und so kam beim Nutzer die
+     Kalender-Vorschau mit allen Terminen. Die damalige Umstellung auf navigator.share
+     war mit "Blob-Download ist im Home-Bildschirm-Modus unzuverlässig" begründet; auf
+     seinem Geraet stimmte das nicht, share zeigt dort nur die Teilen-Leiste mit
+     Kontakten. Teilen bleibt als Auffanglösung dahinter.
+     AUSPROBIERT UND VERWORFEN: window.open auf eine blob:-URL ohne download-Attribut —
+     im Home-Bildschirm-Modus kommt nur eine leere Seite, am Geraet getestet. Und data:
+     scheidet aus, Top-Level-Navigation dorthin blockieren Safari und Chrome.
+     Wer hier etwas ändert, testet zuerst auf dem iPhone. */
+  try {
+    const blob = new Blob([text], {type:"text/calendar;charset=utf-8"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "teigplan.ics";
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+    flash(btn, "KALENDER"); return;
+  } catch(e){}
   try {
     const file = new File([text], "teigplan.ics", { type:"text/calendar" });
     if(navigator.canShare && navigator.canShare({ files:[file] })){
@@ -1817,12 +1825,6 @@ async function downloadICS(btn){
       flash(btn, "GETEILT"); return;
     }
   } catch(e){ if(e && e.name === "AbortError") return; }
-  const blob = new Blob([text], {type:"text/calendar;charset=utf-8"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "teigplan.ics";
-  document.body.appendChild(a); a.click();
-  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
 }
 
 /* ===================== Küchenmodus ===================== */

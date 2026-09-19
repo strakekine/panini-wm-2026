@@ -230,15 +230,17 @@ passiert: beim Zurück-Knopf im Hefe-Kasten und bei "+ Phase" im Vorteig. Ein El
 setzt — der Küchenmodus brauchte darum eigene `env(safe-area-inset-*)`, sonst lag sein
 SCHLIESSEN-Knopf unter Statusleiste und Dynamic Island und war nicht erreichbar. Sein
 Kopf ist zusätzlich `sticky`, damit der Ausgang nach der Zutatenliste nicht weg ist.
-Der **Kalender** öffnet die
-`.ics` zuerst direkt über eine `blob:`-URL in einem neuen Tab, ohne `download`-Attribut:
-iOS übergibt sie dann an den Kalender und zeigt die Vorschau mit allen Terminen und
-„Alle hinzufügen". `navigator.share` öffnet stattdessen die Teilen-Leiste mit Kontakten
-— dasselbe Ergebnis, aber zwei Tipps mehr und ohne Vorschau. Teilen ist nur noch
-Auffanglösung, wenn `window.open` blockiert wird, Download danach. **`data:` geht
-nicht**: Top-Level-Navigation dorthin blockieren Safari und Chrome, es sähe nur so aus,
-als klappte es. Die Sicherung
-geht weiter über `navigator.share` mit Datei, Download nur als Fallback. Küchenmodus
+Kalender und Sicherung
+gehen über `navigator.share` mit Datei, Download nur als Fallback. **Der Kalender kann
+keine Vorschau zeigen, das ist geprüft und erledigt:** `navigator.share` öffnet immer
+die Teilen-Leiste mit Kontakten, nie die Kalender-Ansicht mit „Alle hinzufügen". Der
+naheliegende Ausweg, die `.ics` per `window.open` über eine `blob:`-URL direkt zu
+öffnen, liefert im Home-Bildschirm-Modus **eine leere Seite** — am Geraet getestet,
+schlechter als das Teilen-Menü, wieder zurückgebaut. `data:` scheidet ebenfalls aus,
+Top-Level-Navigation dorthin blockieren Safari und Chrome. Wer es erneut versucht,
+testet zuerst auf dem iPhone. Praktischer Weg für den Nutzer: im Teilen-Menü unter
+„Mehr anzeigen" den Kalender wählen, oder „In Dateien sichern" und die Datei dort
+antippen. Küchenmodus
 hält Wake Lock. Home-Icon ist PNG (iOS nimmt kein SVG).
 
 **Bedienung:** Ein Modus, kein Einfach/Experte mehr. Vorlagen setzen Teig,

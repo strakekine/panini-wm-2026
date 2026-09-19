@@ -159,9 +159,15 @@
   .logrow button{background:transparent;border:0;color:var(--muted);cursor:pointer;font-family:inherit;font-size:14px}
 
   /* Küchenmodus */
-  #kitchen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:none;overflow:auto;padding:22px 20px 40px}
+  /* position:fixed haengt ausserhalb der body-Polsterung, die die iPhone-Sicherheitsabstaende
+     setzt — ohne env() lag der SCHLIESSEN-Knopf unter Statusleiste und Dynamic Island. */
+  #kitchen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:none;overflow:auto;
+    padding:calc(22px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right))
+            calc(40px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left))}
   #kitchen.show{display:block}
-  #kitchen .ktop{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+  /* Kopf bleibt beim Scrollen stehen: sonst ist der Ausgang nach der Zutatenliste weit weg. */
+  #kitchen .ktop{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;
+    position:sticky;top:calc(-22px - env(safe-area-inset-top));padding:12px 0;background:var(--bg);z-index:2}
   #kitchen .ktop h2{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;margin:0;color:var(--gold)}
   #kitchen .know{background:var(--panel);border:1px solid var(--gold);border-radius:16px;padding:18px;margin-bottom:14px}
   #kitchen .klabel{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase}

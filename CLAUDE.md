@@ -225,7 +225,12 @@ des Tippens. Zahlenfelder haben `inputmode="decimal"`. Sitzt in einem Kasten, de
 per innerHTML neu gebaut wird, auch ein **Knopf**, reicht `focusIn(box)` nicht —
 der geklickte Knopf gilt sonst als Bearbeitung und der Neuaufbau unterbleibt, die
 Änderung erscheint nicht. Immer `focusIn(box) && typing()`. Das ist zweimal
-passiert: beim Zurück-Knopf im Hefe-Kasten und bei "+ Phase" im Vorteig. Kalender und Sicherung
+passiert: beim Zurück-Knopf im Hefe-Kasten und bei "+ Phase" im Vorteig. Ein Element mit
+`position:fixed` hängt **ausserhalb** der `body`-Polsterung, die die Sicherheitsabstände
+setzt — der Küchenmodus brauchte darum eigene `env(safe-area-inset-*)`, sonst lag sein
+SCHLIESSEN-Knopf unter Statusleiste und Dynamic Island und war nicht erreichbar. Sein
+Kopf ist zusätzlich `sticky`, damit der Ausgang nach der Zutatenliste nicht weg ist.
+Kalender und Sicherung
 gehen über `navigator.share` mit Datei, Download nur als Fallback. Küchenmodus
 hält Wake Lock. Home-Icon ist PNG (iOS nimmt kein SVG).
 

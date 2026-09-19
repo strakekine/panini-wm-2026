@@ -242,22 +242,22 @@ passiert: beim Zurück-Knopf im Hefe-Kasten und bei "+ Phase" im Vorteig. Ein El
 setzt — der Küchenmodus brauchte darum eigene `env(safe-area-inset-*)`, sonst lag sein
 SCHLIESSEN-Knopf unter Statusleiste und Dynamic Island und war nicht erreichbar. Sein
 Kopf ist zusätzlich `sticky`, damit der Ausgang nach der Zutatenliste nicht weg ist.
-Beim **Seitenkopf** ist der Andockpunkt das Problem, nicht der Abstand. Der Abstand
-bleibt am `body`; der `sticky` Kopf dockt mit `top: env(safe-area-inset-top)` an der
-**Unterkante der Statusleiste** an, nicht an der Bildschirmkante. Im Browser belegt die
-Browserleiste diesen Platz, dort ist der Inset 0 und nichts ändert sich — im
-Home-Bildschirm-Modus gibt es sie nicht, und mit `top:0` schob sich der Kopf beim
-Scrollen hinter die Uhr. Dazu deckt `body::before` (fixed, Höhe = Inset, z-index 21)
-den Streifen ab, damit dort keine Karten durchlaufen.
+**Kein `viewport-fit=cover`** im Viewport-Meta, und das ist die wichtigste Zeile in
+diesem Absatz. Das Attribut legt den Inhalt unter die Statusleiste und erzwingt überall
+`env(safe-area-inset-*)`-Rechnerei — die sich im Home-Bildschirm-Modus anders verhält
+als im Browser und dort nicht nachprüfbar ist. Ohne das Attribut legt iOS die Seite
+selbst in den sicheren Bereich, der `sticky` Kopf dockt mit `top:0` genau unter der
+Statusleiste an, und weder `body` noch Küchenmodus brauchen Insets. `theme-color`
+(`#0e1116`) füllt den Streifen hinter der Statusleiste.
 
-**Ausprobiert und verworfen:** den Inset vom `body` nach `.wrap` zu holen. Im Browser
-schön, im Home-Bildschirm-Modus sass der Kopf erst sehr tief und rutschte beim Scrollen
-hoch. Der Kopf-Hintergrund ist flach statt verlaufend: Der Verlauf von hell nach dunkel
-las sich am oberen Rand wie ein aufgelegter Schatten, und Farbe kann keine Sprünge
-verursachen. Prüfen lässt sich das im Browser nur, indem man `body{padding-top}`,
-`body::before{height}` und `header{top}` per Stylesheet auf einen festen Wert (z. B.
-47 px) setzt — `env()` ist dort immer 0, und ohne diese Simulation sieht jede Variante
-richtig aus.
+**Dreimal am Gerät ausprobiert und verworfen**, bevor die Ursache gefunden war: den
+Inset vom `body` nach `.wrap` holen (Kopf stand sehr tief und rutschte beim Scrollen
+hoch); den Kopf mit `top: env(...)` andocken lassen plus fixiertem Abdeckstreifen
+(Abstand doppelt, Kopf trotzdem hinter der Uhr); und davor der Verlauf im
+Kopf-Hintergrund, der sich wie ein Schatten las — der ist flach geblieben, Farbe kann
+keine Sprünge verursachen. Wer hier etwas ändert: Im Browser ist jeder Inset 0, dort
+sieht **jede** Variante richtig aus. Nur auf dem iPhone, und dort in beiden
+Umgebungen.
 Die **Sicherung** geht über `navigator.share` mit Datei, Download nur als Fallback.
 Der **Kalender unterscheidet die Umgebung** (`navigator.standalone` bzw.
 `display-mode: standalone`), weil beide sich verschieden verhalten — beides am Gerät

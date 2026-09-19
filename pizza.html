@@ -2,7 +2,11 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- KEIN viewport-fit=cover: Das legt den Inhalt unter die Statusleiste und zwingt zu
+     env()-Rechnerei, die sich im Home-Bildschirm-Modus anders verhält als im Browser.
+     Ohne das Attribut legt iOS die Seite selbst in den sicheren Bereich; der klebende
+     Kopf dockt mit top:0 genau unter der Statusleiste an. Am Gerät geprüft. -->
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Teigplaner</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -23,22 +27,15 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Barlow,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-  body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-  /* Deckt den Streifen hinter der Statusleiste ab, damit dort beim Scrollen nicht der
-     Karteninhalt durchläuft. Ohne Inset (Browser, Desktop) ist der Streifen 0 hoch. */
-  body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);
-    background:var(--bg);z-index:21;pointer-events:none}
+  body{padding:0}
   /* Flacher Hintergrund statt Verlauf: der Verlauf las sich wie ein Schatten am oberen Rand. */
-  /* Andockpunkt ist die Unterkante der Statusleiste, nicht die Bildschirmkante: Im
-     Home-Bildschirm-Modus gibt es keine Browserleiste, die den Platz belegt — mit top:0
-     schob sich der Kopf beim Scrollen hinter die Uhr. Im Browser ist der Inset 0, dort
-     ändert sich dadurch nichts. */
-  header{position:sticky;top:env(safe-area-inset-top);z-index:20;background:rgba(22,27,34,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-  /* AUSPROBIERT UND VERWORFEN: den Sicherheitsabstand vom body hierher zu holen
-     (padding-top: calc(14px + env(safe-area-inset-top))), damit der klebende Kopf die
-     Statusleiste selbst füllt. Im Browser schön, im Home-Bildschirm-Modus sass der Kopf
-     erst sehr tief und rutschte beim Scrollen hoch — iOS zählt den Inset dort offenbar
-     schon im Viewport mit. Abstand bleibt am body, hier nur ein paar Pixel mehr Luft. */
+  header{position:sticky;top:0;z-index:20;background:rgba(22,27,34,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  /* ZWEIMAL AUSPROBIERT UND VERWORFEN, am Geraet geprueft: den Sicherheitsabstand nach
+     .wrap zu holen (padding-top: calc(14px + env(safe-area-inset-top))), und den Kopf
+     mit top: env(...) andocken zu lassen. Beides sah im Browser richtig aus, im
+     Home-Bildschirm-Modus stand der Kopf erst doppelt so tief und rutschte beim
+     Scrollen trotzdem hinter die Uhr. Ursache war viewport-fit=cover oben im Kopf der
+     Datei — ohne das Attribut braucht es hier gar keine Rechnerei. */
   .wrap{max-width:880px;margin:0 auto;padding:14px 14px 10px}
   h1{font-family:'Bebas Neue',sans-serif;letter-spacing:1.5px;margin:0;font-size:26px;color:var(--gold);line-height:1.1}
   .sub{color:var(--muted);font-size:12.5px;margin-top:2px}
@@ -176,12 +173,11 @@
   /* position:fixed haengt ausserhalb der body-Polsterung, die die iPhone-Sicherheitsabstaende
      setzt — ohne env() lag der SCHLIESSEN-Knopf unter Statusleiste und Dynamic Island. */
   #kitchen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:none;overflow:auto;
-    padding:calc(22px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right))
-            calc(40px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left))}
+    padding:22px 20px 40px}
   #kitchen.show{display:block}
   /* Kopf bleibt beim Scrollen stehen: sonst ist der Ausgang nach der Zutatenliste weit weg. */
   #kitchen .ktop{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;
-    position:sticky;top:calc(-22px - env(safe-area-inset-top));padding:12px 0;background:var(--bg);z-index:2}
+    position:sticky;top:-22px;padding:12px 0;background:var(--bg);z-index:2}
   #kitchen .ktop h2{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;margin:0;color:var(--gold)}
   #kitchen .know{background:var(--panel);border:1px solid var(--gold);border-radius:16px;padding:18px;margin-bottom:14px}
   #kitchen .klabel{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase}

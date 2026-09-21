@@ -380,11 +380,19 @@ länger ist als die verfügbare Zeit, gibt es gar keinen Vorschlag.
 `#genH`/`#genT` liegen ausserhalb von `#genOut`, damit das Tippen den Neuaufbau der
 Liste nicht blockiert. Übernehmen löscht `S.yOv` (galt für den alten Plan).
 
-**Testen:** Keine Tests im Repo. Playwright ist global installiert
+**Testen — Modell:** `node test/modell.mjs`. Prüft alle Sollwerte aus der Tabelle
+oben, braucht nichts ausser Node, dauert eine Sekunde, Rückgabewert 1 bei Abweichung.
+Der Test schneidet die Modellteile selbst aus `pizza.html` (Marker `Gärmodell`…
+`Vorlagen`, `PRESETS`, `Rechnen`…`Hinweise`) und stubbt `S`, `getCal`, `defaults` —
+er muss also nicht nachgezogen werden, wenn sich etwas anderes in der Datei ändert.
+**Vor jeder Änderung am Modell laufen lassen, und danach wieder.** Schlägt er fehl,
+ist entweder eine Konstante verschoben oder der Sollwert gehört mit Begründung in
+diese Datei angepasst — beides gehört hierher, nicht stillschweigend in den Code.
+Geprüft, dass er auch anschlägt: Tmin von −6 auf −4 reisst 6 von 10 Werten.
+
+**Testen — Oberfläche:** Playwright ist global installiert
 (`/opt/node22/lib/node_modules/playwright/index.mjs`, Chromium unter
-`/opt/pw-browsers`). Modell in Node prüfen: Skript-Teile zwischen den Markern
-`Gärmodell`…`Vorlagen` und `Rechnen`…`Hinweise` ausschneiden, `S`, `getCal` und
-`defaults` stubben, `calc()` gegen die Sollwerte oben laufen lassen. Browser:
+`/opt/pw-browsers`). Browser:
 Seite per `file://` laden, 390 px breit; Presets nacheinander klicken (Locator
 per `nth-child`, die Chips werden bei jedem Render neu gebaut), Tippen mit
 `type()` zeichenweise prüfen (`fill()` sieht Fokusverlust nicht), Konsolenfehler

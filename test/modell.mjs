@@ -62,8 +62,8 @@ const faelle = [
   ["24 h, Ballen davor", () => rechne({ phases:[{h:2,t:21},{h:19,t:6},{h:3,t:21}], ballAfter:1 }).yPctTotal, 0.327, 0.002,
    "Wärmeträgheit: Ballen kalt — der Abstand zur Zeile darüber IST das Alleinstellungsmerkmal"],
 
-  ["48 h kalt (Vorlage nap48)", () => rechne(vorlage("nap48")).yPctTotal, 0.184, 0.002,
-   "Exponent 1,55 am langen Ende"],
+  ["48 h kalt (Vorlage nap48)", () => rechne(vorlage("nap48")).yPctTotal, 0.186, 0.002,
+   "Exponent 1,55 am langen Ende; Vorlage läuft mit 3 % Salz, bei 2,8 % wären es 0,184"],
 
   ["72 h kalt", () => rechne({ phases:[{h:2,t:21},{h:68,t:5},{h:4,t:21}], ballAfter:1 }).yPctTotal, 0.115, 0.002,
    "Exponent 1,55, noch länger"],

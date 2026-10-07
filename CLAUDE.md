@@ -413,8 +413,14 @@ Text und lassen sich nicht anklicken — vorher `open = true` setzen oder
 Erledigt in dieser Runde: Speicher-Bug (`run` in Rezept, Rezept-Laden und
 Teilen-Link), Zwei-Tab-Umbau Planen/Backen mit Statuskarte, „Gebacken?",
 Backprotokoll mit ganzem Plan und „↺", Umplanen übernehmen, Hinweise am
-Knetschritt (Fenstertest → 15 min ruhen; Stockgare über 2 h → zweimal dehnen und
-falten in der ersten Stunde).
+Knetschritt (Fenstertest → 15 min ruhen; erste warme Phase über 2 h → optional
+zweimal dehnen und falten in der ersten Stunde). Der Hinweis hängt an der ersten
+warmen Phase, nicht an der ganzen Stockgare: früher zählte bei kalter Stockgare der
+Kühlschrank mit, und er kam schon bei 2 h warm. Netzrecherche (nur Suchzusammen-
+fassungen, die Foren sind vom Proxy gesperrt): Falten ersetzt vor allem das Kneten,
+mit Spiralkneter oft verzichtbar, bei langer Kühlschrankgare nicht nötig; wo gefaltet
+wird, in der warmen Phase davor. Die 2-h-Schwelle ist unsere eigene, keine Quelle
+nennt eine.
 
 **Vorgeschlagen, noch nicht beantwortet:**
 - Feld in der Statuskarte für die *gemessene* Teigtemperatur nach dem Kneten, das

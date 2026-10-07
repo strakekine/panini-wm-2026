@@ -1100,7 +1100,6 @@ function buildSteps(c, bake, st, run){
         "Zielteigtemperatur "+num(+st.ddt,1)+" °C · Schüttwasser ≈ "+Math.round(tw)+" °C"+
         "<br>Reißt der Teig im Fenstertest, erst 15 min ruhen lassen statt weiterzukneten — der Kleber entspannt sich von allein." });
 
-  const stockH = c.phases.slice(0, c.ballAfter).reduce((a,p)=>a+p.h,0);
   let t = new Date(start.getTime());
   c.phases.forEach((p,i)=>{
     if(i === c.ballAfter){
@@ -1113,8 +1112,12 @@ function buildSteps(c, bake, st, run){
                 : "bei "+num(p.t,0)+" °C stehen lassen";
     const from = new Date(t);
     t = new Date(t.getTime() + p.h*3600e3);
-    const falten = (i === 0 && c.ballAfter > 0 && stockH > 2 && p.t > 16)
-      ? " · in der ersten Stunde zweimal dehnen und falten, das gibt dem Teig Struktur" : "";
+    /* Nur bei langer WARMER Stockgare: die erste Phase muss warm sein und über 2 h laufen.
+       Früher zählte die ganze Stockgare bis zum Ballen, also bei kalter Stockgare auch den
+       Kühlschrank, und der Hinweis kam schon bei 2 h warm. Er ist optional: ein Spiralkneter
+       ersetzt das Falten meistens, und die Kälte entspannt den Kleber ohnehin. */
+    const falten = (i === 0 && c.ballAfter > 0 && p.h > 2 && p.t > 16)
+      ? " · optional: in der ersten Stunde zweimal dehnen und falten, das gibt dem Teig Struktur. Mit Spiralkneter oft verzichtbar" : "";
     steps.push({ t:from, title:kind+" "+fmtH(p.h)+" — "+place, sub:"bis "+fmtWhen(t, start)+falten });
   });
 

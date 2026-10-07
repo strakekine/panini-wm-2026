@@ -63,12 +63,17 @@ Arbeitsbranch), Pull Requests sind ihm zu umständlich.
   | 8 h/20 °C | 2/20 + 6/20, Ballen nach P1 | 0,389 % |
   | 24 h, Ballen nach der Kälte | 2/21 + 19/6 + 3/21, Ballen nach P2 | 0,247 % |
   | 24 h, Ballen davor | dito, Ballen nach P1 | 0,327 % |
-  | 48 h kalt | Preset `nap48`: 2/21 + 42/5 + 4/21, Ballen nach P1, 6 × 260 g, 63 %, ddt 22 | 0,184 % |
+  | 48 h kalt | Preset `nap48`: 2/21 + 42/5 + 4/21, Ballen nach P1, 6 × 260 g, 63 %, ddt 22, **3 % Salz** (so steht es im Preset) | 0,186 % |
   | 72 h kalt | 2/21 + 68/5 + 4/21, Ballen nach P1 | 0,115 % |
   | Biga Vorteighefe | Preset `biga`, `pf.yPct` (18 h/17 °C, in % des Vorteigmehls) | 0,880 % |
   | Biga Reifegrad | Preset `biga`, `Rip` | 1,05 |
   | 100 % Biga + 4 h | 2/21 + 2/21, Ballen nach P1, Biga share 100, hyd 48, 18 h/17 °C, `yPctMain` | 0 |
   | Erster echter Teig | 6 × 280 g, 62 %, 3 % Salz, 5/25 + 16/6 + 6/25, Ballen nach P2, `yG` | 1,00 g |
+
+  Die vier Napoletana-Vorlagen (`nap24a`, `nap24b`, `nap48`, `nap8`) laufen mit **3 % Salz**, die
+  übrigen mit 2,8 % bzw. 2,5 %. Der Unterschied zu 2,8 % ist über `saltF` rund 1,1 % mehr Hefe:
+  `nap24a` 0,247 → 0,250 %, `nap24b` 0,327 → 0,331 %, `nap8` 0,300 → 0,304 %. Die Zeilen 24 h in der
+  Tabelle oben sind mit expliziten Eingaben (2,8 %) gerechnet und bleiben deshalb gültig.
 
   Die Kurzformen sind absichtlich nicht das, was sie zu sein scheinen: „48 h kalt"
   ist der Preset, nicht 48/4 + 3/21 (das gäbe 0,224 %), und „72 h" hat 2 h

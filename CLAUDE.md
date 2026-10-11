@@ -15,6 +15,8 @@ Fünf voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
   nach allen Stufen gleich, teilen sich die Teams den Platz („=" statt Platznummer) und
   die Gruppe bietet ein Entscheidungsspiel an. Das zählt nur für die Reihenfolge, nicht
   für die Tabelle, und blockiert den K.-o.-Start, solange es über den Einzug entscheidet.
+  Es hat **eigene Satzregeln** (`rules.d`, voreingestellt ein Satz bis 11): ein Stichkampf
+  soll kurz sein, auch wenn die Gruppe Best of 5 bis 21 spielt.
 - **`pizza.html`** — Pizzateig-Rechner und Gärplaner: beliebig viele Gärphasen mit
   eigener Temperatur, frei wählbarer Ballen-Zeitpunkt, Vorteige (Poolish, Biga,
   Sauerteig), Rückwärtsplanung auf die Backzeit, Umplanen während der laufenden

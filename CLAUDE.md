@@ -500,6 +500,9 @@ fertig sein; je Rezept als Essfenster `eat:[min,max]` h nach dem Backen (Roggen 
 `kids`, `gare`, `note`), Datum der letzten Sicherung unter `_exp`, letzte Änderung unter `_chg`. `run = {name, rid, flour, eat,
 eatAt, steps (eingefroren, skaliert, Auffrischen entschieden, ggf. `p`), done:[ms…]}`; `done[0]` = Start.
 `WEEK` im Code ist nur der Ausgangswert für `S.week`.
+`h` eines Schritts ist die Zeit **bis zum nächsten Schritt**, nicht die Dauer des Handgriffs — die
+steht in `hand` (Kneten: h 45 min, hand 15 min, davon 10–12 min Halo Core). Angezeigt wird beides
+getrennt über `stepTiming()`; vorher las sich „Hauptteig kneten · 45 min“ wie 45 min Kneten.
 `timeline(steps, done, start, now)`: erledigte Schritte mit echter Zeit, danach aufsummierte
 Mitte/Min/Max; der nächste offene Schritt wird nie in die Vergangenheit gelegt. Abläufe sind
 linear (parallele Vorstufen wie Brühstück gibt es noch nicht). Die iPhone-Regeln der Pizza-App

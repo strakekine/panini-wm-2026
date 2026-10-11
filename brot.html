@@ -347,7 +347,10 @@ const WEEK = {
 /* Schritt: h = [min,max] Stunden bis zum nächsten Schritt, hand = Minuten Arbeit,
    what = was zu tun ist, sign = woran man merkt, dass es weitergeht,
    ing = Zutaten (k: mehl | wasser | salz | hefe | asg | sd), sour = Sauerteig-Ansatz,
-   stay = man muss die ganze Dauer zu Hause sein (Ofen an: Vorheizen, Backen). */
+   stay = man muss die ganze Dauer zu Hause sein (Ofen an: Vorheizen, Backen).
+   ACHTUNG: h ist NICHT die Dauer des Handgriffs, sondern die Zeit bis zum nächsten Schritt.
+   Beim Kneten sind das 45 min, davon 10–12 min in der Halo Core (hand: 15 mit Abwiegen),
+   der Rest ist Ruhe bis zum ersten Falten. Die Anzeige trennt das (stepTiming). */
 const TPL = [
   { id:"weizen", name:"Weizenbrot mit Sauerteig", eat:[2,30],
     desc:"Weizenbrot mit 20 % Roggensauerteig, Stückgare über Nacht im Kühlschrank, gebacken im Gusseisentopf. "+
@@ -357,7 +360,7 @@ const TPL = [
         what:"Anstellgut, Mehl und lauwarmes Wasser glatt verrühren, abdecken, bei Küchentemperatur stehen lassen.",
         sign:"verdoppelt, gewölbt, voller Blasen, riecht säuerlich-frisch",
         ing:[{n:"Roggenvollkornmehl",g:100,k:"mehl"},{n:"Wasser, lauwarm",g:100,k:"wasser"},{n:"Anstellgut",g:10,k:"asg"}] },
-      { title:"Hauptteig kneten", h:[0.75,0.75], hand:20,
+      { title:"Hauptteig kneten", h:[0.75,0.75], hand:15,
         what:"Halo Core: 5 min langsam mischen, dann 5–7 min schneller, bis sich der Teig vom Schüsselrand löst. "+
              "Fenstertest: ein Stück dünn ziehen — scheint Licht durch, ohne dass es reißt, ist er fertig. "+
              "Dann abgedeckt ruhen lassen (Stockgare = Gare des ganzen Teigs vor dem Formen).",
@@ -407,7 +410,7 @@ const TPL = [
     desc:"Ohne Sauerteig, an einem Nachmittag: rund 3,5 h vom Kneten bis aus dem Ofen, dazu 1,5 h Auskühlen. Mildes, weiches Weißbrot. "+
          "Am besten am Backtag essen — Hefebrot wird schneller altbacken als Sauerteigbrot.",
     steps:[
-      { title:"Teig kneten", h:[0.75,0.75], hand:20,
+      { title:"Teig kneten", h:[0.75,0.75], hand:15,
         what:"Hefe im Wasser auflösen. Halo Core: 5 min langsam, dann 5–7 min schneller, bis der Teig glatt ist und sich vom Rand löst (Fenstertest). Abgedeckt ruhen lassen.",
         ing:[{n:"Weizenmehl 550",g:500,k:"mehl"},{n:"Wasser, kühl",g:340,k:"wasser"},{n:"Salz",g:10,k:"salz"},{n:"Frischhefe",g:5,k:"hefe"}] },
       { title:"Dehnen und falten", h:[0.75,1.25], hand:3,
@@ -808,6 +811,17 @@ function fmtH(v){
   if(h === 0) return m+" min";
   return h+" h "+m+" min";
 }
+/* Was die Dauer eines Schritts bedeutet, in Worten — Arbeit und Wartezeit getrennt.
+   Ohne das las sich "Hauptteig kneten · 45 min" wie 45 min Kneten. */
+function stepTiming(s){
+  const work = s.hand >= 5 ? "≈ "+s.hand+" min Arbeit" : "";
+  if(!(s.h[1] > 0)) return work;
+  if(s.stay) return "dauert "+fmtR(s.h)+" — so lange zu Hause bleiben, der Ofen ist an";
+  const hh = s.hand / 60;
+  if(work && hh >= s.h[1] - 1e-9) return work+", danach gleich weiter";
+  if(work && hh > s.h[0]) return work+" — nächster Schritt "+fmtR(s.h)+" nach Beginn";
+  return (work ? work+", dann warten — " : "")+"nächster Schritt "+fmtR(s.h)+" nach Beginn";
+}
 function fmtR(h){ return h[0] === h[1] ? fmtH(h[0]) : fmtH(h[0])+"–"+fmtH(h[1]); }
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
 function typing(){ const a = document.activeElement; return !!a && (a.tagName === "INPUT" || a.tagName === "SELECT" || a.tagName === "TEXTAREA"); }
@@ -1041,9 +1055,9 @@ function stepItem(s, r, i, mode, cls, now, lr){
   let tx = "<b>"+esc(s.title)+"</b>";
   if(!(mode === "run" && r.done)){
     if(s.ing) tx += '<small class="ig">'+s.ing.map(x => esc(x.n)+" "+fmtG(x.g)).join(" · ")+"</small>";
-    if(s.what) tx += "<small>"+esc(s.what)+(s.hand >= 10 ? " (≈ "+s.hand+" min Arbeit)" : "")+"</small>";
+    if(s.what) tx += "<small>"+esc(s.what)+"</small>";
     if(s.sign) tx += '<small class="sg">Weiter, wenn: '+esc(s.sign)+"</small>";
-    if(s.h[1] > 0 && s.h[0] !== s.h[1]) tx += "<small>Danach "+fmtR(s.h)+" bis zum nächsten Schritt</small>";
+    const tg = stepTiming(s); if(tg) tx += "<small>"+tg+"</small>";
     const l = lr && lr[s.title];
     if(l && s.h[1] > 0) tx += '<small style="color:#7fb3e8">Bei Dir bisher: '+(l.n === 1 ? fmtH(l.avg) : "Ø "+fmtH(l.avg)+" ("+l.n+"×, "+fmtH(l.min)+"–"+fmtH(l.max)+")")+
       (offRange(l, s.h) > 0 ? " — länger als das Rezept" : offRange(l, s.h) < 0 ? " — kürzer als das Rezept" : "")+"</small>";
@@ -1176,8 +1190,9 @@ function renderImport(){
       fmtR(dur)+' bis aus dem Ofen'+(r.temp ? ' · Rezept für '+r.temp+' °C' : "")+'</div>'+
       (r.desc ? '<div class="note">'+esc(r.desc)+'</div>' : "")+
       '<ul class="steps" style="margin-top:8px">'+r.steps.map(s =>
-        '<li><div class="tm">'+(s.h[1] ? fmtR(s.h) : "—")+'</div><div class="tx"><b>'+esc(s.title)+'</b>'+
-        (s.ing ? '<small class="ig">'+s.ing.map(x => esc(x.n)+" "+fmtG(x.g)).join(" · ")+'</small>' : "")+'</div></li>').join("")+'</ul>'+
+        '<li><div class="tx"><b>'+esc(s.title)+'</b>'+
+        (s.ing ? '<small class="ig">'+s.ing.map(x => esc(x.n)+" "+fmtG(x.g)).join(" · ")+'</small>' : "")+
+        (stepTiming(s) ? '<small>'+stepTiming(s)+'</small>' : "")+'</div></li>').join("")+'</ul>'+
       '<button class="btn wide" id="impSave" style="margin-top:10px">'+(IMP_EDIT ? "ÄNDERUNG SPEICHERN" : "ÜBERNEHMEN")+'</button>';
   }
   o.innerHTML = h;

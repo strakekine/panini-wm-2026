@@ -1,6 +1,6 @@
 # panini-wm-2026
 
-Vier voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
+Fünf voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
 
 - **`panini*.html`** — Sticker-Tracker für die Panini WM 2026 (Emil, Leo, generisch).
   Reine Einzeldatei-Webapps, kein Build, kein Framework.
@@ -10,6 +10,8 @@ Vier voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
   Sauerteig), Rückwärtsplanung auf die Backzeit, Umplanen während der laufenden
   Gare, Knetprogramm für Spiralkneter, Backprotokoll mit Kalibrierung,
   Kalender-Export und Küchenmodus. Auch Einzeldatei. Details unten.
+- **`brot.html`** — Brotplaner: Überblick über einen Backvorgang (Sauerteig, Roggen, Hefe),
+  Anstellgut-Fütterung, laufender Teig mit echten Zeiten. Einzeldatei. Details unten.
 - **`pine/`** — TradingView Pine-Script-Indikatoren. Eigener Kontext, eigene Regeln:
   siehe **`pine/CLAUDE.md`**, bevor dort etwas geändert wird.
 
@@ -471,3 +473,41 @@ kommen nur per Screenshot vom Nutzer.
 Salz, 5 h/25 °C + 16 h/6 °C + 6 h/25 °C, Ballen nach Phase 2, 1,00 g Frischhefe,
 Backzeit 19.09. um 19:00. Das Ergebnis gehört ins Backprotokoll und ist der erste
 Datenpunkt zum offenen Hefeniveau.
+
+## Brotplaner (`brot.html`) — Stand und Regeln
+
+Nutzer: Laurent (Luxemburg), derselbe Hobbybäcker. Deutsch, Du-Form, Widerspruch erwünscht.
+**`pizza.html` wird dafür nie angefasst** — Teile werden kopiert, nicht geteilt. Eigener
+localStorage-Schlüssel `brot_planer_v1` (+ `_log`); die Pizza-App nutzt `pizza_teigplaner_v1`,
+beide liegen auf derselben Herkunft.
+
+**Zweck:** Nicht rechnen wie die Pizza-App, sondern „wo bin ich, was kommt als Nächstes".
+**Kein Gärmodell.** Jeder Schritt hat eine Spanne `h:[min,max]` aus dem Rezept; die Spannen sind
+der Spielraum für den Planer und das, was im Backen-Tab nachrückt. Lernen soll die App später
+aus den echten Zeiten im Verlauf, nicht aus Konstanten.
+
+**Fakten vom Nutzer:** Roggen-Anstellgut, 100 % Hydration, wöchentlich gefüttert (auf 50 g
+reduzieren + 50 g Roggenvollkorn + 50 g Wasser, 2–3 h warm, dann Kühlschrank). Anstellgut =
+10 % des Sauerteigmehls. Sauerteigmehl ≈ 20 % des Gesamtmehls bei Weizen (Roggenbrote mehr,
+das Rezept gewinnt). Liegt die Fütterung beim **Ansetzen** (nicht heute) mehr als 7 Tage
+zurück, wird vorher aufgefrischt (4–8 h); das Auffrischen zählt als Fütterung. Küche ≈ 24 °C,
+Backofen Ober-/Unterhitze mit Gusseisentopf, Kneter Halo Core. Arbeit inkl. Weg: Mo/Di/Do
+7–16, Mi/Fr 7–13; Schlaf 21–6 (`WEEK`, noch fest im Code). Brot darf bis ~24 h vor dem Essen
+fertig sein; je Rezept als Essfenster `eat:[min,max]` h nach dem Backen (Roggen frühestens 24 h).
+
+**Datenmodell:** `S = {tpl, flour, start, starter:{fed}, run}`. `run = {name, tpl, flour, eat,
+steps (eingefroren, skaliert, Auffrischen schon entschieden), done:[ms…]}`; `done[0]` = Start.
+`timeline(steps, done, start, now)`: erledigte Schritte mit echter Zeit, danach aufsummierte
+Mitte/Min/Max; der nächste offene Schritt wird nie in die Vergangenheit gelegt. Abläufe sind
+linear (parallele Vorstufen wie Brühstück gibt es noch nicht). Die iPhone-Regeln der Pizza-App
+gelten unverändert.
+
+**Testen:** `node test/brot.mjs` schneidet den Block zwischen den Marken `Logik` und
+`Oberfläche` aus und prüft Vorlagen (10-%-Regel, Hydration), Skalierung, Auffrischen,
+Zeitachse und Wochenplan in Zeitzone Europe/Luxembourg. Dieser Block fasst kein DOM an.
+
+**Reihenfolge (abgesprochen):** 1. laufender Teig + Anstellgut + drei Vorlagen (erledigt);
+2. Rezeptsammlung mit Bewertung (nochmal backen ja/vielleicht/nie wieder, Kinder, Notiz,
+optional Gare) und Import über festes Format aus einem Claude-Chat; 3. Rückwärtsplanung
+auf die Essenszeit mit Wochenplan — mehrere Wege mit Begründung zeigen, **nicht** nach einer
+Kennzahl sortieren; 4. Verlauf mit Lernen aus echten Zeiten, Kalender, Küchenmodus.

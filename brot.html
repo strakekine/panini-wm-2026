@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<!-- KEIN viewport-fit=cover — siehe CLAUDE.md, Abschnitt iPhone-Regeln der Pizza-App.
+     Ohne das Attribut legt iOS die Seite selbst in den sicheren Bereich. -->
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Brotplaner</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Brotplaner">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0e1116">
+<!-- iOS nimmt für das Home-Icon nur PNG, kein SVG -->
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,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">
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230e1116'/><text x='50' y='75' font-size='65' text-anchor='middle'>🍞</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --panel2:#1c232c; --line:#2a313c;
+    --text:#e8ecf1; --muted:#8a94a3; --gold:#e0a95b; --accent:#e0a95b;
+    --good:#3ecf6a; --warn:#ffa63d; --bad:#ff5d6b;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Barlow,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  header{position:sticky;top:0;z-index:20;background:rgba(22,27,34,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .wrap{max-width:880px;margin:0 auto;padding:14px 14px 10px}
+  h1{font-family:'Bebas Neue',sans-serif;letter-spacing:1.5px;margin:0;font-size:26px;color:var(--gold);line-height:1.1}
+  main{max-width:880px;margin:0 auto;padding:10px 12px 90px}
+
+  .seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{background:transparent;color:var(--muted);border:0;padding:9px 10px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;letter-spacing:.3px}
+  .seg button.on{background:var(--accent);color:#1a1300}
+  .bar{display:flex;gap:6px;margin-top:8px;align-items:center}
+  .bar .seg{flex:1}
+  .bar .seg button{flex:1;text-align:center}
+  .seg button .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--good);margin-left:6px;vertical-align:middle}
+  .seg button.on .dot{background:#1a1300}
+
+  /* Zwei Sichten, eine DOM — wie in der Pizza-App. */
+  body[data-view="run"] .v-plan{display:none}
+  body[data-view="plan"] .v-run, body[data-run="0"] .v-run{display:none}
+  body[data-view="plan"] .v-norun, body[data-run="1"] .v-norun{display:none}
+  /* Im Backen-Tab steht das laufende Brot vor dem Anstellgut */
+  body[data-view="run"] main{display:flex;flex-direction:column}
+  body[data-view="run"] main > .v-run, body[data-view="run"] main > .v-norun{order:-1}
+
+  .status{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+  .status .st{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 10px;min-width:0}
+  .status .st .l{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+  .status .st .v{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.8px;margin-top:2px;line-height:1.1}
+  .status .st .s{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.35}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin:12px 0;overflow:hidden}
+  .chead{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--panel2);border-bottom:1px solid var(--line)}
+  .chead h2{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1px;margin:0;flex:1;color:var(--text)}
+  .chead .hint{font-size:12px;color:var(--muted);text-align:right}
+  .cbody{padding:12px}
+
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:999px;padding:7px 12px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
+  .chip:active{transform:scale(.96)}
+  .chip.on{background:var(--accent);color:#1a1300;border-color:var(--accent)}
+
+  .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(142px,1fr));gap:10px}
+  label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:600}
+  input,select{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 11px;font-size:16px;font-family:inherit;width:100%;min-height:44px}
+  input:focus,select:focus{outline:none;border-color:var(--accent)}
+
+  table.ing{width:100%;border-collapse:collapse;font-size:15px}
+  table.ing td{padding:7px 0;border-bottom:1px solid var(--line)}
+  table.ing tr:last-child td{border-bottom:0}
+  table.ing td.n{text-align:right;font-family:Menlo,monospace;font-weight:700;font-size:15px;white-space:nowrap;padding-left:12px}
+  table.ing tr.sec td{font-family:'Bebas Neue',sans-serif;letter-spacing:1px;font-size:15px;color:var(--gold);padding-top:14px;border-bottom:1px solid var(--line)}
+  table.ing tr.sec:first-child td{padding-top:0}
+  table.ing tr.sum td{color:var(--muted);font-size:13px}
+
+  .steps{list-style:none;margin:0;padding:0}
+  .steps li{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+  .steps li:last-child{border-bottom:0}
+  .steps .tm{font-family:Menlo,monospace;font-size:13px;font-weight:700;color:var(--gold);min-width:78px;flex:none;padding-top:2px;line-height:1.35}
+  .steps .tm small{display:block;color:var(--muted);font-weight:600;font-size:11px}
+  .steps .tx{flex:1;font-size:15px;line-height:1.35;min-width:0}
+  .steps .tx b{font-weight:700}
+  .steps .tx small{display:block;color:var(--muted);font-size:12.5px;margin-top:3px;line-height:1.4}
+  .steps .tx .ig{color:var(--text);font-size:13px;margin-top:3px}
+  .steps .tx .sg{color:#9fc79a}
+  .steps .tx .bk{color:var(--warn)}
+  .steps li.done .tm{color:var(--good)}
+  .steps li.done .tx{color:var(--muted)}
+  .steps li.now{background:rgba(224,169,91,.08);margin:0 -12px;padding-left:12px;padding-right:12px}
+  .steps .ed{background:transparent;border:0;color:var(--muted);font-size:14px;cursor:pointer;padding:0 4px;font-family:inherit}
+
+  .msg{display:flex;gap:9px;padding:9px 10px;border-radius:10px;margin-bottom:8px;font-size:13.5px;line-height:1.4;align-items:flex-start}
+  .msg:last-child{margin-bottom:0}
+  .msg .ic{flex:none;font-size:14px;line-height:1.3}
+  .msg.warn{background:rgba(255,166,61,.1);border:1px solid rgba(255,166,61,.35)}
+  .msg.bad{background:rgba(255,93,107,.1);border:1px solid rgba(255,93,107,.35)}
+  .msg.good{background:rgba(62,207,106,.1);border:1px solid rgba(62,207,106,.3)}
+  .msg.info{background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+  .msg b{color:var(--text)}
+  .msgs:empty{display:none}
+  .msgs{margin-bottom:10px}
+
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  .btn{background:var(--gold);color:#1a1300;border:0;border-radius:10px;padding:11px 15px;font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1px;cursor:pointer;min-height:44px}
+  .btn.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+  .btn.sm{padding:8px 12px;font-size:15px}
+  .btn.wide{width:100%}
+  .btn:active{transform:scale(.97)}
+  .note{font-size:12px;color:var(--muted);line-height:1.45;margin-top:10px}
+  .big{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:.8px;line-height:1.15;margin:2px 0 4px}
+  .lbl{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.6px;text-transform:uppercase}
+  .txt{font-size:14.5px;line-height:1.45}
+  .txt + .txt{margin-top:6px}
+
+  .logrow{display:flex;gap:8px;align-items:center;font-size:13.5px;padding:8px 0;border-bottom:1px solid var(--line)}
+  .logrow:last-child{border-bottom:0}
+  .logrow .d{font-family:Menlo,monospace;color:var(--muted);font-size:12px;min-width:76px}
+  .logrow .r{flex:1;min-width:0}
+  .logrow .r small{display:block;color:var(--muted);font-size:12px}
+  .logrow button{background:transparent;border:0;color:var(--muted);cursor:pointer;font-family:inherit;font-size:15px;padding:6px}
+  .foot{color:var(--muted);font-size:11.5px;text-align:center;padding:18px 12px 0;line-height:1.5}
+</style>
+</head>
+<body data-view="plan" data-run="0">
+
+<header>
+  <div class="wrap">
+    <h1>BROTPLANER</h1>
+    <div class="bar">
+      <div class="seg" id="tabs"><button data-view="plan" id="tabPlan">PLANEN</button><button data-view="run" id="tabRun">BACKEN</button></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ Planen ============ -->
+<div class="card v-plan">
+  <div class="chead"><h2>Rezept</h2></div>
+  <div class="cbody">
+    <div class="chips" id="tplChips"></div>
+    <div class="note" id="tplDesc"></div>
+  </div>
+</div>
+
+<div class="card v-plan">
+  <div class="chead"><h2>Teig</h2><span class="hint" id="ingHint"></span></div>
+  <div class="cbody">
+    <div class="fields">
+      <label class="f">Mehl gesamt (g)
+        <input id="flour" type="number" inputmode="decimal" min="200" max="3000" step="50">
+      </label>
+    </div>
+    <table class="ing" id="ingTable" style="margin-top:12px"></table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="chead"><h2>Anstellgut</h2><span class="hint">Roggen, 100 %</span></div>
+  <div class="cbody" id="starterBox"></div>
+</div>
+
+<div class="card v-plan">
+  <div class="chead"><h2>Ablauf</h2><span class="hint" id="planHint"></span></div>
+  <div class="cbody">
+    <div class="fields">
+      <label class="f">Erster Schritt um (leer = jetzt)
+        <input id="startAt" type="datetime-local">
+      </label>
+    </div>
+    <div class="btnrow" style="margin-top:6px"><button class="chip" id="startNow">Jetzt</button></div>
+    <div class="msgs" id="planMsgs" style="margin-top:12px"></div>
+    <ul class="steps" id="planSteps"></ul>
+    <button class="btn wide" id="goBtn" style="margin-top:12px"></button>
+    <div class="note">Die Uhrzeiten sind die Mitte dessen, was das Rezept angibt; daneben klein der Rahmen.
+      Brot hält sich nicht an die Uhr — im Backen-Tab trägst Du jeden Schritt ein, wenn Du ihn machst,
+      und der Rest des Plans rückt nach.</div>
+  </div>
+</div>
+
+<!-- ============ Backen ============ -->
+<div class="card v-run">
+  <div class="chead"><h2 id="runTitle">Läuft</h2></div>
+  <div class="cbody" id="runBox"></div>
+</div>
+
+<div class="card v-run">
+  <div class="chead"><h2>Ablauf</h2></div>
+  <div class="cbody"><ul class="steps" id="runSteps"></ul></div>
+</div>
+
+<div class="card v-norun">
+  <div class="cbody">
+    <div class="txt">Gerade ist kein Brot in Arbeit.</div>
+    <div class="note">Im Planen-Tab ein Rezept wählen und mit „Los" den ersten Schritt eintragen.</div>
+  </div>
+</div>
+
+<div class="card v-plan">
+  <div class="chead"><h2>Verlauf</h2></div>
+  <div class="cbody" id="logBox"></div>
+</div>
+
+<div class="foot">Brotplaner · Daten bleiben nur auf diesem Gerät</div>
+</main>
+
+<script>
+/* ===================== Logik =====================
+   Alles bis zur Marke "Oberfläche" fasst kein DOM an und wird von test/brot.mjs
+   ausgeschnitten und geprüft. Kein Gärmodell: Die Zeiten kommen aus dem Rezept,
+   als Spanne [min, max] in Stunden. Die Spannen sind der Spielraum, den der Planer
+   später braucht, und das, was im Backen-Tab nachrückt. */
+const H = 3600e3, DAY = 24*H;
+const BASE = 500;                 /* alle Vorlagen sind für 500 g Mehl geschrieben */
+const REFRESH_DAYS = 7;           /* länger im Kühlschrank → vor dem Sauerteig auffrischen */
+
+/* Wochenplan: Zeiten, in denen kein Handgriff möglich ist (Stunden, Wanduhr).
+   Arbeit inkl. Weg: los um 7, zu Hause Mo/Di/Do um 16, Mi/Fr um 13. Schlaf 21–6.
+   Noch fest eingetragen; eine Einstellung dafür kommt mit dem Planer. */
+const WEEK = {
+  work: { 1:[7,16], 2:[7,16], 3:[7,13], 4:[7,16], 5:[7,13] },
+  sleep: [21, 6]
+};
+
+/* Schritt: h = [min,max] Stunden bis zum nächsten Schritt, hand = Minuten Arbeit,
+   what = was zu tun ist, sign = woran man merkt, dass es weitergeht,
+   ing = Zutaten (k: mehl | wasser | salz | hefe | asg | sd), sour = Sauerteig-Ansatz. */
+const TPL = [
+  { id:"weizen", name:"Weizenbrot mit Sauerteig", eat:[2,30],
+    desc:"Weizenbrot mit 20 % Roggensauerteig, Stückgare über Nacht im Kühlschrank, gebacken im Gusseisentopf. "+
+         "Der Kühlschrank ist der Puffer: 12–20 h, gebacken wird, wenn Du Zeit hast. Schmeckt am Backtag und am Tag danach.",
+    steps:[
+      { title:"Sauerteig ansetzen", sour:true, h:[10,14], hand:5,
+        what:"Anstellgut, Mehl und lauwarmes Wasser glatt verrühren, abdecken, bei Küchentemperatur stehen lassen.",
+        sign:"verdoppelt, gewölbt, voller Blasen, riecht säuerlich-frisch",
+        ing:[{n:"Roggenvollkornmehl",g:100,k:"mehl"},{n:"Wasser, lauwarm",g:100,k:"wasser"},{n:"Anstellgut",g:10,k:"asg"}] },
+      { title:"Hauptteig kneten", h:[0.75,0.75], hand:20,
+        what:"Halo Core: 5 min langsam mischen, dann 5–7 min schneller, bis sich der Teig vom Schüsselrand löst. "+
+             "Fenstertest: ein Stück dünn ziehen — scheint Licht durch, ohne dass es reißt, ist er fertig. "+
+             "Dann abgedeckt ruhen lassen (Stockgare = Gare des ganzen Teigs vor dem Formen).",
+        ing:[{n:"Sauerteig (ganz)",g:210,k:"sd"},{n:"Weizenmehl 550",g:400,k:"mehl"},{n:"Wasser, kühl",g:250,k:"wasser"},{n:"Salz",g:10,k:"salz"}] },
+      { title:"1. Dehnen und falten", h:[0.75,0.75], hand:3,
+        what:"Mit nasser Hand den Teig an einer Seite hochziehen und über die Mitte legen, Schüssel drehen, viermal rundherum. Strafft den Teig ohne Kneten." },
+      { title:"2. Dehnen und falten", h:[1.5,2.5], hand:3,
+        what:"Wie eben. Danach in Ruhe lassen.",
+        sign:"Teig etwa um die Hälfte größer, Oberfläche gewölbt, Blasen am Rand" },
+      { title:"Formen, in den Kühlschrank", h:[12,20], hand:15,
+        what:"Auf leicht bemehlter Fläche rund formen und straff ziehen. Mit dem Schluss (der Naht) nach oben in den bemehlten Gärkorb, abdecken, in den Kühlschrank. "+
+             "Dort läuft die Stückgare (Gare nach dem Formen) langsam weiter." },
+      { title:"Ofen mit Topf vorheizen", h:[0.75,1], hand:2,
+        what:"Gusseisentopf mit Deckel in den Ofen, 250 °C Ober-/Unterhitze. Der Teig bleibt so lange im Kühlschrank." },
+      { title:"Backen", h:[0.75,0.75], hand:10,
+        what:"Teig direkt aus dem Kühlschrank auf Backpapier stürzen, einmal längs einschneiden, mit dem Papier in den heißen Topf. "+
+             "20 min mit Deckel bei 250 °C, dann ohne Deckel 25–30 min bei 230 °C, bis die Kruste kräftig braun ist.",
+        sign:"klingt hohl, wenn man von unten klopft" },
+      { title:"Aus dem Ofen", h:[0,0], hand:2,
+        what:"Auf ein Gitter, nicht zudecken. Nicht warm anschneiden — innen gart es noch." }
+    ]},
+  { id:"roggen", name:"Roggenmischbrot", eat:[24,96],
+    desc:"60 % Roggen, 40 % Weizen, 40 % des Mehls versäuert. Roggenteig wird nicht geknetet, nur gemischt, und bleibt klebrig — das ist richtig. "+
+         "Erst am Tag nach dem Backen anschneiden, vorher ist die Krume schmierig. Hält dann 3–4 Tage.",
+    steps:[
+      { title:"Sauerteig ansetzen", sour:true, h:[10,14], hand:5,
+        what:"Anstellgut, Mehl und lauwarmes Wasser glatt verrühren, abdecken, bei Küchentemperatur stehen lassen.",
+        sign:"deutlich aufgegangen, Oberfläche rissig und blasig, riecht kräftig säuerlich",
+        ing:[{n:"Roggenvollkornmehl",g:200,k:"mehl"},{n:"Wasser, lauwarm",g:200,k:"wasser"},{n:"Anstellgut",g:20,k:"asg"}] },
+      { title:"Hauptteig mischen", h:[0.5,0.75], hand:15,
+        what:"Halo Core: nur mischen, 6–8 min langsam. Nicht schnell kneten, sonst wird Roggenteig schmierig. "+
+             "Abgedeckt ruhen lassen (Stockgare).",
+        ing:[{n:"Sauerteig (ganz)",g:420,k:"sd"},{n:"Roggenmehl 1150",g:100,k:"mehl"},{n:"Weizenmehl 1050",g:200,k:"mehl"},{n:"Wasser, warm (ca. 35 °C)",g:170,k:"wasser"},{n:"Salz",g:10,k:"salz"}] },
+      { title:"Formen, in den Gärkorb", h:[0.25,0.5], hand:10,
+        what:"Mit nassen Händen rund formen, mit dem Schluss nach unten in den gut bemehlten Gärkorb. "+
+             "Beim Stürzen liegt die bemehlte Seite oben und reißt beim Backen von selbst schön auf." },
+      { title:"Ofen mit Topf vorheizen", h:[0.75,1], hand:2,
+        what:"Gusseisentopf mit Deckel in den Ofen, 250 °C Ober-/Unterhitze. Der Teig gärt währenddessen weiter.",
+        sign:"Oberfläche zeigt feine Risse, Teig sichtbar größer — lieber etwas zu früh als zu spät" },
+      { title:"Backen", h:[1,1], hand:10,
+        what:"Teig auf Backpapier stürzen, mit dem Papier in den heißen Topf. 15 min mit Deckel bei 250 °C, dann ohne Deckel ca. 45 min bei 200 °C.",
+        sign:"klingt hohl, wenn man von unten klopft" },
+      { title:"Aus dem Ofen", h:[0,0], hand:2,
+        what:"Auf ein Gitter, nicht zudecken. Frühestens morgen anschneiden." }
+    ]},
+  { id:"hefe", name:"Weizenbrot mit Frischhefe", eat:[1.5,12],
+    desc:"Ohne Sauerteig, an einem Nachmittag: rund 3,5 h vom Kneten bis aus dem Ofen, dazu 1,5 h Auskühlen. Mildes, weiches Weißbrot. "+
+         "Am besten am Backtag essen — Hefebrot wird schneller altbacken als Sauerteigbrot.",
+    steps:[
+      { title:"Teig kneten", h:[0.75,0.75], hand:20,
+        what:"Hefe im Wasser auflösen. Halo Core: 5 min langsam, dann 5–7 min schneller, bis der Teig glatt ist und sich vom Rand löst (Fenstertest). Abgedeckt ruhen lassen.",
+        ing:[{n:"Weizenmehl 550",g:500,k:"mehl"},{n:"Wasser, kühl",g:340,k:"wasser"},{n:"Salz",g:10,k:"salz"},{n:"Frischhefe",g:5,k:"hefe"}] },
+      { title:"Dehnen und falten", h:[0.75,1.25], hand:3,
+        what:"Mit nasser Hand den Teig an einer Seite hochziehen und über die Mitte legen, viermal rundherum.",
+        sign:"Teig fast doppelt so groß" },
+      { title:"Formen, in den Gärkorb", h:[0.1,0.25], hand:10,
+        what:"Rund formen, straff ziehen, mit dem Schluss nach oben in den bemehlten Gärkorb, abdecken." },
+      { title:"Ofen mit Topf vorheizen", h:[0.75,1], hand:2,
+        what:"Gusseisentopf mit Deckel in den Ofen, 250 °C Ober-/Unterhitze. Der Teig gärt währenddessen weiter.",
+        sign:"Fingerprobe: eine Delle füllt sich langsam und nicht ganz wieder" },
+      { title:"Backen", h:[0.75,0.75], hand:10,
+        what:"Auf Backpapier stürzen, einschneiden, mit dem Papier in den heißen Topf. 20 min mit Deckel bei 250 °C, dann ohne Deckel 20–25 min bei 220 °C.",
+        sign:"goldbraun, klingt hohl beim Klopfen" },
+      { title:"Aus dem Ofen", h:[0,0], hand:2,
+        what:"Auf ein Gitter, nicht zudecken, mindestens 1,5 h auskühlen lassen." }
+    ]}
+];
+
+/* Auffrischen = seine normale Fütterung, nur bleibt das Glas draussen, bis es reif ist.
+   Mengen fest, nicht mit dem Teig skaliert. */
+const REFRESH = { title:"Anstellgut auffrischen", refresh:true, h:[4,8], hand:5,
+  what:"Wie beim wöchentlichen Füttern: auf 50 g reduzieren, 50 g Mehl und 50 g lauwarmes Wasser dazu. "+
+       "Diesmal nicht in den Kühlschrank, sondern in der Küche stehen lassen. Zählt als Fütterung.",
+  sign:"verdoppelt, blasig, riecht säuerlich-frisch",
+  ing:[{n:"Anstellgut, reduziert auf",g:50,k:"fix"},{n:"Roggenvollkornmehl",g:50,k:"fix"},{n:"Wasser, lauwarm",g:50,k:"fix"}] };
+
+function tplById(id){ return TPL.find(t => t.id === id) || TPL[0]; }
+function mid(h){ return (h[0] + h[1]) / 2; }
+
+/* Schritte für einen Teig: skaliert auf die Mehlmenge, mit oder ohne Auffrischen. */
+function makeSteps(tpl, flour, refresh){
+  const f = flour / BASE;
+  const steps = tpl.steps.map(s => Object.assign({}, s, {
+    h: s.h.slice(),
+    ing: s.ing ? s.ing.map(i => ({ n:i.n, k:i.k, g: i.g * f })) : undefined
+  }));
+  if(refresh && steps.some(s => s.sour)){
+    const i = steps.findIndex(s => s.sour);
+    steps.splice(i, 0, Object.assign({}, REFRESH, { h:REFRESH.h.slice(), ing:REFRESH.ing.map(x => Object.assign({}, x)) }));
+  }
+  return steps;
+}
+
+/* Zeitachse. done = echte Zeiten der erledigten Schritte (ms). Ohne erledigte Schritte
+   beginnt Schritt 0 bei start. Danach je Schritt t (Mitte), lo und hi (Rahmen aus dem
+   Rezept, aufsummiert ab dem letzten erledigten Schritt). Mit now (Backen-Tab) kann der
+   nächste offene Schritt nicht in der Vergangenheit liegen — ist er überfällig, rückt
+   alles danach mit. */
+function timeline(steps, done, start, now){
+  const out = [];
+  for(let i = 0; i < steps.length; i++){
+    if(i < done.length){ out.push({ t:done[i], lo:done[i], hi:done[i], done:true }); continue; }
+    let r;
+    if(i === 0) r = { t:start, lo:start, hi:start, done:false };
+    else {
+      const p = out[i-1], h = steps[i-1].h;
+      r = { t:p.t + mid(h)*H, lo:p.lo + h[0]*H, hi:p.hi + h[1]*H, done:false };
+    }
+    if(now !== undefined && i === done.length){
+      r.t = Math.max(r.t, now); r.lo = Math.max(r.lo, now); r.hi = Math.max(r.hi, now);
+    }
+    out.push(r);
+  }
+  return out;
+}
+
+/* Vorschau eines Plans: entscheidet, ob vorher aufgefrischt werden muss. Gemessen wird
+   am Zeitpunkt des Sauerteig-Ansatzes, nicht an heute. fed = letzte Fütterung (ms) oder null. */
+function planFor(tpl, flour, start, fed){
+  let steps = makeSteps(tpl, flour, false);
+  let tl = timeline(steps, [], start);
+  const si = steps.findIndex(s => s.sour);
+  let refresh = false;
+  if(si >= 0 && fed) refresh = tl[si].t - fed > REFRESH_DAYS*DAY;
+  if(refresh){ steps = makeSteps(tpl, flour, true); tl = timeline(steps, [], start); }
+  return { steps, tl, refresh };
+}
+
+/* Handgriff in Arbeit oder Schlaf? Gibt "Arbeitszeit", "Schlafenszeit" oder null. */
+function blockAt(ms, week){
+  week = week || WEEK;
+  const d = new Date(ms), h = d.getHours() + d.getMinutes()/60;
+  const sl = week.sleep;
+  if(sl && (sl[0] > sl[1] ? (h >= sl[0] || h < sl[1]) : (h >= sl[0] && h < sl[1]))) return "Schlafenszeit";
+  const w = week.work[d.getDay()];
+  if(w && h >= w[0] && h < w[1]) return "Arbeitszeit";
+  return null;
+}
+/* Erster freie Zeitpunkt in [lo, hi], in 15-min-Schritten; null, wenn keiner. */
+function firstFree(lo, hi, week){
+  for(let t = lo; t <= hi; t += 15*60e3) if(!blockAt(t, week)) return t;
+  return null;
+}
+
+/* Zutaten zusammengefasst: Gesamtmehl, Gesamtwasser, Hydration (Wasser : Mehl).
+   Anstellgut und der fertige Sauerteig zählen nicht doppelt; das Auffrischen gar nicht. */
+function totals(steps){
+  let mehl = 0, wasser = 0;
+  steps.forEach(s => (s.ing||[]).forEach(i => {
+    if(i.k === "mehl") mehl += i.g;
+    if(i.k === "wasser") wasser += i.g;
+  }));
+  return { mehl, wasser, hyd: mehl ? wasser / mehl : 0 };
+}
+
+/* Tage seit der Fütterung, nach Kalendertagen (Fütterung gestern Abend = Tag 1). */
+function starterDays(fed, now){
+  if(!fed) return null;
+  const a = new Date(fed); a.setHours(0,0,0,0);
+  const b = new Date(now); b.setHours(0,0,0,0);
+  return Math.round((b - a) / DAY);
+}
+
+/* "HH:MM" → letzter Zeitpunkt mit dieser Uhrzeit, der nicht in der Zukunft liegt.
+   null, wenn er vor notBefore läge. */
+function parseClock(str, now, notBefore){
+  const m = String(str||"").trim().match(/^(\d{1,2})[:.,h ]?(\d{2})$/);
+  if(!m) return null;
+  const hh = +m[1], mm = +m[2];
+  if(hh > 23 || mm > 59) return null;
+  const d = new Date(now); d.setHours(hh, mm, 0, 0);
+  let t = d.getTime();
+  if(t > now) t -= DAY;
+  if(notBefore !== undefined && t < notBefore) return null;
+  return t;
+}
+
+/* ===================== Oberfläche ===================== */
+const KEY = "brot_planer_v1";
+const $ = id => document.getElementById(id);
+const WD = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+const p2 = n => String(n).padStart(2,"0");
+function fmtClock(ms){ const d = new Date(ms); return p2(d.getHours())+":"+p2(d.getMinutes()); }
+function round5(ms){ return Math.round(ms / 300e3) * 300e3; }
+function fmtWhen(ms, ref){
+  const d = new Date(ms), r = new Date(ref === undefined ? Date.now() : ref);
+  return (d.toDateString() === r.toDateString() ? "" : WD[d.getDay()]+" ")+fmtClock(ms);
+}
+function fmtDay(ms){ const d = new Date(ms); return WD[d.getDay()]+" "+d.getDate()+"."+(d.getMonth()+1)+"."; }
+function fmtG(v){ return v >= 20 ? Math.round(v)+" g" : (Math.round(v*10)/10).toString().replace(".",",")+" g"; }
+function fmtH(v){
+  const tm = Math.round(v*60), h = Math.floor(tm/60), m = tm - 60*h;
+  if(m === 0) return h+" h";
+  if(h === 0) return m+" min";
+  return h+" h "+m+" min";
+}
+function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+function typing(){ const a = document.activeElement; return !!a && (a.tagName === "INPUT" || a.tagName === "SELECT" || a.tagName === "TEXTAREA"); }
+function msg(kind, ic, html){ return '<div class="msg '+kind+'"><span class="ic">'+ic+'</span><span>'+html+'</span></div>'; }
+
+/* ===================== Zustand ===================== */
+function defaults(){ return { tpl:"weizen", flour:500, start:"", starter:{ fed:null }, run:null }; }
+let S = defaults();
+let VIEW = "plan";
+
+/* Alles, was aus localStorage kommt, läuft hier durch. */
+function sanitize(s){
+  const d = defaults();
+  if(!s || typeof s !== "object") return d;
+  if(!TPL.some(t => t.id === s.tpl)) s.tpl = d.tpl;
+  s.flour = Math.min(3000, Math.max(200, Number(s.flour) || d.flour));
+  if(typeof s.start !== "string" || (s.start && isNaN(new Date(s.start)))) s.start = "";
+  if(!s.starter || typeof s.starter !== "object") s.starter = { fed:null };
+  if(typeof s.starter.fed !== "number" || !isFinite(s.starter.fed)) s.starter.fed = null;
+  const r = s.run;
+  const ok = r && typeof r === "object" && Array.isArray(r.steps) && r.steps.length &&
+    r.steps.every(st => st && typeof st.title === "string" && Array.isArray(st.h) && st.h.length === 2 && st.h.every(Number.isFinite)) &&
+    Array.isArray(r.done) && r.done.length >= 1 && r.done.length <= r.steps.length &&
+    r.done.every((t,i) => Number.isFinite(t) && (i === 0 || t >= r.done[i-1]));
+  if(!ok) s.run = null;
+  else if(!Array.isArray(r.eat) || r.eat.length !== 2) r.eat = [2, 30];
+  return s;
+}
+function persist(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+function getLog(){ try { const l = JSON.parse(localStorage.getItem(KEY+"_log")||"[]"); return Array.isArray(l) ? l : []; } catch(e){ return []; } }
+function setLog(l){ try { localStorage.setItem(KEY+"_log", JSON.stringify(l.slice(-100))); } catch(e){} }
+
+(function boot(){
+  try { S = sanitize(JSON.parse(localStorage.getItem(KEY)||"null")); } catch(e){ S = defaults(); }
+  /* Eine Startzeit, die schon vorbei ist, hilft niemandem — dann gilt wieder "jetzt". */
+  if(S.start && new Date(S.start).getTime() < Date.now() - 5*60e3) S.start = "";
+  VIEW = S.run ? "run" : "plan";
+})();
+
+/* ===================== Render ===================== */
+let PLAN = null;
+function startMs(){ return S.start ? new Date(S.start).getTime() : Date.now(); }
+
+function render(){
+  document.body.dataset.view = VIEW;
+  document.body.dataset.run = S.run ? "1" : "0";
+  $("tabPlan").classList.toggle("on", VIEW === "plan");
+  $("tabRun").classList.toggle("on", VIEW === "run");
+  $("tabRun").innerHTML = "BACKEN" + (S.run ? '<span class="dot"></span>' : "");
+
+  const tpl = tplById(S.tpl);
+  PLAN = planFor(tpl, S.flour, startMs(), S.starter.fed);
+
+  /* Eingaben: nie .value auf ein fokussiertes Feld (iPhone-Regel) */
+  if(document.activeElement !== $("flour")) $("flour").value = S.flour;
+  if(document.activeElement !== $("startAt")) $("startAt").value = S.start;
+
+  $("tplChips").innerHTML = TPL.map(t =>
+    '<button class="chip'+(t.id === S.tpl ? " on" : "")+'" data-tpl="'+t.id+'">'+esc(t.name)+'</button>').join("");
+  $("tplDesc").textContent = tpl.desc;
+
+  renderIngredients(PLAN.steps);
+  renderStarter();
+  renderPlan(tpl);
+  renderRun();
+  renderLog();
+}
+
+function renderIngredients(steps){
+  let h = "";
+  steps.forEach(s => {
+    if(!s.ing) return;
+    h += '<tr class="sec"><td colspan="2">'+esc(s.title)+'</td></tr>';
+    s.ing.forEach(i => { h += '<tr><td>'+esc(i.n)+'</td><td class="n">'+fmtG(i.g)+'</td></tr>'; });
+  });
+  const t = totals(steps);
+  h += '<tr class="sum"><td>Mehl gesamt · Wasser gesamt</td><td class="n">'+fmtG(t.mehl)+" · "+fmtG(t.wasser)+'</td></tr>';
+  $("ingTable").innerHTML = h;
+  $("ingHint").textContent = "Hydration "+Math.round(t.hyd*100)+" %";
+}
+
+function renderStarter(){
+  const fed = S.starter.fed, now = Date.now();
+  const days = starterDays(fed, now);
+  let h = "";
+  if(fed === null){
+    h += '<div class="txt">Noch nicht eingetragen, wann Du zuletzt gefüttert hast.</div>'+
+         '<div class="note">Ohne das Datum weiß die App nicht, ob vor dem Sauerteig aufgefrischt werden muss.</div>';
+  } else {
+    const due = fed + REFRESH_DAYS*DAY;
+    h += '<div class="lbl">Zuletzt gefüttert</div><div class="big">'+fmtDay(fed)+' · Tag '+days+'</div>';
+    if(days > REFRESH_DAYS) h += msg("warn","⚠","<b>Füttern überfällig</b> (seit "+fmtDay(due)+"). Vor dem nächsten Sauerteig wird aufgefrischt.");
+    else if(days === REFRESH_DAYS) h += msg("warn","●","<b>Heute füttern.</b> Setzt Du heute einen Sauerteig an, nimm dafür den Rest, den Du beim Reduzieren auf 50 g wegnimmst — dann sparst Du das Auffrischen.");
+    else h += '<div class="note">Nächste Fütterung: '+fmtDay(due)+' Liegt der Sauerteig-Ansatz mehr als '+REFRESH_DAYS+' Tage nach der Fütterung, plant die App vorher das Auffrischen ein.</div>';
+  }
+  h += '<div class="btnrow"><button class="btn sm" id="fedToday">HEUTE GEFÜTTERT</button>'+
+       '<button class="btn ghost sm" id="fedOther">ANDERES DATUM</button></div>';
+  $("starterBox").innerHTML = h;
+}
+
+/* Ein Schritt in der Liste. mode: "plan" | "run". */
+function stepItem(s, r, i, mode, cls, now){
+  let tm;
+  if(r.done) tm = "✓ "+fmtWhen(r.t, now);
+  else {
+    tm = fmtWhen(round5(r.t), now);
+    if(r.hi - r.lo >= 10*60e3) tm += "<small>"+fmtClock(round5(r.lo))+"–"+fmtClock(round5(r.hi))+"</small>";
+  }
+  if(mode === "run" && cls === "last") tm += ' <button class="ed" data-edit="1" title="Uhrzeit ändern">✎</button>';
+  let tx = "<b>"+esc(s.title)+"</b>";
+  if(!(mode === "run" && r.done)){
+    if(s.ing) tx += '<small class="ig">'+s.ing.map(x => esc(x.n)+" "+fmtG(x.g)).join(" · ")+"</small>";
+    tx += "<small>"+esc(s.what)+(s.hand >= 10 ? " (≈ "+s.hand+" min Arbeit)" : "")+"</small>";
+    if(s.sign) tx += '<small class="sg">Weiter, wenn: '+esc(s.sign)+"</small>";
+    if(s.h[1] > 0 && s.h[0] !== s.h[1]) tx += "<small>Danach "+fmtH(s.h[0])+"–"+fmtH(s.h[1])+" bis zum nächsten Schritt</small>";
+    const b = !r.done && blockAt(r.t);
+    if(b){
+      const free = firstFree(r.lo, r.hi);
+      tx += '<small class="bk">⚠ fällt in die '+b+(free ? " — im Rahmen des Rezepts ginge es ab "+fmtWhen(free, now) : " — der ganze Rahmen liegt darin")+"</small>";
+    }
+  }
+  return '<li class="'+(r.done ? "done " : "")+(cls === "now" ? "now" : "")+'"><div class="tm">'+tm+'</div><div class="tx">'+tx+"</div></li>";
+}
+
+function renderPlan(tpl){
+  const now = Date.now(), steps = PLAN.steps, tl = PLAN.tl;
+  $("planSteps").innerHTML = steps.map((s,i) => stepItem(s, tl[i], i, "plan", "", now)).join("");
+  const end = tl[tl.length-1];
+  $("planHint").textContent = "aus dem Ofen ≈ "+fmtWhen(round5(end.t), now);
+
+  const m = [];
+  if(PLAN.refresh) m.push(msg("info","↻","Die letzte Fütterung liegt beim Ansetzen mehr als "+REFRESH_DAYS+" Tage zurück — darum steht vorne <b>Anstellgut auffrischen</b>."));
+  if(S.starter.fed === null && steps.some(s => s.sour)) m.push(msg("warn","?","Trag beim Anstellgut ein, wann Du zuletzt gefüttert hast — sonst weiß die App nicht, ob aufgefrischt werden muss."));
+  const eat0 = end.t + tpl.eat[0]*H, eat1 = end.t + tpl.eat[1]*H;
+  m.push(msg("good","🍞","Aus dem Ofen ≈ <b>"+fmtWhen(round5(end.t), now)+"</b> (Rahmen "+fmtWhen(round5(end.lo), now)+"–"+fmtWhen(round5(end.hi), now)+"). "+
+    "Anschneiden ab <b>"+fmtWhen(round5(eat0), now)+"</b>, gut bis etwa "+fmtWhen(round5(eat1), now)+"."));
+  const clash = steps.filter((s,i) => blockAt(tl[i].t)).length;
+  if(clash) m.push(msg("warn","⚠", clash === 1 ? "Ein Handgriff fällt in Arbeits- oder Schlafenszeit (unten markiert)." :
+    clash+" Handgriffe fallen in Arbeits- oder Schlafenszeit (unten markiert). Probier eine andere Startzeit."));
+  $("planMsgs").innerHTML = m.join("");
+  $("goBtn").textContent = "LOS — „"+steps[0].title.toUpperCase()+"“ JETZT ERLEDIGT";
+}
+
+function renderRun(){
+  const r = S.run;
+  if(!r){ $("runBox").innerHTML = ""; $("runSteps").innerHTML = ""; return; }
+  const now = Date.now();
+  const tl = timeline(r.steps, r.done, r.done[0], now);
+  const a = r.done.length - 1, last = r.steps.length - 1;
+  $("runTitle").textContent = r.name;
+  $("runSteps").innerHTML = r.steps.map((s,i) =>
+    stepItem(s, tl[i], i, "run", i === a ? "last" : (i === a+1 ? "now" : ""), now)).join("");
+
+  const end = tl[last];
+  let h = '<div class="status">'+
+    '<div class="st"><div class="l">Aus dem Ofen</div><div class="v">'+(end.done ? "✓ " : "≈ ")+fmtWhen(round5(end.t), now)+'</div>'+
+      (end.done ? "" : '<div class="s">Rahmen '+fmtWhen(round5(end.lo), now)+"–"+fmtWhen(round5(end.hi), now)+"</div>")+'</div>'+
+    '<div class="st"><div class="l">Anschneiden ab</div><div class="v">'+fmtWhen(round5(end.t + r.eat[0]*H), now)+'</div>'+
+      '<div class="s">gut bis ≈ '+fmtWhen(round5(end.t + r.eat[1]*H), now)+"</div></div></div>";
+
+  if(a >= last){
+    h += msg("good","🍞","<b>Fertig.</b> "+esc(r.steps[last].what));
+    h += '<div class="btnrow"><button class="btn" id="finishBtn">ABSCHLIESSEN</button>'+
+         '<button class="btn ghost sm" id="undoBtn">LETZTEN ZURÜCKNEHMEN</button></div>'+
+         '<div class="note">Abschließen legt das Brot mit allen echten Zeiten im Verlauf ab. Bewerten kommt im nächsten Ausbauschritt.</div>';
+  } else {
+    const cur = r.steps[a], nx = r.steps[a+1], tn = tl[a+1];
+    h += '<div class="lbl">Seit '+fmtWhen(r.done[a], now)+' ('+fmtH((now - r.done[a])/H)+')</div>'+
+         '<div class="txt">'+esc(cur.title)+' erledigt.</div>';
+    h += '<div class="lbl" style="margin-top:10px">Als Nächstes</div><div class="big">'+esc(nx.title)+'</div>';
+    if(now < tn.lo) h += '<div class="txt">Frühestens <b>'+fmtWhen(round5(tn.lo), now)+'</b>, am ehesten '+fmtWhen(round5(tn.t), now)+
+                         ', spätestens '+fmtWhen(round5(tn.hi), now)+' — noch mindestens '+fmtH((tn.lo - now)/H)+'.</div>';
+    else if(tl[a].t + cur.h[1]*H >= now) h += msg("good","●","<b>Jetzt im Zeitfenster</b> (bis "+fmtWhen(round5(tl[a].t + cur.h[1]*H), now)+"). "+
+                         (cur.sign ? "Prüf: "+esc(cur.sign)+"." : "Du kannst loslegen."));
+    else h += msg("warn","⚠","Laut Rezept wäre es spätestens um <b>"+fmtWhen(round5(tl[a].t + cur.h[1]*H), now)+"</b> gewesen. "+
+                         (cur.sign ? "Entscheidend ist der Teig: "+esc(cur.sign)+"." : "Mach weiter, sobald Du kannst."));
+    if(cur.sign && now < tn.lo) h += '<div class="txt" style="color:#9fc79a">Weiter, wenn: '+esc(cur.sign)+'</div>';
+    const b = blockAt(tn.t);
+    if(b && now < tn.t){
+      const free = firstFree(tn.lo, tn.hi);
+      h += msg("warn","⚠","Das fällt in die "+b+(free ? ". Im Rahmen des Rezepts ginge es ab <b>"+fmtWhen(free, now)+"</b>." : ", und der ganze Rahmen auch. Plan einen Puffer ein, etwa die Kühlschrankgare verlängern."));
+    }
+    h += '<button class="btn wide" id="doneBtn" style="margin-top:12px">'+esc(nx.title.toUpperCase())+' — ERLEDIGT</button>'+
+         '<div class="btnrow"><button class="btn ghost sm" id="doneAtBtn">ANDERE UHRZEIT</button>'+
+         '<button class="btn ghost sm" id="undoBtn">LETZTEN ZURÜCKNEHMEN</button>'+
+         '<button class="btn ghost sm" id="dropBtn">VERWERFEN</button></div>';
+  }
+  $("runBox").innerHTML = h;
+}
+
+function renderLog(){
+  const l = getLog();
+  if(!l.length){ $("logBox").innerHTML = '<div class="note" style="margin-top:0">Noch keine Brote. Jedes abgeschlossene Brot landet hier mit seinen echten Zeiten.</div>'; return; }
+  $("logBox").innerHTML = l.map((e,i) => ({e,i})).reverse().map(({e,i}) => {
+    const dur = (e.times[e.times.length-1] - e.times[0]) / H;
+    return '<div class="logrow"><span class="d">'+fmtDay(e.times[0])+'</span><span class="r">'+esc(e.name)+
+      '<small>'+fmtG(e.flour)+' Mehl · '+fmtH(dur)+' vom ersten Schritt bis aus dem Ofen</small></span>'+
+      '<button data-del="'+i+'" title="Löschen">✕</button></div>';
+  }).join("");
+}
+
+/* ===================== Aktionen ===================== */
+function markStarterIfRefresh(step, t){ if(step.refresh) S.starter.fed = t; }
+
+function startRun(){
+  if(S.run && !confirm("Es läuft schon ein Brot („"+S.run.name+"“). Verwerfen und neu anfangen?")) return;
+  const tpl = tplById(S.tpl), now = Date.now();
+  const p = planFor(tpl, S.flour, now, S.starter.fed);
+  S.run = { id:String(now), name:tpl.name, tpl:tpl.id, flour:S.flour, eat:tpl.eat.slice(), steps:p.steps, done:[now] };
+  markStarterIfRefresh(p.steps[0], now);
+  S.start = "";
+  VIEW = "run";
+  persist(); render(); window.scrollTo(0,0);
+}
+function markDone(t){
+  const r = S.run; if(!r || r.done.length >= r.steps.length) return;
+  r.done.push(t);
+  markStarterIfRefresh(r.steps[r.done.length-1], t);
+  persist(); render();
+}
+function askClock(text, notBefore){
+  const v = prompt(text+"\nUhrzeit als HH:MM, z. B. 18:40");
+  if(v === null) return null;
+  const t = parseClock(v, Date.now(), notBefore);
+  if(t === null) alert("Das ging nicht: Uhrzeit nicht erkannt, oder sie liegt vor dem vorigen Schritt.");
+  return t;
+}
+
+document.addEventListener("click", ev => {
+  const b = ev.target.closest("button"); if(!b) return;
+  const r = S.run;
+  if(b.dataset.view){ VIEW = b.dataset.view; render(); window.scrollTo(0,0); return; }
+  if(b.dataset.tpl){ S.tpl = b.dataset.tpl; persist(); render(); return; }
+  if(b.id === "startNow"){ S.start = ""; $("startAt").blur(); persist(); render(); return; }
+  if(b.id === "goBtn"){ startRun(); return; }
+  if(b.id === "fedToday"){ S.starter.fed = Date.now(); persist(); render(); return; }
+  if(b.id === "fedOther"){
+    const v = prompt("Wann hast Du zuletzt gefüttert?\nDatum als TT.MM, z. B. 4.10");
+    if(v === null) return;
+    const m = v.trim().match(/^(\d{1,2})\.(\d{1,2})\.?$/);
+    if(!m){ alert("Datum nicht erkannt."); return; }
+    const now = new Date(), d = new Date(now.getFullYear(), +m[2]-1, +m[1], 12, 0);
+    if(d > now) d.setFullYear(d.getFullYear()-1);
+    S.starter.fed = d.getTime(); persist(); render(); return;
+  }
+  if(!r) return;
+  if(b.id === "doneBtn"){ markDone(Date.now()); return; }
+  if(b.id === "doneAtBtn"){
+    const t = askClock("Wann hast Du „"+r.steps[r.done.length].title+"“ gemacht?", r.done[r.done.length-1]);
+    if(t !== null) markDone(t);
+    return;
+  }
+  if(b.dataset.edit){
+    const i = r.done.length - 1;
+    const t = askClock("Uhrzeit für „"+r.steps[i].title+"“ ändern:", i ? r.done[i-1] : undefined);
+    if(t === null) return;
+    r.done[i] = t; markStarterIfRefresh(r.steps[i], t); persist(); render(); return;
+  }
+  if(b.id === "undoBtn"){
+    if(r.done.length <= 1){ alert("Das ist der erste Schritt. Zum Abbrechen „Verwerfen“ nehmen."); return; }
+    r.done.pop(); persist(); render(); return;
+  }
+  if(b.id === "dropBtn"){
+    if(!confirm("Dieses Brot verwerfen? Es landet nicht im Verlauf.")) return;
+    S.run = null; VIEW = "plan"; persist(); render(); return;
+  }
+  if(b.id === "finishBtn"){
+    const l = getLog();
+    l.push({ name:r.name, tpl:r.tpl, flour:r.flour, titles:r.steps.map(s => s.title), times:r.done.slice() });
+    setLog(l);
+    S.run = null; VIEW = "plan"; persist(); render(); window.scrollTo(0,0); return;
+  }
+});
+document.addEventListener("click", ev => {
+  const b = ev.target.closest("button[data-del]"); if(!b) return;
+  if(!confirm("Diesen Eintrag löschen?")) return;
+  const l = getLog(); l.splice(+b.dataset.del, 1); setLog(l); render();
+});
+
+$("flour").addEventListener("input", e => {
+  const v = Number(String(e.target.value).replace(",", "."));
+  if(v >= 200 && v <= 3000){ S.flour = v; persist(); render(); }
+});
+$("flour").addEventListener("blur", () => render());
+$("startAt").addEventListener("input", e => { S.start = e.target.value || ""; persist(); render(); });
+
+render();
+setInterval(() => { if(!typing()) render(); }, 30000);
+document.addEventListener("visibilitychange", () => { if(!document.hidden && !typing()) render(); });
+</script>
+</body>
+</html>

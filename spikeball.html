@@ -74,6 +74,9 @@
   .sr .vs{color:var(--muted);font-size:12px}
   .mnote{padding:0 10px 9px;font-size:11.5px;color:var(--muted);text-align:center}
   .mnote.open{color:var(--accent)}
+  .tie{padding:9px 12px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);line-height:1.7}
+  .tie b{color:var(--text)}
+  .tie .mini{margin-left:4px;padding:5px 9px;font-size:12px}
   .rlab{padding:7px 12px;background:var(--panel2);color:var(--muted);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;border-top:1px solid var(--line)}
   .bye{color:var(--muted);font-size:12px;padding:0 4px}
   .champ{text-align:center;padding:18px 12px;background:linear-gradient(160deg,rgba(255,179,64,.18),var(--panel));border:1px solid var(--accent);border-radius:14px;margin:12px 0}
@@ -100,7 +103,7 @@ const num = v => v==='' || v===null || v===undefined || isNaN(+v) ? null : +v;
 
 /* ---------- state ---------- */
 const defRules = () => ({
-  g:{ sets:1, target:21, two:true },   /* Gruppenphase */
+  g:{ sets:1, target:21, two:true, sort:'diff' },   /* Gruppenphase */
   k:{ sets:3, target:21, two:true }    /* K.-o.-Phase  */
 });
 const fresh = () => ({
@@ -113,7 +116,7 @@ const fresh = () => ({
   koAfterGroups:true,
   rules: defRules(),
   showRules:false,
-  teams:[], groups:[], gm:[], ko:null
+  teams:[], groups:[], gm:[], gd:[], ko:null
 });
 let S = load();
 
@@ -128,6 +131,8 @@ function load(){
 function migrate(st, fromOld){
   const fix = o => { if(o && o.s===undefined){ o.s = (o.sa||o.sb) ? [[o.sa||'', o.sb||'']] : []; delete o.sa; delete o.sb; } };
   (st.gm||[]).forEach(fix);
+  if(!Array.isArray(st.gd)) st.gd = [];
+  if(st.rules && st.rules.g && !st.rules.g.sort) st.rules.g.sort = 'diff';
   if(st.ko){ (st.ko.rounds||[]).forEach(r=> r.forEach(fix)); fix(st.ko.third); }
   if(fromOld) st.rules = { g:{sets:1,target:null,two:false}, k:{sets:1,target:null,two:false} };
   if(!st.rules || !st.rules.g || !st.rules.k) st.rules = defRules();
@@ -311,11 +316,76 @@ function tableFor(g){
     else if(ev.w==='b'){ B.s++; A.n++; B.p+=2; }
     else { A.u++; B.u++; A.p++; B.p++; }
   });
-  rows.sort((a,b)=> b.p-a.p || (b.sw-b.sl)-(a.sw-a.sl) || (b.pf-b.pa)-(a.pf-a.pa) || b.pf-a.pf || a.name.localeCompare(b.name));
-  return rows;
+  return rankRows(rows, g);
 }
-const groupDone = g => S.gm.filter(m=>m.g===g).every(m=> matchDone(evalMatch(m.s||[], S.rules.g, false)));
-const allGroupsDone = () => S.groups.every((_,g)=> groupDone(g));
+
+/* Minitabelle nur aus den Spielen zwischen den genannten Teams.
+   Dient dem direkten Vergleich und der Auswertung von Entscheidungsspielen. */
+function miniTable(ids, g, list){
+  const st = {}; ids.forEach(id=> st[id] = {p:0, sd:0, pd:0});
+  list.filter(m=> m.g===g && ids.indexOf(m.a)>=0 && ids.indexOf(m.b)>=0).forEach(m=>{
+    const ev = evalMatch(m.s||[], S.rules.g, false);
+    if(!matchDone(ev)) return;
+    const A = st[m.a], B = st[m.b];
+    A.sd += ev.wa-ev.wb; B.sd += ev.wb-ev.wa;
+    A.pd += ev.pa-ev.pb; B.pd += ev.pb-ev.pa;
+    if(ev.w==='a') A.p += 2; else if(ev.w==='b') B.p += 2; else { A.p++; B.p++; }
+  });
+  return st;
+}
+const cmpKey = (x,y) => { for(let i=0;i<x.length;i++){ if(x[i]!==y[i]) return y[i]-x[i]; } return 0; };
+
+/* Reihenfolge in Stufen. Gleichstand nach allen Stufen bleibt Gleichstand
+   (kein Alphabet): die Zeilen bekommen dieselbe Platznummer und werden als
+   "Entscheidungsspiel nötig" markiert. */
+function rankRows(rows, g){
+  const order = S.rules.g.sort==='h2h'
+    ? ['p','h2h','sd','pd','pf','dec']
+    : ['p','sd','pd','pf','h2h','dec'];
+  const out = []; let tie = 0;
+  (function part(block, i){
+    if(block.length===1){ out.push(block[0]); return; }
+    if(i>=order.length){ const t = ++tie; block.forEach(r=> r.tie = t); out.push.apply(out, block); return; }
+    const c = order[i];
+    let keyf;
+    if(c==='p')       keyf = r=>[r.p];
+    else if(c==='sd') keyf = r=>[r.sw-r.sl];
+    else if(c==='pd') keyf = r=>[r.pf-r.pa];
+    else if(c==='pf') keyf = r=>[r.pf];
+    else {
+      const st = miniTable(block.map(r=>r.id), g, c==='h2h' ? S.gm : S.gd);
+      keyf = r=> [st[r.id].p, st[r.id].sd, st[r.id].pd];
+    }
+    const sorted = block.slice().sort((a,b)=> cmpKey(keyf(a), keyf(b)));
+    let cur = [sorted[0]];
+    for(let j=1;j<sorted.length;j++){
+      if(cmpKey(keyf(sorted[j]), keyf(cur[0]))===0) cur.push(sorted[j]);
+      else { part(cur, i+1); cur = [sorted[j]]; }
+    }
+    part(cur, i+1);
+  })(rows.slice(), 0);
+  return out;
+}
+/* Gleichstandsgruppen einer Tabelle: [{tie, von, bis, ids, namen}] */
+function tiesIn(rows){
+  const out = [];
+  rows.forEach((r,i)=>{
+    if(!r.tie) return;
+    let t = out.find(x=>x.tie===r.tie);
+    if(!t){ t = {tie:r.tie, von:i, bis:i, ids:[], namen:[]}; out.push(t); }
+    t.bis = i; t.ids.push(r.id); t.namen.push(r.name);
+  });
+  return out;
+}
+/* Ein Gleichstand blockiert nur, wenn er über den Einzug entscheidet. */
+function tieBlocks(g){
+  if(!S.koAfterGroups) return false;
+  const rows = tableFor(g), q = S.qual;
+  if(q >= rows.length) return false;
+  return tiesIn(rows).some(t=> t.von < q && t.bis >= q);
+}
+const groupDone = g => S.gm.concat(S.gd).filter(m=>m.g===g).every(m=> matchDone(evalMatch(m.s||[], S.rules.g, false)));
+const allGroupsDone = () => S.groups.every((_,g)=> groupDone(g) && !tieBlocks(g));
 
 /* Setzliste: erst alle Gruppensieger, dann alle Zweiten, je nach Stärke. */
 function qualifiers(){
@@ -364,6 +434,14 @@ function rulesCard(which){
      + '<div class="hint">Leer lassen = kein Zielwert, dann zählt jedes eingetragene Ergebnis (bei Gleichstand unentschieden).</div></div>';
   h += '<div style="margin-top:12px"><label class="lbl">Zwei Punkte Vorsprung nötig</label>'
      + segRow('r:'+which+':two', [[1,'Ja'],[0,'Nein']], R.two?1:0) + '</div>';
+  if(!isKO){
+    h += '<div style="margin-top:12px"><label class="lbl">Bei Punktgleichheit zählt zuerst</label>'
+       + segRow('r:g:sort', [['diff','Differenz'],['h2h','Direkter Vergleich']], R.sort||'diff')
+       + '<div class="hint">'+(R.sort==='h2h'
+          ? 'Punkte, dann der direkte Vergleich, danach Satz- und Punktdifferenz.'
+          : 'Punkte, dann Satzdifferenz, Punktdifferenz, erzielte Punkte — und erst zum Schluss der direkte Vergleich.')
+       + ' Bleibt es danach gleich, wird ein Entscheidungsspiel angesetzt.</div></div>';
+  }
   return h + '</div>';
 }
 
@@ -427,21 +505,36 @@ function viewTurnier(){
       const rows = tableFor(g);
       let q = S.koAfterGroups ? S.qual : 0;
       if(q >= rows.length) q = 0;
+      if(tieBlocks(g)) q = 0;   /* solange der Gleichstand den Einzug offen laesst: kein Haken */
       h += '<div class="grp"><div class="ghead">'+(S.groups.length>1?'Gruppe '+String.fromCharCode(65+g):'Tabelle')+'</div>';
       h += '<table><thead><tr><th>#</th><th>Team</th><th>Sp</th><th>S</th><th>N</th>'
          + (R.sets>1?'<th>Sätze</th>':'') + '<th>+/−</th><th>Pkt</th></tr></thead><tbody>';
       rows.forEach((r,i)=>{
         const d = r.pf-r.pa;
-        h += '<tr class="'+(i<q?'q':'')+'"><td>'+(i+1)+'</td><td>'+esc(r.name)+'</td><td>'+r.sp+'</td><td>'+r.s+'</td><td>'+r.n+'</td>'
+        const nr = (r.tie && i>0 && rows[i-1].tie===r.tie) ? '=' : (i+1);
+        h += '<tr class="'+(i<q?'q':'')+'"><td>'+nr+'</td><td>'+esc(r.name)+'</td><td>'+r.sp+'</td><td>'+r.s+'</td><td>'+r.n+'</td>'
            + (R.sets>1?'<td>'+r.sw+':'+r.sl+'</td>':'') + '<td>'+(d>0?'+':'')+d+'</td><td>'+r.p+'</td></tr>';
       });
       h += '</tbody></table>';
+      tiesIn(rows).forEach(t=>{
+        const offen = !S.gd.some(d=> d.g===g && t.ids.indexOf(d.a)>=0 && t.ids.indexOf(d.b)>=0);
+        h += '<div class="tie"><b>Gleichstand auf Platz '+(t.von+1)+':</b> '+esc(t.namen.join(', '))
+           + ' — auch im direkten Vergleich gleich.'
+           + (tieBlocks(g) ? ' <span class="warn">Entscheidet über den Einzug.</span>' : '')
+           + (offen ? ' <button class="mini" data-dec="'+g+'" data-ids="'+t.ids.join(',')+'">Entscheidungsspiel ansetzen</button>' : '')
+           + '</div>';
+      });
       let lastR=-1;
       S.gm.forEach((m,i)=>{
         if(m.g!==g) return;
         if(m.r!==lastR){ h += '<div class="rlab">Runde '+(m.r+1)+'</div>'; lastR=m.r; }
         h += matchRow(m.a, m.b, m, R, false, 'g|'+i+'|');
       });
+      const dec = S.gd.map((d,i)=>({d:d,i:i})).filter(x=> x.d.g===g);
+      if(dec.length){
+        h += '<div class="rlab">Entscheidungsspiel</div>';
+        dec.forEach(x=>{ h += matchRow(x.d.a, x.d.b, x.d, R, false, 'd|'+x.i+'|'); });
+      }
       h += '</div>';
     });
 
@@ -523,6 +616,7 @@ function matchRow(a, b, obj, R, isKO, key){
 /* ---------- Eingaben ---------- */
 function holder(type, idx){
   if(type==='g') return S.gm[+idx];
+  if(type==='d') return S.gd[+idx];
   if(type==='k'){ const p = idx.split('-'); return S.ko.rounds[+p[0]][+p[1]]; }
   return S.ko.third;
 }
@@ -564,13 +658,21 @@ app.addEventListener('click', e=>{
   if(t.dataset.del!==undefined){ S.players.splice(+t.dataset.del,1); save(); render(); return; }
   if(t.id==='clearAll'){ if(confirm('Alle Namen löschen?')){ S.players=[]; save(); render(); } return; }
   if(t.id==='toggleRules'){ S.showRules=!S.showRules; save(); render(); return; }
+  if(t.dataset.dec!==undefined){
+    const g = +t.dataset.dec, ids = t.dataset.ids.split(',').map(Number);
+    for(let i=0;i<ids.length;i++) for(let j=i+1;j<ids.length;j++){
+      if(!S.gd.some(d=> d.g===g && ((d.a===ids[i]&&d.b===ids[j])||(d.a===ids[j]&&d.b===ids[i]))))
+        S.gd.push({g:g, a:ids[i], b:ids[j], s:[]});
+    }
+    save(); render(); return;
+  }
 
   const seg = t.parentElement && t.parentElement.dataset ? t.parentElement.dataset.seg : null;
   if(seg){
     const v = t.dataset.v;
     if(seg.indexOf('r:')===0){
       const p = seg.split(':');          /* r : g|k : sets|two */
-      S.rules[p[1]][p[2]] = p[2]==='two' ? v==='1' : +v;
+      S.rules[p[1]][p[2]] = p[2]==='two' ? v==='1' : (p[2]==='sort' ? v : +v);
     }
     else if(seg==='mode') S.mode = v;
     else if(seg==='koAfterGroups') S.koAfterGroups = v==='1';
@@ -593,7 +695,7 @@ app.addEventListener('click', e=>{
 
 function startTournament(){
   S.teams = makeTeams();
-  S.ko = null; S.gm = []; S.groups = [];
+  S.ko = null; S.gm = []; S.gd = []; S.groups = [];
   if(S.mode==='ko'){
     S.ko = buildKO(shuffle(S.teams.map(t=>t.id)).map(id=>({id:id, g:null, tier:0})));
   } else {

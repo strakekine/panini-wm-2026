@@ -17,7 +17,7 @@ if(i < 0 || j < 0) throw new Error("Abschnittsmarken Logik/Oberfläche nicht gef
 const quelle = src.slice(src.lastIndexOf("/*", i), src.lastIndexOf("/*", j));
 const M = new Function(quelle + `
   return { TPL, REFRESH, H, DAY, BASE, makeSteps, timeline, planFor, blockAt, firstFree,
-           totals, starterDays, parseClock, tplById, mid };`)();
+           totals, starterDays, parseClock, tplById, mid, importRecipe, toImportText, extractJSON };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text){ n++; if(!bed){ fehler++; console.log("✗ " + text); } }
@@ -110,6 +110,60 @@ nah(M.firstFree(at(2026, 10, 12, 14), at(2026, 10, 12, 18)), at(2026, 10, 12, 16
 ok(M.firstFree(at(2026, 10, 12, 9), at(2026, 10, 12, 12)) === null, "ganzer Rahmen in der Arbeit");
 /* Zeitumstellung 25.10.: Wanduhr bleibt Wanduhr */
 ok(M.blockAt(at(2026, 10, 26, 10)) === "Arbeitszeit", "Mo nach Zeitumstellung 10:00 Arbeit");
+
+/* --- Import aus dem Claude-Chat --- */
+{
+  const beispiel = {
+    name:"Testbrot", quelle:"Buch S. 12", beschreibung:"x", mehl:750, temperatur:20, essen:[3, 40],
+    schritte:[
+      { titel:"Sauerteig ansetzen", sauerteig:true, dauer:[12,16], arbeit:5, was:"rühren", weiter_wenn:"verdoppelt",
+        zutaten:[{name:"Roggenvollkornmehl",g:150,art:"mehl"},{name:"Wasser",g:150,art:"wasser"},{name:"Anstellgut",g:15,art:"anstellgut"}] },
+      { titel:"Kneten", dauer:[3,4], arbeit:20, was:"kneten",
+        zutaten:[{name:"Sauerteig",g:315,art:"sauerteig"},{name:"Weizenmehl",g:600,art:"mehl"},{name:"Wasser",g:375,art:"wasser"},
+                 {name:"Salz",g:15,art:"salz"},{name:"Sonnenblumenkerne",g:80,art:"sonstiges"}] },
+      { titel:"Backen", dauer:[0.75,0.75], arbeit:10, was:"backen" },
+      { titel:"Aus dem Ofen", dauer:[0,0], arbeit:2, was:"abkühlen" } ] };
+  const r = M.importRecipe(beispiel);
+  ok(r.recipe && !r.err.length && !r.warn.length, "sauberes Rezept: übernehmbar, ohne Hinweise — " + JSON.stringify(r.err.concat(r.warn)));
+  nah(r.recipe.base, 750, "Basis = Mehl aus den Zutaten");
+  ok(r.recipe.temp === 20 && r.recipe.eat[1] === 40, "Temperatur und Essfenster übernommen");
+  ok(r.recipe.steps[0].sour && r.recipe.steps[1].ing.find(x => x.n === "Sonnenblumenkerne").k === "x", "Sauerteig erkannt, Sonstiges bleibt Sonstiges");
+  const s = M.makeSteps(r.recipe, 500, false);
+  nah(M.totals(s).mehl, 500, "importiertes Rezept skaliert auf 500 g");
+  nah(M.totals(s).hyd, 0.70, "Hydration bleibt beim Skalieren");
+  ok(M.planFor(r.recipe, 500, at(2026,10,18,7), at(2026,10,1,12)).refresh, "Auffrischen greift auch bei importierten Rezepten");
+
+  const ohneEnde = JSON.parse(JSON.stringify(beispiel)); ohneEnde.schritte.pop();
+  const r2 = M.importRecipe(ohneEnde);
+  ok(r2.recipe && r2.recipe.steps[r2.recipe.steps.length-1].title === "Aus dem Ofen" && r2.warn.length === 1, "fehlendes 'Aus dem Ofen' wird ergänzt und gemeldet");
+
+  const asg = JSON.parse(JSON.stringify(beispiel)); asg.schritte[0].zutaten[2].g = 30;
+  ok(M.importRecipe(asg).warn.some(w => /20 %/.test(w)), "Anstellgut 20 % statt 10 % wird gemeldet");
+  const falschesMehl = JSON.parse(JSON.stringify(beispiel)); falschesMehl.mehl = 1000;
+  ok(M.importRecipe(falschesMehl).warn.some(w => /1000 g/.test(w)), "Mehlangabe passt nicht zu den Zutaten → Hinweis");
+
+  const kaputt = JSON.parse(JSON.stringify(beispiel)); kaputt.schritte[1].dauer = "3 Stunden";
+  ok(!M.importRecipe(kaputt).recipe, "Dauer als Text → nicht übernehmbar");
+  const ohneMehl = JSON.parse(JSON.stringify(beispiel)); ohneMehl.schritte.forEach(x => (x.zutaten||[]).forEach(z => { if(z.art === "mehl") z.art = "sonstiges"; }));
+  ok(!M.importRecipe(ohneMehl).recipe, "ohne Mehl → nicht übernehmbar");
+  ok(!M.importRecipe(null).recipe && !M.importRecipe([1]).recipe && !M.importRecipe({}).recipe, "Unsinn → nicht übernehmbar");
+  const einzel = JSON.parse(JSON.stringify(beispiel)); einzel.schritte[2].dauer = 0.75;
+  ok(M.importRecipe(einzel).recipe.steps[2].h[1] === 0.75, "einzelne Zahl als Dauer wird [x, x]");
+
+  /* Chat-Antwort mit Text und Codezaun drumherum */
+  ok(M.extractJSON("Hier:\n```json\n" + JSON.stringify(beispiel) + "\n```\nViel Spaß").name === "Testbrot", "JSON aus Chat-Antwort gefischt");
+  ok(M.extractJSON("kein json") === null && M.extractJSON("{ kaputt") === null, "ohne JSON → null");
+
+  /* Jede Vorlage übersteht Export → Import unverändert (so funktioniert "als Text abwandeln") */
+  for(const t of M.TPL){
+    const back = M.importRecipe(JSON.parse(M.toImportText(t)));
+    ok(back.recipe && !back.err.length && !back.warn.length, t.id + ": Rundreise ohne Fehler und Hinweise — " + JSON.stringify(back.err.concat(back.warn)));
+    if(back.recipe){
+      ok(JSON.stringify(back.recipe.steps.map(x => [x.title, x.h, !!x.sour])) === JSON.stringify(t.steps.map(x => [x.title, x.h, !!x.sour])), t.id + ": Schritte gleich");
+      nah(M.totals(back.recipe.steps).hyd, M.totals(t.steps).hyd, t.id + ": Hydration gleich");
+    }
+  }
+}
 
 /* --- Kleinkram --- */
 ok(M.starterDays(at(2026, 10, 4, 18), at(2026, 10, 11, 9)) === 7, "Starter: So → So = Tag 7");

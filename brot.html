@@ -123,9 +123,25 @@
   .logrow .r small{display:block;color:var(--muted);font-size:12px}
   .logrow button{background:transparent;border:0;color:var(--muted);cursor:pointer;font-family:inherit;font-size:15px;padding:6px}
   .foot{color:var(--muted);font-size:11.5px;text-align:center;padding:18px 12px 0;line-height:1.5}
+  body[data-fin="0"] .v-fin{display:none}
+  details.card > summary{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--panel2);border-bottom:1px solid var(--line);cursor:pointer;list-style:none;font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1px}
+  details.card > summary::-webkit-details-marker{display:none}
+  details.card > summary::after{content:"▾";color:var(--muted);font-family:Barlow;font-size:14px;margin-left:auto;transition:transform .2s}
+  details.card[open] > summary::after{transform:rotate(180deg)}
+  details.card > summary .hint{font-family:Barlow;font-size:12px;letter-spacing:0;color:var(--muted);font-weight:600}
+  textarea{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 11px;font-size:16px;font-family:Menlo,monospace;width:100%;margin-top:10px;resize:vertical}
+  textarea#rateNote{font-family:inherit}
+  textarea:focus{outline:none;border-color:var(--accent)}
+  .howto{margin:0 0 10px;padding-left:20px;font-size:14px;line-height:1.5}
+  .grp{margin-top:12px}
+  .grp .lbl{margin-bottom:6px}
+  .chip.dim{opacity:.6;border-style:dashed}
+  .tag{display:inline-block;font-size:11.5px;font-weight:700;border-radius:6px;padding:1px 6px;margin-right:4px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+  .tag.ja{color:var(--good);border-color:rgba(62,207,106,.4)}
+  .tag.nie{color:var(--bad);border-color:rgba(255,93,107,.4)}
 </style>
 </head>
-<body data-view="plan" data-run="0">
+<body data-view="plan" data-run="0" data-fin="0">
 
 <header>
   <div class="wrap">
@@ -143,9 +159,24 @@
   <div class="chead"><h2>Rezept</h2></div>
   <div class="cbody">
     <div class="chips" id="tplChips"></div>
-    <div class="note" id="tplDesc"></div>
+    <div id="tplDesc"></div>
   </div>
 </div>
+
+<details class="card v-plan" id="impCard">
+  <summary>Rezept hinzufügen <span class="hint">aus einem Claude-Chat</span></summary>
+  <div class="cbody">
+    <ol class="howto">
+      <li>„Anleitung kopieren“ tippen.</li>
+      <li>Einen neuen Claude-Chat öffnen, die Anleitung einfügen und darunter das Rezept: als Text, Link oder Foto aus dem Buch.</li>
+      <li>Claudes Antwort ganz kopieren, hier einfügen, „Prüfen“.</li>
+    </ol>
+    <button class="btn ghost sm" id="copyPrompt">ANLEITUNG KOPIEREN</button>
+    <textarea id="impText" rows="6" placeholder="Antwort aus dem Chat hier einfügen" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+    <div class="btnrow"><button class="btn sm" id="impCheck">PRÜFEN</button><button class="btn ghost sm" id="impClear">LEEREN</button></div>
+    <div id="impOut" style="margin-top:12px"></div>
+  </div>
+</details>
 
 <div class="card v-plan">
   <div class="chead"><h2>Teig</h2><span class="hint" id="ingHint"></span></div>
@@ -188,6 +219,23 @@
   <div class="cbody" id="runBox"></div>
 </div>
 
+<!-- Statisch, nicht per innerHTML gebaut: die Notiz darf beim 30-s-Render nicht den Fokus verlieren -->
+<div class="card v-run v-fin" id="rateCard">
+  <div class="chead"><h2>Wie war's?</h2></div>
+  <div class="cbody">
+    <div class="grp"><div class="lbl">Nochmal backen?</div><div class="chips">
+      <button class="chip" data-rate="again:ja">Ja</button><button class="chip" data-rate="again:vielleicht">Vielleicht</button><button class="chip" data-rate="again:nie">Nie wieder</button></div></div>
+    <div class="grp"><div class="lbl">Kinder</div><div class="chips">
+      <button class="chip" data-rate="kids:geliebt">Geliebt</button><button class="chip" data-rate="kids:okay">Okay</button><button class="chip" data-rate="kids:nein">Nicht gemocht</button></div></div>
+    <div class="grp"><div class="lbl">Gare — wenn Du es sagen kannst</div><div class="chips">
+      <button class="chip" data-rate="gare:jung">Zu wenig</button><button class="chip" data-rate="gare:passt">Passt</button><button class="chip" data-rate="gare:weit">Zu viel</button></div>
+      <div class="note">Zu wenig: dichte, feuchte Krume, Brot reißt seitlich unkontrolliert auf. Zu viel: flach und breit gelaufen,
+        große Löcher direkt unter der Kruste. Das ist die einzige Angabe, aus der die App später lernen kann, ob die Zeiten bei Dir stimmen.</div></div>
+    <textarea id="rateNote" rows="3" maxlength="300" placeholder="Notiz, z. B. „nächstes Mal 10 min länger backen“"></textarea>
+    <button class="btn wide" id="finishBtn" style="margin-top:10px">SPEICHERN UND ABSCHLIESSEN</button>
+  </div>
+</div>
+
 <div class="card v-run">
   <div class="chead"><h2>Ablauf</h2></div>
   <div class="cbody"><ul class="steps" id="runSteps"></ul></div>
@@ -202,7 +250,15 @@
 
 <div class="card v-plan">
   <div class="chead"><h2>Verlauf</h2></div>
-  <div class="cbody" id="logBox"></div>
+  <div class="cbody">
+    <div id="logBox"></div>
+    <div class="btnrow" style="margin-top:14px">
+      <button class="btn ghost sm" id="backupBtn">SICHERN</button>
+      <button class="btn ghost sm" id="restoreBtn">WIEDERHERSTELLEN</button>
+      <input type="file" id="restoreFile" accept=".json,application/json" style="display:none">
+    </div>
+    <div class="note" id="backupNote"></div>
+  </div>
 </div>
 
 <div class="foot">Brotplaner · Daten bleiben nur auf diesem Gerät</div>
@@ -318,9 +374,98 @@ const REFRESH = { title:"Anstellgut auffrischen", refresh:true, h:[4,8], hand:5,
 function tplById(id){ return TPL.find(t => t.id === id) || TPL[0]; }
 function mid(h){ return (h[0] + h[1]) / 2; }
 
+/* ----- Import: Rezept im festen Format aus einem Claude-Chat -----
+   Das Format steht in ANLEITUNG (Oberfläche). Hier wird nur geprüft und übersetzt;
+   alles, was nicht passt, wird Fehler (nicht übernehmbar) oder Hinweis (übernehmbar).
+   Der Chat ist eine fremde Quelle — nichts davon wird ungeprüft übernommen. */
+const ART = { mehl:"mehl", wasser:"wasser", salz:"salz", hefe:"hefe", anstellgut:"asg", sauerteig:"sd", vorteig:"sd" };
+function importRecipe(o){
+  const err = [], warn = [];
+  const str = (v, max) => typeof v === "string" ? v.trim().slice(0, max) : "";
+  const numOr = (v, d) => (typeof v === "number" && isFinite(v)) ? v : d;
+  const range = (v, lo, hi) => {
+    if(typeof v === "number") v = [v, v];
+    if(!Array.isArray(v) || v.length !== 2 || !v.every(x => typeof x === "number" && isFinite(x))) return null;
+    const a = Math.min(v[0], v[1]), b = Math.max(v[0], v[1]);
+    return (a < lo || b > hi) ? null : [a, b];
+  };
+  if(!o || typeof o !== "object" || Array.isArray(o)) return { recipe:null, err:["Kein Rezept-Objekt gefunden."], warn };
+  const name = str(o.name, 80);
+  if(!name) err.push("Es fehlt ein Name.");
+  const raw = Array.isArray(o.schritte) ? o.schritte : [];
+  if(!raw.length) err.push("Es fehlen die Schritte.");
+  if(raw.length > 25) err.push("Mehr als 25 Schritte — das ist kein Brotrezept mehr.");
+  const steps = [];
+  raw.slice(0, 25).forEach((s, i) => {
+    const nr = "Schritt " + (i+1);
+    if(!s || typeof s !== "object"){ err.push(nr + ": kein gültiger Schritt."); return; }
+    const title = str(s.titel, 60);
+    const h = range(s.dauer, 0, 72);
+    if(!title) err.push(nr + ": Titel fehlt.");
+    if(!h) err.push(nr + " („" + title + "“): Dauer muss [min, max] in Stunden sein, zwischen 0 und 72.");
+    const ing = [];
+    (Array.isArray(s.zutaten) ? s.zutaten : []).forEach(z => {
+      const n = z && str(z.name, 60), g = z && numOr(z.g, NaN);
+      if(!n || !(g > 0 && g < 10000)){ warn.push(nr + ": eine Zutat ohne Name oder Menge wurde weggelassen."); return; }
+      ing.push({ n, g, k: ART[String(z.art||"").toLowerCase()] || "x" });
+    });
+    steps.push({ title, h: h || [0,0], hand: Math.round(Math.min(180, Math.max(0, numOr(s.arbeit, 5)))),
+      what: str(s.was, 600), sign: str(s.weiter_wenn, 300) || undefined,
+      sour: s.sauerteig === true || ing.some(x => x.k === "asg") || undefined,
+      ing: ing.length ? ing : undefined });
+  });
+  if(err.length) return { recipe:null, err, warn };
+
+  const last = steps[steps.length - 1];
+  if(last.h[1] > 0){
+    steps.push({ title:"Aus dem Ofen", h:[0,0], hand:2, what:"Auf ein Gitter, nicht zudecken." });
+    warn.push("Am Ende fehlte „Aus dem Ofen“ — ergänzt.");
+  }
+  const mehlSum = steps.reduce((a, s) => a + (s.ing||[]).filter(x => x.k === "mehl").reduce((b, x) => b + x.g, 0), 0);
+  if(!(mehlSum > 0)) return { recipe:null, err:["Keine Zutat ist als Mehl (art: mehl) markiert — so lässt sich nichts skalieren."], warn };
+  const mehl = numOr(o.mehl, mehlSum);
+  if(Math.abs(mehl - mehlSum) > 0.03 * mehlSum)
+    warn.push("Angegeben sind " + Math.round(mehl) + " g Mehl, die Zutaten ergeben " + Math.round(mehlSum) + " g. Gerechnet wird mit den Zutaten.");
+  const sourSteps = steps.filter(s => s.sour);
+  if(sourSteps.length > 1) warn.push("Mehr als ein Sauerteig-Ansatz — aufgefrischt wird vor dem ersten.");
+  sourSteps.slice(0, 1).forEach(s => {
+    const m = (s.ing||[]).filter(x => x.k === "mehl").reduce((a, x) => a + x.g, 0);
+    const asg = (s.ing||[]).filter(x => x.k === "asg").reduce((a, x) => a + x.g, 0);
+    if(m && asg && Math.abs(asg / m - 0.10) > 0.03)
+      warn.push("Anstellgut ist " + Math.round(asg / m * 100) + " % des Sauerteigmehls — Deine Regel sagt 10 %.");
+  });
+  const eat = range(o.essen, 0, 240) || [2, 30];
+  const temp = (typeof o.temperatur === "number" && o.temperatur >= 10 && o.temperatur <= 40) ? o.temperatur : null;
+  return { err, warn, recipe: { name, desc: str(o.beschreibung, 600), src: str(o.quelle, 200),
+    base: mehlSum, eat, temp, steps } };
+}
+
+/* Rezept zurück ins Import-Format — zum Bearbeiten als Text. */
+const ART_BACK = { mehl:"mehl", wasser:"wasser", salz:"salz", hefe:"hefe", asg:"anstellgut", sd:"sauerteig", x:"sonstiges" };
+function toImportText(r){
+  const o = { name:r.name, quelle:r.src || "", beschreibung:r.desc || "", mehl:Math.round(r.base || BASE),
+    temperatur: r.temp === undefined ? null : r.temp, essen:r.eat,
+    schritte: r.steps.map(s => {
+      const x = { titel:s.title };
+      if(s.sour) x.sauerteig = true;
+      x.dauer = s.h; x.arbeit = s.hand; x.was = s.what;
+      if(s.sign) x.weiter_wenn = s.sign;
+      if(s.ing) x.zutaten = s.ing.map(i => ({ name:i.n, g:Math.round(i.g*10)/10, art:ART_BACK[i.k] || "sonstiges" }));
+      return x;
+    }) };
+  return JSON.stringify(o, null, 2);
+}
+/* JSON aus einer Chat-Antwort holen: Codezäune und Text drumherum stören nicht. */
+function extractJSON(t){
+  t = String(t||"");
+  const i = t.indexOf("{"), j = t.lastIndexOf("}");
+  if(i < 0 || j <= i) return null;
+  try { return JSON.parse(t.slice(i, j+1)); } catch(e){ return null; }
+}
+
 /* Schritte für einen Teig: skaliert auf die Mehlmenge, mit oder ohne Auffrischen. */
 function makeSteps(tpl, flour, refresh){
-  const f = flour / BASE;
+  const f = flour / (tpl.base || BASE);
   const steps = tpl.steps.map(s => Object.assign({}, s, {
     h: s.h.slice(),
     ing: s.ing ? s.ing.map(i => ({ n:i.n, k:i.k, g: i.g * f })) : undefined
@@ -418,6 +563,7 @@ function parseClock(str, now, notBefore){
 
 /* ===================== Oberfläche ===================== */
 const KEY = "brot_planer_v1";
+const KITCHEN = 24;               /* Küchentemperatur, °C — nur für den Hinweis bei Rezepten mit anderer Temperatur */
 const $ = id => document.getElementById(id);
 const WD = ["So","Mo","Di","Mi","Do","Fr","Sa"];
 const p2 = n => String(n).padStart(2,"0");
@@ -435,24 +581,89 @@ function fmtH(v){
   if(h === 0) return m+" min";
   return h+" h "+m+" min";
 }
+function fmtR(h){ return h[0] === h[1] ? fmtH(h[0]) : fmtH(h[0])+"–"+fmtH(h[1]); }
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
 function typing(){ const a = document.activeElement; return !!a && (a.tagName === "INPUT" || a.tagName === "SELECT" || a.tagName === "TEXTAREA"); }
 function msg(kind, ic, html){ return '<div class="msg '+kind+'"><span class="ic">'+ic+'</span><span>'+html+'</span></div>'; }
+function flash(btn, text){ const o = btn.textContent; btn.textContent = text; setTimeout(() => { btn.textContent = o; }, 1600); }
+
+/* Anleitung für den Claude-Chat. Sie legt das Format fest, das importRecipe() prüft —
+   wer das eine ändert, ändert das andere mit. Die Zeiten bleiben die des Rezepts; die
+   App weist nur darauf hin, wenn das Rezept für eine andere Temperatur geschrieben ist.
+   Zeiten von einem Sprachmodell "auf 24 °C umrechnen" zu lassen, wäre geraten. */
+const ANLEITUNG = `Du zerlegst ein Brotrezept für meine Backplaner-App. Antworte NUR mit einem JSON-Block im Format unten, ohne Text davor oder danach.
+
+Meine Küche:
+- Etwa 24 °C.
+- Anstellgut: Roggenvollkorn-Sauerteig, 100 % Hydration, aus dem Kühlschrank. Im Sauerteig-Ansatz immer mein Anstellgut verwenden, Menge = 10 % des Mehls im Sauerteig. Steht im Rezept ein anderes Anstellgut (Weizen, Lievito Madre, andere Menge), so umrechnen und in "beschreibung" sagen.
+- Das Auffrischen des Anstellguts NICHT als Schritt aufnehmen, das macht die App selbst.
+- Kneter: Halo Core (Spiralkneter). Knetanweisung dafür schreiben (Minuten langsam/schnell). Roggenreiche Teige nur mischen, nicht kneten.
+- Backen: Backofen Ober-/Unterhitze, Gusseisentopf mit Deckel. Backt das Rezept anders, auf den Topf übersetzen.
+
+Regeln für die Schritte:
+- Jeder Schritt ist ein Handgriff zu einem Zeitpunkt: Ansetzen, Kneten, Falten, Formen, Ofen vorheizen, Backen, Aus dem Ofen.
+- "dauer" = [min, max] in Stunden bis zum NÄCHSTEN Schritt, so wie im Rezept (für die Temperatur des Rezepts). Nennt das Rezept nur einen Wert, eine ehrliche Spanne geben (Sauerteig mindestens ±1 h).
+- "Ofen vorheizen" ist ein eigener Schritt, 0,75–1 h vor dem Backen; er liegt in der Stückgare.
+- Mehrmaliges Dehnen und Falten: jedes Falten ein eigener Schritt.
+- Brüh- oder Quellstück, das parallel zum Sauerteig angesetzt wird: in denselben Schritt wie den Sauerteig (Zutaten beider hinein, beides im Text). Die App kennt nur eine Reihenfolge.
+- Vorteig (Poolish, Biga) ist ein eigener Schritt ohne "sauerteig"; im Hauptteig hat er art "vorteig".
+- Der letzte Schritt heißt "Aus dem Ofen" und hat "dauer": [0, 0].
+- "sauerteig": true nur beim Sauerteig-Ansatz.
+- Mengen in Gramm. "art" ist eins von: mehl, wasser, salz, hefe, anstellgut, sauerteig, vorteig, sonstiges. Der fertige Sauerteig im Hauptteig hat art "sauerteig". Milch, Saaten, Honig, Butter usw.: "sonstiges".
+- "arbeit" = Minuten Handarbeit in diesem Schritt.
+- "essen" = [frühestens, spätestens] Stunden nach dem Backen, wann man es anschneidet (Roggenbrote frühestens 24).
+- "temperatur" = Raumtemperatur in °C, für die das Rezept seine Zeiten angibt, null wenn unbekannt.
+- Texte auf Deutsch, Du-Form, Fachwörter kurz erklären. "was" höchstens 3 Sätze. "weiter_wenn" = woran man erkennt, dass es zum nächsten Schritt weitergeht.
+
+Format:
+{
+  "name": "…",
+  "quelle": "Buch und Seite, oder Link",
+  "beschreibung": "1–3 Sätze: was für ein Brot, Besonderheiten, was umgerechnet wurde",
+  "mehl": 500,
+  "temperatur": 22,
+  "essen": [2, 30],
+  "schritte": [
+    { "titel": "Sauerteig ansetzen", "sauerteig": true, "dauer": [12, 16], "arbeit": 5,
+      "was": "…", "weiter_wenn": "…",
+      "zutaten": [ {"name": "Roggenvollkornmehl", "g": 100, "art": "mehl"},
+                   {"name": "Wasser, lauwarm", "g": 100, "art": "wasser"},
+                   {"name": "Anstellgut", "g": 10, "art": "anstellgut"} ] },
+    { "titel": "Hauptteig kneten", "dauer": [0.75, 0.75], "arbeit": 20, "was": "…",
+      "zutaten": [ {"name": "Sauerteig (ganz)", "g": 210, "art": "sauerteig"} ] },
+    { "titel": "Aus dem Ofen", "dauer": [0, 0], "arbeit": 2, "was": "…" }
+  ]
+}
+
+Hier das Rezept:
+`;
 
 /* ===================== Zustand ===================== */
-function defaults(){ return { tpl:"weizen", flour:500, start:"", starter:{ fed:null }, run:null }; }
+function defaults(){ return { tpl:"weizen", flour:500, start:"", starter:{ fed:null }, run:null, showHidden:false }; }
 let S = defaults();
+let REZ = [];                     /* eigene Rezepte; die Vorlagen (TPL) stehen im Code */
 let VIEW = "plan";
+let RATE = {};                    /* Auswahl im Bewerten-Kasten, erst beim Speichern ins Protokoll */
+let IMP = null, IMP_EDIT = null;  /* geprüftes Import-Rezept; ggf. die ID, die es ersetzt */
 
-/* Alles, was aus localStorage kommt, läuft hier durch. */
+function validRecipe(r){
+  return !!r && typeof r.id === "string" && typeof r.name === "string" && Array.isArray(r.steps) && r.steps.length > 0 &&
+    r.steps.every(s => s && typeof s.title === "string" && Array.isArray(s.h) && s.h.length === 2 && s.h.every(Number.isFinite)) &&
+    Number(r.base) > 0 && Array.isArray(r.eat) && r.eat.length === 2;
+}
+function allRecipes(){ return TPL.concat(REZ); }
+function recipeById(id){ return allRecipes().find(r => r.id === id) || null; }
+
+/* Alles, was aus localStorage oder einer Sicherung kommt, läuft hier durch. */
 function sanitize(s){
   const d = defaults();
   if(!s || typeof s !== "object") return d;
-  if(!TPL.some(t => t.id === s.tpl)) s.tpl = d.tpl;
+  if(!recipeById(s.tpl)) s.tpl = d.tpl;
   s.flour = Math.min(3000, Math.max(200, Number(s.flour) || d.flour));
   if(typeof s.start !== "string" || (s.start && isNaN(new Date(s.start)))) s.start = "";
   if(!s.starter || typeof s.starter !== "object") s.starter = { fed:null };
   if(typeof s.starter.fed !== "number" || !isFinite(s.starter.fed)) s.starter.fed = null;
+  s.showHidden = s.showHidden === true;
   const r = s.run;
   const ok = r && typeof r === "object" && Array.isArray(r.steps) && r.steps.length &&
     r.steps.every(st => st && typeof st.title === "string" && Array.isArray(st.h) && st.h.length === 2 && st.h.every(Number.isFinite)) &&
@@ -463,10 +674,21 @@ function sanitize(s){
   return s;
 }
 function persist(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
-function getLog(){ try { const l = JSON.parse(localStorage.getItem(KEY+"_log")||"[]"); return Array.isArray(l) ? l : []; } catch(e){ return []; } }
-function setLog(l){ try { localStorage.setItem(KEY+"_log", JSON.stringify(l.slice(-100))); } catch(e){} }
+function getLog(){ try { const l = JSON.parse(localStorage.getItem(KEY+"_log")||"[]"); return Array.isArray(l) ? l.filter(e => e && Array.isArray(e.times) && e.times.length) : []; } catch(e){ return []; } }
+function setLog(l){ try { localStorage.setItem(KEY+"_log", JSON.stringify(l.slice(-200))); } catch(e){} }
+function loadRez(){ try { const r = JSON.parse(localStorage.getItem(KEY+"_rez")||"[]"); return Array.isArray(r) ? r.filter(validRecipe) : []; } catch(e){ return []; } }
+function saveRez(r){ REZ = r; try { localStorage.setItem(KEY+"_rez", JSON.stringify(r)); } catch(e){} }
+
+/* Bewertungen eines Rezepts aus dem Verlauf. Ausgeblendet ist, was zuletzt "nie wieder" bekam. */
+function rezStats(id, log){
+  const es = (log || getLog()).filter(e => (e.rid || e.tpl) === id);
+  const rated = es.filter(e => e.again);
+  return { n:es.length, last:es[es.length-1] || null, again: rated.length ? rated[rated.length-1].again : null };
+}
+function isHidden(id, log){ return rezStats(id, log).again === "nie"; }
 
 (function boot(){
+  REZ = loadRez();
   try { S = sanitize(JSON.parse(localStorage.getItem(KEY)||"null")); } catch(e){ S = defaults(); }
   /* Eine Startzeit, die schon vorbei ist, hilft niemandem — dann gilt wieder "jetzt". */
   if(S.start && new Date(S.start).getTime() < Date.now() - 5*60e3) S.start = "";
@@ -476,30 +698,56 @@ function setLog(l){ try { localStorage.setItem(KEY+"_log", JSON.stringify(l.slic
 /* ===================== Render ===================== */
 let PLAN = null;
 function startMs(){ return S.start ? new Date(S.start).getTime() : Date.now(); }
+const AGAIN = { ja:"✓ nochmal", vielleicht:"? vielleicht", nie:"✕ nie wieder" };
+const KIDS = { geliebt:"Kinder: geliebt", okay:"Kinder: okay", nein:"Kinder: nicht gemocht" };
+const GARE = { jung:"Gare zu wenig", passt:"Gare passt", weit:"Gare zu viel" };
 
 function render(){
+  const fin = !!S.run && S.run.done.length >= S.run.steps.length;
   document.body.dataset.view = VIEW;
   document.body.dataset.run = S.run ? "1" : "0";
+  document.body.dataset.fin = fin ? "1" : "0";
   $("tabPlan").classList.toggle("on", VIEW === "plan");
   $("tabRun").classList.toggle("on", VIEW === "run");
   $("tabRun").innerHTML = "BACKEN" + (S.run ? '<span class="dot"></span>' : "");
 
-  const tpl = tplById(S.tpl);
+  const tpl = recipeById(S.tpl) || TPL[0];
   PLAN = planFor(tpl, S.flour, startMs(), S.starter.fed);
 
   /* Eingaben: nie .value auf ein fokussiertes Feld (iPhone-Regel) */
   if(document.activeElement !== $("flour")) $("flour").value = S.flour;
   if(document.activeElement !== $("startAt")) $("startAt").value = S.start;
 
-  $("tplChips").innerHTML = TPL.map(t =>
-    '<button class="chip'+(t.id === S.tpl ? " on" : "")+'" data-tpl="'+t.id+'">'+esc(t.name)+'</button>').join("");
-  $("tplDesc").textContent = tpl.desc;
-
+  const log = getLog();
+  renderRecipes(tpl, log);
   renderIngredients(PLAN.steps);
   renderStarter();
   renderPlan(tpl);
   renderRun();
-  renderLog();
+  renderRate();
+  renderLog(log);
+}
+
+function renderRecipes(tpl, log){
+  const vis = allRecipes().filter(r => S.showHidden || r.id === S.tpl || !isHidden(r.id, log));
+  const nHidden = allRecipes().filter(r => isHidden(r.id, log)).length;
+  $("tplChips").innerHTML = vis.map(r =>
+    '<button class="chip'+(r.id === S.tpl ? " on" : "")+(isHidden(r.id, log) ? " dim" : "")+'" data-tpl="'+esc(r.id)+'">'+esc(r.name)+'</button>').join("") +
+    (nHidden ? '<button class="chip dim" id="toggleHidden">'+(S.showHidden ? "ausgeblendete verstecken" : "ausgeblendet ("+nHidden+")")+'</button>' : "");
+  const st = rezStats(tpl.id, log);
+  let h = '<div class="note">'+esc(tpl.desc || "")+'</div>';
+  if(tpl.src) h += '<div class="note">Quelle: '+esc(tpl.src)+'</div>';
+  if(st.n){
+    const e = st.last;
+    h += '<div class="note"><b>'+st.n+'× gebacken</b>, zuletzt '+fmtDay(e.times[0])+
+      (st.again ? ' · <span class="tag '+st.again+'">'+AGAIN[st.again]+'</span>' : "")+
+      (e.kids ? ' <span class="tag">'+KIDS[e.kids]+'</span>' : "")+
+      (e.note ? '<br>„'+esc(e.note)+'“' : "")+'</div>';
+  } else h += '<div class="note">Noch nie gebacken.</div>';
+  if(st.again === "nie") h += msg("warn","✕","Du hast dieses Rezept zuletzt mit <b>nie wieder</b> bewertet.");
+  h += '<div class="btnrow"><button class="btn ghost sm" id="rezEdit">'+(REZ.includes(tpl) ? "ALS TEXT BEARBEITEN" : "ALS TEXT ABWANDELN")+'</button>'+
+       (REZ.includes(tpl) ? '<button class="btn ghost sm" id="rezDel">LÖSCHEN</button>' : "")+'</div>';
+  $("tplDesc").innerHTML = h;
 }
 
 function renderIngredients(steps){
@@ -546,9 +794,9 @@ function stepItem(s, r, i, mode, cls, now){
   let tx = "<b>"+esc(s.title)+"</b>";
   if(!(mode === "run" && r.done)){
     if(s.ing) tx += '<small class="ig">'+s.ing.map(x => esc(x.n)+" "+fmtG(x.g)).join(" · ")+"</small>";
-    tx += "<small>"+esc(s.what)+(s.hand >= 10 ? " (≈ "+s.hand+" min Arbeit)" : "")+"</small>";
+    if(s.what) tx += "<small>"+esc(s.what)+(s.hand >= 10 ? " (≈ "+s.hand+" min Arbeit)" : "")+"</small>";
     if(s.sign) tx += '<small class="sg">Weiter, wenn: '+esc(s.sign)+"</small>";
-    if(s.h[1] > 0 && s.h[0] !== s.h[1]) tx += "<small>Danach "+fmtH(s.h[0])+"–"+fmtH(s.h[1])+" bis zum nächsten Schritt</small>";
+    if(s.h[1] > 0 && s.h[0] !== s.h[1]) tx += "<small>Danach "+fmtR(s.h)+" bis zum nächsten Schritt</small>";
     const b = !r.done && blockAt(r.t);
     if(b){
       const free = firstFree(r.lo, r.hi);
@@ -567,6 +815,10 @@ function renderPlan(tpl){
   const m = [];
   if(PLAN.refresh) m.push(msg("info","↻","Die letzte Fütterung liegt beim Ansetzen mehr als "+REFRESH_DAYS+" Tage zurück — darum steht vorne <b>Anstellgut auffrischen</b>."));
   if(S.starter.fed === null && steps.some(s => s.sour)) m.push(msg("warn","?","Trag beim Anstellgut ein, wann Du zuletzt gefüttert hast — sonst weiß die App nicht, ob aufgefrischt werden muss."));
+  if(typeof tpl.temp === "number" && Math.abs(tpl.temp - KITCHEN) >= 3)
+    m.push(msg("warn","🌡", "Das Rezept gibt seine Zeiten für <b>"+tpl.temp+" °C</b> an, Deine Küche hat etwa "+KITCHEN+" °C. "+
+      (tpl.temp < KITCHEN ? "Bei Dir geht es schneller: eher das untere Ende der Spannen, und auf die Reifezeichen achten, nicht auf die Uhr."
+                          : "Bei Dir dauert es länger: eher das obere Ende der Spannen, und auf die Reifezeichen achten, nicht auf die Uhr.")));
   const eat0 = end.t + tpl.eat[0]*H, eat1 = end.t + tpl.eat[1]*H;
   m.push(msg("good","🍞","Aus dem Ofen ≈ <b>"+fmtWhen(round5(end.t), now)+"</b> (Rahmen "+fmtWhen(round5(end.lo), now)+"–"+fmtWhen(round5(end.hi), now)+"). "+
     "Anschneiden ab <b>"+fmtWhen(round5(eat0), now)+"</b>, gut bis etwa "+fmtWhen(round5(eat1), now)+"."));
@@ -595,10 +847,8 @@ function renderRun(){
       '<div class="s">gut bis ≈ '+fmtWhen(round5(end.t + r.eat[1]*H), now)+"</div></div></div>";
 
   if(a >= last){
-    h += msg("good","🍞","<b>Fertig.</b> "+esc(r.steps[last].what));
-    h += '<div class="btnrow"><button class="btn" id="finishBtn">ABSCHLIESSEN</button>'+
-         '<button class="btn ghost sm" id="undoBtn">LETZTEN ZURÜCKNEHMEN</button></div>'+
-         '<div class="note">Abschließen legt das Brot mit allen echten Zeiten im Verlauf ab. Bewerten kommt im nächsten Ausbauschritt.</div>';
+    h += msg("good","🍞","<b>Fertig.</b> "+esc(r.steps[last].what || ""));
+    h += '<div class="btnrow"><button class="btn ghost sm" id="undoBtn">LETZTEN ZURÜCKNEHMEN</button></div>';
   } else {
     const cur = r.steps[a], nx = r.steps[a+1], tn = tl[a+1];
     h += '<div class="lbl">Seit '+fmtWhen(r.done[a], now)+' ('+fmtH((now - r.done[a])/H)+')</div>'+
@@ -624,15 +874,51 @@ function renderRun(){
   $("runBox").innerHTML = h;
 }
 
-function renderLog(){
-  const l = getLog();
-  if(!l.length){ $("logBox").innerHTML = '<div class="note" style="margin-top:0">Noch keine Brote. Jedes abgeschlossene Brot landet hier mit seinen echten Zeiten.</div>'; return; }
-  $("logBox").innerHTML = l.map((e,i) => ({e,i})).reverse().map(({e,i}) => {
+/* Nur Klassen umschalten, nichts neu bauen — die Notiz im selben Kasten behält den Fokus. */
+function renderRate(){
+  document.querySelectorAll("#rateCard [data-rate]").forEach(b => {
+    const [k, v] = b.dataset.rate.split(":");
+    b.classList.toggle("on", RATE[k] === v);
+  });
+}
+
+function renderLog(log){
+  if(!log.length){ $("logBox").innerHTML = '<div class="note" style="margin-top:0">Noch keine Brote. Jedes abgeschlossene Brot landet hier mit seinen echten Zeiten und Deiner Bewertung.</div>'; }
+  else $("logBox").innerHTML = log.map((e,i) => ({e,i})).reverse().map(({e,i}) => {
     const dur = (e.times[e.times.length-1] - e.times[0]) / H;
+    const tags = (e.again ? '<span class="tag '+e.again+'">'+AGAIN[e.again]+'</span>' : "")+
+                 (e.kids ? '<span class="tag">'+KIDS[e.kids]+'</span>' : "")+
+                 (e.gare ? '<span class="tag">'+GARE[e.gare]+'</span>' : "");
+    const can = !!recipeById(e.rid || e.tpl);
     return '<div class="logrow"><span class="d">'+fmtDay(e.times[0])+'</span><span class="r">'+esc(e.name)+
-      '<small>'+fmtG(e.flour)+' Mehl · '+fmtH(dur)+' vom ersten Schritt bis aus dem Ofen</small></span>'+
-      '<button data-del="'+i+'" title="Löschen">✕</button></div>';
+      '<small>'+fmtG(e.flour)+' Mehl · '+fmtH(dur)+' bis aus dem Ofen</small>'+
+      (tags ? '<small>'+tags+'</small>' : "")+(e.note ? '<small>„'+esc(e.note)+'“</small>' : "")+'</span>'+
+      (can ? '<button data-again="'+i+'" title="Nochmal planen">↺</button>' : "")+
+      '<button data-note="'+i+'" title="Notiz">✎</button><button data-del="'+i+'" title="Löschen">✕</button></div>';
   }).join("");
+  let exp = null; try { exp = localStorage.getItem(KEY+"_exp"); } catch(e){}
+  $("backupNote").textContent = (exp ? "Letzte Sicherung: "+fmtDay(new Date(exp).getTime())+". " : "Noch nie gesichert. ")+
+    "Rezepte und Verlauf liegen nur auf diesem Gerät — die Sicherung ist eine Datei, die Du z. B. in Dateien/iCloud ablegst.";
+}
+
+function renderImport(){
+  const o = $("impOut");
+  if(!IMP){ o.innerHTML = ""; return; }
+  if(IMP.fail){ o.innerHTML = msg("bad","✕", IMP.fail); return; }
+  const { recipe:r, err, warn } = IMP.res;
+  let h = err.map(e => msg("bad","✕", esc(e))).join("") + warn.map(w => msg("warn","⚠", esc(w))).join("");
+  if(r){
+    const t = totals(r.steps), dur = r.steps.reduce((a,s) => [a[0]+s.h[0], a[1]+s.h[1]], [0,0]);
+    h += '<div class="big" style="margin-top:8px">'+esc(r.name)+'</div>'+
+      '<div class="note" style="margin-top:0">'+fmtG(r.base)+' Mehl · Hydration '+Math.round(t.hyd*100)+' % · '+r.steps.length+' Schritte · '+
+      fmtR(dur)+' bis aus dem Ofen'+(r.temp ? ' · Rezept für '+r.temp+' °C' : "")+'</div>'+
+      (r.desc ? '<div class="note">'+esc(r.desc)+'</div>' : "")+
+      '<ul class="steps" style="margin-top:8px">'+r.steps.map(s =>
+        '<li><div class="tm">'+(s.h[1] ? fmtR(s.h) : "—")+'</div><div class="tx"><b>'+esc(s.title)+'</b>'+
+        (s.ing ? '<small class="ig">'+s.ing.map(x => esc(x.n)+" "+fmtG(x.g)).join(" · ")+'</small>' : "")+'</div></li>').join("")+'</ul>'+
+      '<button class="btn wide" id="impSave" style="margin-top:10px">'+(IMP_EDIT ? "ÄNDERUNG SPEICHERN" : "ÜBERNEHMEN")+'</button>';
+  }
+  o.innerHTML = h;
 }
 
 /* ===================== Aktionen ===================== */
@@ -640,11 +926,11 @@ function markStarterIfRefresh(step, t){ if(step.refresh) S.starter.fed = t; }
 
 function startRun(){
   if(S.run && !confirm("Es läuft schon ein Brot („"+S.run.name+"“). Verwerfen und neu anfangen?")) return;
-  const tpl = tplById(S.tpl), now = Date.now();
+  const tpl = recipeById(S.tpl) || TPL[0], now = Date.now();
   const p = planFor(tpl, S.flour, now, S.starter.fed);
-  S.run = { id:String(now), name:tpl.name, tpl:tpl.id, flour:S.flour, eat:tpl.eat.slice(), steps:p.steps, done:[now] };
+  S.run = { id:String(now), name:tpl.name, rid:tpl.id, flour:S.flour, eat:tpl.eat.slice(), steps:p.steps, done:[now] };
   markStarterIfRefresh(p.steps[0], now);
-  S.start = "";
+  S.start = ""; RATE = {}; $("rateNote").value = "";
   VIEW = "run";
   persist(); render(); window.scrollTo(0,0);
 }
@@ -662,55 +948,141 @@ function askClock(text, notBefore){
   return t;
 }
 
-document.addEventListener("click", ev => {
+async function backup(btn){
+  const d = { app:"brotplaner", v:1, exported:new Date().toISOString(), state:S, rez:REZ, log:getLog() };
+  const text = JSON.stringify(d, null, 1);
+  const name = "brotplaner-"+new Date().toISOString().slice(0,10)+".json";
+  const done = () => { try { localStorage.setItem(KEY+"_exp", d.exported); } catch(e){} render(); };
+  try {
+    const file = new File([text], name, { type:"application/json" });
+    if(navigator.canShare && navigator.canShare({ files:[file] })){
+      await navigator.share({ files:[file], title:"Brotplaner-Sicherung" });
+      done(); return;
+    }
+  } catch(e){ if(e && e.name === "AbortError") return; }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type:"application/json" }));
+  a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  flash(btn, "GESPEICHERT"); done();
+}
+function restore(text){
+  let d = null; try { d = JSON.parse(text); } catch(e){}
+  if(!d || d.app !== "brotplaner"){ alert("Das ist keine Brotplaner-Sicherung."); return; }
+  const rez = Array.isArray(d.rez) ? d.rez.filter(validRecipe) : [];
+  const log = Array.isArray(d.log) ? d.log.filter(e => e && Array.isArray(e.times) && e.times.length) : [];
+  if(!confirm("Sicherung vom "+String(d.exported||"?").slice(0,10)+" laden?\n"+rez.length+" eigene Rezepte, "+log.length+" Brote im Verlauf.\nDas ersetzt alles, was jetzt auf diesem Gerät ist.")) return;
+  saveRez(rez); setLog(log);
+  if(d.exported){ try { localStorage.setItem(KEY+"_exp", d.exported); } catch(e){} }
+  S = sanitize(d.state); VIEW = S.run ? "run" : "plan";
+  persist(); render();
+}
+
+document.addEventListener("click", async ev => {
   const b = ev.target.closest("button"); if(!b) return;
   const r = S.run;
   if(b.dataset.view){ VIEW = b.dataset.view; render(); window.scrollTo(0,0); return; }
   if(b.dataset.tpl){ S.tpl = b.dataset.tpl; persist(); render(); return; }
-  if(b.id === "startNow"){ S.start = ""; $("startAt").blur(); persist(); render(); return; }
-  if(b.id === "goBtn"){ startRun(); return; }
-  if(b.id === "fedToday"){ S.starter.fed = Date.now(); persist(); render(); return; }
-  if(b.id === "fedOther"){
-    const v = prompt("Wann hast Du zuletzt gefüttert?\nDatum als TT.MM, z. B. 4.10");
+  if(b.dataset.rate){
+    const [k, v] = b.dataset.rate.split(":");
+    RATE[k] = RATE[k] === v ? undefined : v;     /* nochmal tippen hebt die Wahl auf */
+    renderRate(); return;
+  }
+  if(b.dataset.del){
+    if(!confirm("Diesen Eintrag löschen?")) return;
+    const l = getLog(); l.splice(+b.dataset.del, 1); setLog(l); render(); return;
+  }
+  if(b.dataset.note){
+    const l = getLog(), e = l[+b.dataset.note]; if(!e) return;
+    const v = prompt("Notiz zu „"+e.name+"“:", e.note || "");
     if(v === null) return;
-    const m = v.trim().match(/^(\d{1,2})\.(\d{1,2})\.?$/);
-    if(!m){ alert("Datum nicht erkannt."); return; }
-    const now = new Date(), d = new Date(now.getFullYear(), +m[2]-1, +m[1], 12, 0);
-    if(d > now) d.setFullYear(d.getFullYear()-1);
-    S.starter.fed = d.getTime(); persist(); render(); return;
+    e.note = v.trim().slice(0, 300); setLog(l); render(); return;
+  }
+  if(b.dataset.again){
+    const e = getLog()[+b.dataset.again]; if(!e) return;
+    S.tpl = e.rid || e.tpl; S.flour = e.flour || S.flour; persist(); render(); window.scrollTo(0,0); return;
+  }
+  switch(b.id){
+    case "toggleHidden": S.showHidden = !S.showHidden; persist(); render(); return;
+    case "startNow": S.start = ""; $("startAt").blur(); persist(); render(); return;
+    case "goBtn": startRun(); return;
+    case "fedToday": S.starter.fed = Date.now(); persist(); render(); return;
+    case "fedOther": {
+      const v = prompt("Wann hast Du zuletzt gefüttert?\nDatum als TT.MM, z. B. 4.10");
+      if(v === null) return;
+      const m = v.trim().match(/^(\d{1,2})\.(\d{1,2})\.?$/);
+      if(!m){ alert("Datum nicht erkannt."); return; }
+      const now = new Date(), d = new Date(now.getFullYear(), +m[2]-1, +m[1], 12, 0);
+      if(d > now) d.setFullYear(d.getFullYear()-1);
+      S.starter.fed = d.getTime(); persist(); render(); return;
+    }
+    case "copyPrompt":
+      try { await navigator.clipboard.writeText(ANLEITUNG); flash(b, "KOPIERT ✓"); }
+      catch(e){
+        /* Ohne Zwischenablage-Recht: Anleitung ins Feld, markiert, zum Kopieren von Hand */
+        $("impText").value = ANLEITUNG; $("impText").focus(); $("impText").select();
+        flash(b, "MARKIERT — KOPIEREN");
+      }
+      return;
+    case "impClear": $("impText").value = ""; IMP = null; IMP_EDIT = null; renderImport(); return;
+    case "impCheck": {
+      const o = extractJSON($("impText").value);
+      IMP = o ? { res: importRecipe(o) } : { fail:"Kein gültiger Rezept-Block gefunden. Kopier Claudes Antwort ganz, von der ersten { bis zur letzten }." };
+      renderImport(); return;
+    }
+    case "impSave": {
+      if(!IMP || !IMP.res || !IMP.res.recipe) return;
+      const rec = IMP.res.recipe, list = REZ.slice();
+      const i = IMP_EDIT ? list.findIndex(x => x.id === IMP_EDIT) : -1;
+      rec.id = i >= 0 ? IMP_EDIT : "r"+Date.now();
+      if(i >= 0) list[i] = rec; else list.push(rec);
+      saveRez(list);
+      S.tpl = rec.id; IMP = null; IMP_EDIT = null; $("impText").value = "";
+      $("impCard").open = false; persist(); render(); renderImport(); window.scrollTo(0,0); return;
+    }
+    case "rezEdit": {
+      const tpl = recipeById(S.tpl); if(!tpl) return;
+      IMP_EDIT = REZ.includes(tpl) ? tpl.id : null;     /* Vorlagen werden nicht überschrieben, sondern abgewandelt */
+      $("impText").value = toImportText(tpl); IMP = null; renderImport();
+      $("impCard").open = true; $("impCard").scrollIntoView({ behavior:"smooth" }); return;
+    }
+    case "rezDel": {
+      const tpl = recipeById(S.tpl); if(!tpl || !REZ.includes(tpl)) return;
+      if(!confirm("„"+tpl.name+"“ löschen? Der Verlauf bleibt.")) return;
+      saveRez(REZ.filter(x => x !== tpl)); S.tpl = TPL[0].id; persist(); render(); return;
+    }
+    case "backupBtn": backup(b); return;
+    case "restoreBtn": $("restoreFile").click(); return;
   }
   if(!r) return;
-  if(b.id === "doneBtn"){ markDone(Date.now()); return; }
-  if(b.id === "doneAtBtn"){
-    const t = askClock("Wann hast Du „"+r.steps[r.done.length].title+"“ gemacht?", r.done[r.done.length-1]);
-    if(t !== null) markDone(t);
-    return;
+  switch(b.id){
+    case "doneBtn": markDone(Date.now()); return;
+    case "doneAtBtn": {
+      const t = askClock("Wann hast Du „"+r.steps[r.done.length].title+"“ gemacht?", r.done[r.done.length-1]);
+      if(t !== null) markDone(t);
+      return;
+    }
+    case "undoBtn":
+      if(r.done.length <= 1){ alert("Das ist der erste Schritt. Zum Abbrechen „Verwerfen“ nehmen."); return; }
+      r.done.pop(); persist(); render(); return;
+    case "dropBtn":
+      if(!confirm("Dieses Brot verwerfen? Es landet nicht im Verlauf.")) return;
+      S.run = null; VIEW = "plan"; persist(); render(); return;
+    case "finishBtn": {
+      const l = getLog();
+      l.push({ name:r.name, rid:r.rid || r.tpl, flour:r.flour, titles:r.steps.map(s => s.title), times:r.done.slice(),
+               again:RATE.again, kids:RATE.kids, gare:RATE.gare, note:$("rateNote").value.trim().slice(0,300) || undefined });
+      setLog(l);
+      RATE = {}; $("rateNote").value = "";
+      S.run = null; VIEW = "plan"; persist(); render(); window.scrollTo(0,0); return;
+    }
   }
   if(b.dataset.edit){
     const i = r.done.length - 1;
     const t = askClock("Uhrzeit für „"+r.steps[i].title+"“ ändern:", i ? r.done[i-1] : undefined);
     if(t === null) return;
-    r.done[i] = t; markStarterIfRefresh(r.steps[i], t); persist(); render(); return;
+    r.done[i] = t; markStarterIfRefresh(r.steps[i], t); persist(); render();
   }
-  if(b.id === "undoBtn"){
-    if(r.done.length <= 1){ alert("Das ist der erste Schritt. Zum Abbrechen „Verwerfen“ nehmen."); return; }
-    r.done.pop(); persist(); render(); return;
-  }
-  if(b.id === "dropBtn"){
-    if(!confirm("Dieses Brot verwerfen? Es landet nicht im Verlauf.")) return;
-    S.run = null; VIEW = "plan"; persist(); render(); return;
-  }
-  if(b.id === "finishBtn"){
-    const l = getLog();
-    l.push({ name:r.name, tpl:r.tpl, flour:r.flour, titles:r.steps.map(s => s.title), times:r.done.slice() });
-    setLog(l);
-    S.run = null; VIEW = "plan"; persist(); render(); window.scrollTo(0,0); return;
-  }
-});
-document.addEventListener("click", ev => {
-  const b = ev.target.closest("button[data-del]"); if(!b) return;
-  if(!confirm("Diesen Eintrag löschen?")) return;
-  const l = getLog(); l.splice(+b.dataset.del, 1); setLog(l); render();
 });
 
 $("flour").addEventListener("input", e => {
@@ -719,6 +1091,10 @@ $("flour").addEventListener("input", e => {
 });
 $("flour").addEventListener("blur", () => render());
 $("startAt").addEventListener("input", e => { S.start = e.target.value || ""; persist(); render(); });
+$("restoreFile").addEventListener("change", e => {
+  const f = e.target.files && e.target.files[0]; if(!f) return;
+  f.text().then(restore).finally(() => { e.target.value = ""; });
+});
 
 render();
 setInterval(() => { if(!typing()) render(); }, 30000);

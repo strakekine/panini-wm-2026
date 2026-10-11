@@ -18,7 +18,7 @@ const quelle = src.slice(src.lastIndexOf("/*", i), src.lastIndexOf("/*", j));
 const M = new Function(quelle + `
   return { TPL, REFRESH, H, DAY, BASE, makeSteps, timeline, planFor, blockAt, firstFree,
            totals, starterDays, parseClock, tplById, mid, importRecipe, toImportText, extractJSON,
-           suggest, nearestEat, planFor, WEEK };`)();
+           suggest, nearestEat, planFor, WEEK, learned, offRange };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text){ n++; if(!bed){ fehler++; console.log("✗ " + text); } }
@@ -232,6 +232,27 @@ ok(M.blockAt(at(2026, 10, 26, 10)) === "Arbeitszeit", "Mo nach Zeitumstellung 10
   /* Übernommener Vorschlag: planFor rechnet mit dessen Dauern */
   const p0 = s[0], pf = M.planFor(w, 500, p0.t[0], fed, { refresh:p0.refresh, ds:p0.d });
   ok(pf.tl.every((x, i) => Math.abs(x.t - p0.t[i]) < 1000), "übernommener Plan: Ablauf = Vorschlag");
+}
+
+/* --- Lernen aus dem Verlauf --- */
+{
+  const T = ["Anstellgut auffrischen", "Sauerteig ansetzen", "Hauptteig kneten", "Aus dem Ofen"];
+  const e = (rid, h, extra) => ({ rid, titles:T, times:[0, h[0], h[0]+h[1], h[0]+h[1]+h[2]].map(x => at(2026,10,1,8) + x*H), ...extra });
+  const log = [
+    e("weizen", [6, 15, 4]), e("weizen", [5, 16, 4]), e("roggen", [7, 12, 2]),
+    { rid:"weizen", titles:T, times:[at(2026,10,1,8)] },            /* abgebrochen: nichts zu lernen */
+    { tpl:"weizen", titles:T.slice(1), times:[0, 14].map(x => at(2026,10,1,8) + x*H) }   /* alter Eintrag mit tpl statt rid */
+  ];
+  const l = M.learned(log, "weizen");
+  ok(l["Sauerteig ansetzen"].n === 3, "Sauerteig: drei Weizen-Brote, Roggen zählt nicht — ist " + (l["Sauerteig ansetzen"] || {}).n);
+  nah(l["Sauerteig ansetzen"].avg, 15, "Sauerteig Ø 15 h");
+  ok(l["Anstellgut auffrischen"].n === 3, "Auffrischen zählt über alle Rezepte (dasselbe Glas)");
+  ok(!l["Aus dem Ofen"], "letzter Schritt hat keine Dauer");
+  ok(M.offRange(l["Sauerteig ansetzen"], [10, 14]) === 1, "Ø 15 h bei Rezept 10–14 h → länger");
+  ok(M.offRange(l["Sauerteig ansetzen"], [12, 16]) === 0, "Ø 15 h bei Rezept 12–16 h → passt");
+  ok(M.offRange({ n:1, avg:20 }, [10, 14]) === 0, "ein einzelnes Brot reicht nicht für eine Meldung");
+  const viele = []; for(let k = 0; k < 8; k++) viele.push(e("weizen", [6, k < 3 ? 20 : 12, 4]));
+  nah(M.learned(viele, "weizen")["Sauerteig ansetzen"].avg, 12, "nur die letzten fünf Brote zählen");
 }
 
 /* --- Kleinkram --- */

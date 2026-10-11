@@ -492,7 +492,7 @@ reduzieren + 50 g Roggenvollkorn + 50 g Wasser, 2–3 h warm, dann Kühlschrank)
 das Rezept gewinnt). Liegt die Fütterung beim **Ansetzen** (nicht heute) mehr als 7 Tage
 zurück, wird vorher aufgefrischt (4–8 h); das Auffrischen zählt als Fütterung. Küche ≈ 24 °C,
 Backofen Ober-/Unterhitze mit Gusseisentopf, Kneter Halo Core. Arbeit inkl. Weg: Mo/Di/Do
-7–16, Mi/Fr 7–13; Schlaf 21–6 (`WEEK`, noch fest im Code). Brot darf bis ~24 h vor dem Essen
+7–16, Mi/Fr 7–13; Schlaf 21–6 (Ausgangswert `WEEK`, einstellbar unter „Meine Woche“). Brot darf bis ~24 h vor dem Essen
 fertig sein; je Rezept als Essfenster `eat:[min,max]` h nach dem Backen (Roggen frühestens 24 h).
 
 **Datenmodell:** `S = {tpl, flour, start, eat, sel, week, starter:{fed}, run, showHidden}` unter
@@ -522,6 +522,21 @@ Mit seiner Woche ist die `stay`-Regel nie bindend (kein Termin ist kürzer als e
 Ofenstunde) — darum prüft der Test sie mit einer eigenen Woche (Termin Sa 12:00–12:30).
 Geprüft, dass er anschlägt: ohne `stay`-Regel 8 Verstöße.
 
+**Lernen:** `learned(log, rid)` = echte Dauern je Schritttitel aus den letzten fünf Broten des
+Rezepts (Auffrischen über alle Rezepte, dasselbe Glas). Angezeigt im Ablauf („Bei Dir bisher“);
+liegt der Schnitt bei mindestens zwei Broten ausserhalb der Spanne (`offRange`), meldet der
+Planen-Tab das und verweist aufs Rezept-Bearbeiten. **Bewusst kein automatisches Nachstellen**:
+die Zeiten hängen daran, dass „Erledigt“ pünktlich getippt wird, und ein vergessener Tipp
+sähe aus wie eine lange Gare. Darum fragt „Erledigt“ nach, wenn es mehr als 30 min vor dem
+frühesten Zeitpunkt liegt (`doneNow`), und „Andere Uhrzeit“ / „✎“ korrigieren nachträglich.
+
+**Kalender und Küche:** aus der Pizza-App kopiert, samt Safari/Home-Bildschirm-Weiche (dort
+am Gerät geprüft, hier nicht erneut). UIDs `brotplaner-<id>-<Schritt>`; der Plan bekommt
+beim ersten Export `S.calId`, der Lauf übernimmt sie, damit ein Export vor dem Start durch
+den späteren ersetzt wird. Ofen-Schritte stehen mit ihrer ganzen Dauer im Kalender.
+Küchenmodus zeigt den nächsten Schritt, Countdown bis zum frühesten Zeitpunkt, Reifezeichen,
+Zutaten und „Erledigt“; hält Wake Lock.
+
 **Testen:** `node test/brot.mjs` schneidet den Block zwischen den Marken `Logik` und
 `Oberfläche` aus und prüft Vorlagen (10-%-Regel, Hydration), Skalierung, Auffrischen,
 Zeitachse und Wochenplan in Zeitzone Europe/Luxembourg. Dieser Block fasst kein DOM an.
@@ -530,4 +545,5 @@ Zeitachse und Wochenplan in Zeitzone Europe/Luxembourg. Dieser Block fasst kein 
 2. Rezeptsammlung mit Bewertung (nochmal backen ja/vielleicht/nie wieder, Kinder, Notiz,
 optional Gare), Import über festes Format aus einem Claude-Chat, Sicherung (erledigt;
 `ANLEITUNG` und `importRecipe()` gehören zusammen — wer das Format ändert, ändert beide);
-3. Rückwärtsplanung auf die Essenszeit mit Wochenplan (erledigt); 4. Verlauf mit Lernen aus echten Zeiten, Kalender, Küchenmodus.
+3. Rückwärtsplanung auf die Essenszeit mit Wochenplan (erledigt); 4. Lernen aus echten Zeiten,
+Kalender, Küchenmodus (erledigt). **Am iPhone noch nicht ausprobiert** — Stand 11.10.2026.

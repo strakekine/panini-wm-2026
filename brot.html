@@ -33,6 +33,9 @@
   .seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
   .seg button{background:transparent;color:var(--muted);border:0;padding:9px 10px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;letter-spacing:.3px}
   .seg button.on{background:var(--accent);color:#1a1300}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .top .acts{display:flex;gap:6px}
+  .top .acts .btn.sm{padding:7px 10px;font-size:14.5px;min-height:36px}
   .bar{display:flex;gap:6px;margin-top:8px;align-items:center}
   .bar .seg{flex:1}
   .bar .seg button{flex:1;text-align:center}
@@ -124,6 +127,20 @@
   .logrow button{background:transparent;border:0;color:var(--muted);cursor:pointer;font-family:inherit;font-size:15px;padding:6px}
   .foot{color:var(--muted);font-size:11.5px;text-align:center;padding:18px 12px 0;line-height:1.5}
   body[data-fin="0"] .v-fin{display:none}
+  /* Küchenmodus — wie in der Pizza-App. Kein viewport-fit=cover, darum keine Insets nötig;
+     der Kopf ist sticky, damit SCHLIESSEN nach langen Zutatenlisten erreichbar bleibt. */
+  #kitchen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:none;overflow:auto;padding:22px 20px 40px}
+  #kitchen.show{display:block}
+  #kitchen .ktop{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;position:sticky;top:-22px;padding:12px 0;background:var(--bg);z-index:2}
+  #kitchen .ktop h2{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;margin:0;color:var(--gold)}
+  #kitchen .know{background:var(--panel);border:1px solid var(--gold);border-radius:16px;padding:18px;margin-bottom:14px}
+  #kitchen .klabel{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+  #kitchen .kbig{font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1.1;letter-spacing:1px;margin:6px 0}
+  #kitchen .ksub{font-size:17px;color:var(--muted);line-height:1.45}
+  #kitchen .kcount{font-family:Menlo,monospace;font-size:26px;color:var(--gold);font-weight:700;margin-top:10px}
+  #kitchen .knext{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+  #kitchen .king{font-size:18px;line-height:1.8}
+  #kitchen .king b{font-family:Menlo,monospace;color:var(--gold)}
   details.card > summary{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--panel2);border-bottom:1px solid var(--line);cursor:pointer;list-style:none;font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1px}
   details.card > summary::-webkit-details-marker{display:none}
   details.card > summary::after{content:"▾";color:var(--muted);font-family:Barlow;font-size:14px;margin-left:auto;transition:transform .2s}
@@ -152,7 +169,13 @@
 
 <header>
   <div class="wrap">
-    <h1>BROTPLANER</h1>
+    <div class="top">
+      <h1>BROTPLANER</h1>
+      <div class="acts">
+        <button class="btn ghost sm v-run" id="kitchenBtn">KÜCHE</button>
+        <button class="btn ghost sm" id="icsBtn">KALENDER</button>
+      </div>
+    </div>
     <div class="bar">
       <div class="seg" id="tabs"><button data-view="plan" id="tabPlan">PLANEN</button><button data-view="run" id="tabRun">BACKEN</button></div>
     </div>
@@ -291,6 +314,16 @@
 
 <div class="foot">Brotplaner · Daten bleiben nur auf diesem Gerät</div>
 </main>
+
+<div id="kitchen">
+  <div class="ktop">
+    <h2>KÜCHE</h2>
+    <button class="btn ghost sm" id="kClose">SCHLIESSEN</button>
+  </div>
+  <div class="know" id="kNow"></div>
+  <div class="knext" id="kIng"></div>
+  <div class="knext" id="kCur"></div>
+</div>
 
 <script>
 /* ===================== Logik =====================
@@ -675,6 +708,38 @@ function nearestEat(tpl, flour, eatT, fed, week, now){
   return { after, before };
 }
 
+/* ----- Lernen aus dem Verlauf -----
+   Echte Dauern je Schritt (Zeit bis zum nächsten erledigten Schritt), je Rezept und Titel.
+   Auffrischen zählt über alle Rezepte, weil es immer dasselbe Glas ist. Kein Eingriff in den
+   Plan: die App zeigt, was bei Dir passiert ist, und sagt es, wenn das regelmässig ausserhalb
+   der Rezeptspanne liegt. Ändern tust Du das Rezept selbst ("Als Text bearbeiten"). */
+function learned(log, rid){
+  const out = {};
+  (log || []).forEach(e => {
+    if(!Array.isArray(e.titles) || !Array.isArray(e.times)) return;
+    const own = (e.rid || e.tpl) === rid;
+    for(let i = 0; i + 1 < e.times.length && i < e.titles.length; i++){
+      const title = e.titles[i];
+      if(!own && title !== REFRESH.title) continue;
+      const d = (e.times[i+1] - e.times[i]) / H;
+      if(!(d >= 0 && d < 96)) continue;
+      (out[title] = out[title] || []).push(d);
+    }
+  });
+  Object.keys(out).forEach(k => {
+    const a = out[k].slice(-5);                    /* die letzten fünf: Küche und Jahreszeit ändern sich */
+    out[k] = { n:a.length, avg:a.reduce((x, y) => x + y, 0) / a.length, min:Math.min(...a), max:Math.max(...a) };
+  });
+  return out;
+}
+/* Liegt der Schnitt bei mindestens zwei Broten ausserhalb der Rezeptspanne? */
+function offRange(l, h){
+  if(!l || l.n < 2) return 0;
+  if(l.avg > h[1] + 0.25) return 1;
+  if(l.avg < h[0] - 0.25) return -1;
+  return 0;
+}
+
 /* Zutaten zusammengefasst: Gesamtmehl, Gesamtwasser, Hydration (Wasser : Mehl).
    Anstellgut und der fertige Sauerteig zählen nicht doppelt; das Auffrischen gar nicht. */
 function totals(steps){
@@ -787,7 +852,7 @@ Hier das Rezept:
 `;
 
 /* ===================== Zustand ===================== */
-function defaults(){ return { tpl:"weizen", flour:500, start:"", eat:"", sel:null, starter:{ fed:null }, run:null, showHidden:false,
+function defaults(){ return { tpl:"weizen", flour:500, start:"", eat:"", sel:null, calId:null, starter:{ fed:null }, run:null, showHidden:false,
   week:JSON.parse(JSON.stringify(WEEK)) }; }
 let S = defaults();
 let REZ = [];                     /* eigene Rezepte; die Vorlagen (TPL) stehen im Code */
@@ -813,6 +878,7 @@ function sanitize(s){
   if(!s.starter || typeof s.starter !== "object") s.starter = { fed:null };
   if(typeof s.starter.fed !== "number" || !isFinite(s.starter.fed)) s.starter.fed = null;
   s.showHidden = s.showHidden === true;
+  if(typeof s.calId !== "string") s.calId = null;
   if(typeof s.eat !== "string" || (s.eat && isNaN(new Date(s.eat)))) s.eat = "";
   if(!(s.sel && typeof s.sel === "object" && typeof s.sel.tpl === "string" && Array.isArray(s.sel.ds) && s.sel.ds.every(Number.isFinite))) s.sel = null;
   else s.sel.refresh = s.sel.refresh === true;
@@ -945,7 +1011,7 @@ function renderStarter(){
 }
 
 /* Ein Schritt in der Liste. mode: "plan" | "run". */
-function stepItem(s, r, i, mode, cls, now){
+function stepItem(s, r, i, mode, cls, now, lr){
   let tm;
   if(r.done) tm = "✓ "+fmtWhen(r.t, now);
   else {
@@ -959,6 +1025,9 @@ function stepItem(s, r, i, mode, cls, now){
     if(s.what) tx += "<small>"+esc(s.what)+(s.hand >= 10 ? " (≈ "+s.hand+" min Arbeit)" : "")+"</small>";
     if(s.sign) tx += '<small class="sg">Weiter, wenn: '+esc(s.sign)+"</small>";
     if(s.h[1] > 0 && s.h[0] !== s.h[1]) tx += "<small>Danach "+fmtR(s.h)+" bis zum nächsten Schritt</small>";
+    const l = lr && lr[s.title];
+    if(l && s.h[1] > 0) tx += '<small style="color:#7fb3e8">Bei Dir bisher: '+(l.n === 1 ? fmtH(l.avg) : "Ø "+fmtH(l.avg)+" ("+l.n+"×, "+fmtH(l.min)+"–"+fmtH(l.max)+")")+
+      (offRange(l, s.h) > 0 ? " — länger als das Rezept" : offRange(l, s.h) < 0 ? " — kürzer als das Rezept" : "")+"</small>";
     const b = !r.done && blockAt(r.t, S.week);
     if(b){
       const free = firstFree(r.lo, r.hi, S.week);
@@ -970,11 +1039,15 @@ function stepItem(s, r, i, mode, cls, now){
 
 function renderPlan(tpl){
   const now = Date.now(), steps = PLAN.steps, tl = PLAN.tl;
-  $("planSteps").innerHTML = steps.map((s,i) => stepItem(s, tl[i], i, "plan", "", now)).join("");
+  const lr = learned(getLog(), tpl.id);
+  $("planSteps").innerHTML = steps.map((s,i) => stepItem(s, tl[i], i, "plan", "", now, lr)).join("");
   const end = tl[tl.length-1];
   $("planHint").textContent = "aus dem Ofen ≈ "+fmtWhen(round5(end.t), now);
 
   const m = [];
+  const off = steps.filter(s => offRange(lr[s.title], s.h) !== 0);
+  if(off.length) m.push(msg("info","📈", "Nach Deinen letzten Broten weicht ab: "+off.map(s => "<b>"+esc(s.title)+"</b> Ø "+fmtH(lr[s.title].avg)+" (Rezept "+fmtR(s.h)+")").join(", ")+
+    ". Wenn das so bleibt, passe das Rezept an („Als Text bearbeiten“) — dann rechnet auch der Planer damit."));
   if(PLAN.refresh) m.push(msg("info","↻","Die letzte Fütterung liegt beim Ansetzen mehr als "+REFRESH_DAYS+" Tage zurück — darum steht vorne <b>Anstellgut auffrischen</b>."));
   if(S.starter.fed === null && steps.some(s => s.sour)) m.push(msg("warn","?","Trag beim Anstellgut ein, wann Du zuletzt gefüttert hast — sonst weiß die App nicht, ob aufgefrischt werden muss."));
   if(typeof tpl.temp === "number" && Math.abs(tpl.temp - KITCHEN) >= 3)
@@ -991,15 +1064,17 @@ function renderPlan(tpl){
   $("goBtn").textContent = "LOS — „"+steps[0].title.toUpperCase()+"“ JETZT ERLEDIGT";
 }
 
+let LR_RUN = null;
 function renderRun(){
   const r = S.run;
+  LR_RUN = r ? learned(getLog(), r.rid || r.tpl) : null;
   if(!r){ $("runBox").innerHTML = ""; $("runSteps").innerHTML = ""; return; }
   const now = Date.now();
   const tl = timeline(r.steps, r.done, r.done[0], now);
   const a = r.done.length - 1, last = r.steps.length - 1;
   $("runTitle").textContent = r.name;
   $("runSteps").innerHTML = r.steps.map((s,i) =>
-    stepItem(s, tl[i], i, "run", i === a ? "last" : (i === a+1 ? "now" : ""), now)).join("");
+    stepItem(s, tl[i], i, "run", i === a ? "last" : (i === a+1 ? "now" : ""), now, LR_RUN)).join("");
 
   const end = tl[last];
   let h = '<div class="status">'+
@@ -1158,6 +1233,111 @@ function readWeek(){
   S.sel = null; persist(); render();
 }
 
+/* ===================== Kalender =====================
+   Aus der Pizza-App übernommen, samt der Weiche zwischen Safari und Home-Bildschirm.
+   Beides dort am Gerät geprüft (siehe CLAUDE.md, Pizza-Abschnitt):
+   - In Safari öffnet ein Download die .ics direkt im Kalender, mit Vorschau.
+   - Vom Home-Bildschirm liefert derselbe Download nur eine weisse Seite; dort bleibt
+     navigator.share, der Kalender steht in der Teilen-Leiste unter "Mehr anzeigen".
+   NICHT nochmal probieren: window.open auf blob: (weisse Seite), data:-URLs (blockiert). */
+function icsDate(ms){
+  const d = new Date(ms);
+  return d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate())+"T"+p2(d.getHours())+p2(d.getMinutes())+"00";
+}
+function icsEvents(){
+  const r = S.run;
+  if(VIEW === "run" && r){
+    const tl = timeline(r.steps, r.done, r.done[0], Date.now());
+    return { id:r.id, ev: r.steps.map((s, i) => ({ s, i, t:tl[i].t, d:s.p !== undefined ? s.p : mid(s.h) })).filter(x => x.i >= r.done.length) };
+  }
+  if(!S.calId){ S.calId = String(Date.now()); persist(); }
+  return { id:S.calId, ev: PLAN.steps.map((s, i) => ({ s, i, t:PLAN.tl[i].t, d:s.p !== undefined ? s.p : mid(s.h) })) };
+}
+async function downloadICS(btn){
+  const { id, ev } = icsEvents();
+  if(!ev.length) return;
+  const q = v => String(v).replace(/[,;\\]/g, m => "\\"+m).replace(/\n/g, "\\n");
+  let out = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Brotplaner//DE","CALSCALE:GREGORIAN"];
+  ev.forEach(({ s, i, t, d }) => {
+    const end = t + (s.stay ? d*H : Math.max(15, s.hand || 0)*60e3);
+    const desc = [s.ing ? s.ing.map(x => x.n+" "+fmtG(x.g)).join(", ") : "", s.what || "", s.sign ? "Weiter, wenn: "+s.sign : ""].filter(Boolean).join("\n");
+    out = out.concat(["BEGIN:VEVENT",
+      "UID:brotplaner-"+id+"-"+i+"@local",          /* stabil je Brot und Schritt: Re-Import ersetzt statt verdoppelt */
+      "DTSTAMP:"+icsDate(Date.now()), "DTSTART:"+icsDate(t), "DTEND:"+icsDate(Math.max(end, t + 15*60e3)),
+      "SUMMARY:"+q("Brot: "+s.title), "DESCRIPTION:"+q(desc),
+      "BEGIN:VALARM","TRIGGER:PT0M","ACTION:DISPLAY","DESCRIPTION:Brotplaner","END:VALARM",
+      "END:VEVENT"]);
+  });
+  out.push("END:VCALENDAR");
+  const text = out.join("\r\n");
+  const blobDatei = () => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], { type:"text/calendar;charset=utf-8" }));
+    a.download = "brotplan.ics";
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  };
+  const teilen = async () => {
+    const file = new File([text], "brotplan.ics", { type:"text/calendar" });
+    if(!(navigator.canShare && navigator.canShare({ files:[file] }))) return false;
+    await navigator.share({ files:[file], title:"Brotplan" });
+    return true;
+  };
+  const homescreen = window.navigator.standalone === true ||
+    (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+  try {
+    if(homescreen){
+      if(await teilen()){ flash(btn, "GETEILT"); return; }
+      blobDatei();
+    } else { blobDatei(); flash(btn, "KALENDER"); }
+  } catch(e){
+    if(e && e.name === "AbortError") return;
+    try { blobDatei(); } catch(e2){}
+  }
+}
+
+/* ===================== Küchenmodus =====================
+   Gross, ein Blick: was als Nächstes kommt, ab wann, mit welchen Zutaten, und ein Knopf. */
+function countdown(ms){
+  const h = Math.floor(ms/3600e3), m = Math.floor(ms/60e3) % 60;
+  return h > 0 ? h+" h "+p2(m)+" min" : m+" min";
+}
+function renderKitchen(){
+  if(!$("kitchen").classList.contains("show")) return;
+  const r = S.run;
+  if(!r){ $("kitchen").classList.remove("show"); wakeLock(false); return; }
+  const now = Date.now(), tl = timeline(r.steps, r.done, r.done[0], now);
+  const a = r.done.length - 1, cur = r.steps[a], nx = r.steps[a+1];
+  if(!nx){
+    $("kNow").innerHTML = '<div class="klabel">Fertig</div><div class="kbig">'+esc(cur.title)+'</div><div class="ksub">'+esc(cur.what || "")+'</div>';
+    $("kIng").innerHTML = ""; $("kCur").innerHTML = ""; return;
+  }
+  const tn = tl[a+1], late = tl[a].t + cur.h[1]*H;
+  const when = now < tn.lo ? '<div class="kcount">in '+countdown(tn.lo - now)+'</div><div class="ksub">frühestens '+fmtWhen(round5(tn.lo), now)+', am ehesten '+fmtWhen(round5(tn.t), now)+'</div>'
+             : now <= late ? '<div class="kcount" style="color:var(--good)">jetzt</div><div class="ksub">im Zeitfenster bis '+fmtWhen(round5(late), now)+'</div>'
+             : '<div class="kcount" style="color:var(--warn)">überfällig</div><div class="ksub">laut Rezept spätestens '+fmtWhen(round5(late), now)+' — entscheidend ist der Teig</div>';
+  $("kNow").innerHTML = '<div class="klabel">Als Nächstes</div><div class="kbig">'+esc(nx.title)+'</div>'+when+
+    (cur.sign ? '<div class="ksub" style="color:#9fc79a;margin-top:8px">Weiter, wenn: '+esc(cur.sign)+'</div>' : "")+
+    '<div class="ksub" style="color:var(--text);margin-top:10px">'+esc(nx.what || "")+'</div>'+
+    '<button class="btn wide" id="kDone" style="margin-top:14px">ERLEDIGT</button>';
+  $("kIng").innerHTML = nx.ing ? '<div class="klabel">Zutaten</div><div class="king">'+nx.ing.map(x => '<b>'+fmtG(x.g)+'</b> '+esc(x.n)).join("<br>")+'</div>'
+                               : '<div class="klabel">Keine Zutaten in diesem Schritt</div>';
+  $("kCur").innerHTML = '<div class="klabel">Läuft seit '+fmtWhen(r.done[a], now)+' ('+fmtH((now - r.done[a])/H)+')</div><div class="ksub" style="margin-top:4px">'+esc(cur.title)+'</div>';
+}
+/* Bildschirm anlassen, solange der Küchenmodus offen ist (Safari ab iOS 16.4). */
+let WAKE = null;
+async function wakeLock(on){
+  try {
+    if(on && navigator.wakeLock && !WAKE){
+      WAKE = await navigator.wakeLock.request("screen");
+      WAKE.addEventListener("release", () => { WAKE = null; });
+    } else if(!on && WAKE){ await WAKE.release(); WAKE = null; }
+  } catch(e){ WAKE = null; }
+}
+document.addEventListener("visibilitychange", () => {
+  if(!document.hidden && $("kitchen").classList.contains("show")) wakeLock(true);
+});
+
 /* ===================== Aktionen ===================== */
 function markStarterIfRefresh(step, t){ if(step.refresh) S.starter.fed = t; }
 
@@ -1166,10 +1346,11 @@ function startRun(){
   const tpl = recipeById(S.tpl) || TPL[0], now = Date.now();
   const sel = S.sel && S.sel.tpl === tpl.id ? S.sel : null;
   const p = planFor(tpl, S.flour, now, S.starter.fed, sel);
-  S.run = { id:String(now), name:tpl.name, rid:tpl.id, flour:S.flour, eat:tpl.eat.slice(), steps:p.steps, done:[now],
+  /* Kalender: der Teig übernimmt die ID des exportierten Plans, damit der Export ersetzt statt verdoppelt wird */
+  S.run = { id:S.calId || String(now), name:tpl.name, rid:tpl.id, flour:S.flour, eat:tpl.eat.slice(), steps:p.steps, done:[now],
             eatAt: sel && S.eat ? new Date(S.eat).getTime() : null };
   markStarterIfRefresh(p.steps[0], now);
-  S.start = ""; S.sel = null; RATE = {}; $("rateNote").value = "";
+  S.start = ""; S.sel = null; S.calId = null; RATE = {}; $("rateNote").value = "";
   VIEW = "run";
   persist(); render(); window.scrollTo(0,0);
 }
@@ -1178,6 +1359,15 @@ function markDone(t){
   r.done.push(t);
   markStarterIfRefresh(r.steps[r.done.length-1], t);
   persist(); render();
+}
+/* "Erledigt" jetzt — mit Rückfrage, wenn es deutlich vor dem frühesten Zeitpunkt liegt.
+   Ein versehentlicher Tipp verfälscht sonst den Lauf und später das Gelernte. */
+function doneNow(){
+  const r = S.run; if(!r || r.done.length >= r.steps.length) return;
+  const now = Date.now(), tl = timeline(r.steps, r.done, r.done[0]), tn = tl[r.done.length];
+  if(now < tn.lo - 30*60e3 && !confirm("„"+r.steps[r.done.length].title+"“ ist laut Rezept frühestens um "+fmtWhen(round5(tn.lo), now)+
+     " dran — noch "+fmtH((tn.lo - now)/H)+". Trotzdem jetzt eintragen?")) return;
+  markDone(now);
 }
 function askClock(text, notBefore){
   const v = prompt(text+"\nUhrzeit als HH:MM, z. B. 18:40");
@@ -1299,11 +1489,15 @@ document.addEventListener("click", async ev => {
       saveRez(REZ.filter(x => x !== tpl)); S.tpl = TPL[0].id; persist(); render(); return;
     }
     case "backupBtn": backup(b); return;
+    case "icsBtn": downloadICS(b); return;
+    case "kitchenBtn": if(!S.run) return; $("kitchen").classList.add("show"); renderKitchen(); wakeLock(true); return;
+    case "kClose": $("kitchen").classList.remove("show"); wakeLock(false); return;
+    case "kDone": doneNow(); renderKitchen(); return;
     case "restoreBtn": $("restoreFile").click(); return;
   }
   if(!r) return;
   switch(b.id){
-    case "doneBtn": markDone(Date.now()); return;
+    case "doneBtn": doneNow(); return;
     case "doneAtBtn": {
       const t = askClock("Wann hast Du „"+r.steps[r.done.length].title+"“ gemacht?", r.done[r.done.length-1]);
       if(t !== null) markDone(t);
@@ -1347,7 +1541,7 @@ $("restoreFile").addEventListener("change", e => {
 buildWeek();
 $("weekBox").addEventListener("change", readWeek);
 render();
-setInterval(() => { if(!typing()) render(); }, 30000);
+setInterval(() => { if(!typing()) render(); renderKitchen(); }, 30000);
 document.addEventListener("visibilitychange", () => { if(!document.hidden && !typing()) render(); });
 </script>
 </body>

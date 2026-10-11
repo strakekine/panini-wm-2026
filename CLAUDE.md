@@ -4,7 +4,17 @@ Fünf voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
 
 - **`panini*.html`** — Sticker-Tracker für die Panini WM 2026 (Emil, Leo, generisch).
   Reine Einzeldatei-Webapps, kein Build, kein Framework.
-- **`spikeball.html`** — Turnierplaner für Strand-Spikeball. Ebenfalls Einzeldatei.
+- **`spikeball.html`** — **Turnierplaner** (Dateiname bleibt aus Link-Gründen): Teilnehmer
+  eintragen, Teams auslosen, Gruppenphase und/oder K.-o.-Runde, nur Ergebnisse eintippen.
+  Sportartneutral — Sätze (1 bis 5; ungerade = Best of n, gerade kann gleich ausgehen),
+  Zielpunkte pro Satz und Zwei-Punkte-Regel
+  sind für Gruppen- und K.-o.-Phase getrennt einstellbar. Einzeldatei.
+  Tabellenreihenfolge in Stufen, umschaltbar: Punkte, dann entweder Satzdifferenz →
+  Punktdifferenz → erzielte Punkte → direkter Vergleich (Standard) oder direkter
+  Vergleich gleich nach den Punkten. **Kein alphabetischer Stichentscheid**: bleibt es
+  nach allen Stufen gleich, teilen sich die Teams den Platz („=" statt Platznummer) und
+  die Gruppe bietet ein Entscheidungsspiel an. Das zählt nur für die Reihenfolge, nicht
+  für die Tabelle, und blockiert den K.-o.-Start, solange es über den Einzug entscheidet.
 - **`pizza.html`** — Pizzateig-Rechner und Gärplaner: beliebig viele Gärphasen mit
   eigener Temperatur, frei wählbarer Ballen-Zeitpunkt, Vorteige (Poolish, Biga,
   Sauerteig), Rückwärtsplanung auf die Backzeit, Umplanen während der laufenden

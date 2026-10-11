@@ -471,9 +471,10 @@ function importRecipe(o){
     if(!h) err.push(nr + " („" + title + "“): Dauer muss [min, max] in Stunden sein, zwischen 0 und 72.");
     const ing = [];
     (Array.isArray(s.zutaten) ? s.zutaten : []).forEach(z => {
-      const n = z && str(z.name, 60), g = z && numOr(z.g, NaN);
+      const n = z && str(z.name, 60), g = z && numOr(z.g, NaN), teil = z && str(z.teil, 30);
       if(!n || !(g > 0 && g < 10000)){ warn.push(nr + ": eine Zutat ohne Name oder Menge wurde weggelassen."); return; }
-      ing.push({ n, g, k: ART[String(z.art||"").toLowerCase()] || "x" });
+      /* teil: bei gleichzeitig angesetzten Vorstufen (Sauerteig + Poolish in einem Schritt) */
+      ing.push({ n: teil ? teil + ": " + n : n, g, k: ART[String(z.art||"").toLowerCase()] || "x", teil: teil || undefined });
     });
     steps.push({ title, h: h || [0,0], hand: Math.round(Math.min(180, Math.max(0, numOr(s.arbeit, 5)))),
       what: str(s.was, 600), sign: str(s.weiter_wenn, 300) || undefined,
@@ -497,8 +498,14 @@ function importRecipe(o){
   const sourSteps = steps.filter(s => s.sour);
   if(sourSteps.length > 1) warn.push("Mehr als ein Sauerteig-Ansatz — aufgefrischt wird vor dem ersten.");
   sourSteps.slice(0, 1).forEach(s => {
-    const m = (s.ing||[]).filter(x => x.k === "mehl").reduce((a, x) => a + x.g, 0);
-    const asg = (s.ing||[]).filter(x => x.k === "asg").reduce((a, x) => a + x.g, 0);
+    /* Teilt sich der Sauerteig den Schritt mit Poolish oder Brühstück, zählt nur sein eigenes Mehl —
+       sonst meldete die 10-%-Regel falschen Alarm. Ohne "teil" lässt sich das nicht trennen: dann
+       keine Prüfung, sobald Hefe im Schritt ist (ein Hefe-Vorteig teilt ihn sich). */
+    const all = s.ing || [], tagged = all.some(x => x.teil);
+    if(!tagged && all.some(x => x.k === "hefe")) return;
+    const own = tagged ? all.filter(x => x.teil && /sauer/i.test(x.teil)) : all;
+    const m = own.filter(x => x.k === "mehl").reduce((a, x) => a + x.g, 0);
+    const asg = own.filter(x => x.k === "asg").reduce((a, x) => a + x.g, 0);
     if(m && asg && Math.abs(asg / m - 0.10) > 0.03)
       warn.push("Anstellgut ist " + Math.round(asg / m * 100) + " % des Sauerteigmehls — Deine Regel sagt 10 %.");
   });
@@ -518,7 +525,11 @@ function toImportText(r){
       if(s.sour) x.sauerteig = true;
       x.dauer = s.h; x.arbeit = s.hand; if(s.stay) x.dabei = true; x.was = s.what;
       if(s.sign) x.weiter_wenn = s.sign;
-      if(s.ing) x.zutaten = s.ing.map(i => ({ name:i.n, g:Math.round(i.g*10)/10, art:ART_BACK[i.k] || "sonstiges" }));
+      if(s.ing) x.zutaten = s.ing.map(i => {
+        const z = { name: i.teil && i.n.indexOf(i.teil + ": ") === 0 ? i.n.slice(i.teil.length + 2) : i.n, g:Math.round(i.g*10)/10, art:ART_BACK[i.k] || "sonstiges" };
+        if(i.teil) z.teil = i.teil;
+        return z;
+      });
       return x;
     }) };
   return JSON.stringify(o, null, 2);
@@ -536,7 +547,7 @@ function makeSteps(tpl, flour, refresh){
   const f = flour / (tpl.base || BASE);
   const steps = tpl.steps.map(s => Object.assign({}, s, {
     h: s.h.slice(),
-    ing: s.ing ? s.ing.map(i => ({ n:i.n, k:i.k, g: i.g * f })) : undefined
+    ing: s.ing ? s.ing.map(i => ({ n:i.n, k:i.k, g: i.g * f, teil:i.teil })) : undefined
   }));
   if(refresh && steps.some(s => s.sour)){
     const i = steps.findIndex(s => s.sour);
@@ -846,8 +857,8 @@ Regeln für die Schritte:
 - "dauer" = [min, max] in Stunden bis zum NÄCHSTEN Schritt, so wie im Rezept (für die Temperatur des Rezepts). Nennt das Rezept nur einen Wert, eine ehrliche Spanne geben (Sauerteig mindestens ±1 h).
 - "Ofen vorheizen" ist ein eigener Schritt, 0,75–1 h vor dem Backen; er liegt in der Stückgare.
 - Mehrmaliges Dehnen und Falten: jedes Falten ein eigener Schritt.
-- Brüh- oder Quellstück, das parallel zum Sauerteig angesetzt wird: in denselben Schritt wie den Sauerteig (Zutaten beider hinein, beides im Text). Die App kennt nur eine Reihenfolge.
-- Vorteig (Poolish, Biga) ist ein eigener Schritt ohne "sauerteig"; im Hauptteig hat er art "vorteig".
+- Alles, was gleichzeitig angesetzt wird (Sauerteig, Vorteig wie Poolish oder Biga, Brüh- oder Quellstück), kommt in EINEN Schritt: Zutaten aller Teile hinein, im Text jedes Teil einzeln beschreiben. Die App kennt nur eine Reihenfolge — getrennte Schritte würden hintereinander statt gleichzeitig geplant. "dauer" ist dann die Zeit, bis alle Teile fertig sind; "weiter_wenn" nennt die Reifezeichen jedes Teils. Jede Zutat in so einem Schritt bekommt "teil" (z. B. "Sauerteig", "Poolish", "Brühstück").
+- Ein Vorteig, der NICHT gleichzeitig mit etwas anderem angesetzt wird, ist ein eigener Schritt ohne "sauerteig". Im Hauptteig hat der fertige Vorteig art "vorteig".
 - Der letzte Schritt heißt "Aus dem Ofen" und hat "dauer": [0, 0].
 - "sauerteig": true nur beim Sauerteig-Ansatz.
 - Mengen in Gramm. "art" ist eins von: mehl, wasser, salz, hefe, anstellgut, sauerteig, vorteig, sonstiges. Der fertige Sauerteig im Hauptteig hat art "sauerteig". Milch, Saaten, Honig, Butter usw.: "sonstiges".

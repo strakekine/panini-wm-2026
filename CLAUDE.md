@@ -566,6 +566,9 @@ Zeitachse und Wochenplan in Zeitzone Europe/Luxembourg. Dieser Block fasst kein 
 **Reihenfolge (abgesprochen):** 1. laufender Teig + Anstellgut + drei Vorlagen (erledigt);
 2. Rezeptsammlung mit Bewertung (nochmal backen ja/vielleicht/nie wieder, Kinder, Notiz,
 optional Gare), Import über festes Format aus einem Claude-Chat, Sicherung (erledigt;
-`ANLEITUNG` und `importRecipe()` gehören zusammen — wer das Format ändert, ändert beide);
+`ANLEITUNG` und `importRecipe()` gehören zusammen — wer das Format ändert, ändert beide;
+Gleichzeitiges — Sauerteig, Poolish, Brühstück — steht in EINEM Schritt, die Zutaten tragen
+`teil`, und die 10-%-Regel prüft nur den Sauerteig-Teil; ohne `teil` und mit Hefe im Schritt
+wird nicht geprüft statt falsch gewarnt. Hefe wird nicht umgerechnet, er kauft, was das Rezept will);
 3. Rückwärtsplanung auf die Essenszeit mit Wochenplan (erledigt); 4. Lernen aus echten Zeiten,
 Kalender, Küchenmodus (erledigt). **Am iPhone noch nicht ausprobiert** — Stand 11.10.2026.

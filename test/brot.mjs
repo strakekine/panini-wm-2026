@@ -151,6 +151,25 @@ ok(M.blockAt(at(2026, 10, 26, 10)) === "Arbeitszeit", "Mo nach Zeitumstellung 10
   const einzel = JSON.parse(JSON.stringify(beispiel)); einzel.schritte[2].dauer = 0.75;
   ok(M.importRecipe(einzel).recipe.steps[2].h[1] === 0.75, "einzelne Zahl als Dauer wird [x, x]");
 
+  /* Sauerteig und Poolish gleichzeitig in einem Schritt: 10-%-Regel nur am Sauerteig-Teil */
+  const parallel = { name:"Parallel", essen:[2,30], schritte:[
+    { titel:"Sauerteig und Poolish ansetzen", sauerteig:true, dauer:[12,14], arbeit:10, was:"beides ansetzen",
+      zutaten:[{name:"Roggenmehl",g:100,art:"mehl",teil:"Sauerteig"},{name:"Wasser",g:100,art:"wasser",teil:"Sauerteig"},
+               {name:"Anstellgut",g:10,art:"anstellgut",teil:"Sauerteig"},
+               {name:"Weizenmehl",g:200,art:"mehl",teil:"Poolish"},{name:"Wasser",g:200,art:"wasser",teil:"Poolish"},{name:"Hefe",g:0.5,art:"hefe",teil:"Poolish"}] },
+    { titel:"Kneten", dauer:[1,1], arbeit:15, was:"k", zutaten:[{name:"Sauerteig",g:210,art:"sauerteig"},{name:"Poolish",g:400,art:"vorteig"},{name:"Weizenmehl",g:200,art:"mehl"}] },
+    { titel:"Aus dem Ofen", dauer:[0,0], arbeit:2, was:"x" } ] };
+  const rp = M.importRecipe(parallel);
+  ok(rp.recipe && !rp.warn.length, "Sauerteig + Poolish in einem Schritt: kein falscher 10-%-Alarm — " + JSON.stringify(rp.warn));
+  ok(rp.recipe.steps[0].ing[3].n === "Poolish: Weizenmehl", "Zutat zeigt ihren Teil");
+  nah(M.totals(rp.recipe.steps).mehl, 500, "Mehl aller Teile zählt zum Gesamtmehl");
+  const rp2 = M.importRecipe(JSON.parse(M.toImportText(rp.recipe)));
+  ok(rp2.recipe && rp2.recipe.steps[0].ing[3].n === "Poolish: Weizenmehl", "Rundreise: Teil bleibt, nicht doppelt");
+  const falsch = JSON.parse(JSON.stringify(parallel)); falsch.schritte[0].zutaten[2].g = 30;
+  ok(M.importRecipe(falsch).warn.some(w => /30 %/.test(w)), "mit Teil: falsches Anstellgut im Sauerteig wird trotzdem gemeldet");
+  const ohneTeil = JSON.parse(JSON.stringify(parallel)); ohneTeil.schritte[0].zutaten.forEach(z => delete z.teil);
+  ok(!M.importRecipe(ohneTeil).warn.length, "ohne Teil, aber mit Hefe im Schritt: lieber keine Prüfung als falscher Alarm");
+
   /* Chat-Antwort mit Text und Codezaun drumherum */
   ok(M.extractJSON("Hier:\n```json\n" + JSON.stringify(beispiel) + "\n```\nViel Spaß").name === "Testbrot", "JSON aus Chat-Antwort gefischt");
   ok(M.extractJSON("kein json") === null && M.extractJSON("{ kaputt") === null, "ohne JSON → null");

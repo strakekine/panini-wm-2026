@@ -497,7 +497,7 @@ fertig sein; je Rezept als Essfenster `eat:[min,max]` h nach dem Backen (Roggen 
 
 **Datenmodell:** `S = {tpl, flour, start, eat, sel, week, starter:{fed}, run, showHidden}` unter
 `brot_planer_v1`; eigene Rezepte unter `_rez`, Verlauf unter `_log` (mit Bewertung `again`,
-`kids`, `gare`, `note`), Datum der letzten Sicherung unter `_exp`. `run = {name, rid, flour, eat,
+`kids`, `gare`, `note`), Datum der letzten Sicherung unter `_exp`, letzte Änderung unter `_chg`. `run = {name, rid, flour, eat,
 eatAt, steps (eingefroren, skaliert, Auffrischen entschieden, ggf. `p`), done:[ms…]}`; `done[0]` = Start.
 `WEEK` im Code ist nur der Ausgangswert für `S.week`.
 `timeline(steps, done, start, now)`: erledigte Schritte mit echter Zeit, danach aufsummierte
@@ -536,6 +536,15 @@ beim ersten Export `S.calId`, der Lauf übernimmt sie, damit ein Export vor dem 
 den späteren ersetzt wird. Ofen-Schritte stehen mit ihrer ganzen Dauer im Kalender.
 Küchenmodus zeigt den nächsten Schritt, Countdown bis zum frühesten Zeitpunkt, Reifezeichen,
 Zutaten und „Erledigt“; hält Wake Lock.
+
+**Sicherung und Erinnerung:** Speicher wie bei der Pizza-App — localStorage, getrennt zwischen
+Safari und Home-Bildschirm, von iOS löschbar. Einziger Weg zum Behalten und Übertragen ist die
+Sicherungsdatei (SICHERN/WIEDERHERSTELLEN in der Verlauf-Karte). `setLog`/`saveRez` schreiben
+`_chg`; `needBackup(chg, exp, snooze, now)` blendet oben im Planen-Tab eine Erinnerung ein, wenn
+seit der letzten Sicherung etwas geändert wurde und sie älter als 14 Tage ist (oder es keine gab);
+„Später“ = 3 Tage Ruhe (`_snooze`). Wiederherstellen setzt `_chg` auf das Datum der Sicherung,
+sonst erinnerte die App direkt nach dem Laden. Automatischer Abgleich mit iCloud geht nicht ohne
+eigenen Server — mit dem Nutzer besprochen.
 
 **Testen:** `node test/brot.mjs` schneidet den Block zwischen den Marken `Logik` und
 `Oberfläche` aus und prüft Vorlagen (10-%-Regel, Hydration), Skalierung, Auffrischen,

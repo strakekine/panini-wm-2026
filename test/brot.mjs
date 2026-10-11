@@ -18,7 +18,7 @@ const quelle = src.slice(src.lastIndexOf("/*", i), src.lastIndexOf("/*", j));
 const M = new Function(quelle + `
   return { TPL, REFRESH, H, DAY, BASE, makeSteps, timeline, planFor, blockAt, firstFree,
            totals, starterDays, parseClock, tplById, mid, importRecipe, toImportText, extractJSON,
-           suggest, nearestEat, planFor, WEEK, learned, offRange };`)();
+           suggest, nearestEat, planFor, WEEK, learned, offRange, needBackup };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text){ n++; if(!bed){ fehler++; console.log("✗ " + text); } }
@@ -253,6 +253,18 @@ ok(M.blockAt(at(2026, 10, 26, 10)) === "Arbeitszeit", "Mo nach Zeitumstellung 10
   ok(M.offRange({ n:1, avg:20 }, [10, 14]) === 0, "ein einzelnes Brot reicht nicht für eine Meldung");
   const viele = []; for(let k = 0; k < 8; k++) viele.push(e("weizen", [6, k < 3 ? 20 : 12, 4]));
   nah(M.learned(viele, "weizen")["Sauerteig ansetzen"].avg, 12, "nur die letzten fünf Brote zählen");
+}
+
+/* --- Erinnerung an die Sicherung --- */
+{
+  const now = at(2026, 10, 30, 12), d = x => now - x*DAY;
+  ok(!M.needBackup(null, null, null, now), "nichts geändert, nie gesichert → keine Erinnerung (leere App)");
+  ok(M.needBackup(d(1), null, null, now), "Änderung, nie gesichert → erinnern");
+  ok(!M.needBackup(d(1), d(5), null, now), "Sicherung 5 Tage alt → noch nicht");
+  ok(M.needBackup(d(1), d(20), null, now), "Sicherung 20 Tage alt, seitdem geändert → erinnern");
+  ok(!M.needBackup(d(25), d(20), null, now), "Sicherung 20 Tage alt, aber nichts geändert → nicht erinnern");
+  ok(!M.needBackup(d(1), d(20), now + DAY, now), "Später gedrückt → Ruhe");
+  ok(M.needBackup(d(1), d(20), now - 1, now), "Später abgelaufen → wieder erinnern");
 }
 
 /* --- Kleinkram --- */

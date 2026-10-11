@@ -185,6 +185,7 @@
 <main>
 
 <!-- ============ Planen ============ -->
+<div class="v-plan" id="nagBox"></div>
 <div class="card v-plan">
   <div class="chead"><h2>Rezept</h2></div>
   <div class="cbody">
@@ -740,6 +741,20 @@ function offRange(l, h){
   return 0;
 }
 
+/* ----- Erinnerung an die Sicherung -----
+   iOS darf den Speicher einer Webseite löschen, und Safari und Home-Bildschirm haben
+   getrennte Speicher. Die Sicherungsdatei ist der einzige Weg, Rezepte und Verlauf zu
+   behalten. Erinnert wird, wenn sich seit der letzten Sicherung etwas geändert hat und
+   diese älter als 14 Tage ist (oder es nie eine gab) — nach "Später" 3 Tage Ruhe.
+   chg = letzte Änderung an Rezepten/Verlauf, exp = letzte Sicherung, snooze = Später bis (ms oder null). */
+const BACKUP_DAYS = 14, SNOOZE_DAYS = 3;
+function needBackup(chg, exp, snooze, now){
+  if(!chg) return false;
+  if(exp && chg <= exp) return false;
+  if(snooze && now < snooze) return false;
+  return !exp || now - exp > BACKUP_DAYS*DAY;
+}
+
 /* Zutaten zusammengefasst: Gesamtmehl, Gesamtwasser, Hydration (Wasser : Mehl).
    Anstellgut und der fertige Sauerteig zählen nicht doppelt; das Auffrischen gar nicht. */
 function totals(steps){
@@ -899,9 +914,12 @@ function sanitize(s){
 }
 function persist(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
 function getLog(){ try { const l = JSON.parse(localStorage.getItem(KEY+"_log")||"[]"); return Array.isArray(l) ? l.filter(e => e && Array.isArray(e.times) && e.times.length) : []; } catch(e){ return []; } }
-function setLog(l){ try { localStorage.setItem(KEY+"_log", JSON.stringify(l.slice(-200))); } catch(e){} }
+function setLog(l){ try { localStorage.setItem(KEY+"_log", JSON.stringify(l.slice(-200))); } catch(e){} touched(); }
+/* Zeitpunkt der letzten Änderung an Rezepten oder Verlauf — für die Sicherungs-Erinnerung */
+function touched(t){ try { localStorage.setItem(KEY+"_chg", String(t || Date.now())); } catch(e){} }
+function lsTime(k){ try { const v = localStorage.getItem(KEY+k); if(!v) return null; const n = /^\d+$/.test(v) ? +v : new Date(v).getTime(); return isFinite(n) ? n : null; } catch(e){ return null; } }
 function loadRez(){ try { const r = JSON.parse(localStorage.getItem(KEY+"_rez")||"[]"); return Array.isArray(r) ? r.filter(validRecipe) : []; } catch(e){ return []; } }
-function saveRez(r){ REZ = r; try { localStorage.setItem(KEY+"_rez", JSON.stringify(r)); } catch(e){} }
+function saveRez(r){ REZ = r; try { localStorage.setItem(KEY+"_rez", JSON.stringify(r)); } catch(e){} touched(); }
 
 /* Bewertungen eines Rezepts aus dem Verlauf. Ausgeblendet ist, was zuletzt "nie wieder" bekam. */
 function rezStats(id, log){
@@ -954,6 +972,7 @@ function render(){
   renderRun();
   renderRate();
   renderLog(log);
+  renderNag();
 }
 
 function renderRecipes(tpl, log){
@@ -1162,6 +1181,16 @@ function renderImport(){
       '<button class="btn wide" id="impSave" style="margin-top:10px">'+(IMP_EDIT ? "ÄNDERUNG SPEICHERN" : "ÜBERNEHMEN")+'</button>';
   }
   o.innerHTML = h;
+}
+
+function renderNag(){
+  const exp = lsTime("_exp");
+  if(!needBackup(lsTime("_chg"), exp, lsTime("_snooze"), Date.now())){ $("nagBox").innerHTML = ""; return; }
+  $("nagBox").innerHTML = '<div class="card" style="border-color:rgba(255,166,61,.5)"><div class="cbody">'+
+    msg("warn","💾", exp ? "Letzte Sicherung am <b>"+fmtDay(exp)+"</b>, seitdem hat sich etwas geändert."
+                         : "Du hast Deine Rezepte und Deinen Verlauf <b>noch nie gesichert</b>.")+
+    '<div class="note" style="margin-top:6px">iOS kann den Speicher der App löschen, wenn sie länger nicht benutzt wird. Die Sicherung landet als Datei z. B. in iCloud Drive.</div>'+
+    '<div class="btnrow"><button class="btn sm" id="nagBackup">JETZT SICHERN</button><button class="btn ghost sm" id="nagLater">SPÄTER</button></div></div></div>';
 }
 
 /* ===================== Planer ===================== */
@@ -1402,7 +1431,7 @@ function restore(text){
   const log = Array.isArray(d.log) ? d.log.filter(e => e && Array.isArray(e.times) && e.times.length) : [];
   if(!confirm("Sicherung vom "+String(d.exported||"?").slice(0,10)+" laden?\n"+rez.length+" eigene Rezepte, "+log.length+" Brote im Verlauf.\nDas ersetzt alles, was jetzt auf diesem Gerät ist.")) return;
   saveRez(rez); setLog(log);
-  if(d.exported){ try { localStorage.setItem(KEY+"_exp", d.exported); } catch(e){} }
+  if(d.exported){ try { localStorage.setItem(KEY+"_exp", d.exported); } catch(e){} touched(new Date(d.exported).getTime()); }
   S = sanitize(d.state); VIEW = S.run ? "run" : "plan";
   persist(); render();
 }
@@ -1488,7 +1517,8 @@ document.addEventListener("click", async ev => {
       if(!confirm("„"+tpl.name+"“ löschen? Der Verlauf bleibt.")) return;
       saveRez(REZ.filter(x => x !== tpl)); S.tpl = TPL[0].id; persist(); render(); return;
     }
-    case "backupBtn": backup(b); return;
+    case "backupBtn": case "nagBackup": backup(b); return;
+    case "nagLater": try { localStorage.setItem(KEY+"_snooze", String(Date.now() + SNOOZE_DAYS*DAY)); } catch(e){} render(); return;
     case "icsBtn": downloadICS(b); return;
     case "kitchenBtn": if(!S.run) return; $("kitchen").classList.add("show"); renderKitchen(); wakeLock(true); return;
     case "kClose": $("kitchen").classList.remove("show"); wakeLock(false); return;

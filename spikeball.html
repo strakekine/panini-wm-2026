@@ -155,10 +155,13 @@ function setProblem(x, y, R){
   if(A===B && R.target) return 'kein Sieger';
   return null;
 }
-/* Partie auswerten. isKO: bei "2 Sätze" entscheidet dort ein dritter Satz. */
+/* Wie viele Satzsiege die Partie entscheiden. Bei gerader Satzzahl kann es
+   gleich ausgehen (Gruppe: unentschieden, K.o.: ein Extrasatz entscheidet). */
+const setsNeeded = n => n%2===1 ? (n+1)/2 : n/2+1;
+/* Partie auswerten. */
 function evalMatch(sets, R, isKO){
-  const need = R.sets===1 ? 1 : 2;
-  const maxRows = (R.sets===2 && isKO) ? 3 : R.sets;
+  const need = setsNeeded(R.sets);
+  const maxRows = (R.sets%2===0 && isKO) ? R.sets+1 : R.sets;
   let wa=0, wb=0, pa=0, pb=0, played=0;
   for(let i=0; i<sets.length && i<maxRows; i++){
     const r = setResult(sets[i][0], sets[i][1], R);
@@ -175,7 +178,9 @@ function evalMatch(sets, R, isKO){
 const matchDone = ev => !!ev.w || ev.drawn;
 const rulesOf = isKO => isKO ? S.rules.k : S.rules.g;
 function rulesText(R, isKO){
-  const bo = R.sets===1 ? 'ein Satz' : R.sets===2 ? (isKO ? '2 Sätze (+ Entscheidungssatz)' : '2 Sätze') : 'Best of 3';
+  const bo = R.sets===1 ? 'ein Satz'
+    : R.sets%2===1 ? 'Best of '+R.sets
+    : R.sets+' Sätze'+(isKO ? ' (+ Entscheidungssatz)' : '');
   return bo + (R.target ? ' bis '+R.target : ' (ohne Zielwert)') + (R.two ? ', 2 Punkte Vorsprung' : '');
 }
 
@@ -344,12 +349,16 @@ function segRow(seg, opts, cur){
 }
 function rulesCard(which){
   const R = S.rules[which], isKO = which==='k';
-  const sets = [[1,'1 Satz'],[2,'2 Sätze'],[3,'Best of 3']];
+  const sets = [[1,'1'],[2,'2'],[3,'3'],[4,'4'],[5,'5']];
+  const need = setsNeeded(R.sets), half = R.sets/2;
   let h = '<div class="card"><div class="sec">'+(isKO?'K.-o.-Phase':'Gruppenphase')+'</div>';
-  h += '<label class="lbl">Sätze</label>' + segRow('r:'+which+':sets', sets, R.sets);
-  h += '<div class="hint">'+(R.sets===1 ? 'Eine Partie = ein Satz.'
-      : R.sets===2 ? (isKO ? 'Steht es 1:1, erscheint automatisch ein Entscheidungssatz.' : 'Steht es 1:1, ist die Partie unentschieden.')
-      : 'Wer zwei Sätze gewinnt, gewinnt die Partie.')+'</div>';
+  h += '<label class="lbl">Sätze (höchstens)</label>' + segRow('r:'+which+':sets', sets, R.sets);
+  h += '<div class="hint">' + (R.sets===1
+      ? 'Eine Partie = ein Satz.'
+      : 'Wer '+need+' Sätze gewinnt, gewinnt die Partie'
+        + (R.sets%2===1 ? ' (Best of '+R.sets+').'
+           : '. Steht es '+half+':'+half+', '+(isKO ? 'entscheidet ein Extrasatz.' : 'ist die Partie unentschieden.'))
+      ) + '</div>';
   h += '<div style="margin-top:12px"><label class="lbl">Ein Satz geht bis</label>'
      + '<input type="text" inputmode="numeric" maxlength="3" data-target="'+which+'" value="'+esc(R.target||'')+'" placeholder="z. B. 21">'
      + '<div class="hint">Leer lassen = kein Zielwert, dann zählt jedes eingetragene Ergebnis (bei Gleichstand unentschieden).</div></div>';

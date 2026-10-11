@@ -6,7 +6,8 @@ Fünf voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
   Reine Einzeldatei-Webapps, kein Build, kein Framework.
 - **`spikeball.html`** — **Turnierplaner** (Dateiname bleibt aus Link-Gründen): Teilnehmer
   eintragen, Teams auslosen, Gruppenphase und/oder K.-o.-Runde, nur Ergebnisse eintippen.
-  Sportartneutral — Sätze (1 / 2 / Best of 3), Zielpunkte pro Satz und Zwei-Punkte-Regel
+  Sportartneutral — Sätze (1 bis 5; ungerade = Best of n, gerade kann gleich ausgehen),
+  Zielpunkte pro Satz und Zwei-Punkte-Regel
   sind für Gruppen- und K.-o.-Phase getrennt einstellbar. Einzeldatei.
 - **`pizza.html`** — Pizzateig-Rechner und Gärplaner: beliebig viele Gärphasen mit
   eigener Temperatur, frei wählbarer Ballen-Zeitpunkt, Vorteige (Poolish, Biga,

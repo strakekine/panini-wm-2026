@@ -17,7 +17,8 @@ if(i < 0 || j < 0) throw new Error("Abschnittsmarken Logik/Oberfläche nicht gef
 const quelle = src.slice(src.lastIndexOf("/*", i), src.lastIndexOf("/*", j));
 const M = new Function(quelle + `
   return { TPL, REFRESH, H, DAY, BASE, makeSteps, timeline, planFor, blockAt, firstFree,
-           totals, starterDays, parseClock, tplById, mid, importRecipe, toImportText, extractJSON };`)();
+           totals, starterDays, parseClock, tplById, mid, importRecipe, toImportText, extractJSON,
+           suggest, nearestEat, planFor, WEEK };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text){ n++; if(!bed){ fehler++; console.log("✗ " + text); } }
@@ -163,6 +164,74 @@ ok(M.blockAt(at(2026, 10, 26, 10)) === "Arbeitszeit", "Mo nach Zeitumstellung 10
       nah(M.totals(back.recipe.steps).hyd, M.totals(t.steps).hyd, t.id + ": Hydration gleich");
     }
   }
+}
+
+/* --- Planer: jeder Vorschlag hält alle Regeln ein --- */
+{
+  const now = at(2026, 10, 17, 10), fed = at(2026, 10, 17, 9);
+  /* Prüft einen Vorschlag gegen die Regeln, unabhängig vom Suchverfahren */
+  const pruefe = (tpl, p, eat, name, week, ab = now) => {
+    const n = p.steps.length;
+    ok(p.t[0] >= ab, name + ": beginnt nicht vor jetzt");
+    ok(p.end >= eat - tpl.eat[1]*H - 1 && p.end <= eat - tpl.eat[0]*H + 1, name + ": Ende im Essfenster");
+    for(let i = 0; i < n - 1; i++){
+      ok(p.d[i] >= p.steps[i].h[0] - 1e-9 && p.d[i] <= p.steps[i].h[1] + 1e-9, name + ": Dauer " + p.steps[i].title + " in der Spanne");
+      nah(p.t[i+1] - p.t[i], p.d[i]*H, name + ": Zeiten passen zu den Dauern", 1);
+    }
+    p.steps.forEach((s, i) => {
+      for(let t = p.t[i]; t < p.t[i] + Math.max(1, s.hand)*60e3; t += 60e3)
+        if(M.blockAt(t, week)){ ok(false, name + ": Handgriff " + s.title + " um " + new Date(t).toString().slice(0,21) + " blockiert"); break; }
+      if(s.stay) for(let t = p.t[i]; t < p.t[i+1]; t += 60e3)
+        if(M.blockAt(t, week)){ ok(false, name + ": " + s.title + " (Ofen an) um " + new Date(t).toString().slice(0,21) + " nicht zu Hause"); break; }
+    });
+    const si = p.steps.findIndex(s => s.sour);
+    if(si >= 0) ok(p.t[si] - fed <= 7*DAY, name + ": Ansatz höchstens 7 Tage nach Fütterung (sonst aufgefrischt)");
+  };
+  /* Das Beispiel aus dem Gespräch: Weizenbrot für Dienstag 19:00 */
+  const w = M.tplById("weizen"), eat = at(2026, 10, 20, 19);
+  const s = M.suggest(w, 500, eat, fed, M.WEEK, now);
+  ok(s.length >= 1, "Weizen für Di 19:00: mindestens ein Vorschlag");
+  s.forEach((p, k) => pruefe(w, p, eat, "Weizen Di 19:00 #" + k));
+  ok(s.every(p => new Date(p.t[0]).getDay() === 0), "Weizen Di 19:00: Start am Sonntag (Montag vor der Arbeit reicht nicht)");
+  /* Roggen: echte Abwägung zwischen 'alles am Wochenende' und 'frischer' */
+  const r = M.tplById("roggen"), sr = M.suggest(r, 500, eat, fed, M.WEEK, now);
+  ok(sr.length === 2 && sr[0].wk === 0 && sr[1].age < sr[0].age, "Roggen Di 19:00: Wochenende gegen frischer");
+  sr.forEach((p, k) => pruefe(r, p, eat, "Roggen Di 19:00 #" + k));
+  /* Viele Essenszeiten, alle Vorlagen: kein Vorschlag bricht eine Regel */
+  let gesamt = 0;
+  for(const t of M.TPL) for(let k = 0; k < 7*24; k += 5){
+    const e = now + 30*H + k*H;
+    M.suggest(t, 500, e, fed, M.WEEK, now).forEach(p => { gesamt++; pruefe(t, p, e, t.id + " +" + k + "h"); });
+  }
+  ok(gesamt > 50, "Regelprüfung über " + gesamt + " Vorschläge");
+  /* Auffrischen: Fütterung lange her → vorne Auffrischen, und es liegt selbst nicht in der Nacht */
+  /* (Für Di 19:00 selbst gibt es dann keinen Weg: 4–8 h Auffrischen mehr, und entweder fällt
+     das Falten in die Nacht oder der Kühlschrank müsste über 20 h.) */
+  ok(M.suggest(w, 500, eat, at(2026, 10, 5, 9), M.WEEK, now).length === 0, "alte Fütterung: Di 19:00 geht nicht mehr");
+  let alt = [];
+  for(let k = 0; k < 5*24; k += 3) alt = alt.concat(M.suggest(w, 500, eat + k*H, at(2026, 10, 5, 9), M.WEEK, now));
+  ok(alt.length > 0 && alt.every(p => p.refresh && p.steps[0].refresh), "alte Fütterung: alle Vorschläge mit Auffrischen vorne");
+  /* Hefebrot für Dienstag 19:00 geht nicht (Arbeit bis 16, 3,5 h + 1,5 h Auskühlen) → Ausweichzeiten */
+  const h = M.tplById("hefe");
+  ok(M.suggest(h, 500, eat, fed, M.WEEK, now).length === 0, "Hefebrot Di 19:00: kein Vorschlag");
+  const nb = M.nearestEat(h, 500, eat, fed, M.WEEK, now);
+  ok(nb.after > eat && nb.before < eat, "Hefebrot: Ausweichzeit davor und danach");
+  ok(M.suggest(h, 500, nb.after, fed, M.WEEK, now).length >= 1, "Ausweichzeit danach ist wirklich machbar");
+  ok(M.suggest(h, 500, nb.before, fed, M.WEEK, now).length >= 1, "Ausweichzeit davor ist wirklich machbar");
+  /* Kurzer Termin (Sa 12:00–12:30) mitten in einer möglichen Ofenstunde: Der Ofen darf
+     nicht laufen, während man weg ist, auch wenn Vorheizen und Backen davor und danach
+     beginnen könnten. Mit Deiner Woche fällt das nie auf — darum eine eigene. */
+  const kurz = { work:{ 6:[12, 12.5] }, sleep:[21, 6] };
+  let kn = 0;
+  for(let k = 0; k < 48; k++){
+    const e = at(2026, 10, 17, 12) + k*15*60e3;
+    M.suggest(h, 500, e, fed, kurz, at(2026, 10, 17, 6)).forEach(p => { kn++; pruefe(h, p, e, "Termin Sa 12:00 +" + k, kurz, at(2026, 10, 17, 6)); });
+  }
+  ok(kn > 10, "Termin-Woche: " + kn + " Vorschläge geprüft");
+
+  /* Übernommener Vorschlag: planFor rechnet mit dessen Dauern */
+  const p0 = s[0], pf = M.planFor(w, 500, p0.t[0], fed, { refresh:p0.refresh, ds:p0.d });
+  ok(pf.tl.every((x, i) => Math.abs(x.t - p0.t[i]) < 1000), "übernommener Plan: Ablauf = Vorschlag");
 }
 
 /* --- Kleinkram --- */

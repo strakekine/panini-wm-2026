@@ -495,12 +495,32 @@ Backofen Ober-/Unterhitze mit Gusseisentopf, Kneter Halo Core. Arbeit inkl. Weg:
 7–16, Mi/Fr 7–13; Schlaf 21–6 (`WEEK`, noch fest im Code). Brot darf bis ~24 h vor dem Essen
 fertig sein; je Rezept als Essfenster `eat:[min,max]` h nach dem Backen (Roggen frühestens 24 h).
 
-**Datenmodell:** `S = {tpl, flour, start, starter:{fed}, run}`. `run = {name, tpl, flour, eat,
-steps (eingefroren, skaliert, Auffrischen schon entschieden), done:[ms…]}`; `done[0]` = Start.
+**Datenmodell:** `S = {tpl, flour, start, eat, sel, week, starter:{fed}, run, showHidden}` unter
+`brot_planer_v1`; eigene Rezepte unter `_rez`, Verlauf unter `_log` (mit Bewertung `again`,
+`kids`, `gare`, `note`), Datum der letzten Sicherung unter `_exp`. `run = {name, rid, flour, eat,
+eatAt, steps (eingefroren, skaliert, Auffrischen entschieden, ggf. `p`), done:[ms…]}`; `done[0]` = Start.
+`WEEK` im Code ist nur der Ausgangswert für `S.week`.
 `timeline(steps, done, start, now)`: erledigte Schritte mit echter Zeit, danach aufsummierte
 Mitte/Min/Max; der nächste offene Schritt wird nie in die Vergangenheit gelegt. Abläufe sind
 linear (parallele Vorstufen wie Brühstück gibt es noch nicht). Die iPhone-Regeln der Pizza-App
 gelten unverändert.
+
+**Planer („Wann wird gegessen?“):** rückwärts von der Essenszeit. Das Ende („Aus dem Ofen“)
+liegt im Essfenster des Rezepts, gesucht wird je halbe Stunde ein Plan per Tiefensuche über
+die Dauern in Viertelstunden, Rezeptmitte zuerst (`scheduleBack`). Regeln: jeder Handgriff
+(Beginn + `hand` Minuten) ausserhalb von `S.week`; Schritte mit `stay` (Ofen an: Vorheizen,
+Backen) **die ganze Dauer** zu Hause; nichts vor jetzt; Auffrischen nur, wenn beim Ansetzen
+nötig. Bis zu drei Vorschläge, je der beste in einer Hinsicht — wenig Handgriffe an
+Arbeitstagen, am frischesten, nah an der Rezeptmitte —, alle drei Zahlen daneben, feste
+Reihenfolge, **keine Gesamtwertung** (dieselbe Lehre wie beim Pizza-Planvorschlag). Fast
+gleiche Pläne (Start und Ende < 1,5 h auseinander) werden zusammengelegt. Geht nichts,
+nennt `nearestEat` die nächste machbare Essenszeit davor und danach. Übernehmen schreibt
+`S.sel = {tpl, refresh, ds}` und `S.start`; die Dauern landen als `p` in den Schritten und
+damit im eingefrorenen Lauf (`timeline` nimmt `p` statt der Mitte). `run.eatAt` meldet im
+Backen-Tab, ob die Essenszeit noch hält.
+Mit seiner Woche ist die `stay`-Regel nie bindend (kein Termin ist kürzer als eine
+Ofenstunde) — darum prüft der Test sie mit einer eigenen Woche (Termin Sa 12:00–12:30).
+Geprüft, dass er anschlägt: ohne `stay`-Regel 8 Verstöße.
 
 **Testen:** `node test/brot.mjs` schneidet den Block zwischen den Marken `Logik` und
 `Oberfläche` aus und prüft Vorlagen (10-%-Regel, Hydration), Skalierung, Auffrischen,
@@ -508,6 +528,6 @@ Zeitachse und Wochenplan in Zeitzone Europe/Luxembourg. Dieser Block fasst kein 
 
 **Reihenfolge (abgesprochen):** 1. laufender Teig + Anstellgut + drei Vorlagen (erledigt);
 2. Rezeptsammlung mit Bewertung (nochmal backen ja/vielleicht/nie wieder, Kinder, Notiz,
-optional Gare) und Import über festes Format aus einem Claude-Chat; 3. Rückwärtsplanung
-auf die Essenszeit mit Wochenplan — mehrere Wege mit Begründung zeigen, **nicht** nach einer
-Kennzahl sortieren; 4. Verlauf mit Lernen aus echten Zeiten, Kalender, Küchenmodus.
+optional Gare), Import über festes Format aus einem Claude-Chat, Sicherung (erledigt;
+`ANLEITUNG` und `importRecipe()` gehören zusammen — wer das Format ändert, ändert beide);
+3. Rückwärtsplanung auf die Essenszeit mit Wochenplan (erledigt); 4. Verlauf mit Lernen aus echten Zeiten, Kalender, Küchenmodus.

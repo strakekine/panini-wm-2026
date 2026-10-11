@@ -134,6 +134,13 @@
   textarea:focus{outline:none;border-color:var(--accent)}
   .howto{margin:0 0 10px;padding-left:20px;font-size:14px;line-height:1.5}
   .grp{margin-top:12px}
+  .wk{display:grid;grid-template-columns:64px 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px;font-size:14px;font-weight:600}
+  .wk input{padding:8px 9px}
+  .opt{border:1px solid var(--line);background:var(--panel2);border-radius:12px;padding:10px 12px;margin-bottom:10px}
+  .opt .k{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:.8px;color:var(--gold)}
+  .opt .ln{font-size:14px;line-height:1.45;margin-top:3px}
+  .opt .hg{font-family:Menlo,monospace;font-size:12px;color:var(--muted);line-height:1.6;margin-top:6px}
+  .opt .hg b{color:var(--text);font-weight:700}
   .grp .lbl{margin-bottom:6px}
   .chip.dim{opacity:.6;border-style:dashed}
   .tag{display:inline-block;font-size:11.5px;font-weight:700;border-radius:6px;padding:1px 6px;margin-right:4px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
@@ -195,7 +202,19 @@
   <div class="cbody" id="starterBox"></div>
 </div>
 
-<div class="card v-plan">
+<div class="card v-plan" id="genCard">
+  <div class="chead"><h2>Wann wird gegessen?</h2></div>
+  <div class="cbody">
+    <div class="fields">
+      <label class="f">Brot auf dem Tisch am
+        <input id="eatAt" type="datetime-local">
+      </label>
+    </div>
+    <div id="genOut" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<div class="card v-plan" id="planCard">
   <div class="chead"><h2>Ablauf</h2><span class="hint" id="planHint"></span></div>
   <div class="cbody">
     <div class="fields">
@@ -212,6 +231,15 @@
       und der Rest des Plans rückt nach.</div>
   </div>
 </div>
+
+<details class="card v-plan" id="weekCard">
+  <summary>Meine Woche <span class="hint">wann Du nicht kannst</span></summary>
+  <div class="cbody">
+    <div class="note" style="margin-top:0">Weg = aus dem Haus bis zurück, Arbeitsweg inklusive. Beide Felder leer = freier Tag.
+      Der Planer legt keinen Handgriff in diese Zeiten, und den Ofen lässt er nur an, wenn Du zu Hause bist.</div>
+    <div id="weekBox" style="margin-top:10px"></div>
+  </div>
+</details>
 
 <!-- ============ Backen ============ -->
 <div class="card v-run">
@@ -284,7 +312,8 @@ const WEEK = {
 
 /* Schritt: h = [min,max] Stunden bis zum nächsten Schritt, hand = Minuten Arbeit,
    what = was zu tun ist, sign = woran man merkt, dass es weitergeht,
-   ing = Zutaten (k: mehl | wasser | salz | hefe | asg | sd), sour = Sauerteig-Ansatz. */
+   ing = Zutaten (k: mehl | wasser | salz | hefe | asg | sd), sour = Sauerteig-Ansatz,
+   stay = man muss die ganze Dauer zu Hause sein (Ofen an: Vorheizen, Backen). */
 const TPL = [
   { id:"weizen", name:"Weizenbrot mit Sauerteig", eat:[2,30],
     desc:"Weizenbrot mit 20 % Roggensauerteig, Stückgare über Nacht im Kühlschrank, gebacken im Gusseisentopf. "+
@@ -307,9 +336,9 @@ const TPL = [
       { title:"Formen, in den Kühlschrank", h:[12,20], hand:15,
         what:"Auf leicht bemehlter Fläche rund formen und straff ziehen. Mit dem Schluss (der Naht) nach oben in den bemehlten Gärkorb, abdecken, in den Kühlschrank. "+
              "Dort läuft die Stückgare (Gare nach dem Formen) langsam weiter." },
-      { title:"Ofen mit Topf vorheizen", h:[0.75,1], hand:2,
+      { title:"Ofen mit Topf vorheizen", h:[0.75,1], hand:2, stay:true,
         what:"Gusseisentopf mit Deckel in den Ofen, 250 °C Ober-/Unterhitze. Der Teig bleibt so lange im Kühlschrank." },
-      { title:"Backen", h:[0.75,0.75], hand:10,
+      { title:"Backen", h:[0.75,0.75], hand:10, stay:true,
         what:"Teig direkt aus dem Kühlschrank auf Backpapier stürzen, einmal längs einschneiden, mit dem Papier in den heißen Topf. "+
              "20 min mit Deckel bei 250 °C, dann ohne Deckel 25–30 min bei 230 °C, bis die Kruste kräftig braun ist.",
         sign:"klingt hohl, wenn man von unten klopft" },
@@ -331,10 +360,10 @@ const TPL = [
       { title:"Formen, in den Gärkorb", h:[0.25,0.5], hand:10,
         what:"Mit nassen Händen rund formen, mit dem Schluss nach unten in den gut bemehlten Gärkorb. "+
              "Beim Stürzen liegt die bemehlte Seite oben und reißt beim Backen von selbst schön auf." },
-      { title:"Ofen mit Topf vorheizen", h:[0.75,1], hand:2,
+      { title:"Ofen mit Topf vorheizen", h:[0.75,1], hand:2, stay:true,
         what:"Gusseisentopf mit Deckel in den Ofen, 250 °C Ober-/Unterhitze. Der Teig gärt währenddessen weiter.",
         sign:"Oberfläche zeigt feine Risse, Teig sichtbar größer — lieber etwas zu früh als zu spät" },
-      { title:"Backen", h:[1,1], hand:10,
+      { title:"Backen", h:[1,1], hand:10, stay:true,
         what:"Teig auf Backpapier stürzen, mit dem Papier in den heißen Topf. 15 min mit Deckel bei 250 °C, dann ohne Deckel ca. 45 min bei 200 °C.",
         sign:"klingt hohl, wenn man von unten klopft" },
       { title:"Aus dem Ofen", h:[0,0], hand:2,
@@ -352,10 +381,10 @@ const TPL = [
         sign:"Teig fast doppelt so groß" },
       { title:"Formen, in den Gärkorb", h:[0.1,0.25], hand:10,
         what:"Rund formen, straff ziehen, mit dem Schluss nach oben in den bemehlten Gärkorb, abdecken." },
-      { title:"Ofen mit Topf vorheizen", h:[0.75,1], hand:2,
+      { title:"Ofen mit Topf vorheizen", h:[0.75,1], hand:2, stay:true,
         what:"Gusseisentopf mit Deckel in den Ofen, 250 °C Ober-/Unterhitze. Der Teig gärt währenddessen weiter.",
         sign:"Fingerprobe: eine Delle füllt sich langsam und nicht ganz wieder" },
-      { title:"Backen", h:[0.75,0.75], hand:10,
+      { title:"Backen", h:[0.75,0.75], hand:10, stay:true,
         what:"Auf Backpapier stürzen, einschneiden, mit dem Papier in den heißen Topf. 20 min mit Deckel bei 250 °C, dann ohne Deckel 20–25 min bei 220 °C.",
         sign:"goldbraun, klingt hohl beim Klopfen" },
       { title:"Aus dem Ofen", h:[0,0], hand:2,
@@ -412,6 +441,8 @@ function importRecipe(o){
     steps.push({ title, h: h || [0,0], hand: Math.round(Math.min(180, Math.max(0, numOr(s.arbeit, 5)))),
       what: str(s.was, 600), sign: str(s.weiter_wenn, 300) || undefined,
       sour: s.sauerteig === true || ing.some(x => x.k === "asg") || undefined,
+      /* Ofen an = zu Hause bleiben. Steht "dabei" nicht da, am Titel erkennen — lieber einmal zu vorsichtig. */
+      stay: (s.dabei === true || (s.dabei !== false && /vorheiz|backen/i.test(title) && !/aus dem ofen/i.test(title))) || undefined,
       ing: ing.length ? ing : undefined });
   });
   if(err.length) return { recipe:null, err, warn };
@@ -448,7 +479,7 @@ function toImportText(r){
     schritte: r.steps.map(s => {
       const x = { titel:s.title };
       if(s.sour) x.sauerteig = true;
-      x.dauer = s.h; x.arbeit = s.hand; x.was = s.what;
+      x.dauer = s.h; x.arbeit = s.hand; if(s.stay) x.dabei = true; x.was = s.what;
       if(s.sign) x.weiter_wenn = s.sign;
       if(s.ing) x.zutaten = s.ing.map(i => ({ name:i.n, g:Math.round(i.g*10)/10, art:ART_BACK[i.k] || "sonstiges" }));
       return x;
@@ -490,7 +521,8 @@ function timeline(steps, done, start, now){
     if(i === 0) r = { t:start, lo:start, hi:start, done:false };
     else {
       const p = out[i-1], h = steps[i-1].h;
-      r = { t:p.t + mid(h)*H, lo:p.lo + h[0]*H, hi:p.hi + h[1]*H, done:false };
+      const d = steps[i-1].p !== undefined ? steps[i-1].p : mid(h);   /* p = Dauer aus einem Planvorschlag */
+      r = { t:p.t + d*H, lo:p.lo + h[0]*H, hi:p.hi + h[1]*H, done:false };
     }
     if(now !== undefined && i === done.length){
       r.t = Math.max(r.t, now); r.lo = Math.max(r.lo, now); r.hi = Math.max(r.hi, now);
@@ -501,8 +533,16 @@ function timeline(steps, done, start, now){
 }
 
 /* Vorschau eines Plans: entscheidet, ob vorher aufgefrischt werden muss. Gemessen wird
-   am Zeitpunkt des Sauerteig-Ansatzes, nicht an heute. fed = letzte Fütterung (ms) oder null. */
-function planFor(tpl, flour, start, fed){
+   am Zeitpunkt des Sauerteig-Ansatzes, nicht an heute. fed = letzte Fütterung (ms) oder null.
+   sel = übernommener Planvorschlag {refresh, ds}: dessen Dauern und Auffrisch-Entscheidung gelten. */
+function planFor(tpl, flour, start, fed, sel){
+  if(sel){
+    const steps = makeSteps(tpl, flour, sel.refresh);
+    if(Array.isArray(sel.ds) && sel.ds.length === steps.length){
+      steps.forEach((st, i) => { if(i < steps.length - 1) st.p = sel.ds[i]; });
+      return { steps, tl:timeline(steps, [], start), refresh:sel.refresh, sel:true };
+    }
+  }
   let steps = makeSteps(tpl, flour, false);
   let tl = timeline(steps, [], start);
   const si = steps.findIndex(s => s.sour);
@@ -526,6 +566,113 @@ function blockAt(ms, week){
 function firstFree(lo, hi, week){
   for(let t = lo; t <= hi; t += 15*60e3) if(!blockAt(t, week)) return t;
   return null;
+}
+
+/* ----- Planer: rückwärts von der Essenszeit -----
+   Kein Optimum, sondern mehrere Wege mit Begründung (siehe CLAUDE.md, Planvorschlag der
+   Pizza-App: wer nach einer einzigen Kennzahl sortiert, versteckt die Abwägung). Gesucht wird
+   innerhalb der Rezeptspannen, rückwärts ab "Aus dem Ofen", in Viertelstunden. Bedingungen:
+   jeder Handgriff (Beginn bis Beginn + Arbeitsminuten) ausserhalb von Arbeit und Schlaf, bei
+   stay-Schritten (Ofen an) die ganze Dauer, und nichts vor jetzt. */
+function makeBlocked(week){
+  const cache = new Map();
+  return t => {
+    const k = Math.floor(t / 300e3);
+    let v = cache.get(k);
+    if(v === undefined){ v = !!blockAt(k * 300e3, week); cache.set(k, v); }
+    return v;
+  };
+}
+function freeSpan(isB, a, b){
+  for(let t = a; t < b; t += 300e3) if(isB(t)) return false;
+  return !isB(a);
+}
+function durOptions(h){
+  const m = mid(h), o = [h[0]];
+  for(let q = Math.ceil(h[0]*4 - 1e-9)/4; q <= h[1] + 1e-9; q += 0.25) if(q > h[0] + 1e-9) o.push(Math.min(q, h[1]));
+  if(h[1] > o[o.length-1] + 1e-9) o.push(h[1]);
+  const offGrid = x => Math.abs(x*4 - Math.round(x*4)) > 1e-9 ? 1 : 0;
+  /* nah an der Rezeptmitte zuerst; bei Gleichstand die Viertelstunde (sonst "Los um 16:09") */
+  const dist = x => Math.round(Math.abs(x - m) * 1e6);    /* gerundet: 0,175 − 0,1 ist sonst 0,07499… */
+  return o.sort((a, b) => dist(a) - dist(b) || offGrid(a) - offGrid(b));
+}
+function scheduleBack(steps, endT, isB, now, cap){
+  const n = steps.length, t = new Array(n), d = new Array(n).fill(0);
+  const handFree = (i, ti) => freeSpan(isB, ti, ti + Math.max(1, steps[i].hand || 0) * 60e3);
+  const opts = steps.map(s => durOptions(s.h));
+  const minBefore = []; let acc = 0;
+  steps.forEach((s, i) => { minBefore[i] = acc; acc += s.h[0]; });
+  let nodes = 0;
+  t[n-1] = endT;
+  if(endT - minBefore[n-1]*H < now || !handFree(n-1, endT)) return null;
+  const rec = i => {
+    if(i < 0) return true;
+    for(const x of opts[i]){
+      if(++nodes > cap) return false;
+      const ti = t[i+1] - x*H;
+      if(ti - minBefore[i]*H < now) continue;
+      if(!handFree(i, ti)) continue;
+      if(steps[i].stay && !freeSpan(isB, ti, ti + x*H)) continue;
+      t[i] = ti; d[i] = x;
+      if(rec(i-1)) return true;
+    }
+    return false;
+  };
+  return rec(n-2) ? { t, d } : null;
+}
+/* Alle machbaren Pläne mit Ende ("Aus dem Ofen") zwischen endLo und endHi, je halbe Stunde einer.
+   Auffrischen nur, wenn es beim Ansetzen nötig ist — sonst wäre es Arbeit für nichts. */
+function feasibleEnds(tpl, flour, endLo, endHi, fed, week, now){
+  const isB = makeBlocked(week);
+  const plain = makeSteps(tpl, flour, false);
+  const si = plain.findIndex(s => s.sour);
+  const withRef = (si >= 0 && fed) ? makeSteps(tpl, flour, true) : null;
+  const out = [], step = 30*60e3;
+  for(let e = Math.floor(endHi / step) * step; e >= endLo; e -= step){
+    let sc = scheduleBack(plain, e, isB, now, 2500), steps = plain;
+    if(sc && withRef && sc.t[si] - fed > REFRESH_DAYS*DAY) sc = null;
+    if(!sc && withRef){
+      sc = scheduleBack(withRef, e, isB, now, 2500); steps = withRef;
+      if(sc && sc.t[si+1] - fed <= REFRESH_DAYS*DAY) sc = null;
+    }
+    if(sc) out.push({ steps, t:sc.t, d:sc.d, end:e, refresh:steps === withRef });
+  }
+  return out;
+}
+function workday(ms, week){ return !!(week || WEEK).work[new Date(ms).getDay()]; }
+/* Bis zu drei Vorschläge, jeder der beste in einer Hinsicht, mit allen drei Zahlen daneben.
+   Reihenfolge fest, nicht nach Güte sortiert. */
+function suggest(tpl, flour, eatT, fed, week, now){
+  const all = feasibleEnds(tpl, flour, eatT - tpl.eat[1]*H, eatT - tpl.eat[0]*H, fed, week, now).map(p => {
+    p.wk = p.steps.filter((s, i) => (s.hand || 0) > 0 && workday(p.t[i], week)).length;
+    p.age = (eatT - p.end) / H;
+    p.dev = p.d.reduce((a, x, i) => a + (i < p.steps.length - 1 ? Math.abs(x - mid(p.steps[i].h)) : 0), 0);
+    return p;
+  });
+  const crit = [
+    ["wenig",  (a, b) => a.wk - b.wk || a.dev - b.dev || a.age - b.age],
+    ["frisch", (a, b) => a.age - b.age || a.wk - b.wk || a.dev - b.dev],
+    ["rezept", (a, b) => a.dev - b.dev || a.wk - b.wk || a.age - b.age]
+  ];
+  const out = [];
+  crit.forEach(([k, f]) => {
+    const p = all.slice().sort(f)[0]; if(!p) return;
+    /* Fast derselbe Plan (Start und Ende je unter 1,5 h auseinander) zählt nicht als zweiter Weg. */
+    const same = out.find(o => Math.abs(o.t[0] - p.t[0]) < 1.5*H && Math.abs(o.end - p.end) < 1.5*H);
+    if(same) same.keys.push(k); else out.push(Object.assign({ keys:[k] }, p));
+  });
+  return out;
+}
+/* Geht es zur Wunschzeit nicht: die nächste Essenszeit davor und danach, die geht. */
+function nearestEat(tpl, flour, eatT, fed, week, now){
+  const ends = feasibleEnds(tpl, flour, now, eatT + 96*H, fed, week, now);
+  let after = null, before = null;
+  ends.forEach(p => {
+    const a = p.end + tpl.eat[0]*H, b = p.end + tpl.eat[1]*H;
+    if(a > eatT && (after === null || a < after)) after = a;
+    if(b < eatT && (before === null || b > before)) before = b;
+  });
+  return { after, before };
 }
 
 /* Zutaten zusammengefasst: Gesamtmehl, Gesamtwasser, Hydration (Wasser : Mehl).
@@ -611,6 +758,7 @@ Regeln für die Schritte:
 - "sauerteig": true nur beim Sauerteig-Ansatz.
 - Mengen in Gramm. "art" ist eins von: mehl, wasser, salz, hefe, anstellgut, sauerteig, vorteig, sonstiges. Der fertige Sauerteig im Hauptteig hat art "sauerteig". Milch, Saaten, Honig, Butter usw.: "sonstiges".
 - "arbeit" = Minuten Handarbeit in diesem Schritt.
+- "dabei": true, wenn man die ganze Dauer zu Hause sein muss, weil der Ofen an ist (Ofen vorheizen, Backen).
 - "essen" = [frühestens, spätestens] Stunden nach dem Backen, wann man es anschneidet (Roggenbrote frühestens 24).
 - "temperatur" = Raumtemperatur in °C, für die das Rezept seine Zeiten angibt, null wenn unbekannt.
 - Texte auf Deutsch, Du-Form, Fachwörter kurz erklären. "was" höchstens 3 Sätze. "weiter_wenn" = woran man erkennt, dass es zum nächsten Schritt weitergeht.
@@ -639,7 +787,8 @@ Hier das Rezept:
 `;
 
 /* ===================== Zustand ===================== */
-function defaults(){ return { tpl:"weizen", flour:500, start:"", starter:{ fed:null }, run:null, showHidden:false }; }
+function defaults(){ return { tpl:"weizen", flour:500, start:"", eat:"", sel:null, starter:{ fed:null }, run:null, showHidden:false,
+  week:JSON.parse(JSON.stringify(WEEK)) }; }
 let S = defaults();
 let REZ = [];                     /* eigene Rezepte; die Vorlagen (TPL) stehen im Code */
 let VIEW = "plan";
@@ -664,12 +813,21 @@ function sanitize(s){
   if(!s.starter || typeof s.starter !== "object") s.starter = { fed:null };
   if(typeof s.starter.fed !== "number" || !isFinite(s.starter.fed)) s.starter.fed = null;
   s.showHidden = s.showHidden === true;
+  if(typeof s.eat !== "string" || (s.eat && isNaN(new Date(s.eat)))) s.eat = "";
+  if(!(s.sel && typeof s.sel === "object" && typeof s.sel.tpl === "string" && Array.isArray(s.sel.ds) && s.sel.ds.every(Number.isFinite))) s.sel = null;
+  else s.sel.refresh = s.sel.refresh === true;
+  /* Woche: Stunden als Zahl, von < bis; alles andere fällt auf den eingebauten Wochenplan zurück */
+  const hr = v => typeof v === "number" && v >= 0 && v <= 24;
+  const w = s.week, ok = w && typeof w === "object" && w.work && typeof w.work === "object" &&
+    Array.isArray(w.sleep) && w.sleep.length === 2 && w.sleep.every(hr) &&
+    Object.keys(w.work).every(k => /^[0-6]$/.test(k) && Array.isArray(w.work[k]) && w.work[k].length === 2 && w.work[k].every(hr) && w.work[k][0] < w.work[k][1]);
+  if(!ok) s.week = JSON.parse(JSON.stringify(WEEK));
   const r = s.run;
-  const ok = r && typeof r === "object" && Array.isArray(r.steps) && r.steps.length &&
+  const okRun = r && typeof r === "object" && Array.isArray(r.steps) && r.steps.length &&
     r.steps.every(st => st && typeof st.title === "string" && Array.isArray(st.h) && st.h.length === 2 && st.h.every(Number.isFinite)) &&
     Array.isArray(r.done) && r.done.length >= 1 && r.done.length <= r.steps.length &&
     r.done.every((t,i) => Number.isFinite(t) && (i === 0 || t >= r.done[i-1]));
-  if(!ok) s.run = null;
+  if(!okRun) s.run = null;
   else if(!Array.isArray(r.eat) || r.eat.length !== 2) r.eat = [2, 30];
   return s;
 }
@@ -692,6 +850,7 @@ function isHidden(id, log){ return rezStats(id, log).again === "nie"; }
   try { S = sanitize(JSON.parse(localStorage.getItem(KEY)||"null")); } catch(e){ S = defaults(); }
   /* Eine Startzeit, die schon vorbei ist, hilft niemandem — dann gilt wieder "jetzt". */
   if(S.start && new Date(S.start).getTime() < Date.now() - 5*60e3) S.start = "";
+  if(S.eat && new Date(S.eat).getTime() < Date.now()){ S.eat = ""; S.sel = null; }
   VIEW = S.run ? "run" : "plan";
 })();
 
@@ -712,16 +871,19 @@ function render(){
   $("tabRun").innerHTML = "BACKEN" + (S.run ? '<span class="dot"></span>' : "");
 
   const tpl = recipeById(S.tpl) || TPL[0];
-  PLAN = planFor(tpl, S.flour, startMs(), S.starter.fed);
+  PLAN = planFor(tpl, S.flour, startMs(), S.starter.fed, S.sel && S.sel.tpl === tpl.id ? S.sel : null);
 
   /* Eingaben: nie .value auf ein fokussiertes Feld (iPhone-Regel) */
   if(document.activeElement !== $("flour")) $("flour").value = S.flour;
   if(document.activeElement !== $("startAt")) $("startAt").value = S.start;
+  if(document.activeElement !== $("eatAt")) $("eatAt").value = S.eat;
+  renderWeekValues();
 
   const log = getLog();
   renderRecipes(tpl, log);
   renderIngredients(PLAN.steps);
   renderStarter();
+  renderGen(tpl);
   renderPlan(tpl);
   renderRun();
   renderRate();
@@ -797,9 +959,9 @@ function stepItem(s, r, i, mode, cls, now){
     if(s.what) tx += "<small>"+esc(s.what)+(s.hand >= 10 ? " (≈ "+s.hand+" min Arbeit)" : "")+"</small>";
     if(s.sign) tx += '<small class="sg">Weiter, wenn: '+esc(s.sign)+"</small>";
     if(s.h[1] > 0 && s.h[0] !== s.h[1]) tx += "<small>Danach "+fmtR(s.h)+" bis zum nächsten Schritt</small>";
-    const b = !r.done && blockAt(r.t);
+    const b = !r.done && blockAt(r.t, S.week);
     if(b){
-      const free = firstFree(r.lo, r.hi);
+      const free = firstFree(r.lo, r.hi, S.week);
       tx += '<small class="bk">⚠ fällt in die '+b+(free ? " — im Rahmen des Rezepts ginge es ab "+fmtWhen(free, now) : " — der ganze Rahmen liegt darin")+"</small>";
     }
   }
@@ -822,7 +984,7 @@ function renderPlan(tpl){
   const eat0 = end.t + tpl.eat[0]*H, eat1 = end.t + tpl.eat[1]*H;
   m.push(msg("good","🍞","Aus dem Ofen ≈ <b>"+fmtWhen(round5(end.t), now)+"</b> (Rahmen "+fmtWhen(round5(end.lo), now)+"–"+fmtWhen(round5(end.hi), now)+"). "+
     "Anschneiden ab <b>"+fmtWhen(round5(eat0), now)+"</b>, gut bis etwa "+fmtWhen(round5(eat1), now)+"."));
-  const clash = steps.filter((s,i) => blockAt(tl[i].t)).length;
+  const clash = steps.filter((s,i) => blockAt(tl[i].t, S.week)).length;
   if(clash) m.push(msg("warn","⚠", clash === 1 ? "Ein Handgriff fällt in Arbeits- oder Schlafenszeit (unten markiert)." :
     clash+" Handgriffe fallen in Arbeits- oder Schlafenszeit (unten markiert). Probier eine andere Startzeit."));
   $("planMsgs").innerHTML = m.join("");
@@ -845,6 +1007,12 @@ function renderRun(){
       (end.done ? "" : '<div class="s">Rahmen '+fmtWhen(round5(end.lo), now)+"–"+fmtWhen(round5(end.hi), now)+"</div>")+'</div>'+
     '<div class="st"><div class="l">Anschneiden ab</div><div class="v">'+fmtWhen(round5(end.t + r.eat[0]*H), now)+'</div>'+
       '<div class="s">gut bis ≈ '+fmtWhen(round5(end.t + r.eat[1]*H), now)+"</div></div></div>";
+  if(r.eatAt){
+    const age = (r.eatAt - end.t) / H;
+    h += age < r.eat[0] ? msg("warn","🍽","Geplant zum Essen <b>"+fmtWhen(r.eatAt, now)+"</b> — so wie es läuft, ist das Brot dann erst "+fmtH(Math.max(0, age))+" aus dem Ofen. Zu früh zum Anschneiden.")
+       : age > r.eat[1] ? msg("warn","🍽","Geplant zum Essen <b>"+fmtWhen(r.eatAt, now)+"</b> — dann ist das Brot schon "+fmtH(age)+" alt.")
+       : '<div class="note" style="margin:0 0 8px">Geplant zum Essen: <b>'+fmtWhen(r.eatAt, now)+'</b> — passt.</div>';
+  }
 
   if(a >= last){
     h += msg("good","🍞","<b>Fertig.</b> "+esc(r.steps[last].what || ""));
@@ -861,9 +1029,9 @@ function renderRun(){
     else h += msg("warn","⚠","Laut Rezept wäre es spätestens um <b>"+fmtWhen(round5(tl[a].t + cur.h[1]*H), now)+"</b> gewesen. "+
                          (cur.sign ? "Entscheidend ist der Teig: "+esc(cur.sign)+"." : "Mach weiter, sobald Du kannst."));
     if(cur.sign && now < tn.lo) h += '<div class="txt" style="color:#9fc79a">Weiter, wenn: '+esc(cur.sign)+'</div>';
-    const b = blockAt(tn.t);
+    const b = blockAt(tn.t, S.week);
     if(b && now < tn.t){
-      const free = firstFree(tn.lo, tn.hi);
+      const free = firstFree(tn.lo, tn.hi, S.week);
       h += msg("warn","⚠","Das fällt in die "+b+(free ? ". Im Rahmen des Rezepts ginge es ab <b>"+fmtWhen(free, now)+"</b>." : ", und der ganze Rahmen auch. Plan einen Puffer ein, etwa die Kühlschrankgare verlängern."));
     }
     h += '<button class="btn wide" id="doneBtn" style="margin-top:12px">'+esc(nx.title.toUpperCase())+' — ERLEDIGT</button>'+
@@ -921,16 +1089,87 @@ function renderImport(){
   o.innerHTML = h;
 }
 
+/* ===================== Planer ===================== */
+let GEN = [];
+function toLocalInput(ms){ const d = new Date(ms); return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())+"T"+fmtClock(ms); }
+const GENKEY = { wenig:"Wenig unter der Woche", frisch:"Am frischesten", rezept:"Nah am Rezept" };
+function renderGen(tpl){
+  const o = $("genOut"), now = Date.now();
+  GEN = [];
+  if(!S.eat){ o.innerHTML = '<div class="note" style="margin-top:0">Gib ein, wann das Brot auf dem Tisch stehen soll. Die App sucht dann rückwärts Wege, '+
+    'bei denen kein Handgriff in Arbeit oder Schlaf fällt und der Ofen nur läuft, wenn Du zu Hause bist.</div>'; return; }
+  const eatT = new Date(S.eat).getTime();
+  if(eatT <= now){ o.innerHTML = msg("bad","✕","Die Zeit liegt in der Vergangenheit."); return; }
+  const nowQ = Math.ceil(now / (15*60e3)) * 15*60e3;
+  GEN = suggest(tpl, S.flour, eatT, S.starter.fed, S.week, nowQ);
+  let h = "";
+  if(S.sel && S.sel.tpl === tpl.id) h += msg("good","✓","Plan übernommen — er steht unten im Ablauf. <button class=\"chip\" id=\"selDrop\" style=\"margin-left:4px\">verwerfen</button>");
+  if(!GEN.length){
+    const nb = nearestEat(tpl, S.flour, eatT, S.starter.fed, S.week, nowQ);
+    h += msg("warn","⚠","Für <b>"+fmtWhen(eatT, now)+"</b> gibt es keinen Weg, bei dem alle Handgriffe ausserhalb von Arbeit und Schlaf liegen"+
+      (tpl.eat[0] >= 12 ? " — denk dran: dieses Brot muss vor dem Anschneiden "+fmtH(tpl.eat[0])+" ruhen" : "")+".");
+    if(nb.before || nb.after) h += '<div class="lbl" style="margin-top:8px">Das ginge:</div><div class="btnrow" style="margin-top:6px">'+
+      (nb.before ? '<button class="chip" data-eat="'+nb.before+'">bis '+fmtWhen(nb.before, now)+' essen</button>' : "")+
+      (nb.after ? '<button class="chip" data-eat="'+nb.after+'">ab '+fmtWhen(nb.after, now)+' essen</button>' : "")+'</div>';
+    o.innerHTML = h; return;
+  }
+  if(GEN.length > 1) h += '<div class="note" style="margin:0 0 10px">'+GEN.length+' Wege. Jeder ist in einer Hinsicht der beste — welche Dir wichtiger ist, entscheidest Du.</div>';
+  h += GEN.map((p, k) => {
+    const last = p.steps.length - 1;
+    const devs = p.steps.slice(0, last).map((s, i) => ({ s, x:p.d[i] })).filter(v => Math.abs(v.x - mid(v.s.h)) >= 0.5 && v.s.h[1] > v.s.h[0]);
+    return '<div class="opt"><div class="k">'+p.keys.map(x => GENKEY[x]).join(" · ")+'</div>'+
+      '<div class="ln">Los: <b>'+fmtWhen(p.t[0], now)+'</b> — '+esc(p.steps[0].title)+'</div>'+
+      '<div class="ln">Aus dem Ofen: <b>'+fmtWhen(p.end, now)+'</b>, beim Essen '+fmtH(p.age)+' alt</div>'+
+      '<div class="ln" style="color:var(--muted);font-size:13px">'+p.wk+' Handgriff'+(p.wk === 1 ? "" : "e")+' an Arbeitstagen'+
+        (devs.length ? ' · '+devs.map(v => esc(v.s.title)+' '+fmtH(v.x)+' (Rezept '+fmtR(v.s.h)+')').join(", ") : ' · Zeiten wie im Rezept')+
+        (p.refresh ? ' · mit Auffrischen' : '')+'</div>'+
+      '<div class="hg">'+p.steps.map((s, i) => '<b>'+fmtWhen(p.t[i], now)+'</b> '+esc(s.title)).join("<br>")+'</div>'+
+      '<button class="btn sm" data-pick="'+k+'" style="margin-top:8px">DIESEN PLAN NEHMEN</button></div>';
+  }).join("");
+  o.innerHTML = h;
+}
+
+/* Wochenplan-Felder: einmal gebaut, danach nur Werte gesetzt (iPhone-Regel: kein Neuaufbau unter dem Finger). */
+const WROWS = [[1,"Mo"],[2,"Di"],[3,"Mi"],[4,"Do"],[5,"Fr"],[6,"Sa"],[0,"So"]];
+const hToStr = h => h === undefined || h === null ? "" : p2(Math.floor(h))+":"+p2(Math.round((h % 1)*60));
+const strToH = v => { const m = String(v||"").match(/^(\d{1,2}):(\d{2})/); return m ? +m[1] + +m[2]/60 : null; };
+function buildWeek(){
+  $("weekBox").innerHTML = '<div class="wk"><span></span><span class="lbl">weg ab</span><span class="lbl">zurück um</span></div>'+
+    WROWS.map(([d, n]) => '<div class="wk"><span>'+n+'</span><input type="time" data-wd="'+d+'" data-i="0"><input type="time" data-wd="'+d+'" data-i="1"></div>').join("")+
+    '<div class="wk" style="margin-top:12px"><span>Schlaf</span><span class="lbl">ins Bett</span><span class="lbl">auf um</span></div>'+
+    '<div class="wk"><span></span><input type="time" data-sl="0"><input type="time" data-sl="1"></div>';
+}
+function renderWeekValues(){
+  document.querySelectorAll("#weekBox input").forEach(el => {
+    if(el === document.activeElement) return;
+    if(el.dataset.sl !== undefined) el.value = hToStr(S.week.sleep[+el.dataset.sl]);
+    else { const w = S.week.work[el.dataset.wd]; el.value = w ? hToStr(w[+el.dataset.i]) : ""; }
+  });
+}
+function readWeek(){
+  const work = {};
+  WROWS.forEach(([d]) => {
+    const a = strToH(document.querySelector('#weekBox [data-wd="'+d+'"][data-i="0"]').value);
+    const b = strToH(document.querySelector('#weekBox [data-wd="'+d+'"][data-i="1"]').value);
+    if(a !== null && b !== null && a < b) work[d] = [a, b];
+  });
+  const s0 = strToH(document.querySelector('#weekBox [data-sl="0"]').value), s1 = strToH(document.querySelector('#weekBox [data-sl="1"]').value);
+  S.week = { work, sleep: (s0 !== null && s1 !== null) ? [s0, s1] : S.week.sleep };
+  S.sel = null; persist(); render();
+}
+
 /* ===================== Aktionen ===================== */
 function markStarterIfRefresh(step, t){ if(step.refresh) S.starter.fed = t; }
 
 function startRun(){
   if(S.run && !confirm("Es läuft schon ein Brot („"+S.run.name+"“). Verwerfen und neu anfangen?")) return;
   const tpl = recipeById(S.tpl) || TPL[0], now = Date.now();
-  const p = planFor(tpl, S.flour, now, S.starter.fed);
-  S.run = { id:String(now), name:tpl.name, rid:tpl.id, flour:S.flour, eat:tpl.eat.slice(), steps:p.steps, done:[now] };
+  const sel = S.sel && S.sel.tpl === tpl.id ? S.sel : null;
+  const p = planFor(tpl, S.flour, now, S.starter.fed, sel);
+  S.run = { id:String(now), name:tpl.name, rid:tpl.id, flour:S.flour, eat:tpl.eat.slice(), steps:p.steps, done:[now],
+            eatAt: sel && S.eat ? new Date(S.eat).getTime() : null };
   markStarterIfRefresh(p.steps[0], now);
-  S.start = ""; RATE = {}; $("rateNote").value = "";
+  S.start = ""; S.sel = null; RATE = {}; $("rateNote").value = "";
   VIEW = "run";
   persist(); render(); window.scrollTo(0,0);
 }
@@ -982,7 +1221,14 @@ document.addEventListener("click", async ev => {
   const b = ev.target.closest("button"); if(!b) return;
   const r = S.run;
   if(b.dataset.view){ VIEW = b.dataset.view; render(); window.scrollTo(0,0); return; }
-  if(b.dataset.tpl){ S.tpl = b.dataset.tpl; persist(); render(); return; }
+  if(b.dataset.tpl){ S.tpl = b.dataset.tpl; S.sel = null; persist(); render(); return; }
+  if(b.dataset.pick){
+    const p = GEN[+b.dataset.pick]; if(!p) return;
+    S.sel = { tpl:S.tpl, refresh:p.refresh, ds:p.d.slice() };
+    S.start = toLocalInput(p.t[0]);
+    persist(); render(); $("planCard").scrollIntoView({ behavior:"smooth" }); return;
+  }
+  if(b.dataset.eat){ S.eat = toLocalInput(+b.dataset.eat); S.sel = null; persist(); render(); return; }
   if(b.dataset.rate){
     const [k, v] = b.dataset.rate.split(":");
     RATE[k] = RATE[k] === v ? undefined : v;     /* nochmal tippen hebt die Wahl auf */
@@ -1004,7 +1250,8 @@ document.addEventListener("click", async ev => {
   }
   switch(b.id){
     case "toggleHidden": S.showHidden = !S.showHidden; persist(); render(); return;
-    case "startNow": S.start = ""; $("startAt").blur(); persist(); render(); return;
+    case "startNow": S.start = ""; S.sel = null; $("startAt").blur(); persist(); render(); return;
+    case "selDrop": S.sel = null; S.start = ""; persist(); render(); return;
     case "goBtn": startRun(); return;
     case "fedToday": S.starter.fed = Date.now(); persist(); render(); return;
     case "fedOther": {
@@ -1090,12 +1337,15 @@ $("flour").addEventListener("input", e => {
   if(v >= 200 && v <= 3000){ S.flour = v; persist(); render(); }
 });
 $("flour").addEventListener("blur", () => render());
-$("startAt").addEventListener("input", e => { S.start = e.target.value || ""; persist(); render(); });
+$("startAt").addEventListener("input", e => { S.start = e.target.value || ""; S.sel = null; persist(); render(); });
+$("eatAt").addEventListener("input", e => { S.eat = e.target.value || ""; S.sel = null; persist(); render(); });
 $("restoreFile").addEventListener("change", e => {
   const f = e.target.files && e.target.files[0]; if(!f) return;
   f.text().then(restore).finally(() => { e.target.value = ""; });
 });
 
+buildWeek();
+$("weekBox").addEventListener("change", readWeek);
 render();
 setInterval(() => { if(!typing()) render(); }, 30000);
 document.addEventListener("visibilitychange", () => { if(!document.hidden && !typing()) render(); });

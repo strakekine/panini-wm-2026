@@ -571,6 +571,8 @@ optional Gare), Import über festes Format aus einem Claude-Chat, Sicherung (erl
 `ANLEITUNG` und `importRecipe()` gehören zusammen — wer das Format ändert, ändert beide;
 Gleichzeitiges — Sauerteig, Poolish, Brühstück — steht in EINEM Schritt, die Zutaten tragen
 `teil`, und die 10-%-Regel prüft nur den Sauerteig-Teil; ohne `teil` und mit Hefe im Schritt
-wird nicht geprüft statt falsch gewarnt. Hefe wird nicht umgerechnet, er kauft, was das Rezept will);
+wird nicht geprüft statt falsch gewarnt. Hefe wird nicht umgerechnet, er kauft, was das Rezept will. Nur ein einzelner
+Laib wird auf den Gusseisentopf übersetzt — Buns, Brötchen, Baguettes, Kastenbrote backen wie im Rezept;
+die erste Fassung der Anleitung hat auch Buns in den Topf geschickt);
 3. Rückwärtsplanung auf die Essenszeit mit Wochenplan (erledigt); 4. Lernen aus echten Zeiten,
 Kalender, Küchenmodus (erledigt). **Am iPhone noch nicht ausprobiert** — Stand 11.10.2026.

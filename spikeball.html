@@ -413,11 +413,30 @@ function qualifiers(){
 
 /* ---------- Ansicht ---------- */
 const app = $('#app');
+/* Die Seite wird bei jeder Eingabe komplett neu gebaut. Damit auf dem iPhone
+   die Tastatur nicht nach jeder Ziffer zuklappt, muss das vorher fokussierte
+   Feld danach WIEDER fokussiert werden - und zwar jedes, nicht nur die
+   Satzfelder: das Feld "Ein Satz geht bis" (data-target) ging leer aus und
+   verlor bei jedem Zeichen die Tastatur. Auch die Cursorposition wird
+   uebernommen, sonst landet die naechste Ziffer vorne (aus 21 wurde 12). */
 function render(){
   const act = document.activeElement;
-  const key = act && act.dataset && act.dataset.k ? act.dataset.k : null;
+  const sel = act && act.dataset
+    ? (act.dataset.k ? '[data-k="'+act.dataset.k+'"]'
+      : act.dataset.target ? '[data-target="'+act.dataset.target+'"]' : null)
+    : null;
+  let pos = null;
+  if(sel){ try{ pos = [act.selectionStart, act.selectionEnd]; }catch(e){} }
   app.innerHTML = S.phase==='setup' ? viewSetup() : viewTurnier();
-  if(key){ const el = app.querySelector('[data-k="'+key+'"]'); if(el){ el.focus(); try{ el.setSelectionRange(el.value.length, el.value.length); }catch(e){} } }
+  if(sel){
+    const el = app.querySelector(sel);
+    if(el){
+      el.focus();
+      const a = pos && pos[0]!=null ? Math.min(pos[0], el.value.length) : el.value.length;
+      const b = pos && pos[1]!=null ? Math.min(pos[1], el.value.length) : a;
+      try{ el.setSelectionRange(a, b); }catch(e){}
+    }
+  }
   $('#sub').textContent = S.phase==='setup'
     ? 'Namen eintragen, mischen, spielen.'
     : (S.mode==='ko' ? 'K.-o.-System · ' : 'Gruppen + K.o. · ') + S.teams.length + ' Teams';

@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Turnierplaner</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -22,8 +22,14 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Barlow,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-  body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-  header{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,var(--panel),rgba(22,27,34,.94));backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  body{padding:0}
+  /* Kopf: flacher Hintergrund statt Verlauf (der las sich wie ein Schatten) und
+     top:0 ohne env()-Rechnerei. Das geht nur, weil oben KEIN viewport-fit=cover
+     steht — damit legt iOS die Seite selbst in den sicheren Bereich. Siehe die
+     ausfuehrliche Begruendung in CLAUDE.md, Abschnitt iPhone-Regeln: mit cover
+     stand der Kopf im Home-Bildschirm-Modus hinter Uhr und Dynamic Island und
+     rutschte beim Scrollen weg. Nicht wieder einbauen. */
+  header{position:sticky;top:0;z-index:20;background:rgba(22,27,34,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
   .wrap{max-width:820px;margin:0 auto;padding:12px 14px 10px}
   h1{font-family:'Bebas Neue',sans-serif;letter-spacing:1.5px;margin:0;font-size:30px;color:var(--accent)}
   .sub{color:var(--muted);font-size:13px;margin-top:2px}
@@ -407,11 +413,30 @@ function qualifiers(){
 
 /* ---------- Ansicht ---------- */
 const app = $('#app');
+/* Die Seite wird bei jeder Eingabe komplett neu gebaut. Damit auf dem iPhone
+   die Tastatur nicht nach jeder Ziffer zuklappt, muss das vorher fokussierte
+   Feld danach WIEDER fokussiert werden - und zwar jedes, nicht nur die
+   Satzfelder: das Feld "Ein Satz geht bis" (data-target) ging leer aus und
+   verlor bei jedem Zeichen die Tastatur. Auch die Cursorposition wird
+   uebernommen, sonst landet die naechste Ziffer vorne (aus 21 wurde 12). */
 function render(){
   const act = document.activeElement;
-  const key = act && act.dataset && act.dataset.k ? act.dataset.k : null;
+  const sel = act && act.dataset
+    ? (act.dataset.k ? '[data-k="'+act.dataset.k+'"]'
+      : act.dataset.target ? '[data-target="'+act.dataset.target+'"]' : null)
+    : null;
+  let pos = null;
+  if(sel){ try{ pos = [act.selectionStart, act.selectionEnd]; }catch(e){} }
   app.innerHTML = S.phase==='setup' ? viewSetup() : viewTurnier();
-  if(key){ const el = app.querySelector('[data-k="'+key+'"]'); if(el){ el.focus(); try{ el.setSelectionRange(el.value.length, el.value.length); }catch(e){} } }
+  if(sel){
+    const el = app.querySelector(sel);
+    if(el){
+      el.focus();
+      const a = pos && pos[0]!=null ? Math.min(pos[0], el.value.length) : el.value.length;
+      const b = pos && pos[1]!=null ? Math.min(pos[1], el.value.length) : a;
+      try{ el.setSelectionRange(a, b); }catch(e){}
+    }
+  }
   $('#sub').textContent = S.phase==='setup'
     ? 'Namen eintragen, mischen, spielen.'
     : (S.mode==='ko' ? 'K.-o.-System · ' : 'Gruppen + K.o. · ') + S.teams.length + ' Teams';

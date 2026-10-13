@@ -580,6 +580,24 @@ function timeline(steps, done, start, now){
   return out;
 }
 
+/* Abweichung auffangen. target = die geplanten Uhrzeiten aller Schritte (aus einem übernommenen
+   Vorschlag). Ab dem letzten erledigten Schritt bekommt jeder offene Schritt die Dauer, die den
+   nächsten Schritt wieder auf seine geplante Uhrzeit bringt — begrenzt auf die Rezeptspanne. So
+   fängt der erste dehnbare Schritt die Abweichung auf, und danach stimmen die Uhrzeiten wieder.
+   Gierig von vorn mit Absicht: Die geplanten Zeiten waren frei von Arbeit und Schlaf; am
+   schnellsten wieder dort zu sein, ist wichtiger, als welcher Schritt dafür nachgibt.
+   Anlass: Sauerteig 27 min zu früh angesetzt, und das Kneten rutschte vor den Feierabend. */
+function absorb(steps, done, target){
+  if(!Array.isArray(target) || target.length !== steps.length || !done.length) return;
+  let cur = done[done.length - 1];
+  for(let j = done.length - 1; j < steps.length - 1; j++){
+    const want = (target[j+1] - cur) / H, h = steps[j].h;
+    const d = Math.min(h[1], Math.max(h[0], want));
+    steps[j].p = d;
+    cur += d * H;
+  }
+}
+
 /* Vorschau eines Plans: entscheidet, ob vorher aufgefrischt werden muss. Gemessen wird
    am Zeitpunkt des Sauerteig-Ansatzes, nicht an heute. fed = letzte Fütterung (ms) oder null.
    sel = übernommener Planvorschlag {refresh, ds}: dessen Dauern und Auffrisch-Entscheidung gelten. */
@@ -934,7 +952,10 @@ function sanitize(s){
     Array.isArray(r.done) && r.done.length >= 1 && r.done.length <= r.steps.length &&
     r.done.every((t,i) => Number.isFinite(t) && (i === 0 || t >= r.done[i-1]));
   if(!okRun) s.run = null;
-  else if(!Array.isArray(r.eat) || r.eat.length !== 2) r.eat = [2, 30];
+  else {
+    if(!Array.isArray(r.eat) || r.eat.length !== 2) r.eat = [2, 30];
+    if(r.target && !(Array.isArray(r.target) && r.target.length === r.steps.length && r.target.every(Number.isFinite))) delete r.target;
+  }
   return s;
 }
 function persist(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
@@ -1148,8 +1169,12 @@ function renderRun(){
     else h += msg("warn","⚠","Laut Rezept wäre es spätestens um <b>"+fmtWhen(round5(tl[a].t + cur.h[1]*H), now)+"</b> gewesen. "+
                          (cur.sign ? "Entscheidend ist der Teig: "+esc(cur.sign)+"." : "Mach weiter, sobald Du kannst."));
     if(cur.sign && now < tn.lo) h += '<div class="txt" style="color:#9fc79a">Weiter, wenn: '+esc(cur.sign)+'</div>';
+    const tg = r.target && r.target[a+1];
+    if(tg && Math.abs(tg - tn.t) >= 5*60e3 && now < tn.t)
+      h += msg("info","🕑","Geplant war <b>"+fmtWhen(tg, now)+"</b>. Das liegt "+fmtH(Math.abs(tg - tn.t)/H)+" "+(tg > tn.t ? "nach dem Ende" : "vor dem Anfang")+
+        " der Rezeptspanne. Ein paar Minuten machen nichts — richte Dich nach den Reifezeichen.");
     const b = blockAt(tn.t, S.week);
-    if(b && now < tn.t){
+    if(b && now < tn.t && !(tg && !blockAt(tg, S.week))){
       const free = firstFree(tn.lo, tn.hi, S.week);
       h += msg("warn","⚠","Das fällt in die "+b+(free ? ". Im Rahmen des Rezepts ginge es ab <b>"+fmtWhen(free, now)+"</b>." : ", und der ganze Rahmen auch. Plan einen Puffer ein, etwa die Kühlschrankgare verlängern."));
     }
@@ -1404,6 +1429,11 @@ function startRun(){
   /* Kalender: der Teig übernimmt die ID des exportierten Plans, damit der Export ersetzt statt verdoppelt wird */
   S.run = { id:S.calId || String(now), name:tpl.name, rid:tpl.id, flour:S.flour, eat:tpl.eat.slice(), steps:p.steps, done:[now],
             eatAt: sel && S.eat ? new Date(S.eat).getTime() : null };
+  /* Mit übernommenem Plan: dessen Uhrzeiten merken und eine Abweichung beim Start auffangen */
+  if(sel && S.start){
+    S.run.target = timeline(planFor(tpl, S.flour, new Date(S.start).getTime(), S.starter.fed, sel).steps, [], new Date(S.start).getTime()).map(x => x.t);
+    absorb(S.run.steps, S.run.done, S.run.target);
+  }
   markStarterIfRefresh(p.steps[0], now);
   S.start = ""; S.sel = null; S.calId = null; RATE = {}; $("rateNote").value = "";
   VIEW = "run";
@@ -1413,6 +1443,7 @@ function markDone(t){
   const r = S.run; if(!r || r.done.length >= r.steps.length) return;
   r.done.push(t);
   markStarterIfRefresh(r.steps[r.done.length-1], t);
+  absorb(r.steps, r.done, r.target);
   persist(); render();
 }
 /* "Erledigt" jetzt — mit Rückfrage, wenn es deutlich vor dem frühesten Zeitpunkt liegt.
@@ -1561,7 +1592,7 @@ document.addEventListener("click", async ev => {
     }
     case "undoBtn":
       if(r.done.length <= 1){ alert("Das ist der erste Schritt. Zum Abbrechen „Verwerfen“ nehmen."); return; }
-      r.done.pop(); persist(); render(); return;
+      r.done.pop(); absorb(r.steps, r.done, r.target); persist(); render(); return;
     case "dropBtn":
       if(!confirm("Dieses Brot verwerfen? Es landet nicht im Verlauf.")) return;
       S.run = null; VIEW = "plan"; persist(); render(); return;
@@ -1578,7 +1609,7 @@ document.addEventListener("click", async ev => {
     const i = r.done.length - 1;
     const t = askClock("Uhrzeit für „"+r.steps[i].title+"“ ändern:", i ? r.done[i-1] : undefined);
     if(t === null) return;
-    r.done[i] = t; markStarterIfRefresh(r.steps[i], t); persist(); render();
+    r.done[i] = t; markStarterIfRefresh(r.steps[i], t); absorb(r.steps, r.done, r.target); persist(); render();
   }
 });
 

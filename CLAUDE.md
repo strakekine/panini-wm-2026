@@ -533,6 +533,14 @@ nennt `nearestEat` die nächste machbare Essenszeit davor und danach. Übernehme
 `S.sel = {tpl, refresh, ds}` und `S.start`; die Dauern landen als `p` in den Schritten und
 damit im eingefrorenen Lauf (`timeline` nimmt `p` statt der Mitte). `run.eatAt` meldet im
 Backen-Tab, ob die Essenszeit noch hält.
+**Abweichung auffangen:** Beim Start mit übernommenem Plan merkt sich der Lauf dessen Uhrzeiten
+(`run.target`). Nach Start, „Erledigt“, Zurücknehmen und Uhrzeit-Korrektur setzt `absorb()` die
+Dauern der offenen Schritte so, dass jeder nächste Schritt wieder auf seine geplante Uhrzeit
+kommt, begrenzt auf die Rezeptspanne — gierig von vorn: der erste dehnbare Schritt gibt nach,
+danach stimmen die Zeiten wieder. Anlass: Sauerteig 27 min zu früh angesetzt (20:28 statt 20:55),
+und „am ehesten“ rutschte vor den Feierabend. Reicht die Spanne nicht, zeigt der Backen-Tab die
+geplante Uhrzeit und wie weit sie ausserhalb liegt. Läufe ohne übernommenen Plan bleiben wie
+bisher (Mitte der Spanne ab dem echten Zeitpunkt).
 Mit seiner Woche ist die `stay`-Regel nie bindend (kein Termin ist kürzer als eine
 Ofenstunde) — darum prüft der Test sie mit einer eigenen Woche (Termin Sa 12:00–12:30).
 Geprüft, dass er anschlägt: ohne `stay`-Regel 8 Verstöße.

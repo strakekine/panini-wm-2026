@@ -18,7 +18,7 @@ const quelle = src.slice(src.lastIndexOf("/*", i), src.lastIndexOf("/*", j));
 const M = new Function(quelle + `
   return { TPL, REFRESH, H, DAY, BASE, makeSteps, timeline, planFor, blockAt, firstFree,
            totals, starterDays, parseClock, tplById, mid, importRecipe, toImportText, extractJSON,
-           suggest, nearestEat, planFor, WEEK, learned, offRange, needBackup };`)();
+           suggest, nearestEat, planFor, WEEK, learned, offRange, needBackup, absorb, timeline };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text){ n++; if(!bed){ fehler++; console.log("✗ " + text); } }
@@ -251,6 +251,34 @@ ok(M.blockAt(at(2026, 10, 26, 10)) === "Arbeitszeit", "Mo nach Zeitumstellung 10
   /* Übernommener Vorschlag: planFor rechnet mit dessen Dauern */
   const p0 = s[0], pf = M.planFor(w, 500, p0.t[0], fed, { refresh:p0.refresh, ds:p0.d });
   ok(pf.tl.every((x, i) => Math.abs(x.t - p0.t[i]) < 1000), "übernommener Plan: Ablauf = Vorschlag");
+}
+
+/* --- Abweichung vom Plan auffangen --- */
+{
+  /* Der Fall vom 13.10.: Sauerteig 12–16 h, geplant 20:55 → Kneten 12:40 (15,75 h); angesetzt 20:28 */
+  const w = M.tplById("weizen");
+  const plan = () => { const s = M.makeSteps(w, 500, false); s[0].h = [12, 16]; s[0].p = 15.75; return s; };
+  const p0 = at(2026, 10, 13, 20, 55), target = M.timeline(plan(), [], p0).map(x => x.t);
+  nah(target[1], at(2026, 10, 14, 12, 40), "geplant: Kneten Mi 12:40");
+  const fr = plan(), dFr = [at(2026, 10, 13, 20, 28)];
+  M.absorb(fr, dFr, target);
+  const tFr = M.timeline(fr, dFr, dFr[0]);
+  nah(tFr[1].t, at(2026, 10, 14, 12, 28), "27 min zu früh: Sauerteig bis ans Ende der Spanne (16 h) → 12:28, nicht 12:13");
+  nah(tFr[3].t - target[3], -12*60e3, "Falten hat feste Abstände: bleibt 12 min früher", 1000);
+  nah(tFr[4].t, target[4], "die Stockgare fängt den Rest auf — ab dem Formen stimmen die Uhrzeiten wieder");
+  ok(fr.every((s, i) => i === fr.length - 1 || (s.p >= s.h[0] - 1e-9 && s.p <= s.h[1] + 1e-9)), "nie ausserhalb der Rezeptspannen");
+  const sp = plan(), dSp = [at(2026, 10, 13, 21, 30)];
+  M.absorb(sp, dSp, target);
+  nah(M.timeline(sp, dSp, dSp[0])[1].t, target[1], "35 min zu spät: Kneten bleibt 12:40");
+  nah(M.timeline(sp, dSp, dSp[0]).slice(-1)[0].t, target[target.length-1], "und das Brot ist zur geplanten Zeit aus dem Ofen");
+  /* Später im Lauf: Kneten 50 min zu spät → Stockgare und Kühlschrank fangen es auf */
+  const la = plan(), dLa = [target[0], target[1] + 50*60e3];
+  M.absorb(la, dLa, target);
+  const tLa = M.timeline(la, dLa, dLa[0]);
+  nah(tLa[tLa.length-1].t, target[target.length-1], "Kneten 50 min zu spät: aus dem Ofen trotzdem wie geplant");
+  ok(la.every((s, i) => i === la.length - 1 || (s.p >= s.h[0] - 1e-9 && s.p <= s.h[1] + 1e-9)), "auch dabei in den Spannen");
+  const ohne = plan(); M.absorb(ohne, [p0], undefined);
+  nah(ohne[0].p, 15.75, "ohne geplante Uhrzeiten ändert sich nichts");
 }
 
 /* --- Lernen aus dem Verlauf --- */

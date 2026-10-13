@@ -515,6 +515,8 @@ eatAt, steps (eingefroren, skaliert, Auffrischen entschieden, ggf. `p`), done:[m
 `h` eines Schritts ist die Zeit **bis zum nächsten Schritt**, nicht die Dauer des Handgriffs — die
 steht in `hand` (Kneten: h 45 min, hand 15 min, davon 10–12 min Halo Core). Angezeigt wird beides
 getrennt über `stepTiming()`; vorher las sich „Hauptteig kneten · 45 min“ wie 45 min Kneten.
+Beim letzten Schritt zeigt die App die Abkühlzeit aus `eat` („Anschneiden frühestens nach …“) —
+gerechnet wird immer mit `eat`, nie mit dem Rezepttext; so fällt auf, wenn beide auseinanderlaufen.
 `timeline(steps, done, start, now)`: erledigte Schritte mit echter Zeit, danach aufsummierte
 Mitte/Min/Max; der nächste offene Schritt wird nie in die Vergangenheit gelegt. Abläufe sind
 linear (parallele Vorstufen wie Brühstück gibt es noch nicht). Die iPhone-Regeln der Pizza-App

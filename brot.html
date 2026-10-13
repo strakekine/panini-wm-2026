@@ -1076,7 +1076,7 @@ function renderStarter(){
 }
 
 /* Ein Schritt in der Liste. mode: "plan" | "run". */
-function stepItem(s, r, i, mode, cls, now, lr){
+function stepItem(s, r, i, mode, cls, now, lr, eat){
   let tm;
   if(r.done) tm = "✓ "+fmtWhen(r.t, now);
   else {
@@ -1090,6 +1090,10 @@ function stepItem(s, r, i, mode, cls, now, lr){
     if(s.what) tx += "<small>"+esc(s.what)+"</small>";
     if(s.sign) tx += '<small class="sg">Weiter, wenn: '+esc(s.sign)+"</small>";
     const tg = stepTiming(s); if(tg) tx += "<small>"+tg+"</small>";
+    /* Beim letzten Schritt die Abkühlzeit, mit der die App rechnet — aus "essen", nicht aus dem
+       Rezepttext. Steht im Text etwas anderes, sieht man es hier. */
+    if(eat) tx += '<small class="sg">Anschneiden frühestens nach '+fmtH(eat[0])+" — ab "+fmtWhen(round5(r.t + eat[0]*H), now)+
+                  ", gut bis "+fmtWhen(round5(r.t + eat[1]*H), now)+"</small>";
     const l = lr && lr[s.title];
     if(l && s.h[1] > 0) tx += '<small style="color:#7fb3e8">Bei Dir bisher: '+(l.n === 1 ? fmtH(l.avg) : "Ø "+fmtH(l.avg)+" ("+l.n+"×, "+fmtH(l.min)+"–"+fmtH(l.max)+")")+
       (offRange(l, s.h) > 0 ? " — länger als das Rezept" : offRange(l, s.h) < 0 ? " — kürzer als das Rezept" : "")+"</small>";
@@ -1105,7 +1109,7 @@ function stepItem(s, r, i, mode, cls, now, lr){
 function renderPlan(tpl){
   const now = Date.now(), steps = PLAN.steps, tl = PLAN.tl;
   const lr = learned(getLog(), tpl.id);
-  $("planSteps").innerHTML = steps.map((s,i) => stepItem(s, tl[i], i, "plan", "", now, lr)).join("");
+  $("planSteps").innerHTML = steps.map((s,i) => stepItem(s, tl[i], i, "plan", "", now, lr, i === steps.length-1 ? tpl.eat : null)).join("");
   const end = tl[tl.length-1];
   $("planHint").textContent = "aus dem Ofen ≈ "+fmtWhen(round5(end.t), now);
 
@@ -1139,7 +1143,7 @@ function renderRun(){
   const a = r.done.length - 1, last = r.steps.length - 1;
   $("runTitle").textContent = r.name;
   $("runSteps").innerHTML = r.steps.map((s,i) =>
-    stepItem(s, tl[i], i, "run", i === a ? "last" : (i === a+1 ? "now" : ""), now, LR_RUN)).join("");
+    stepItem(s, tl[i], i, "run", i === a ? "last" : (i === a+1 ? "now" : ""), now, LR_RUN, i === r.steps.length-1 ? r.eat : null)).join("");
 
   const end = tl[last];
   let h = '<div class="status">'+

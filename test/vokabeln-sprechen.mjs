@@ -170,17 +170,42 @@ for(const v of VARIANTEN){
   ok(gr >= 26, "2: Lösung groß geschrieben — ist " + gr + " px");
   await pg.click("#qGo"); await pg.waitForTimeout(50);
 
-  /* 3. falsch → nochmal → wieder falsch → Lösung sofort, Fehler, kein dritter Versuch */
+  /* 3. falsch → nochmal → wieder falsch → kein drittes Sprechen, nur noch Tippen oder Lösung */
+  sol = await loesung();
   await sag("faux");
   await pg.click("#qRetry"); await pg.waitForTimeout(80);
   await sprich("toujours faux");
   fb = await pg.textContent("#qFb");
-  ok(fb.includes("✗") && (await pg.$("#qFb .sol")) && !(await pg.$("#qRetry")), "3: zweiter Fehlversuch → Lösung sofort, kein dritter Versuch");
-  ok(await pg.evaluate(() => Object.values(Q.first)[2] === false), "3: zählt als Fehler");
+  ok(!fb.includes(sol) && !(await pg.$("#qRetry")) && (await pg.$("#qType")), "3: zweiter Fehlversuch → Lösung verdeckt, nur noch Tippen/Lösung");
+  await pg.click("#qShow"); await pg.waitForTimeout(50);
+  ok(await pg.evaluate(() => Object.values(Q.first)[2] === false), "3: Lösung zeigen zählt als Fehler");
+  await pg.click("#qGo"); await pg.waitForTimeout(50);
+
+  /* 4. falsch → Antwort tippen → richtig getippt → zählt richtig und als getippt */
+  sol = await loesung();
+  await sag("pas compris");
+  await pg.click("#qType"); await pg.waitForTimeout(50);
+  ok(await pg.evaluate(() => document.activeElement.id === "qIn" && $("qIn").value === ""), "4: Tippen → leeres Feld mit Tastatur");
+  ok(!(await pg.isVisible("#qMic")), "4: Tippen → kein Mikrofon");
+  await pg.type("#qIn", sol); await pg.keyboard.press("Enter"); await pg.waitForTimeout(50);
+  ok((await pg.textContent("#qFb")).startsWith("✓"), "4: richtig getippt → ✓");
+  ok(await pg.evaluate(() => { const it = Q.items[Q.i], k = key(it.cid, it.dir); return Q.first[k] === true && (it.dir !== "df" || P[k].ty); }), "4: zählt richtig (und getippt)");
+  await pg.click("#qGo"); await pg.waitForTimeout(50);
+  ok(await pg.isVisible("#qMic"), "4: nächstes Wort wieder mit Mikrofon");
+
+  /* 5. falsch → nochmal → falsch → Antwort tippen → falsch getippt → Lösung, Fehler */
+  await sag("faux");
+  await pg.click("#qRetry"); await pg.waitForTimeout(80);
+  await sprich("faux encore");
+  await pg.click("#qType"); await pg.waitForTimeout(50);
+  await pg.type("#qIn", "zzz"); await pg.keyboard.press("Enter"); await pg.waitForTimeout(50);
+  fb = await pg.textContent("#qFb");
+  ok(fb.includes("✗") && (await pg.$("#qFb .sol")) && !(await pg.$("#qType")), "5: falsch getippt → Lösung, kein weiterer Versuch");
+  ok(await pg.evaluate(() => Object.values(Q.first)[4] === false), "5: zählt als Fehler");
 
   const okay = !fehl.length && !errs.length;
   if(!okay) fehler++;
-  console.log((okay ? "✓ " : "✗ ") + "„Verhört? Nochmal sprechen“ ohne Blick auf die Lösung" + (fehl.length ? "\n    " + fehl.join("\n    ") : "") + (errs.length ? "\n    Seitenfehler: " + errs.join(" | ") : ""));
+  console.log((okay ? "✓ " : "✗ ") + "„Verhört? Nochmal sprechen“ / „Antwort tippen“ ohne Blick auf die Lösung" + (fehl.length ? "\n    " + fehl.join("\n    ") : "") + (errs.length ? "\n    Seitenfehler: " + errs.join(" | ") : ""));
   await pg.close();
 }
 

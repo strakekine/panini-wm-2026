@@ -634,7 +634,11 @@ verre/vert). **Falsch gesprochen → Lösung erst nach Entscheidung** (Fassung k
 gewünscht): Die App zeigt nur „✗ Gehört: …“ und zwei Knöpfe. „VERHÖRT? NOCHMAL SPRECHEN“ (einmal pro
 Wort) schaltet das Mikrofon selbst wieder ein, ohne dass die Lösung zu sehen war; der zweite
 Versuch zählt normal, ist er wieder falsch, kommt die Lösung sofort und es ist ein Fehler.
-„LÖSUNG ZEIGEN“ zählt als Fehler. Bewertet wird erst bei der Entscheidung (`Q.fb.pending`) —
+„LÖSUNG ZEIGEN“ zählt als Fehler. **„ANTWORT TIPPEN“** (Fassung l, vom Vater: „jouer d'un
+instrument“ versteht das iPhone nicht) schaltet für dieses eine Wort aufs Tippen um (`Q.tipp`,
+`sprichtGerade()`; `next()` setzt zurück): Tastatur auf, kein Mikrofon, streng geprüft und als
+getippt gewertet (setzt `ty`). Bleibt auch nach dem zweiten Sprechversuch frei (dann ohne
+Nochmal-Knopf); falsch getippt → Lösung, Fehler. Bewertet wird erst bei der Entscheidung (`Q.fb.pending`) —
 vorher hätte „Nochmal“ mit sichtbarer Lösung einfach Nachsprechen belohnt. Die Lösung steht
 überall groß (`.fb .sol`, `.full b`, 25–27 px). **Gleicher Klang** (`klang()`, `klingtWie()`, nur Sprechen
 und nur bei Antwort auf Französisch): Die Erkennung schrieb am iPhone zweimal „Arrivé en retard“

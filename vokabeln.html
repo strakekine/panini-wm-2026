@@ -83,6 +83,7 @@
   .btn:active{transform:scale(.97)}
   .btnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
   .btnrow .btn{flex:1}
+  .fb .btnrow .btn{flex:1 1 100%}
   .note{font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:10px}
   input{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 11px;font-size:16px;font-family:inherit;width:100%;min-height:44px}
   input:focus{outline:none;border-color:var(--accent)}
@@ -689,7 +690,7 @@ function needBackup(dirty, snooze, now){
 /* Fassung — bei JEDER Änderung hochzählen. Steht unten im Startbild und als erste Zeile der
    Mitschrift; am iPhone lief einmal noch die alte Datei aus dem Zwischenspeicher, und die
    Mitschrift sah aus wie ein neuer Fehler. */
-const FASSUNG = "15.10.2026 k";
+const FASSUNG = "15.10.2026 l";
 const KEY = "vokabeln_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
@@ -828,6 +829,8 @@ function startQuiz(items, nurTippen){
   showQ();
 }
 function cur(){ return Q.items[Q.i]; }
+/* Gesprochen oder getippt? „Antwort tippen“ schaltet für das eine Wort aufs Tippen um. */
+function sprichtGerade(){ return S.input === "voice" && !Q.nurTippen && Q.tipp !== key(cur().cid, cur().dir); }
 function showQ(){
   stopListen();   /* eine noch offene Erkennung der vorigen Frage freigeben */
   const it = cur(), c = BYID[it.cid], fr = it.dir === "df";
@@ -846,7 +849,8 @@ function showQ(){
   $("qFb").innerHTML = "";
   $("qGo").textContent = "PRÜFEN"; $("qGo").style.display = "";
   $("qSkip").style.display = "";
-  const voice = S.input === "voice" && !Q.nurTippen;
+  const voice = sprichtGerade();
+  if(Q.tipp) inp.placeholder = "Antwort tippen";
   $("qMic").style.display = voice && SR ? "" : "none";
   $("qMic").textContent = "🎤 SPRECHEN"; $("qMic").classList.remove("live");
   $("qNote").textContent = voice && !SR ? "Spracherkennung geht in dieser Ansicht nicht. Tipp ins Feld und nimm das Mikrofon unten auf der Tastatur." : "";
@@ -857,7 +861,7 @@ function showQ(){
 function answer(text, alts, endgueltig){
   if(Q.fb && !(endgueltig && Q.fb.pending)) return;
   const it = cur(), c = BYID[it.cid], sol = it.dir === "df" ? c.f : c.d;
-  const voice = S.input === "voice" && !Q.nurTippen;
+  const voice = sprichtGerade();
   let r = check(text, sol, voice);
   /* Beim Sprechen liefert die Erkennung mehrere Lesarten (verre / vert / vers klingen gleich).
      Passt eine davon, war die Aussprache richtig — das Raten der Schreibweise ist nicht das Kind. */
@@ -869,12 +873,19 @@ function answer(text, alts, endgueltig){
      nichts werten. Vorher stand die Lösung über dem Knopf — man konnte sie ablesen und
      nachsprechen (vom Vater gefunden). Jetzt: nur zeigen, was gehört wurde, und entweder
      nochmal sprechen (ohne die Lösung gesehen zu haben) oder „Lösung zeigen“ = Fehler. */
-  if(!r.ok && voice && SR && text.trim() && !endgueltig && !Q.retry[k] && !it.again){
+  /* „Antwort tippen“ (einmal pro Wort) bleibt auch nach dem zweiten Sprechversuch frei: manches
+     versteht das iPhone einfach nicht („jouer d'un instrument“). Getippt wird streng geprüft,
+     die Lösung war nicht zu sehen — kein Schlupfloch. Getippt ist voice aus, also endgültig. */
+  if(!r.ok && voice && SR && text.trim() && !endgueltig && !it.again){
+    const nochmal = !Q.retry[k];
     Q.fb = { pending:true, text, alts };
     $("qIn").className = "qin bad"; $("qIn").value = text;
     $("qFb").innerHTML = '<div class="fb bad"><div class="h">✗ Gehört: „'+esc(text)+'“</div>'+
-      '<small>Hat sich das iPhone verhört? Dann sprich nochmal. Sonst schau Dir die Lösung an — das zählt als Fehler.</small>'+
-      '<div class="btnrow"><button class="btn ghost sm" id="qRetry">VERHÖRT? NOCHMAL SPRECHEN</button>'+
+      '<small>'+(nochmal ? "Hat sich das iPhone verhört? Dann sprich nochmal oder tipp die Antwort."
+                         : "Wieder nicht verstanden? Dann tipp die Antwort.")+
+      ' Sonst schau Dir die Lösung an — das zählt als Fehler.</small>'+
+      '<div class="btnrow">'+(nochmal ? '<button class="btn ghost sm" id="qRetry">VERHÖRT? NOCHMAL SPRECHEN</button>' : '')+
+      '<button class="btn ghost sm" id="qType">ANTWORT TIPPEN</button>'+
       '<button class="btn sm" id="qShow">LÖSUNG ZEIGEN</button></div></div>';
     $("qGo").style.display = "none"; $("qSkip").style.display = "none"; $("qMic").style.display = "none";
     return;
@@ -926,6 +937,15 @@ function retry(){
   Q.fb = null;
   showQ(); listen();
 }
+/* „Antwort tippen“: dasselbe Wort, aber getippt — Tastatur auf, kein Mikrofon. Zählt wie
+   getippt (streng, setzt `ty`). Läuft synchron im Klick, sonst öffnet iOS die Tastatur nicht. */
+function tippen(){
+  if(!Q.fb || !Q.fb.pending) return;
+  const it = cur();
+  Q.tipp = key(it.cid, it.dir);
+  Q.fb = null;
+  showQ();
+}
 /* „Lösung zeigen“: die gesprochene Antwort endgültig werten — als das, was sie war */
 function zeigeLoesung(){
   if(!Q.fb || !Q.fb.pending) return;
@@ -933,7 +953,7 @@ function zeigeLoesung(){
   answer(text, alts, true);
 }
 function next(){
-  Q.i++;
+  Q.i++; Q.tipp = null;
   if(Q.i >= Q.items.length) return finish();
   showQ();
 }
@@ -1194,6 +1214,7 @@ document.addEventListener("click", ev => {
     case "qMic": if(LISTEN){ settle(); } else listen(); return;
     case "qRetry": retry(); return;
     case "qShow": zeigeLoesung(); return;
+    case "qType": tippen(); return;
     case "qStop":
       if(Object.keys(Q.first).length) finish(); else goHome(); return;
     case "learnBtn": startLearn(); return;

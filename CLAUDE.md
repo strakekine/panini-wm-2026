@@ -615,7 +615,9 @@ Versuch samt Fach-Änderung zurück. Ob die API im Home-Bildschirm-Modus geht, i
 noch nicht geprüft**; Rückfall ist das Mikrofon der Tastatur (Text landet im Feld, wird aber
 dann wie getippt geprüft). Vorlesen ist ausdrücklich nicht gewünscht.
 
-**Karteikasten:** 5 Fächer, Abstände `FACH = [0,1,2,4,8,16]` Tage ab Tagesbeginn; falsch →
+**Karteikasten:** 5 Fächer, Abstände `FACH = [0,1,2,4,8,16]` Tage ab Tagesbeginn. Neue Wörter
+zählen als Fach 1 — richtig beim ersten Mal → Fach 2 (vom Vater angemerkt: sonst endeten
+richtig und falsch am ersten Tag im selben Fach). Falsch →
 Fach 1, **morgen** fällig, Marke `bad` (für „Fehler“). Beide Richtungen zählen getrennt
 (`key = id>fd|df`). „Heute fällig“ = fällig + neu, gesehene zuerst. In der Runde kommt ein
 falsches Wort 4 Fragen später wieder, bis es sitzt, zählt dann aber nicht mehr fürs Fach.

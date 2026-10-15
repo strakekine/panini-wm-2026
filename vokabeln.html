@@ -289,7 +289,9 @@ const LEKTIONEN = [
    geprüft. */
 const DAY = 864e5;
 /* Tage bis zur nächsten Abfrage, wenn ein Wort richtig war und jetzt in Fach b liegt.
-   Fach 0 = noch nie gefragt. */
+   Fach 0 = noch nie gefragt. Ein neues Wort steht gedanklich in Fach 1: richtig beim
+   ersten Mal → Fach 2 (2 Tage), falsch → bleibt in Fach 1 (morgen). Sonst machte
+   richtig oder falsch am ersten Tag keinen Unterschied. */
 const FACH = [0, 1, 2, 4, 8, 16];
 const SICHER = 4;   /* ab Fach 4 gilt ein Wort als sicher */
 
@@ -379,7 +381,7 @@ function startOfDay(t){ const d = new Date(t); d.setHours(0, 0, 0, 0); return d.
    in der Runde kommt das Wort ohnehin wieder, bis es sitzt, und eine zweite Runde gleich
    danach prüft nur das Kurzzeitgedächtnis. Wer heute nochmal will, nimmt "Fehler". */
 function grade(p, right, now){
-  p = p ? { ...p } : { b:0, due:0, n:0, w:0 };
+  p = p ? { ...p, b:Math.max(1, p.b) } : { b:1, due:0, n:0, w:0 };
   p.n++; p.last = now;
   if(right){ p.b = Math.min(5, p.b + 1); p.due = startOfDay(now) + FACH[p.b] * DAY; }
   else { p.b = 1; p.w++; p.due = startOfDay(now) + DAY; p.bad = 1; }

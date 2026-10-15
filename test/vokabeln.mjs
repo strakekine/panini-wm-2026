@@ -74,9 +74,10 @@ falsch("le être", "être", "Hier gehört kein Artikel dazu.");
 const { DAY } = M;
 const t0 = new Date(2026, 9, 15, 17, 30).getTime(), heute = M.startOfDay(t0);
 let p = M.grade(null, true, t0);
-ok(p.b === 1 && p.due === heute + DAY, "neu und richtig → Fach 1, morgen dran");
-p = M.grade(p, true, t0 + DAY);
-ok(p.b === 2 && p.due === heute + DAY + 2 * DAY, "Fach 2 → in 2 Tagen");
+ok(p.b === 2 && p.due === heute + 2 * DAY, "neu und richtig → Fach 2, in 2 Tagen");
+ok(M.grade(null, false, t0).b === 1 && M.grade(null, false, t0).due === heute + DAY, "neu und falsch → Fach 1, morgen");
+p = M.grade(p, true, t0 + 2 * DAY);
+ok(p.b === 3 && p.due === heute + 2 * DAY + 4 * DAY, "Fach 3 → in 4 Tagen");
 for(let k = 0; k < 6; k++) p = M.grade(p, true, t0);
 ok(p.b === 5 && p.due === heute + 16 * DAY, "oben bleibt Fach 5, 16 Tage");
 p = M.grade(p, false, t0);
@@ -92,7 +93,7 @@ p = M.review(wartet, false, t0);
 ok(p.b === 1 && p.bad === 1, "wartendes Wort falsch → Fach 1");
 p = M.review({ b:4, due:t0 - 1, n:4, w:0 }, true, t0);
 ok(p.b === 5, "fälliges Wort richtig → steigt auf");
-ok(M.review(undefined, true, t0).b === 1, "neues Wort richtig → Fach 1");
+ok(M.review(undefined, true, t0).b === 2, "neues Wort richtig → Fach 2");
 
 /* "Fehler" am selben Tag: falsch → morgen fällig; heute nochmal richtig → Fehlermarke weg,
    Fach 1 und Termin morgen bleiben */

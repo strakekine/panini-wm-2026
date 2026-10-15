@@ -14,7 +14,7 @@ const i = src.indexOf("===== Lektionen"), j = src.indexOf("===== Oberfläche");
 if(i < 0 || j < 0) throw new Error("Abschnittsmarken Lektionen/Oberfläche nicht gefunden");
 const quelle = src.slice(src.lastIndexOf("/*", i), src.lastIndexOf("/*", j));
 const M = new Function(quelle + `
-  return { LEKTIONEN, DAY, FACH, clean, variants, check, cardsOf, grade, isDue, buildSession,
+  return { LEKTIONEN, DAY, FACH, clean, variants, check, cardsOf, grade, review, isDue, buildSession,
            lessonStats, startOfDay, key };`)();
 
 let fehler = 0, n = 0;
@@ -80,10 +80,19 @@ ok(p.b === 2 && p.due === heute + DAY + 2 * DAY, "Fach 2 → in 2 Tagen");
 for(let k = 0; k < 6; k++) p = M.grade(p, true, t0);
 ok(p.b === 5 && p.due === heute + 16 * DAY, "oben bleibt Fach 5, 16 Tage");
 p = M.grade(p, false, t0);
-ok(p.b === 1 && p.due === t0 && p.bad === 1 && p.w === 1, "falsch → Fach 1, sofort wieder dran, als Fehler markiert");
+ok(p.b === 1 && p.due === heute + DAY && p.bad === 1 && p.w === 1, "falsch → Fach 1, morgen wieder, als Fehler markiert");
 p = M.grade(p, true, t0);
 ok(p.b === 2 && !p.bad, "danach richtig → Fehlermarke weg");
 ok(M.isDue(undefined, t0) && !M.isDue({ due:t0 + 1 }, t0), "isDue");
+
+/* "Alle": ein noch wartendes Wort steigt bei richtig nicht auf, fällt bei falsch aber zurück */
+const wartet = { b:4, due:t0 + 5 * DAY, n:4, w:0, last:t0 - 3 * DAY };
+ok(M.review(wartet, true, t0) === wartet, "wartendes Wort richtig → bleibt unverändert");
+p = M.review(wartet, false, t0);
+ok(p.b === 1 && p.bad === 1, "wartendes Wort falsch → Fach 1");
+p = M.review({ b:4, due:t0 - 1, n:4, w:0 }, true, t0);
+ok(p.b === 5, "fälliges Wort richtig → steigt auf");
+ok(M.review(undefined, true, t0).b === 1, "neues Wort richtig → Fach 1");
 
 /* --- Rundenbau --- */
 let seed = 1; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;

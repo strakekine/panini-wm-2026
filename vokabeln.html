@@ -31,11 +31,18 @@
   main{max-width:720px;margin:0 auto;padding:10px 12px 90px}
   .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 
-  /* Drei Sichten, eine DOM */
-  body[data-view="home"] .v-quiz, body[data-view="home"] .v-res{display:none}
-  body[data-view="quiz"] .v-home, body[data-view="quiz"] .v-res{display:none}
-  body[data-view="res"] .v-home, body[data-view="res"] .v-quiz{display:none}
-  body[data-view="quiz"] .v-head{display:none}
+  /* Vier Sichten, eine DOM */
+  body:not([data-view="home"]) .v-home, body:not([data-view="quiz"]) .v-quiz,
+  body:not([data-view="res"]) .v-res, body:not([data-view="learn"]) .v-learn{display:none}
+  body[data-view="quiz"] .v-head, body[data-view="learn"] .v-head{display:none}
+
+  /* Nur zum Lernen: Karte antippen deckt auf, nochmal tippen geht weiter */
+  .lcard{min-height:52vh;display:flex;flex-direction:column;justify-content:center;text-align:center;padding:22px 16px;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+  .lcard .qword{font-size:34px}
+  .lsep{height:1px;background:var(--line);margin:22px 10%}
+  .lans{font-size:30px;font-weight:700;color:var(--gold);line-height:1.2;word-break:break-word}
+  .ltap{font-size:15px;color:var(--muted)}
+  .lend{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;color:var(--gold)}
 
   .seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
   .seg button{flex:1;background:transparent;color:var(--muted);border:0;padding:10px 6px;font-family:inherit;font-weight:700;font-size:13.5px;cursor:pointer;letter-spacing:.3px}
@@ -123,13 +130,20 @@
 
 <header>
   <div class="wrap">
-    <div class="top v-head"><h1 id="title">VOKABELN</h1></div>
+    <div class="top v-head"><h1 id="title">VOKABELN</h1><button class="btn sm v-home" id="learnBtn">📖 NUR LERNEN</button></div>
     <div class="v-quiz">
       <div class="qtop">
         <span class="qcount" id="qCount">1 / 10</span>
         <button class="btn ghost sm" id="qStop">BEENDEN</button>
       </div>
       <div class="qbar"><i id="qBar" style="width:0"></i></div>
+    </div>
+    <div class="v-learn">
+      <div class="qtop">
+        <span class="qcount" id="lCount">1 / 10</span>
+        <span style="display:flex;gap:6px"><button class="btn ghost sm" id="lMix">MISCHEN</button><button class="btn ghost sm" id="lStop">FERTIG</button></span>
+      </div>
+      <div class="qbar"><i id="lBar" style="width:0"></i></div>
     </div>
   </div>
 </header>
@@ -149,7 +163,7 @@
       <div><div class="lbl">Richtung</div>
         <div class="seg" data-opt="dir"><button data-v="fd">FR → DE</button><button data-v="df">DE → FR</button><button data-v="mix">GEMISCHT</button></div></div>
       <div><div class="lbl">Welche Wörter</div>
-        <div class="seg" data-opt="mode"><button data-v="due">DRAN</button><button data-v="all">ALLE</button><button data-v="err">FEHLER</button></div></div>
+        <div class="seg" data-opt="mode"><button data-v="due">HEUTE FÄLLIG</button><button data-v="all">ALLE</button><button data-v="err">FEHLER</button></div></div>
       <div><div class="lbl">Wie viele</div>
         <div class="seg" data-opt="count"><button data-v="10">10</button><button data-v="20">20</button><button data-v="0">ALLE</button></div></div>
       <div><div class="lbl">Antworten</div>
@@ -175,8 +189,14 @@
     bei <i>(se) promener</i> zählt beides.</p>
     <p><b>Karteikasten:</b> Jedes Wort wandert in fünf Fächern nach oben, wenn Du es weißt,
     und nach jedem Fehler zurück ins erste. Fach 1 kommt am nächsten Tag wieder, Fach 5 erst nach
-    16 Tagen. „Dran“ fragt nur, was heute fällig ist, dazu neue Wörter. Beide Richtungen
-    zählen getrennt — wer <i>le chat</i> erkennt, kann es noch lange nicht schreiben.</p>
+    16 Tagen. Beide Richtungen zählen getrennt — wer <i>le chat</i> erkennt, kann es noch lange
+    nicht schreiben.</p>
+    <p><b>Welche Wörter:</b> „Heute fällig“ nimmt die neuen Wörter und die, deren Wartezeit um ist.
+    „Alle“ nimmt alle Wörter der Lektion, auch die, die noch warten — gut vor einer Arbeit. Ein
+    noch wartendes Wort, das dabei richtig ist, bleibt in seinem Fach; ein falsches fällt
+    trotzdem zurück. „Fehler“ nimmt nur, was zuletzt falsch war.</p>
+    <p><b>📖 Nur lernen:</b> Ohne Abfrage durchblättern. Das Wort steht da, antippen zeigt die
+    Übersetzung, nochmal antippen das nächste Wort. Zählt nicht für die Fächer.</p>
     <p><b>Sprechen:</b> Mit „🎤 Sprechen“ tippst Du auf den blauen Knopf und sagst die Antwort.
     Groß und klein zählt dann nicht, man hört es ja nicht. Hat das iPhone sich verhört, darfst Du
     einmal pro Wort neu sprechen. Klappt der Knopf nicht, nimm das Mikrofon unten auf der Tastatur —
@@ -217,6 +237,15 @@
     </div>
     <div class="note" id="qNote"></div>
   </div>
+</div>
+
+<!-- ============ Nur lernen ============ -->
+<div class="card v-learn">
+  <div class="lcard" id="lCard"></div>
+</div>
+<div class="btnrow v-learn" id="lNav">
+  <button class="btn ghost" id="lPrev">← ZURÜCK</button>
+  <button class="btn ghost" id="lNext">WEITER →</button>
 </div>
 
 <!-- ============ Ergebnis ============ -->
@@ -346,16 +375,22 @@ function cardsOf(lessons){
 const key = (cid, dir) => cid + ">" + dir;
 function startOfDay(t){ const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); }
 /* Karteikasten: richtig → ein Fach höher, fällig nach FACH[b] Tagen (ab Tagesbeginn,
-   damit "morgen" auch morgen früh heißt); falsch → Fach 1, sofort wieder fällig. */
+   damit "morgen" auch morgen früh heißt); falsch → Fach 1, morgen wieder. Nicht sofort:
+   in der Runde kommt das Wort ohnehin wieder, bis es sitzt, und eine zweite Runde gleich
+   danach prüft nur das Kurzzeitgedächtnis. Wer heute nochmal will, nimmt "Fehler". */
 function grade(p, right, now){
   p = p ? { ...p } : { b:0, due:0, n:0, w:0 };
   p.n++; p.last = now;
   if(right){ p.b = Math.min(5, p.b + 1); p.due = startOfDay(now) + FACH[p.b] * DAY; }
-  else { p.b = 1; p.w++; p.due = now; p.bad = 1; }
+  else { p.b = 1; p.w++; p.due = startOfDay(now) + DAY; p.bad = 1; }
   if(right) delete p.bad;
   return p;
 }
 const isDue = (p, now) => !p || p.due <= now;
+/* Bei "Alle" kommen auch Wörter dran, die noch warten. Richtig heißt dann nichts — der
+   Abstand, den das Fach messen soll, war nicht da —, das Wort bleibt, wo es ist.
+   Falsch zählt immer: wer es nach drei Tagen nicht weiß, weiß es nach acht erst recht nicht. */
+function review(p, right, now){ return right && p && !isDue(p, now) ? p : grade(p, right, now); }
 function shuffle(a, rnd){
   for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
   return a;
@@ -447,12 +482,12 @@ function renderHome(){
   if(LEKTIONEN.length > 1){
     const st = lessonStats(CARDS, P, now);
     h += '<button class="les all'+(all ? " on" : "")+'" data-all="1"><span class="ck">'+(all ? "✓" : "")+'</span>'+
-      '<span class="t"><b>ALLE LEKTIONEN</b><small>'+CARDS.length+' Wörter · '+st.due+' dran</small></span>'+bar(st)+'</button>';
+      '<span class="t"><b>ALLE LEKTIONEN</b><small>'+CARDS.length+' Wörter · '+st.due+' heute fällig</small></span>'+bar(st)+'</button>';
   }
   for(const l of LEKTIONEN){
     const on = S.sel.includes(l.id), cs = CARDS.filter(c => c.lid === l.id), st = lessonStats(cs, P, now);
     h += '<button class="les'+(on ? " on" : "")+'" data-les="'+esc(l.id)+'"><span class="ck">'+(on ? "✓" : "")+'</span>'+
-      '<span class="t"><b>'+esc(l.titel)+'</b><small>'+cs.length+' Wörter · '+st.sicher+' von '+st.n+' sicher · '+st.due+' dran</small></span>'+bar(st)+'</button>';
+      '<span class="t"><b>'+esc(l.titel)+'</b><small>'+cs.length+' Wörter · '+st.sicher+' von '+st.n+' sicher · '+st.due+' heute fällig</small></span>'+bar(st)+'</button>';
   }
   $("lessons").innerHTML = h;
   $("selHint").textContent = S.sel.length + " gewählt";
@@ -462,10 +497,11 @@ function renderHome(){
   });
   const cs = selCards(), sess = buildSession(cs, P, opts(), now);
   const info = !cs.length ? "Wähle oben mindestens eine Lektion."
-    : !sess.length ? (S.mode === "err" ? "Keine Fehler offen — gut so." : "Heute ist nichts mehr dran. Mit „Alle“ geht es trotzdem.")
+    : !sess.length ? (S.mode === "err" ? "Keine Fehler offen — gut so." : "Heute ist nichts mehr fällig. Mit „Alle“ geht es trotzdem.")
     : sess.length + (sess.length === 1 ? " Wort" : " Wörter") + " in dieser Runde.";
   $("startInfo").textContent = info;
   $("startBtn").disabled = !sess.length;
+  $("learnBtn").disabled = !cs.length;
   if(document.activeElement !== $("nameIn")) $("nameIn").value = S.name;
   renderList(cs);
   let exp = null; try { exp = localStorage.getItem(KEY + "_exp"); } catch(e){}
@@ -531,7 +567,7 @@ function answer(text, alts){
   const k = key(it.cid, it.dir);
   if(!it.again && !(k in Q.first)){
     Q.first[k] = r.ok;
-    P[k] = grade(P[k], r.ok, Date.now());
+    P[k] = review(P[k], r.ok, Date.now());
     if(!r.ok) Q.wrong.push(it);
     persist();
   }
@@ -586,14 +622,54 @@ function finish(){
       const c = BYID[it.cid];
       h += '<tr><td><b>'+esc(shown(it.dir === "df" ? c.d : c.f))+'</b></td><td>'+esc(shown(it.dir === "df" ? c.f : c.d))+'</td></tr>';
     }
-    h += '</table><div class="btnrow"><button class="btn" id="resAgain">FEHLER NOCHMAL</button></div>';
+    h += '</table><div class="note">Diese Wörter kommen morgen wieder. Wer heute nochmal will: „Fehler“.</div>';
   }
   h += '<div class="btnrow"><button class="btn ghost" id="resHome">ZURÜCK</button></div>';
   $("resBody").innerHTML = h;
-  Q.last = Q.wrong.slice();
   VIEW = "res"; document.body.dataset.view = VIEW; window.scrollTo(0, 0);
   document.activeElement && document.activeElement.blur();
 }
+/* ----- Nur lernen -----
+   Blättern ohne Abfrage. Reihenfolge wie in der Lektion, auf Wunsch gemischt; Richtung
+   aus der Einstellung, bei "gemischt" je Wort zufällig. Zählt nicht für die Fächer. */
+let L = { items:[], i:0, open:false, mix:false };
+function startLearn(mix = false){
+  const cs = selCards(); if(!cs.length) return;
+  const items = cs.map(c => ({ c, dir:S.dir === "mix" ? (Math.random() < .5 ? "fd" : "df") : S.dir }));
+  L = { items:mix ? shuffle(items, Math.random) : items, i:0, open:false, mix };
+  VIEW = "learn"; document.body.dataset.view = VIEW; window.scrollTo(0, 0);
+  document.activeElement && document.activeElement.blur();
+  showLearn();
+}
+function showLearn(){
+  const n = L.items.length, end = L.i >= n;
+  $("lCount").textContent = Math.min(L.i + 1, n) + " / " + n;
+  $("lBar").style.width = (100 * Math.min(L.i + (L.open ? 1 : 0), n) / n) + "%";
+  $("lMix").classList.toggle("on", L.mix);
+  $("lMix").textContent = L.mix ? "✓ GEMISCHT" : "MISCHEN";
+  $("lNav").style.display = end ? "none" : "";
+  $("lPrev").disabled = L.i === 0;
+  if(end){
+    $("lCard").innerHTML = '<div class="lend">Alle '+n+' Wörter durch</div>'+
+      '<div class="btnrow"><button class="btn ghost" id="lAgain">NOCHMAL</button><button class="btn" id="lQuiz">JETZT ABFRAGEN</button></div>';
+    return;
+  }
+  const { c, dir } = L.items[L.i], fr = dir === "df";
+  $("lCard").innerHTML =
+    '<div class="qdir">'+(fr ? "Deutsch → Französisch" : "Französisch → Deutsch")+'</div>'+
+    '<div class="qword">'+esc(shown(fr ? c.d : c.f))+'</div>'+
+    (c.h ? '<div class="qhint">'+esc(c.h)+'</div>' : '')+
+    '<div class="lsep"></div>'+
+    (L.open ? '<div class="lans">'+esc(shown(fr ? c.f : c.d))+'</div>' : '<div class="ltap">antippen zum Aufdecken</div>');
+}
+function learnStep(d){
+  L.i = Math.max(0, Math.min(L.items.length, L.i + d)); L.open = false; showLearn();
+}
+$("lCard").addEventListener("click", ev => {
+  if(ev.target.closest("button") || L.i >= L.items.length) return;
+  if(!L.open){ L.open = true; showLearn(); } else learnStep(1);
+});
+
 function goHome(){ stopListen(); Q = null; VIEW = "home"; document.body.dataset.view = VIEW; renderHome(); window.scrollTo(0, 0); }
 
 /* ----- Sprechen ----- */
@@ -683,7 +759,13 @@ document.addEventListener("click", ev => {
     case "qRetry": retry(); return;
     case "qStop":
       if(Object.keys(Q.first).length) finish(); else goHome(); return;
-    case "resAgain": startQuiz(Q.last.map(({ cid, dir }) => ({ cid, dir }))); return;
+    case "learnBtn": startLearn(); return;
+    case "lPrev": learnStep(-1); return;
+    case "lNext": learnStep(1); return;
+    case "lMix": L.mix = !L.mix; startLearn(L.mix); return;
+    case "lStop": goHome(); return;
+    case "lAgain": startLearn(L.mix); return;
+    case "lQuiz": { const s = buildSession(selCards(), P, opts(), Date.now()); if(s.length) startQuiz(s); else goHome(); return; }
     case "resHome": goHome(); return;
     case "backupBtn": backup(b); return;
     case "restoreBtn": $("restoreFile").click(); return;

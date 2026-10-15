@@ -616,9 +616,20 @@ noch nicht geprüft**; Rückfall ist das Mikrofon der Tastatur (Text landet im F
 dann wie getippt geprüft). Vorlesen ist ausdrücklich nicht gewünscht.
 
 **Karteikasten:** 5 Fächer, Abstände `FACH = [0,1,2,4,8,16]` Tage ab Tagesbeginn; falsch →
-Fach 1, sofort fällig, Marke `bad` (für „Fehler“). Beide Richtungen zählen getrennt
-(`key = id>fd|df`). „Dran“ = fällig + neu, gesehene zuerst. In der Runde kommt ein falsches
-Wort 4 Fragen später wieder, bis es sitzt, zählt dann aber nicht mehr fürs Fach.
+Fach 1, **morgen** fällig, Marke `bad` (für „Fehler“). Beide Richtungen zählen getrennt
+(`key = id>fd|df`). „Heute fällig“ = fällig + neu, gesehene zuerst. In der Runde kommt ein
+falsches Wort 4 Fragen später wieder, bis es sitzt, zählt dann aber nicht mehr fürs Fach.
+„Alle“ fragt auch wartende Wörter; dort gilt `review()`: richtig bei einem noch nicht
+fälligen Wort ändert nichts (der Abstand, den das Fach misst, war nicht da — sonst schöbe
+ein Durchgang vor der Klassenarbeit die halbe Lektion ein Fach hoch), falsch zählt immer.
+Den Knopf „Fehler nochmal“ direkt nach der Runde gibt es bewusst **nicht** mehr: die Wörter
+waren in der Runde gerade richtig, eine Minute später prüft das nur das Kurzzeitgedächtnis.
+Wer heute nochmal will, nimmt „Fehler“ im Startbild (filtert `bad`, nicht nach Fälligkeit).
+
+**Nur lernen** (Knopf oben im Startbild): Karteikarten ohne Abfrage über die gewählten
+Lektionen, Richtung aus der Einstellung (gemischt = je Wort zufällig), Lektionsreihenfolge
+oder gemischt. Antippen deckt auf, nochmal antippen = nächstes Wort. Zählt nicht für die
+Fächer. Am Ende „Jetzt abfragen“ mit den aktuellen Einstellungen.
 
 **Speicher:** `vokabeln_v1` (Einstellungen, Name), `_p` (Lernstand), `_exp` (letzte
 Sicherung). Sicherung als Datei über `navigator.share` wie in den anderen Apps.

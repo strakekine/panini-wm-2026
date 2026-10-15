@@ -128,6 +128,31 @@ async function spielen(pg, falsch = []){
   await pg.close();
 }
 
+/* --- 3c. Knopf „✍️ Jetzt tippen“: erscheint nur mit Kandidaten, erzwingt Tippen + DE → FR --- */
+{
+  const pg = await seite();
+  ok(!(await pg.isVisible("#tippBtn")), "ohne ✍️-Wörter kein Knopf");
+  await pg.evaluate(() => {
+    const [a, c] = CARDS;
+    P[key(a.id, "df")] = { b:3, hi:3, due:Date.now() + 3 * DAY, n:3, w:0, wt:1 };   /* ✍️, noch nicht wieder fällig */
+    P[key(c.id, "df")] = { b:3, hi:3, due:Date.now() + 3 * DAY, n:3, w:0 };         /* wartet → nicht dabei */
+    S.input = "voice"; persist();
+  });
+  await pg.reload();
+  ok(await pg.isVisible("#tippBtn"), "Knopf erscheint");
+  ok((await pg.textContent("#tippBox")).includes("1 Wort"), "Knopf zählt nur das eine Kandidaten-Wort");
+  await pg.click("#tippBtn");
+  ok(await pg.evaluate(() => Q.nurTippen && Q.items.every(x => x.dir === "df")), "Tipp-Runde: DE → FR, nur Tippen");
+  ok(!(await pg.isVisible("#qMic")), "kein Mikrofon in der Tipp-Runde, obwohl Sprechen eingestellt ist");
+  await spielen(pg);
+  ok(await pg.evaluate(() => P[key(CARDS[0].id, "df")].b) === 4, "✍️-Wort richtig getippt → sicher");
+  ok((await pg.textContent("#resBody")).includes("jetzt sicher"), "Ergebnis meldet „jetzt sicher“");
+  await pg.click("#resHome");
+  ok(!(await pg.isVisible("#tippBtn")), "danach ist der Knopf weg");
+  ok(!pg.errs.length, "keine Fehler auf der Seite: " + pg.errs.join(" | "));
+  await pg.close();
+}
+
 /* --- 4. Sicherungs-Erinnerung --- */
 {
   const pg = await seite();

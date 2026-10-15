@@ -15,7 +15,7 @@ if(i < 0 || j < 0) throw new Error("Abschnittsmarken Lektionen/Oberfläche nicht
 const quelle = src.slice(src.lastIndexOf("/*", i), src.lastIndexOf("/*", j));
 const M = new Function(quelle + `
   return { LEKTIONEN, DAY, FACH, clean, variants, check, cardsOf, grade, review, isDue, buildSession,
-           lessonStats, startOfDay, key, needBackup, klang, klingtWie, reviewAnswer, SICHER, weekStatus, dayKey, dayDone, pruneDays, pct, DAY_MIN };`)();
+           lessonStats, startOfDay, key, needBackup, klang, klingtWie, reviewAnswer, SICHER, tippKandidaten, weekStatus, dayKey, dayDone, pruneDays, pct, DAY_MIN };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text){ n++; if(!bed){ fehler++; console.log("✗ " + text); } }
@@ -237,6 +237,31 @@ ok(st.n === cards.length * 2 && st.neu === st.n - 2 && st.lern === 2 && st.siche
   ok(M.reviewAnswer(wartet, true, t0, false, true) === wartet, "„Alle“, noch nicht fällig, gesprochen: unverändert");
   q = M.reviewAnswer(wartet, true, t0, true, true);
   ok(q.b === 3 && q.due === wartet.due && q.ty === 1, "„Alle“, noch nicht fällig, getippt: Fach bleibt, Schreibweise bewiesen");
+}
+
+/* --- ✍️-Wörter: gesprochen verdient, Tippen fehlt; Knopf „Jetzt tippen“ --- */
+{
+  const f3 = { b:3, hi:3, due:t0 - 1, n:3, w:0 };
+  const gesprochen = M.reviewAnswer(f3, true, t0, false, true);
+  ok(gesprochen.wt === 1 && gesprochen.b === 3, "gedeckelt → Marke ✍️ (wt)");
+  const spaeter = t0 + 3600e3;   /* noch nicht wieder fällig */
+  let q = M.reviewAnswer(gesprochen, true, spaeter, true, true);
+  ok(q.b === 4 && q.ty === 1 && !q.wt && q.due === heute + 7 * DAY, "✍️-Wort richtig getippt: sofort Fach 4, in 7 Tagen wieder");
+  q = M.reviewAnswer(gesprochen, false, spaeter, true, true);
+  ok(q.b === 1 && !q.wt && !q.ty, "✍️-Wort falsch getippt: Fehler, Marke weg");
+  q = M.reviewAnswer(gesprochen, true, spaeter, false, true);
+  ok(q === gesprochen, "✍️-Wort, noch nicht fällig, wieder gesprochen: unverändert");
+
+  const cs = M.cardsOf(M.LEKTIONEN), P = {}, k = i => M.key(cs[i].id, "df");
+  P[k(0)] = gesprochen;                                          /* ✍️ → ja */
+  P[k(1)] = { b:3, hi:3, due:t0 - 1, n:3, w:0 };                /* Fach 3, fällig, nie getippt → ja */
+  P[k(2)] = { b:3, hi:3, due:t0 + 2 * DAY, n:3, w:0 };          /* Fach 3, wartet noch → nein */
+  P[k(3)] = { b:3, hi:3, due:t0 - 1, n:3, w:0, ty:1 };          /* schon getippt → nein */
+  P[k(4)] = { b:2, hi:2, due:t0 - 1, n:2, w:0 };                /* Fach 2 → nein */
+  P[M.key(cs[5].id, "fd")] = { b:3, hi:3, due:t0 - 1, n:3, w:0, wt:1 };   /* FR→DE → nein */
+  const kand = M.tippKandidaten(cs, P, t0).map(x => x.cid);
+  ok(kand.length === 2 && kand.includes(cs[0].id) && kand.includes(cs[1].id), "Knopf nimmt ✍️-Wörter und fällige Fach-3-Wörter ohne Tippen — ist " + kand.length);
+  ok(M.tippKandidaten(cs, P, t0).every(x => x.dir === "df"), "nur Richtung DE → FR");
 }
 
 /* --- Erinnerung an die Sicherung --- */

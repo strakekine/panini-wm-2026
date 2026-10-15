@@ -139,6 +139,10 @@
   .goal{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.4}
   .goal b{color:var(--text)}
   .goal.ok b{color:var(--gold)}
+  .tipp{display:flex;gap:10px;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+  .tipp > div{flex:1;min-width:0;font-size:14px;line-height:1.35}
+  .tipp small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+  .tipp .btn{flex:none}
   .les .pc{flex:none;width:58px;text-align:right}
   .les .pc b{display:block;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.5px;line-height:1}
   .les .pc .pr{margin-top:4px;width:100%}
@@ -176,7 +180,7 @@
 <!-- ============ Start ============ -->
 <div class="v-home" id="nagBox"></div>
 <div class="card v-home">
-  <div class="cbody"><div class="prog" id="progBox"></div></div>
+  <div class="cbody"><div class="prog" id="progBox"></div><div id="tippBox"></div></div>
 </div>
 <div class="card v-home">
   <div class="chead"><h2>Lektionen</h2><span class="hint" id="selHint"></span></div>
@@ -222,7 +226,8 @@
     <p><b>Sicher heißt schreiben können:</b> Bei Deutsch → Französisch kommt ein Wort nur dann in
     Fach 4, wenn es mindestens einmal richtig <i>getippt</i> wurde. Wer es schon einmal richtig
     getippt hat, darf es danach auch sprechen. Nach einem Fehler muss es wieder einmal getippt
-    werden. Bei Französisch → Deutsch reicht Sprechen.</p>
+    werden. Bei Französisch → Deutsch reicht Sprechen. Wörter, denen nur noch das Tippen fehlt,
+    sammelt oben der Knopf „✍️ Jetzt tippen“ — einmal richtig getippt, sind sie sofort sicher.</p>
     <p><b>Welche Wörter:</b> „Heute fällig“ nimmt die neuen Wörter und die, deren Wartezeit um ist.
     „Alle“ nimmt alle Wörter der Lektion, auch die, die noch warten — gut vor einer Arbeit. Ein
     noch wartendes Wort, das dabei richtig ist, bleibt in seinem Fach; ein falsches fällt
@@ -568,19 +573,39 @@ function review(p, right, now){
    Nach einem Fehler gilt die Schreibweise wieder als unbewiesen (`ty` weg). FR → DE: Sprechen
    reicht. Ergebnis: neuer Stand; `.gedeckelt` = wäre aufgestiegen, fehlt aber das Tippen. */
 function reviewAnswer(p, right, now, getippt, brauchtTippen){
+  /* ✍️-Wort (wt: war fällig, richtig gesprochen, nur die Schreibweise fehlte) richtig getippt:
+     sofort Fach 4 — den Abstand hat es beim Sprechen schon bestanden. */
+  if(right && getippt && p && p.wt && p.b === SICHER - 1){
+    const q = { ...p, b:SICHER, hi:Math.max(p.hi || 0, SICHER), ty:1, n:(p.n || 0) + 1, last:now, due:startOfDay(now) + FACH[SICHER] * DAY };
+    delete q.wt; delete q.bad; return q;
+  }
   let q = review(p, right, now);
   /* „Alle“, noch nicht fällig: Fach und Termin bleiben — aber richtig getippt ist richtig
      getippt, die Schreibweise ist damit bewiesen */
   if(q === p) return right && getippt && p && !p.ty ? { ...p, ty:1 } : q;
   q = { ...q };
-  if(!right){ delete q.ty; return q; }
+  if(!right){ delete q.ty; delete q.wt; return q; }
+  delete q.wt;
   if(getippt) q.ty = 1;
   if(brauchtTippen && !q.ty && q.b >= SICHER && (!p || p.b < SICHER)){
     q.b = SICHER - 1; q.hi = Math.max(p ? p.hi || p.b : 0, q.b);
     q.due = startOfDay(now) + FACH[q.b] * DAY;
+    q.wt = 1;
     Object.defineProperty(q, "gedeckelt", { value:true, enumerable:false });
   }
   return q;
+}
+/* Knopf „✍️ Jetzt tippen“ im Startbild (vom Vater: nur dort, nicht nach der Runde — „zu frisch“).
+   Alle Lektionen. Wörter in Richtung DE → FR, Fach 3, noch nie richtig getippt, die JETZT durch
+   einmal richtig Tippen aufsteigen würden: ✍️-Wörter (wt) oder gerade fällige. Fach-3-Wörter,
+   die ihren Abstand noch abwarten müssen, gehören nicht hinein. */
+function tippKandidaten(cards, P, now){
+  const out = [];
+  for(const c of cards){
+    const p = P[key(c.id, "df")];
+    if(p && p.b === SICHER - 1 && !p.ty && (p.wt || isDue(p, now))) out.push({ cid:c.id, dir:"df" });
+  }
+  return out;
 }
 function shuffle(a, rnd){
   for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
@@ -664,7 +689,7 @@ function needBackup(dirty, snooze, now){
 /* Fassung — bei JEDER Änderung hochzählen. Steht unten im Startbild und als erste Zeile der
    Mitschrift; am iPhone lief einmal noch die alte Datei aus dem Zwischenspeicher, und die
    Mitschrift sah aus wie ein neuer Fehler. */
-const FASSUNG = "15.10.2026 i";
+const FASSUNG = "15.10.2026 j";
 const KEY = "vokabeln_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
@@ -695,7 +720,7 @@ function sanitizeP(p){
     const v = p[k];
     /* Altbestand aus Fach 5 (gab es bis Oktober 2026) landet in Fach 4 */
     if(v && typeof v === "object" && v.b >= 0 && v.b <= 5 && isFinite(v.due))
-      out[k] = { b:Math.min(TOP, v.b|0), hi:Math.min(TOP, Math.max(v.hi|0, v.b|0)), due:Math.min(+v.due, (+v.last || +v.due) + FACH[TOP] * DAY), n:v.n|0, w:v.w|0, last:+v.last || 0, ...(v.bad ? { bad:1 } : {}), ...(v.ty ? { ty:1 } : {}) };
+      out[k] = { b:Math.min(TOP, v.b|0), hi:Math.min(TOP, Math.max(v.hi|0, v.b|0)), due:Math.min(+v.due, (+v.last || +v.due) + FACH[TOP] * DAY), n:v.n|0, w:v.w|0, last:+v.last || 0, ...(v.bad ? { bad:1 } : {}), ...(v.ty ? { ty:1 } : {}), ...(v.wt ? { wt:1 } : {}) };
   }
   return out;
 }
@@ -734,6 +759,10 @@ function renderHome(){
   $("title").innerHTML = "VOKABELN" + (S.name ? " <small>· " + esc(S.name.toUpperCase()) + "</small>" : "");
   {
     const total = lessonStats(CARDS, P, now), wk = weekStatus(DAYS, now), left = WEEK_GOAL - wk.count;
+    const tk = tippKandidaten(CARDS, P, now).length;
+    $("tippBox").innerHTML = tk ? '<div class="tipp"><div><b>✍️ '+tk+(tk === 1 ? " Wort" : " Wörter")+' fast sicher</b>'+
+      '<small>Gesprochen gekonnt — fehlt nur noch einmal richtig tippen (Deutsch → Französisch).</small></div>'+
+      '<button class="btn sm" id="tippBtn">JETZT TIPPEN</button></div>' : "";
     $("progBox").innerHTML =
       '<div class="safe"><b>'+total.sicher+'</b><span>sicher</span></div>'+
       '<div class="wk"><div class="lbl" style="margin:0">Diese Woche</div><div class="days">'+
@@ -792,8 +821,8 @@ function renderList(cs){
 /* ----- Abfrage ----- */
 const ACC = ["é","è","ê","à","â","ç","ù","û","î","ï","ô","ë","œ"];
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-function startQuiz(items){
-  Q = { items:items.slice(), i:0, first:{}, wrong:[], fb:null, retry:{}, total:items.length,
+function startQuiz(items, nurTippen){
+  Q = { items:items.slice(), i:0, first:{}, wrong:[], fb:null, retry:{}, total:items.length, nurTippen:!!nurTippen,
         gained:{}, counted:{}, dayBefore:dayDone(DAYS[dayKey(Date.now())]) };
   VIEW = "quiz"; document.body.dataset.view = VIEW; window.scrollTo(0, 0);
   showQ();
@@ -817,7 +846,7 @@ function showQ(){
   $("qFb").innerHTML = "";
   $("qGo").textContent = "PRÜFEN";
   $("qSkip").style.display = "";
-  const voice = S.input === "voice";
+  const voice = S.input === "voice" && !Q.nurTippen;
   $("qMic").style.display = voice && SR ? "" : "none";
   $("qMic").textContent = "🎤 SPRECHEN"; $("qMic").classList.remove("live");
   $("qNote").textContent = voice && !SR ? "Spracherkennung geht in dieser Ansicht nicht. Tipp ins Feld und nimm das Mikrofon unten auf der Tastatur." : "";
@@ -828,7 +857,7 @@ function showQ(){
 function answer(text, alts){
   if(Q.fb) return;
   const it = cur(), c = BYID[it.cid], sol = it.dir === "df" ? c.f : c.d;
-  const voice = S.input === "voice";
+  const voice = S.input === "voice" && !Q.nurTippen;
   let r = check(text, sol, voice);
   /* Beim Sprechen liefert die Erkennung mehrere Lesarten (verre / vert / vers klingen gleich).
      Passt eine davon, war die Aussprache richtig — das Raten der Schreibweise ist nicht das Kind. */
@@ -1144,6 +1173,7 @@ document.addEventListener("click", ev => {
   }
   switch(b.id){
     case "startBtn": { const s = buildSession(selCards(), P, opts(), Date.now()); if(s.length) startQuiz(s); return; }
+    case "tippBtn": { const s = shuffle(tippKandidaten(CARDS, P, Date.now()), Math.random); if(s.length) startQuiz(s, true); return; }
     case "qGo": if(Q.fb) next(); else answer($("qIn").value); return;
     case "qSkip": answer(""); return;
     case "qMic": if(LISTEN){ settle(); } else listen(); return;

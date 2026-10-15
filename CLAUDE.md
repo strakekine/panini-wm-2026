@@ -704,7 +704,16 @@ aufsteigen — nicht noch einmal aufs Tippen warten (Einwand des Vaters gegen di
 „Fach 4 nur durch Tippen“). Fehlt die Marke, bleibt es gesprochen in Fach 3 (in 4 Tagen
 wieder) mit Hinweis „✍️ … einmal richtig tippen“. Nach einem Fehler ist `ty` weg (Claudes
 Festlegung, dem Vater gesagt). Richtig getippt in „Alle“ ohne Fälligkeit setzt `ty`, ohne
-Fach oder Termin zu ändern. FR → DE: Sprechen reicht. Getippt heißt Modus „Tippen“; im
+Fach oder Termin zu ändern. FR → DE: Sprechen reicht.
+**✍️-Wörter und Knopf „Jetzt tippen“:** Wird ein Wort gedeckelt, bekommt es die Marke `wt`
+(Abstand bestanden, nur Schreibweise fehlt). Richtig getippt steigt ein `wt`-Wort **sofort** auf
+Fach 4 (auch wenn es noch nicht wieder fällig ist — der Aufstieg war beim Sprechen verdient).
+Der Knopf sitzt **nur im Startbild** im Fortschritt-Kasten unter „sicher“ (`#tippBox`), nicht auf
+der Ergebnisseite — vom Vater: direkt nach der Runde „zu frisch“. Er nimmt aus **allen**
+Lektionen (`tippKandidaten()`): DE → FR, Fach 3, ohne `ty`, und entweder `wt` oder gerade
+fällig — also genau die, die durch einmal richtig Tippen jetzt aufsteigen würden. Die Runde
+erzwingt Tippen (`Q.nurTippen`), auch wenn „Sprechen“ eingestellt ist. Ohne Kandidaten kein
+Knopf. Getippt heißt Modus „Tippen“; im
 Sprechen-Modus Eingetipptes zählt als gesprochen (Groß/klein und Klang sind dort lockerer).
 
 **Nur lernen** (Knopf oben im Startbild): Karteikarten ohne Abfrage über die gewählten

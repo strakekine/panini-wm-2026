@@ -219,6 +219,10 @@
     Tagen — spätestens jede Woche ist also jedes Wort wieder dran. Nach einem Fehler geht es zurück: nach Fach 0, wenn das Wort noch
     nie weiter als Fach 1 war, sonst nach Fach 1. Beide Richtungen zählen getrennt — wer <i>le chat</i> erkennt, kann es noch lange
     nicht schreiben.</p>
+    <p><b>Sicher heißt schreiben können:</b> Bei Deutsch → Französisch kommt ein Wort nur dann in
+    Fach 4, wenn es mindestens einmal richtig <i>getippt</i> wurde. Wer es schon einmal richtig
+    getippt hat, darf es danach auch sprechen. Nach einem Fehler muss es wieder einmal getippt
+    werden. Bei Französisch → Deutsch reicht Sprechen.</p>
     <p><b>Welche Wörter:</b> „Heute fällig“ nimmt die neuen Wörter und die, deren Wartezeit um ist.
     „Alle“ nimmt alle Wörter der Lektion, auch die, die noch warten — gut vor einer Arbeit. Ein
     noch wartendes Wort, das dabei richtig ist, bleibt in seinem Fach; ein falsches fällt
@@ -556,6 +560,28 @@ function review(p, right, now){
   if(!p.bad) return p;
   const q = { ...p }; delete q.bad; return q;
 }
+/* „Sicher“ heißt bei DE → FR auch: kann es SCHREIBEN. Vom Vater so festgelegt: Sprechen prüft
+   die Schreibweise nicht (Groß/klein egal, gleich klingende Endungen zählen), in der
+   Klassenarbeit wird aber geschrieben. Darum braucht ein Wort in Richtung DE → FR für Fach 4
+   einmal eine richtig GETIPPTE Antwort (Marke `ty`). Wurde es schon einmal richtig getippt,
+   darf es auch gesprochen aufsteigen — nicht noch einmal aufs Tippen warten (auch vom Vater).
+   Nach einem Fehler gilt die Schreibweise wieder als unbewiesen (`ty` weg). FR → DE: Sprechen
+   reicht. Ergebnis: neuer Stand; `.gedeckelt` = wäre aufgestiegen, fehlt aber das Tippen. */
+function reviewAnswer(p, right, now, getippt, brauchtTippen){
+  let q = review(p, right, now);
+  /* „Alle“, noch nicht fällig: Fach und Termin bleiben — aber richtig getippt ist richtig
+     getippt, die Schreibweise ist damit bewiesen */
+  if(q === p) return right && getippt && p && !p.ty ? { ...p, ty:1 } : q;
+  q = { ...q };
+  if(!right){ delete q.ty; return q; }
+  if(getippt) q.ty = 1;
+  if(brauchtTippen && !q.ty && q.b >= SICHER && (!p || p.b < SICHER)){
+    q.b = SICHER - 1; q.hi = Math.max(p ? p.hi || p.b : 0, q.b);
+    q.due = startOfDay(now) + FACH[q.b] * DAY;
+    Object.defineProperty(q, "gedeckelt", { value:true, enumerable:false });
+  }
+  return q;
+}
 function shuffle(a, rnd){
   for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
   return a;
@@ -638,7 +664,7 @@ function needBackup(dirty, snooze, now){
 /* Fassung — bei JEDER Änderung hochzählen. Steht unten im Startbild und als erste Zeile der
    Mitschrift; am iPhone lief einmal noch die alte Datei aus dem Zwischenspeicher, und die
    Mitschrift sah aus wie ein neuer Fehler. */
-const FASSUNG = "15.10.2026 h";
+const FASSUNG = "15.10.2026 i";
 const KEY = "vokabeln_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
@@ -669,7 +695,7 @@ function sanitizeP(p){
     const v = p[k];
     /* Altbestand aus Fach 5 (gab es bis Oktober 2026) landet in Fach 4 */
     if(v && typeof v === "object" && v.b >= 0 && v.b <= 5 && isFinite(v.due))
-      out[k] = { b:Math.min(TOP, v.b|0), hi:Math.min(TOP, Math.max(v.hi|0, v.b|0)), due:Math.min(+v.due, (+v.last || +v.due) + FACH[TOP] * DAY), n:v.n|0, w:v.w|0, last:+v.last || 0, ...(v.bad ? { bad:1 } : {}) };
+      out[k] = { b:Math.min(TOP, v.b|0), hi:Math.min(TOP, Math.max(v.hi|0, v.b|0)), due:Math.min(+v.due, (+v.last || +v.due) + FACH[TOP] * DAY), n:v.n|0, w:v.w|0, last:+v.last || 0, ...(v.bad ? { bad:1 } : {}), ...(v.ty ? { ty:1 } : {}) };
   }
   return out;
 }
@@ -814,8 +840,9 @@ function answer(text, alts){
   if(!it.again && !(k in Q.first)){
     Q.first[k] = r.ok;
     const now = Date.now(), vorher = P[k] ? P[k].b : -1;
-    P[k] = review(P[k], r.ok, now);
+    P[k] = reviewAnswer(P[k], r.ok, now, !voice, it.dir === "df");
     if(vorher < SICHER && P[k].b >= SICHER) Q.gained[k] = 1;
+    if(P[k].gedeckelt) r.tippen = true;
     const dk = dayKey(now); DAYS[dk] = { n:(DAYS[dk] ? DAYS[dk].n : 0) + 1 }; Q.counted[k] = dk;
     if(!r.ok) Q.wrong.push(it);
     persist(); markDirty();
@@ -834,6 +861,7 @@ function answer(text, alts){
     if(r.klang) h += '<div class="full">Richtig gesprochen — geschrieben wird es:<b>'+esc(shown(sol))+'</b></div>';
     else if(r.part) h += '<div class="full">Vollständig heißt es:<b>'+esc(shown(sol))+'</b></div>';
     else if(String(sol).includes("|")) h += '<small>Auch richtig: '+esc(shown(sol))+'</small>';
+    if(r.tippen) h += '<small>✍️ Gesprochen kann es das schon. Für „sicher“ dieses Wort einmal richtig <b>tippen</b>.</small>';
   } else {
     h += '<div class="h">✗ '+(text.trim() ? "Falsch" : "Lösung")+(r.why && text.trim() ? " — "+esc(r.why) : "")+'</div>'+
       '<div class="sol">'+esc(shown(sol))+'</div>';

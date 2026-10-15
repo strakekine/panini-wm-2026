@@ -697,6 +697,16 @@ Den Knopf „Fehler nochmal“ direkt nach der Runde gibt es bewusst **nicht** m
 waren in der Runde gerade richtig, eine Minute später prüft das nur das Kurzzeitgedächtnis.
 Wer heute nochmal will, nimmt „Meine Fehler“ im Startbild (filtert `bad`, nicht nach Fälligkeit).
 
+**„Sicher“ bei DE → FR heißt schreiben können** (`reviewAnswer()`, vom Vater festgelegt): In
+Richtung DE → FR kommt ein Wort nur nach Fach 4, wenn es mindestens einmal richtig **getippt**
+wurde (Marke `ty`). Wurde es schon einmal richtig getippt, darf es danach auch **gesprochen**
+aufsteigen — nicht noch einmal aufs Tippen warten (Einwand des Vaters gegen die erste Idee
+„Fach 4 nur durch Tippen“). Fehlt die Marke, bleibt es gesprochen in Fach 3 (in 4 Tagen
+wieder) mit Hinweis „✍️ … einmal richtig tippen“. Nach einem Fehler ist `ty` weg (Claudes
+Festlegung, dem Vater gesagt). Richtig getippt in „Alle“ ohne Fälligkeit setzt `ty`, ohne
+Fach oder Termin zu ändern. FR → DE: Sprechen reicht. Getippt heißt Modus „Tippen“; im
+Sprechen-Modus Eingetipptes zählt als gesprochen (Groß/klein und Klang sind dort lockerer).
+
 **Nur lernen** (Knopf oben im Startbild): Karteikarten ohne Abfrage über die gewählten
 Lektionen, Richtung aus der Einstellung (gemischt = je Wort zufällig), Lektionsreihenfolge
 oder gemischt. Antippen deckt auf, nochmal antippen = nächstes Wort. Zählt nicht für die

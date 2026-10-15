@@ -15,7 +15,7 @@ if(i < 0 || j < 0) throw new Error("Abschnittsmarken Lektionen/Oberfläche nicht
 const quelle = src.slice(src.lastIndexOf("/*", i), src.lastIndexOf("/*", j));
 const M = new Function(quelle + `
   return { LEKTIONEN, DAY, FACH, clean, variants, check, cardsOf, grade, review, isDue, buildSession,
-           lessonStats, startOfDay, key, needBackup, klang, klingtWie, weekStatus, dayKey, dayDone, pruneDays, pct, DAY_MIN };`)();
+           lessonStats, startOfDay, key, needBackup, klang, klingtWie, reviewAnswer, SICHER, weekStatus, dayKey, dayDone, pruneDays, pct, DAY_MIN };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text){ n++; if(!bed){ fehler++; console.log("✗ " + text); } }
@@ -214,6 +214,29 @@ ok(st.n === cards.length * 2 && st.neu === st.n - 2 && st.lern === 2 && st.siche
     ok(!alt || alt === c.f, `Klang-Kollision: "${alt}" und "${c.f}" klingen für die App gleich („${k}“)`);
     seen.set(k, c.f);
   }
+}
+
+/* --- „Sicher“ bei DE → FR nur mit einmal richtig getippt --- */
+{
+  const f3 = { b:3, hi:3, due:t0 - 1, n:3, w:0 };
+  let q = M.reviewAnswer(f3, true, t0, false, true);
+  ok(q.b === 3 && q.gedeckelt && q.due === heute + 4 * DAY, "DE→FR gesprochen, nie getippt: bleibt Fach 3, in 4 Tagen wieder, Hinweis");
+  q = M.reviewAnswer(f3, true, t0, true, true);
+  ok(q.b === 4 && q.ty === 1 && !q.gedeckelt, "DE→FR getippt: Fach 4, Schreibweise bewiesen");
+  q = M.reviewAnswer({ ...f3, ty:1 }, true, t0, false, true);
+  ok(q.b === 4 && !q.gedeckelt, "DE→FR gesprochen, früher schon getippt: darf aufsteigen");
+  q = M.reviewAnswer(f3, true, t0, false, false);
+  ok(q.b === 4, "FR→DE gesprochen: Sprechen reicht");
+  q = M.reviewAnswer({ b:2, hi:2, due:t0 - 1, n:2, w:0 }, true, t0, true, true);
+  ok(q.b === 3 && q.ty === 1, "getippt in Fach 2: Marke wird schon gesetzt");
+  q = M.reviewAnswer({ b:4, hi:4, due:t0 - 1, n:5, w:0, ty:1 }, false, t0, true, true);
+  ok(q.b === 1 && !q.ty, "Fehler: Schreibweise wieder unbewiesen");
+  q = M.reviewAnswer({ b:2, hi:2, due:t0 - 1, n:2, w:0 }, true, t0, false, true);
+  ok(q.b === 3 && !q.gedeckelt, "unter Fach 4 ändert sich beim Sprechen nichts");
+  const wartet = { b:3, hi:3, due:t0 + DAY, n:3, w:0 };
+  ok(M.reviewAnswer(wartet, true, t0, false, true) === wartet, "„Alle“, noch nicht fällig, gesprochen: unverändert");
+  q = M.reviewAnswer(wartet, true, t0, true, true);
+  ok(q.b === 3 && q.due === wartet.due && q.ty === 1, "„Alle“, noch nicht fällig, getippt: Fach bleibt, Schreibweise bewiesen");
 }
 
 /* --- Erinnerung an die Sicherung --- */

@@ -15,7 +15,7 @@ if(i < 0 || j < 0) throw new Error("Abschnittsmarken Lektionen/Oberfläche nicht
 const quelle = src.slice(src.lastIndexOf("/*", i), src.lastIndexOf("/*", j));
 const M = new Function(quelle + `
   return { LEKTIONEN, DAY, FACH, clean, variants, check, cardsOf, grade, review, isDue, buildSession,
-           lessonStats, startOfDay, key, needBackup, klang, klingtWie, reviewAnswer, SICHER, tippKandidaten, ausgeschrieben, weekStatus, dayKey, dayDone, pruneDays, pct, DAY_MIN };`)();
+           lessonStats, startOfDay, key, needBackup, klang, klingtWie, reviewAnswer, SICHER, tippKandidaten, ausgeschrieben, weekStatus, dayKey, dayDone, pruneDays, pct, DAY_MIN, DAY_RIGHT, countDay, sternWochen, sanitizeStars, sterneNachtragen, sterneStand, wochenStart };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text){ n++; if(!bed){ fehler++; console.log("✗ " + text); } }
@@ -256,6 +256,30 @@ for(const d of ["fd", "df", "mix"]){
   ok(!M.dayDone({ n:M.DAY_MIN - 1 }) && M.dayDone({ n:M.DAY_MIN }), "Lerntag ab " + M.DAY_MIN + " Antworten");
   const alt = M.pruneDays({ [M.dayKey(mi - 70 * DAY)]:{ n:20 }, [M.dayKey(mi)]:{ n:3 } }, mi);
   ok(Object.keys(alt).length === 1, "alte Tage werden aufgeräumt");
+  /* Lerntag ehrlich: 10 Antworten, davon 5 richtig; alte Einträge ohne r nach alter Regel */
+  ok(!M.dayDone({ n:10, r:4 }) && M.dayDone({ n:10, r:5 }) && M.dayDone({ n:12 }), "Lerntag: 10 Antworten, davon " + M.DAY_RIGHT + " richtig");
+  let e; for(let i = 0; i < 10; i++) e = M.countDay(e, false);
+  ok(e.n === 10 && e.r === 0 && !M.dayDone(e), "zehnmal falsch/„Weiß nicht“ ist kein Lerntag");
+  ok(M.countDay({ n:8 }, true).r === 9, "alter Eintrag ohne r: weiterzählen ohne ihn abzuwerten");
+  ok(M.pruneDays({ [M.dayKey(mi)]:{ n:10, r:7 } }, mi)[M.dayKey(mi)].r === 7, "pruneDays behält r");
+  /* Sterne: Woche mit 5 Lerntagen = 1 Stern, nie verloren, Einlösen zieht ab */
+  const mo = M.wochenStart(mi), d5 = {};
+  for(let i = 0; i < 5; i++) d5[M.dayKey(mo + i * DAY + 3600e3 * 12)] = { n:10, r:8 };
+  ok(M.dayKey(mo) === "2026-10-12", "Woche beginnt am Montag 12.10. — ist " + M.dayKey(mo));
+  ok(M.sternWochen(d5).join() === "2026-10-12", "5 Lerntage → Stern für diese Woche");
+  const d4 = { ...d5 }; delete d4[M.dayKey(mo + 12 * 3600e3)];
+  ok(M.sternWochen(d4).length === 0, "4 Lerntage → kein Stern");
+  const ueber = {}; for(let i = 3; i < 8; i++) ueber[M.dayKey(mo + i * DAY + 12 * 3600e3)] = { n:10, r:9 };
+  ok(M.sternWochen(ueber).length === 0, "5 Tage über zwei Wochen verteilt → kein Stern");
+  let st = M.sterneNachtragen(M.sanitizeStars(null), d5);
+  ok(M.sterneStand(st) === 1, "ein Stern verdient");
+  st = M.sterneNachtragen(st, {});
+  ok(M.sterneStand(st) === 1, "Stern bleibt, auch wenn die Tage aus DAYS herausfallen");
+  ok(M.sterneNachtragen(st, d5) === st, "derselbe Stern nicht doppelt");
+  st = { ...st, red:[{ t:mi, n:1, was:"Kino" }] };
+  ok(M.sterneStand(st) === 0, "Einlösen zieht ab");
+  ok(M.sanitizeStars({ w:["2026-10-12", "2026-10-12", "kaputt"], red:[{ t:1, n:0 }, { t:1, n:2.7, was:"x" }] }).w.length === 1 &&
+     M.sanitizeStars({ red:[{ t:1, n:0 }, { t:1, n:2.7, was:"x" }] }).red[0].n === 2, "sanitizeStars räumt auf");
   ok(M.pct({ sicher:25, n:26 }) === 96 && M.pct({ sicher:26, n:26 }) === 100 && M.pct({ sicher:0, n:0 }) === 0, "Prozent abgerundet, 100 nur wenn alles sicher");
 }
 

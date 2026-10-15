@@ -750,7 +750,16 @@ Lektion (`pct`, abgerundet, 100 % nur bei allem sicher, dann ✓). **Je Lektion 
 (fällt nach einem Krankheitstag auf null), keine Punkte je Antwort (mit „Alle“ austricksbar),
 kein Emil-gegen-Leo (unfair, bräuchte Server), keine Blitzrunde (belohnt Tempo statt
 Genauigkeit). Nach der Runde: „⭐ n Wörter jetzt sicher“ und „📅 Lerntag geschafft“, wenn
-der Tag in dieser Runde voll wurde. Offen als
+der Tag in dieser Runde voll wurde.
+**Lerntag seit Fassung r:** 10 erste Antworten, **davon mindestens 5 richtig** (`DAY_RIGHT`,
+`countDay`, Tageseintrag `{n, r}`); alte Einträge ohne `r` gelten nach alter Regel. Grund: seit
+es Sterne gibt, wäre zehnmal „Weiß nicht“ ein geschenkter Lerntag.
+**Sterne** (Fassung r, vom Vater gewünscht): Woche Mo–So mit 5 Lerntagen = 1 Stern (`sternWochen`,
+nachgetragen aus `DAYS` per `sterneNachtragen`, nie entfernt — `DAYS` hält nur 60 Tage). Gespeichert
+unter `_stars` = `{w:[Montage], red:[{t,n,was}]}`, in der Sicherung mit drin, „Lernstand löschen“
+lässt sie stehen. Eingelöst wird in der echten Welt; „EINLÖSEN“ fragt per `prompt()` Anzahl und
+wofür und schreibt den Kontoauszug. **Kein Papa-Code** — der könnte nur abziehen, schützt also vor
+nichts (Einwand des Vaters). Ergebnisseite: „🌟 Wochenstern verdient!“. Offen als
 zweiter Schritt: Klassenarbeit-Modus (Datum je Lektion, „Bereit: x %“).
 
 **Fassung:** `FASSUNG` (z. B. „15.10.2026 e“) steht unten im Startbild und als erste Zeile der

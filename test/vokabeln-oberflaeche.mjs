@@ -20,7 +20,7 @@ async function seite(){
   pg.errs = [];
   pg.on("pageerror", e => pg.errs.push(String(e)));
   pg.on("console", m => { if(m.type() === "error" && !/fonts/.test(m.text())) pg.errs.push(m.text()); });
-  pg.on("dialog", d => d.accept());
+  pg.on("dialog", d => d.type() === "prompt" ? d.accept(d.defaultValue()) : d.accept());   /* prompt: OK mit Vorgabe */
   await pg.goto("file://" + datei);
   return pg;
 }
@@ -168,6 +168,30 @@ async function spielen(pg, falsch = []){
   const breit = await pg.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
   ok(breit, "kein seitliches Scrollen bei 390 px");
   await pg.screenshot({ path: process.env.SHOT || "/dev/null" }).catch(() => {});
+  ok(!pg.errs.length, "keine Fehler auf der Seite: " + pg.errs.join(" | "));
+  await pg.close();
+}
+
+/* --- 3e. Sterne: Woche mit 5 Lerntagen = 1 Stern, Einlösen mit Nachfrage, Sicherung trägt sie --- */
+{
+  const pg = await seite();
+  ok(await pg.textContent("#starBox").then(t => t.includes("⭐ 0")), "ohne Lerntage 0 Sterne");
+  ok(!(await pg.isVisible("#starRedeem")), "ohne Sterne kein Einlösen");
+  await pg.evaluate(() => {   /* letzte Woche: Mo–Fr je 10 Antworten, 8 richtig */
+    const mo = wochenStart(Date.now()) - 7 * DAY;
+    for(let i = 0; i < 5; i++) DAYS[dayKey(mo + i * DAY + 12 * 3600e3)] = { n:10, r:8 };
+    persist();
+  });
+  await pg.reload();
+  ok((await pg.textContent("#starBox")).includes("⭐ 1"), "ein Stern für die volle Woche");
+  await pg.click("#starRedeem");      /* Dialoge: 1 Stern (Vorgabe), Wofür leer */
+  ok((await pg.textContent("#starBox")).includes("⭐ 0"), "nach Einlösen 0");
+  ok((await pg.textContent("#starBox")).includes("Eingelöst (1)"), "Kontoauszug zeigt die Einlösung");
+  const sich = await pg.evaluate(() => JSON.stringify({ app:"vokabeln", v:1, exported:new Date().toISOString(), state:S, p:P, days:{}, stars:STARS }));
+  await pg.evaluate(() => { localStorage.clear(); });
+  await pg.reload();
+  await pg.evaluate(t => restore(t), sich);
+  ok((await pg.textContent("#starBox")).includes("Eingelöst (1)") && (await pg.textContent("#starBox")).includes("⭐ 0"), "Wiederherstellen bringt Sterne und Einlösungen mit");
   ok(!pg.errs.length, "keine Fehler auf der Seite: " + pg.errs.join(" | "));
   await pg.close();
 }

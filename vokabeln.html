@@ -131,6 +131,13 @@
   .prog .safe b{display:block;font-family:'Bebas Neue',sans-serif;font-size:46px;line-height:1;color:var(--good);letter-spacing:1px}
   .prog .safe span{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.5px;text-transform:uppercase}
   .prog .wk{flex:1;min-width:0}
+  .sterne{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+  .sterne > div{flex:1;min-width:0}
+  .sterne b{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:.5px;color:var(--accent)}
+  .sterne small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+  .sterneLog{margin-top:6px;font-size:13px;color:var(--muted)}
+  .sterneLog summary{cursor:pointer;padding:4px 0}
+  .sterneLog div{padding:2px 0}
   .days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:6px}
   .days div{text-align:center;font-size:11px;font-weight:700;color:var(--muted)}
   .days i{display:block;height:24px;border-radius:7px;background:var(--panel2);border:1px solid var(--line);margin-top:3px}
@@ -182,7 +189,7 @@
 <!-- ============ Start ============ -->
 <div class="v-home" id="nagBox"></div>
 <div class="card v-home">
-  <div class="cbody"><div class="prog" id="progBox"></div><div id="tippBox"></div></div>
+  <div class="cbody"><div class="prog" id="progBox"></div><div id="starBox"></div><div id="tippBox"></div></div>
 </div>
 <div class="card v-home">
   <div class="chead"><h2>Lektionen</h2><span class="hint" id="selHint"></span></div>
@@ -684,10 +691,18 @@ function lessonStats(cards, P, now, dir = "mix"){
    Wochenziel statt Serie: Eine Serie fällt nach einem Krankheitstag auf null, ein
    Wochenziel verzeiht das und beginnt jeden Montag neu. Ein Lerntag zählt ab 10 Antworten
    (erste Versuche, "Nur lernen" zählt nicht) — eine einzige Antwort soll keinen Tag machen. */
-const DAY_MIN = 10, WEEK_GOAL = 5;
+/* Seit es Sterne gibt (Fassung r), muss ein Lerntag auch ehrlich sein: 10 Antworten, davon
+   mindestens 5 richtig — zehnmal „Weiß nicht“ ist kein Lerntag. Alte Tage ohne Zählung der
+   richtigen (r fehlt) gelten weiter nach der alten Regel. */
+const DAY_MIN = 10, DAY_RIGHT = 5, WEEK_GOAL = 5;
 const pct = st => Math.floor(100 * st.sicher / Math.max(1, st.n));   /* abrunden: 100 % nur, wenn alles sicher */
 function dayKey(t){ const d = new Date(t); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
-const dayDone = e => !!e && e.n >= DAY_MIN;
+const dayDone = e => !!e && e.n >= DAY_MIN && (e.r == null || e.r >= DAY_RIGHT);
+/* Eine Antwort in die Tageszählung: n = erste Antworten, r = davon richtig */
+function countDay(e, ok){
+  const n = e ? e.n : 0, r = e ? (e.r == null ? e.n : e.r) : 0;
+  return { n:n + 1, r:r + (ok ? 1 : 0) };
+}
 /* Woche Montag bis Sonntag: je Tag {label, done, today, future}, dazu die Zahl der Lerntage */
 function weekStatus(days, now){
   const d = new Date(startOfDay(now)), wd = (d.getDay() + 6) % 7;   /* 0 = Montag */
@@ -701,9 +716,40 @@ function weekStatus(days, now){
 /* Nur die letzten 60 Tage aufheben */
 function pruneDays(days, now){
   const out = {}, min = dayKey(now - 60 * DAY);
-  for(const k in days) if(k >= min && days[k] && days[k].n > 0) out[k] = { n:days[k].n|0 };
+  for(const k in days) if(k >= min && days[k] && days[k].n > 0){
+    out[k] = { n:days[k].n|0 };
+    if(days[k].r != null) out[k].r = Math.min(days[k].r|0, out[k].n);
+  }
   return out;
 }
+
+/* ----- Sterne (vom Vater gewünscht) -----
+   Eine Woche (Mo–So) mit 5 Lerntagen = 1 Stern. Sterne gehen nie verloren; eingelöst wird
+   in der echten Welt (Kino, Bildschirmzeit), die App führt nur den Kontoauszug. Kein Code:
+   er könnte nur abziehen, also schützt er vor nichts (Einwand des Vaters).
+   stars = { w:[Montag-Schlüssel der verdienten Wochen], red:[{t, n, was}] }.
+   Verdiente Wochen werden aus DAYS nachgetragen (sternWochen), nie entfernt — DAYS hält nur
+   60 Tage, die Sterne bleiben. */
+function wochenStart(t){ const d = new Date(startOfDay(t)); return new Date(d.getFullYear(), d.getMonth(), d.getDate() - (d.getDay() + 6) % 7).getTime(); }
+function sternWochen(days){
+  const proWoche = {};
+  for(const k in days) if(dayDone(days[k])){
+    const [y, m, d] = k.split("-").map(Number), w = dayKey(wochenStart(new Date(y, m - 1, d).getTime()));
+    proWoche[w] = (proWoche[w] || 0) + 1;
+  }
+  return Object.keys(proWoche).filter(w => proWoche[w] >= WEEK_GOAL).sort();
+}
+function sanitizeStars(x){
+  const w = x && Array.isArray(x.w) ? [...new Set(x.w.filter(k => /^\d{4}-\d\d-\d\d$/.test(k)))].sort() : [];
+  const red = x && Array.isArray(x.red) ? x.red.filter(r => r && r.n > 0 && r.t > 0)
+    .map(r => ({ t:+r.t, n:Math.floor(r.n), was:String(r.was || "").slice(0, 80) })) : [];
+  return { w, red };
+}
+function sterneNachtragen(stars, days){
+  const neu = sternWochen(days).filter(w => !stars.w.includes(w));
+  return neu.length ? { ...stars, w:[...stars.w, ...neu].sort() } : stars;
+}
+function sterneStand(stars){ return stars.w.length - stars.red.reduce((a, r) => a + r.n, 0); }
 
 /* Erinnerung an die Sicherung. dirty = Zeitpunkt der ersten Antwort seit der letzten
    Sicherung (null = nichts Ungesichertes), snooze = "Später" bis. Erinnert wird, wenn das
@@ -718,7 +764,7 @@ function needBackup(dirty, snooze, now){
 /* Fassung — bei JEDER Änderung hochzählen. Steht unten im Startbild und als erste Zeile der
    Mitschrift; am iPhone lief einmal noch die alte Datei aus dem Zwischenspeicher, und die
    Mitschrift sah aus wie ein neuer Fehler. */
-const FASSUNG = "15.10.2026 q";
+const FASSUNG = "15.10.2026 r";
 const KEY = "vokabeln_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
@@ -761,8 +807,9 @@ function load(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ 
 let S = fixDir(sanitize(load(KEY)));
 let P = sanitizeP(load(KEY + "_p"));
 let DAYS = pruneDays(load(KEY + "_days") || {}, Date.now());
+let STARS = sterneNachtragen(sanitizeStars(load(KEY + "_stars")), DAYS);
 if(!S.sel.length && LEKTIONEN.length) S.sel = LEKTIONEN.map(l => l.id);
-function persist(){ try { localStorage.setItem(KEY, JSON.stringify(S)); localStorage.setItem(KEY + "_p", JSON.stringify(P)); localStorage.setItem(KEY + "_days", JSON.stringify(DAYS)); } catch(e){} }
+function persist(){ try { localStorage.setItem(KEY, JSON.stringify(S)); localStorage.setItem(KEY + "_p", JSON.stringify(P)); localStorage.setItem(KEY + "_days", JSON.stringify(DAYS)); localStorage.setItem(KEY + "_stars", JSON.stringify(STARS)); } catch(e){} }
 
 let VIEW = "home";
 let Q = null;   /* laufende Abfrage */
@@ -808,8 +855,15 @@ function renderHome(){
       wk.cells.map(c => '<div class="'+(c.done ? "on " : "")+(c.today ? "today" : "")+'">'+c.label+'<i></i></div>').join("")+
       '</div><div class="goal'+(left <= 0 ? " ok" : "")+'">'+
       (left <= 0 ? '<b>🎉 Wochenziel geschafft!</b> '+wk.count+' Lerntage.'
-                 : '<b>'+wk.count+' von '+WEEK_GOAL+'</b> Lerntagen. Ein Lerntag = '+DAY_MIN+' Antworten an einem Tag.')+
+                 : '<b>'+wk.count+' von '+WEEK_GOAL+'</b> Lerntagen. Ein Lerntag = '+DAY_MIN+' Antworten an einem Tag, davon '+DAY_RIGHT+' richtig.')+
       '</div></div>';
+    const st = sterneStand(STARS);
+    $("starBox").innerHTML = '<div class="sterne"><div><b>⭐ '+st+'</b> '+(st === 1 ? "Stern" : "Sterne")+
+      '<small>1 Stern für jede Woche mit '+WEEK_GOAL+' Lerntagen. Einlösen bei Papa.</small></div>'+
+      (st > 0 ? '<button class="btn ghost sm" id="starRedeem">EINLÖSEN</button>' : '')+'</div>'+
+      (STARS.red.length ? '<details class="sterneLog"><summary>Eingelöst ('+STARS.red.length+')</summary>'+
+        STARS.red.slice().reverse().map(r => '<div>'+new Date(r.t).toLocaleDateString("de-DE")+' · '+r.n+' ⭐'+(r.was ? ' · '+esc(r.was) : '')+'</div>').join("")+
+        '</details>' : '');
   }
   const all = LEKTIONEN.length > 1 && S.sel.length === LEKTIONEN.length;
   let h = "";
@@ -862,7 +916,7 @@ const ACC = ["é","è","ê","à","â","ç","ù","û","î","ï","ô","ë","œ"];
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 function startQuiz(items, nurTippen){
   Q = { items:items.slice(), i:0, first:{}, wrong:[], fb:null, retry:{}, total:items.length, nurTippen:!!nurTippen,
-        gained:{}, counted:{}, dayBefore:dayDone(DAYS[dayKey(Date.now())]) };
+        gained:{}, counted:{}, dayBefore:dayDone(DAYS[dayKey(Date.now())]), sterneVorher:STARS.w.length };
   VIEW = "quiz"; document.body.dataset.view = VIEW; window.scrollTo(0, 0);
   showQ();
 }
@@ -936,7 +990,8 @@ function answer(text, alts, endgueltig){
     P[k] = reviewAnswer(P[k], r.ok, now, !voice, it.dir === "df");
     if(vorher < SICHER && P[k].b >= SICHER) Q.gained[k] = 1;
     if(P[k].gedeckelt) r.tippen = true;
-    const dk = dayKey(now); DAYS[dk] = { n:(DAYS[dk] ? DAYS[dk].n : 0) + 1 }; Q.counted[k] = dk;
+    const dk = dayKey(now); DAYS[dk] = countDay(DAYS[dk], r.ok); Q.counted[k] = dk;
+    STARS = sterneNachtragen(STARS, DAYS);
     if(!r.ok) Q.wrong.push(it);
     persist(); markDirty();
   }
@@ -1006,6 +1061,8 @@ function finish(){
     const wk = weekStatus(DAYS, Date.now());
     h += '<div class="star day">📅 <b>Lerntag geschafft!</b> '+(wk.count >= WEEK_GOAL ? "Wochenziel erreicht 🎉" : wk.count+" von "+WEEK_GOAL+" diese Woche.")+'</div>';
   }
+  if(STARS.w.length > Q.sterneVorher)
+    h += '<div class="star">🌟 <b>Wochenstern verdient!</b> Du hast jetzt '+sterneStand(STARS)+(sterneStand(STARS) === 1 ? " Stern" : " Sterne")+'.</div>';
   if(Q.wrong.length){
     h += '<div class="lbl" style="margin-top:14px">Das war falsch</div><table class="w">';
     for(const it of Q.wrong){
@@ -1197,9 +1254,21 @@ function listen(){
   }
 }
 
+/* Einlösen: zwei Nachfragen, dann in den Kontoauszug. prompt() statt Eingabefeld, weil die
+   Startseite per innerHTML neu gebaut wird (iPhone-Regel: kein fokussiertes Feld darin). */
+function sterneEinloesen(){
+  const st = sterneStand(STARS); if(st <= 0) return;
+  const a = prompt("Wie viele Sterne einlösen? Du hast " + st + ".", "1"); if(a == null) return;
+  const n = Math.floor(Number(String(a).replace(",", ".")));
+  if(!(n >= 1 && n <= st)){ alert("Bitte eine Zahl von 1 bis " + st + "."); return; }
+  const was = prompt("Wofür? (z. B. Kino, 30 min Bildschirmzeit)", ""); if(was == null) return;
+  STARS = { ...STARS, red:[...STARS.red, { t:Date.now(), n, was:was.trim().slice(0, 80) }] };
+  persist(); markDirty(); renderHome();
+}
+
 /* ----- Sicherung ----- */
 async function backup(btn){
-  const d = { app:"vokabeln", v:1, exported:new Date().toISOString(), state:S, p:P, days:DAYS };
+  const d = { app:"vokabeln", v:1, exported:new Date().toISOString(), state:S, p:P, days:DAYS, stars:STARS };
   const text = JSON.stringify(d);
   const name = "vokabeln-" + (S.name ? S.name.toLowerCase().replace(/[^a-z0-9äöü]+/g, "") + "-" : "") + new Date().toISOString().slice(0, 10) + ".json";
   const done = () => { lsSet("_exp", d.exported); lsSet("_dirty", null); lsSet("_snooze", null); renderHome(); };
@@ -1222,7 +1291,8 @@ function restore(text){
   const p = sanitizeP(d.p), st = sanitize(d.state);
   if(!confirm("Sicherung vom " + String(d.exported || "?").slice(0, 10) + (st.name ? " (" + st.name + ")" : "") + " laden?\n" +
     Object.keys(p).length + " gelernte Einträge.\nDas ersetzt den Lernstand auf diesem iPhone.")) return;
-  S = fixDir(st); P = p; DAYS = pruneDays(d.days && typeof d.days === "object" ? d.days : {}, Date.now()); if(!S.sel.length && LEKTIONEN.length) S.sel = LEKTIONEN.map(l => l.id);
+  S = fixDir(st); P = p; DAYS = pruneDays(d.days && typeof d.days === "object" ? d.days : {}, Date.now());
+  STARS = sterneNachtragen(sanitizeStars(d.stars), DAYS); if(!S.sel.length && LEKTIONEN.length) S.sel = LEKTIONEN.map(l => l.id);
   if(d.exported) lsSet("_exp", d.exported);
   lsSet("_dirty", null); lsSet("_snooze", null);
   persist(); renderHome();
@@ -1265,10 +1335,11 @@ document.addEventListener("click", ev => {
     case "lQuiz": { const s = buildSession(selCards(), P, opts(), Date.now()); if(s.length) startQuiz(s); else goHome(); return; }
     case "resHome": goHome(); return;
     case "backupBtn": case "nagSave": backup(b); return;
+    case "starRedeem": sterneEinloesen(); return;
     case "nagLater": lsSet("_snooze", Date.now() + SNOOZE_DAYS * DAY); renderHome(); return;
     case "restoreBtn": $("restoreFile").click(); return;
     case "resetBtn":
-      if(confirm("Den ganzen Lernstand auf diesem iPhone löschen? Alle Wörter sind danach wieder neu.")){ P = {}; DAYS = {}; persist(); renderHome(); }
+      if(confirm("Den ganzen Lernstand auf diesem iPhone löschen? Alle Wörter sind danach wieder neu.")){ P = {}; DAYS = {}; persist(); renderHome(); }   /* Sterne bleiben — die sind verdient */
       return;
   }
 });

@@ -632,7 +632,10 @@ Vom Vater festgelegt: neue Wörter starten in **Fach 0**, das dieselbe Regel hat
 ein neues Wort kommt nie gleich nach 2 Tagen. Falsch → Fach 0, solange das Wort nie über
 Fach 1 hinaus war; war es schon einmal in Fach 2+ (`hi`), nur nach Fach 1. Immer **morgen**
 fällig, Marke `bad` (für „Meine Fehler“). Beide Richtungen zählen getrennt
-(`key = id>fd|df`). „Heute fällig“ = fällig + neu, gesehene zuerst. In der Runde kommt ein
+(`key = id>fd|df`). „Heute fällig“ = fällig + neu; gesehene zuerst, **unter ihnen das niedrigste Fach zuerst**
+(vom Vater: nach einer Pause stauen sich fällige Wörter, und eine 10er-Runde soll die
+wackeligen bringen, nicht Fach-4-Wörter). Innerhalb eines Fachs zufällig. Pausen bestrafen
+nicht: kein Wort fällt durchs Nichtlernen zurück, nur durch falsche Antworten. In der Runde kommt ein
 falsches Wort 4 Fragen später wieder, bis es sitzt, zählt dann aber nicht mehr fürs Fach.
 „Alle“ fragt auch wartende Wörter; dort gilt `review()`: richtig bei einem noch nicht
 fälligen Wort ändert nichts (der Abstand, den das Fach misst, war nicht da — sonst schöbe

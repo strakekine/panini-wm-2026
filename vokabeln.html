@@ -438,7 +438,10 @@ function shuffle(a, rnd){
 }
 /* Die Abfrage zusammenstellen. mode: due (fällig + neu), all, err (zuletzt falsch).
    dir: fd (Französisch gefragt, Deutsch antworten), df, mix (je Wort die Richtung,
-   die eher dran ist). Bei "due" kommen schon gesehene, fällige Wörter vor neuen. */
+   die eher dran ist). Bei "due" kommen schon gesehene, fällige Wörter vor neuen, und unter
+   ihnen die niedrigen Fächer zuerst: Nach einer Pause stauen sich fällige Wörter, und mit
+   "10" soll die Runde die wackeligen bringen, nicht Fach-4-Wörter, die ohnehin sitzen.
+   Innerhalb eines Fachs bleibt es zufällig. */
 function buildSession(cards, P, o, now, rnd = Math.random){
   const items = [];
   for(const c of cards){
@@ -453,7 +456,7 @@ function buildSession(cards, P, o, now, rnd = Math.random){
     if(!dirs.length) continue;
     const dir = dirs.length > 1 ? dirs[Math.floor(rnd() * dirs.length)] : dirs[0];
     const p = P[key(c.id, dir)];
-    items.push({ cid:c.id, dir, rank:o.mode === "due" && !p ? 1 : 0 });
+    items.push({ cid:c.id, dir, rank:o.mode !== "due" ? 0 : p ? p.b : 99 });
   }
   shuffle(items, rnd);
   items.sort((a, b) => a.rank - b.rank);

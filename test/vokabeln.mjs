@@ -153,6 +153,15 @@ ok(s.length === 1 && s[0].cid === cards[0].id, "Fehler-Modus nimmt nur zuletzt f
 s = M.buildSession(cards, P, { dir:"mix", mode:"err", count:0 }, t0, rnd);
 ok(s.length === 1 && s[0].dir === "fd", "gemischt + Fehler nimmt die Richtung, in der der Fehler war");
 
+/* Nach einer Pause: fällige Wörter nach Fach sortiert, niedrige zuerst, neue zuletzt */
+const P2 = {};
+cards.slice(0, 6).forEach((c, i) => { P2[M.key(c.id, "fd")] = { b:[4, 1, 3, 0, 2, 4][i], due:t0 - DAY, n:3, w:0 }; });
+s = M.buildSession(cards, P2, { dir:"fd", mode:"due", count:0 }, t0, rnd);
+const faecher = s.map(x => P2[M.key(x.cid, "fd")] ? P2[M.key(x.cid, "fd")].b : 99);
+ok(faecher.slice(0, 6).join() === "0,1,2,3,4,4" && faecher.slice(6).every(b => b === 99), "Reihenfolge nach Fach, neue zuletzt — ist " + faecher.join());
+s = M.buildSession(cards, P2, { dir:"fd", mode:"due", count:3 }, t0, rnd);
+ok(s.every(x => P2[M.key(x.cid, "fd")].b <= 2), "mit 3 Wörtern kommen nur die wackeligsten");
+
 const st = M.lessonStats(cards, P, t0);
 ok(st.n === cards.length * 2 && st.neu === st.n - 2 && st.lern === 2 && st.sicher === 0, "Statistik");
 

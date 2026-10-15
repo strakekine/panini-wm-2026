@@ -662,6 +662,7 @@ function startQuiz(items){
 }
 function cur(){ return Q.items[Q.i]; }
 function showQ(){
+  stopListen();   /* eine noch offene Erkennung der vorigen Frage freigeben */
   const it = cur(), c = BYID[it.cid], fr = it.dir === "df";
   Q.fb = null; Q.heard = null;
   const done = Object.keys(Q.first).length;
@@ -815,36 +816,64 @@ $("lCard").addEventListener("click", ev => {
 
 function goHome(){ stopListen(); Q = null; VIEW = "home"; document.body.dataset.view = VIEW; renderHome(); window.scrollTo(0, 0); }
 
-/* ----- Sprechen ----- */
-let REC = null;
-function stopListen(){ if(REC){ try { REC.abort(); } catch(e){} REC = null; } }
-function listen(){
-  if(!SR || !Q || Q.fb) return;
-  stopListen();
-  const it = cur(), mic = $("qMic");
-  /* Für das Zurücknehmen merken, wie das Fach vorher stand */
-  Q.prev = Q.prev || {}; const k = key(it.cid, it.dir); if(!(k in Q.prev)) Q.prev[k] = P[k] ? { ...P[k] } : null;
+/* ----- Sprechen -----
+   EINE Erkennung für die ganze Sitzung, nach jedem Wort ausdrücklich beendet.
+   Am iPhone (vom Vater gemeldet, Home-Bildschirm): erstes Wort ging, ab dem zweiten nicht
+   mehr. Ursache: Nach dem Ergebnis wurde die Erkennung nur vergessen, nicht gestoppt — iOS
+   hält sie dann offen und damit das Mikrofon besetzt, und die für das nächste Wort neu
+   angelegte kam nicht mehr dran. Im Chrome am Rechner endet sie von selbst, dort fiel es
+   nicht auf. Darum: stop() beim Endergebnis, Neustart erst nach onend, und nie zwei
+   gleichzeitig. Die Erlaubnis-Frage bei jedem App-Start kommt von iOS selbst (für
+   Home-Bildschirm-Apps merkt es sich das Mikrofon nicht) — die lässt sich nicht abstellen. */
+let REC = null, REC_ON = false, REC_GOT = false, REC_NEXT = false;
+function micIdle(){ const m = $("qMic"); m.classList.remove("live"); m.textContent = "🎤 SPRECHEN"; }
+function stopListen(){ REC_NEXT = false; if(REC && REC_ON){ try { REC.abort(); } catch(e){} } }
+function recognizer(){
+  if(REC) return REC;
   const r = new SR();
-  r.lang = it.dir === "df" ? "fr-FR" : "de-DE";
   r.interimResults = true; r.maxAlternatives = 5; r.continuous = false;
-  let got = false;
   r.onresult = e => {
+    if(!Q || Q.fb || REC_GOT) return;
     const res = e.results[e.results.length - 1];
     $("qIn").value = res[0].transcript;
     if(res.isFinal){
-      got = true; REC = null;
+      REC_GOT = true;
+      try { r.stop(); } catch(x){}   /* sonst bleibt das Mikrofon am iPhone belegt */
       const alts = []; for(let i = 1; i < res.length; i++) alts.push(res[i].transcript);
       answer(res[0].transcript, alts);
     }
   };
   r.onerror = e => {
-    REC = null; mic.classList.remove("live"); mic.textContent = "🎤 SPRECHEN";
-    if(e.error === "no-speech") $("qNote").textContent = "Nichts gehört — nochmal tippen und sprechen.";
-    else if(e.error !== "aborted") $("qNote").textContent = "Spracherkennung geht gerade nicht ("+e.error+"). Tipp ins Feld und nimm das Mikrofon der Tastatur.";
+    if(e.error === "aborted") return;
+    micIdle();
+    $("qNote").textContent = e.error === "no-speech" ? "Nichts gehört — nochmal tippen und sprechen."
+      : e.error === "not-allowed" ? "Mikrofon nicht erlaubt. Beim nächsten Fragen „Erlauben“ tippen — oder ins Feld tippen und das Mikrofon der Tastatur nehmen."
+      : "Spracherkennung geht gerade nicht ("+e.error+"). Tipp ins Feld und nimm das Mikrofon der Tastatur.";
   };
-  r.onend = () => { if(!got){ mic.classList.remove("live"); mic.textContent = "🎤 SPRECHEN"; } REC = null; };
-  try { r.start(); REC = r; mic.classList.add("live"); mic.textContent = "● ICH HÖRE …"; $("qNote").textContent = ""; }
-  catch(e){ $("qNote").textContent = "Spracherkennung ließ sich nicht starten. Tipp ins Feld und nimm das Mikrofon der Tastatur."; }
+  r.onend = () => {
+    REC_ON = false;
+    if(!REC_GOT) micIdle();
+    /* Wurde während des Laufens schon neu gedrückt: jetzt erst starten */
+    if(REC_NEXT){ REC_NEXT = false; listen(); }
+  };
+  return REC = r;
+}
+function listen(){
+  if(!SR || !Q || Q.fb) return;
+  const it = cur(), k = key(it.cid, it.dir);
+  /* Für das Zurücknehmen merken, wie das Fach vorher stand */
+  Q.prev = Q.prev || {}; if(!(k in Q.prev)) Q.prev[k] = P[k] ? { ...P[k] } : null;
+  const r = recognizer();
+  if(REC_ON){ REC_NEXT = true; try { r.abort(); } catch(e){} return; }   /* erst sauber beenden */
+  r.lang = it.dir === "df" ? "fr-FR" : "de-DE";
+  REC_GOT = false;
+  try {
+    r.start(); REC_ON = true;
+    const m = $("qMic"); m.classList.add("live"); m.textContent = "● ICH HÖRE …"; $("qNote").textContent = "";
+  } catch(e){
+    micIdle();
+    $("qNote").textContent = "Spracherkennung ließ sich nicht starten ("+(e && e.name || "?")+"). Tipp ins Feld und nimm das Mikrofon der Tastatur.";
+  }
 }
 
 /* ----- Sicherung ----- */
@@ -899,7 +928,7 @@ document.addEventListener("click", ev => {
     case "startBtn": { const s = buildSession(selCards(), P, opts(), Date.now()); if(s.length) startQuiz(s); return; }
     case "qGo": if(Q.fb) next(); else answer($("qIn").value); return;
     case "qSkip": answer(""); return;
-    case "qMic": if(REC) stopListen(); else listen(); return;
+    case "qMic": if(REC_ON) stopListen(); else listen(); return;
     case "qRetry": retry(); return;
     case "qStop":
       if(Object.keys(Q.first).length) finish(); else goHome(); return;

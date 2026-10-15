@@ -621,9 +621,18 @@ Autokorrektur ist im Feld aus — sie würde Tippfehler stillschweigend reparier
 **Sprechen:** Web-Speech-API (`fr-FR`/`de-DE`). Gesprochen zählt Groß/Klein nicht. Die
 Erkennung liefert bis zu 5 Lesarten; passt eine, gilt es als richtig (Homophone wie
 verre/vert). Bei falscher gesprochener Antwort einmal pro Wort „Verhört? Nochmal“ — nimmt den
-Versuch samt Fach-Änderung zurück. Ob die API im Home-Bildschirm-Modus geht, ist **am iPhone
-noch nicht geprüft**; Rückfall ist das Mikrofon der Tastatur (Text landet im Feld, wird aber
-dann wie getippt geprüft). Vorlesen ist ausdrücklich nicht gewünscht.
+Versuch samt Fach-Änderung zurück. Rückfall ist das Mikrofon der Tastatur (Text landet im
+Feld, wird aber dann wie getippt geprüft). Vorlesen ist ausdrücklich nicht gewünscht.
+**Am iPhone (Home-Bildschirm) gemeldet, 15.10.2026:** erstes Wort ging, ab dem zweiten nicht
+mehr. Ursache: Die Erkennung wurde nach dem Ergebnis nur vergessen, nicht gestoppt; iOS hält
+sie offen und das Mikrofon belegt, die nächste kam nicht dran (im Chrome am Rechner endet sie
+von selbst — dort unsichtbar). Seitdem **eine** Erkennung je Sitzung (`recognizer()`),
+`stop()` beim Endergebnis, Neustart erst nach `onend`, `showQ()` gibt eine offene frei. Im
+Browser nachgestellt mit einer Attrappe, die nicht von selbst endet und keine zweite
+gleichzeitig zulässt: alte Fassung scheitert beim 2. Wort mit `audio-capture`, neue schafft
+6 von 6. **Am Gerät nach dem Fix noch nicht bestätigt.** Die Mikrofon-Nachfrage bei jedem
+App-Start macht iOS selbst (Home-Bildschirm-Apps merken sich die Erlaubnis nicht) — nicht
+abstellbar.
 
 **Karteikasten:** 5 Fächer 0–4, Abstände `FACH = [1,1,2,4,7]` Tage ab Tagesbeginn. Fach 4 ist
 das oberste und „sicher“; spätestens jede Woche kommt jedes Wort wieder (vom Vater: Fach 5 mit

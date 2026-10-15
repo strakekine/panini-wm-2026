@@ -117,10 +117,10 @@
   .fb.ok{background:rgba(62,207,106,.12);border:1px solid rgba(62,207,106,.4)}
   .fb.bad{background:rgba(255,93,107,.1);border:1px solid rgba(255,93,107,.4)}
   .fb .h{font-weight:700;font-size:16px}
-  .fb .sol{font-size:19px;font-weight:700;margin-top:3px}
+  .fb .sol{font-size:27px;font-weight:700;margin-top:6px;line-height:1.2;color:var(--text);word-break:break-word}
   .fb small{display:block;color:var(--muted);font-size:13px;margin-top:3px}
   .fb .full{margin-top:8px;padding:8px 10px;border-radius:8px;background:rgba(255,166,61,.14);border:1px solid rgba(255,166,61,.5);color:var(--warn);font-size:14px;font-weight:600}
-  .fb .full b{display:block;color:var(--text);font-size:19px;margin-top:2px}
+  .fb .full b{display:block;color:var(--text);font-size:25px;margin-top:3px;line-height:1.2;word-break:break-word}
   .mic{width:100%;margin-top:10px;min-height:64px;font-size:22px;background:var(--blue);color:#06142e}
   .mic.live{background:var(--bad);color:#fff}
 
@@ -689,7 +689,7 @@ function needBackup(dirty, snooze, now){
 /* Fassung — bei JEDER Änderung hochzählen. Steht unten im Startbild und als erste Zeile der
    Mitschrift; am iPhone lief einmal noch die alte Datei aus dem Zwischenspeicher, und die
    Mitschrift sah aus wie ein neuer Fehler. */
-const FASSUNG = "15.10.2026 j";
+const FASSUNG = "15.10.2026 k";
 const KEY = "vokabeln_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
@@ -844,7 +844,7 @@ function showQ(){
   $("qAcc").innerHTML = fr ? ACC.map(a => '<button data-acc="'+a+'">'+a+'</button>').join("") : "";
   $("qAcc").style.display = fr ? "" : "none";
   $("qFb").innerHTML = "";
-  $("qGo").textContent = "PRÜFEN";
+  $("qGo").textContent = "PRÜFEN"; $("qGo").style.display = "";
   $("qSkip").style.display = "";
   const voice = S.input === "voice" && !Q.nurTippen;
   $("qMic").style.display = voice && SR ? "" : "none";
@@ -854,8 +854,8 @@ function showQ(){
      Läuft synchron im Klick, sonst öffnet iOS die Tastatur nicht. */
   if(!voice || !SR) inp.focus(); else inp.blur();
 }
-function answer(text, alts){
-  if(Q.fb) return;
+function answer(text, alts, endgueltig){
+  if(Q.fb && !(endgueltig && Q.fb.pending)) return;
   const it = cur(), c = BYID[it.cid], sol = it.dir === "df" ? c.f : c.d;
   const voice = S.input === "voice" && !Q.nurTippen;
   let r = check(text, sol, voice);
@@ -864,8 +864,23 @@ function answer(text, alts){
   if(!r.ok && alts) for(const a of alts){ const ra = check(a, sol, true); if(ra.ok){ r = ra; text = a; break; } }
   /* Gleicher Klang, andere Schreibweise (arrivé / arriver): richtig gesprochen */
   if(!r.ok && voice && it.dir === "df") for(const a of [text, ...(alts || [])]){ if(klingtWie(a, sol)){ r = { ok:true, why:"", klang:true }; break; } }
-  Q.fb = { ok:r.ok, text };
   const k = key(it.cid, it.dir);
+  /* Falsch GESPROCHEN, und „Verhört? Nochmal“ ist noch frei: Lösung noch NICHT zeigen und noch
+     nichts werten. Vorher stand die Lösung über dem Knopf — man konnte sie ablesen und
+     nachsprechen (vom Vater gefunden). Jetzt: nur zeigen, was gehört wurde, und entweder
+     nochmal sprechen (ohne die Lösung gesehen zu haben) oder „Lösung zeigen“ = Fehler. */
+  if(!r.ok && voice && SR && text.trim() && !endgueltig && !Q.retry[k] && !it.again){
+    Q.fb = { pending:true, text, alts };
+    $("qIn").className = "qin bad"; $("qIn").value = text;
+    $("qFb").innerHTML = '<div class="fb bad"><div class="h">✗ Gehört: „'+esc(text)+'“</div>'+
+      '<small>Hat sich das iPhone verhört? Dann sprich nochmal. Sonst schau Dir die Lösung an — das zählt als Fehler.</small>'+
+      '<div class="btnrow"><button class="btn ghost sm" id="qRetry">VERHÖRT? NOCHMAL SPRECHEN</button>'+
+      '<button class="btn sm" id="qShow">LÖSUNG ZEIGEN</button></div></div>';
+    $("qGo").style.display = "none"; $("qSkip").style.display = "none"; $("qMic").style.display = "none";
+    return;
+  }
+  Q.fb = { ok:r.ok, text };
+  $("qGo").style.display = "";
   if(!it.again && !(k in Q.first)){
     Q.first[k] = r.ok;
     const now = Date.now(), vorher = P[k] ? P[k].b : -1;
@@ -895,27 +910,27 @@ function answer(text, alts){
     h += '<div class="h">✗ '+(text.trim() ? "Falsch" : "Lösung")+(r.why && text.trim() ? " — "+esc(r.why) : "")+'</div>'+
       '<div class="sol">'+esc(shown(sol))+'</div>';
     if(text.trim()) h += '<small>Deine Antwort: '+esc(text)+'</small>';
-    if(voice && SR && text.trim() && !Q.retry[k] && !it.again) h += '<button class="btn ghost sm" id="qRetry" style="margin-top:8px">VERHÖRT? NOCHMAL SPRECHEN</button>';
   }
   $("qFb").innerHTML = h + '</div>';
   $("qGo").textContent = "WEITER";
   $("qSkip").style.display = "none";
   $("qMic").style.display = "none";
 }
-/* Einmal pro Wort: die falsche Antwort zurücknehmen und neu sprechen. Nur beim Sprechen —
-   beim Tippen gibt es nichts, was sich verhören könnte. */
+/* Einmal pro Wort: nochmal sprechen, solange die Lösung noch nicht gezeigt wurde. Gewertet
+   war noch nichts, es gibt also nichts zurückzunehmen. Der zweite Versuch zählt normal; ist
+   er falsch, kommt die Lösung sofort (kein dritter Versuch). Nur beim Sprechen. */
 function retry(){
-  const it = cur(), k = key(it.cid, it.dir);
-  Q.retry[k] = 1;
-  if(Q.prev && Q.prev[k]) P[k] = Q.prev[k]; else delete P[k];
-  delete Q.gained[k];
-  const dk = Q.counted[k]; if(dk && DAYS[dk]) DAYS[dk].n = Math.max(0, DAYS[dk].n - 1); delete Q.counted[k];
-  delete Q.first[k];
-  Q.wrong = Q.wrong.filter(x => key(x.cid, x.dir) !== k);
-  const j = Q.items.findIndex((x, n) => n > Q.i && x.again && key(x.cid, x.dir) === k);
-  if(j > 0) Q.items.splice(j, 1);
-  persist();
+  if(!Q.fb || !Q.fb.pending) return;
+  const it = cur();
+  Q.retry[key(it.cid, it.dir)] = 1;
+  Q.fb = null;
   showQ(); listen();
+}
+/* „Lösung zeigen“: die gesprochene Antwort endgültig werten — als das, was sie war */
+function zeigeLoesung(){
+  if(!Q.fb || !Q.fb.pending) return;
+  const { text, alts } = Q.fb;
+  answer(text, alts, true);
 }
 function next(){
   Q.i++;
@@ -1174,10 +1189,11 @@ document.addEventListener("click", ev => {
   switch(b.id){
     case "startBtn": { const s = buildSession(selCards(), P, opts(), Date.now()); if(s.length) startQuiz(s); return; }
     case "tippBtn": { const s = shuffle(tippKandidaten(CARDS, P, Date.now()), Math.random); if(s.length) startQuiz(s, true); return; }
-    case "qGo": if(Q.fb) next(); else answer($("qIn").value); return;
+    case "qGo": if(Q.fb && Q.fb.pending) return; if(Q.fb) next(); else answer($("qIn").value); return;
     case "qSkip": answer(""); return;
     case "qMic": if(LISTEN){ settle(); } else listen(); return;
     case "qRetry": retry(); return;
+    case "qShow": zeigeLoesung(); return;
     case "qStop":
       if(Object.keys(Q.first).length) finish(); else goHome(); return;
     case "learnBtn": startLearn(); return;
@@ -1210,6 +1226,7 @@ $("qAcc").addEventListener("click", ev => ev.preventDefault());
 $("qIn").addEventListener("keydown", ev => {
   if(ev.key !== "Enter") return;
   ev.preventDefault();
+  if(Q.fb && Q.fb.pending) return;
   if(Q.fb) next(); else answer($("qIn").value);
 });
 $("qIn").addEventListener("input", () => { if(Q && Q.fb) $("qIn").value = Q.fb.text; });

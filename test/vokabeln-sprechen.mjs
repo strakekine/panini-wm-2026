@@ -124,5 +124,65 @@ for(const v of VARIANTEN){
   console.log((okay ? "✓ " : "✗ ") + v.name + ": " + gut + " von " + WOERTER + (log.length ? "\n    " + log.join("\n    ") : "") + (errs.length ? "\n    Seitenfehler: " + errs.join(" | ") : ""));
   await pg.close();
 }
+/* --- „Verhört? Nochmal sprechen“: Lösung bleibt verdeckt, bis entschieden ist --- */
+{
+  const pg = await b.newPage({ viewport:{ width:390, height:780 } });
+  const errs = []; pg.on("pageerror", e => errs.push(String(e)));
+  await pg.addInitScript(() => {
+    let erste = null, text = "";
+    class FakeSR { start(){ if(!erste) erste = this; setTimeout(() => { this.onstart && this.onstart(); }, 5); } stop(){} abort(){} }
+    window.__sprich = w => { const z = erste; text = (text ? text + " " : "") + w; setTimeout(() => { const a = [{ transcript:text }]; a.isFinal = false; z.onresult && z.onresult({ results:[a] }); }, 50); };
+    window.webkitSpeechRecognition = FakeSR; window.SpeechRecognition = undefined;
+  });
+  await pg.goto("file://" + datei);
+  await pg.click('[data-opt="input"] [data-v="voice"]');
+  await pg.click("#startBtn");
+  const fehl = []; const ok = (bed, t) => { if(!bed) fehl.push(t); };
+  const loesung = () => pg.evaluate(() => { const it = Q.items[Q.i], c = BYID[it.cid]; return variants(it.dir === "df" ? c.f : c.d)[0]; });
+  const fach = () => pg.evaluate(() => { const it = Q.items[Q.i]; const p = P[key(it.cid, it.dir)]; return p ? p.b : -1; });
+  const sprich = async w => { await pg.evaluate(w => window.__sprich(w), w); await pg.waitForTimeout(1900); };
+  const sag = async w => { await pg.click("#qMic"); await pg.waitForTimeout(80); await sprich(w); };
+  /* „Verhört? Nochmal sprechen“ schaltet das Mikrofon selbst ein — danach nur sprechen */
+
+  /* 1. falsch → verdeckt → nochmal richtig → zählt richtig */
+  let sol = await loesung();
+  await sag("quelque chose de faux");
+  let fb = await pg.textContent("#qFb");
+  ok(fb.includes("Gehört") && !fb.includes(sol), "1: nach falsch gesprochen ist die Lösung verdeckt");
+  ok(!(await pg.isVisible("#qGo")), "1: kein Weiter, solange nicht entschieden");
+  ok(await fach() === -1, "1: noch nichts gewertet");
+  await pg.click("#qRetry"); await pg.waitForTimeout(80);
+  ok(await pg.evaluate(() => !!LISTEN), "1: nach „Nochmal“ hört die App schon zu");
+  await sprich(sol);
+  ok((await pg.textContent("#qFb")).startsWith("✓"), "1: zweiter Versuch richtig → ✓");
+  ok(await pg.evaluate(() => Object.values(Q.first)[0] === true), "1: zählt als richtig");
+  await pg.click("#qGo"); await pg.waitForTimeout(50);
+
+  /* 2. falsch → Lösung zeigen → Fehler, Lösung groß sichtbar */
+  sol = await loesung();
+  await sag("encore faux");
+  await pg.click("#qShow"); await pg.waitForTimeout(50);
+  fb = await pg.textContent("#qFb");
+  ok(fb.includes("✗") && (await pg.textContent("#qFb .sol")).length > 0, "2: Lösung zeigen → ✗ mit Lösung");
+  ok(await pg.evaluate(() => Object.values(Q.first)[1] === false), "2: zählt als Fehler");
+  ok(!(await pg.$("#qRetry")), "2: danach kein Nochmal-Knopf mehr");
+  const gr = await pg.evaluate(() => parseFloat(getComputedStyle(document.querySelector("#qFb .sol")).fontSize));
+  ok(gr >= 26, "2: Lösung groß geschrieben — ist " + gr + " px");
+  await pg.click("#qGo"); await pg.waitForTimeout(50);
+
+  /* 3. falsch → nochmal → wieder falsch → Lösung sofort, Fehler, kein dritter Versuch */
+  await sag("faux");
+  await pg.click("#qRetry"); await pg.waitForTimeout(80);
+  await sprich("toujours faux");
+  fb = await pg.textContent("#qFb");
+  ok(fb.includes("✗") && (await pg.$("#qFb .sol")) && !(await pg.$("#qRetry")), "3: zweiter Fehlversuch → Lösung sofort, kein dritter Versuch");
+  ok(await pg.evaluate(() => Object.values(Q.first)[2] === false), "3: zählt als Fehler");
+
+  const okay = !fehl.length && !errs.length;
+  if(!okay) fehler++;
+  console.log((okay ? "✓ " : "✗ ") + "„Verhört? Nochmal sprechen“ ohne Blick auf die Lösung" + (fehl.length ? "\n    " + fehl.join("\n    ") : "") + (errs.length ? "\n    Seitenfehler: " + errs.join(" | ") : ""));
+  await pg.close();
+}
+
 await b.close();
 process.exit(fehler ? 1 : 0);

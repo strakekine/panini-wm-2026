@@ -630,8 +630,13 @@ Autokorrektur ist im Feld aus — sie würde Tippfehler stillschweigend reparier
 
 **Sprechen:** Web-Speech-API (`fr-FR`/`de-DE`). Gesprochen zählt Groß/Klein nicht. Die
 Erkennung liefert bis zu 5 Lesarten; passt eine, gilt es als richtig (Homophone wie
-verre/vert). Bei falscher gesprochener Antwort einmal pro Wort „Verhört? Nochmal“ — nimmt den
-Versuch samt Fach-Änderung zurück. **Gleicher Klang** (`klang()`, `klingtWie()`, nur Sprechen
+verre/vert). **Falsch gesprochen → Lösung erst nach Entscheidung** (Fassung k, vom Vater
+gewünscht): Die App zeigt nur „✗ Gehört: …“ und zwei Knöpfe. „VERHÖRT? NOCHMAL SPRECHEN“ (einmal pro
+Wort) schaltet das Mikrofon selbst wieder ein, ohne dass die Lösung zu sehen war; der zweite
+Versuch zählt normal, ist er wieder falsch, kommt die Lösung sofort und es ist ein Fehler.
+„LÖSUNG ZEIGEN“ zählt als Fehler. Bewertet wird erst bei der Entscheidung (`Q.fb.pending`) —
+vorher hätte „Nochmal“ mit sichtbarer Lösung einfach Nachsprechen belohnt. Die Lösung steht
+überall groß (`.fb .sol`, `.full b`, 25–27 px). **Gleicher Klang** (`klang()`, `klingtWie()`, nur Sprechen
 und nur bei Antwort auf Französisch): Die Erkennung schrieb am iPhone zweimal „Arrivé en retard“
 für gesprochenes „arriver en retard“. Gleich klingende stumme Endungen (`-é/-ée/-és/-er/-ez/
 -ai/-ais/-ait/-aient` → „é“, Plural-`s/x` weg) zählen darum als richtig, mit gelbem Kasten
@@ -729,7 +734,7 @@ Lektion (`pct`, abgerundet, 100 % nur bei allem sicher, dann ✓). Bewusst **kei
 (fällt nach einem Krankheitstag auf null), keine Punkte je Antwort (mit „Alle“ austricksbar),
 kein Emil-gegen-Leo (unfair, bräuchte Server), keine Blitzrunde (belohnt Tempo statt
 Genauigkeit). Nach der Runde: „⭐ n Wörter jetzt sicher“ und „📅 Lerntag geschafft“, wenn
-der Tag in dieser Runde voll wurde. „Verhört? Nochmal“ nimmt beides zurück. Offen als
+der Tag in dieser Runde voll wurde. Offen als
 zweiter Schritt: Klassenarbeit-Modus (Datum je Lektion, „Bereit: x %“).
 
 **Fassung:** `FASSUNG` (z. B. „15.10.2026 e“) steht unten im Startbild und als erste Zeile der

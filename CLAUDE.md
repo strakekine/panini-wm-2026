@@ -602,7 +602,11 @@ une amie“, angezeigt mit Komma): beide zusammen richtig, eine allein auch rich
 gut sichtbarem Kasten „Vollständig heißt es: …“ (`check().part`) — so vom Vater gewünscht.
 Ein normales Komma ist **kein** Formtrenner, sonst ginge bei „Ça va, merci“ „merci“ allein
 durch. Beim Abtippen also männlich/weiblich und Einzahl/Mehrzahl mit `;` schreiben, und
-Buchkürzel wie „petit, e“ ausschreiben („petit; petite“). `(…)` ist optional, ein Artikel
+Buchkürzel wie „petit, e“ ausschreiben („petit; petite“). **Formen nur, wenn die andere
+Sprache ein einziges Wort dafür hat** (grand; grande → groß). Hat sie zwei (un ami / une amie →
+ein Freund / eine Freundin, le voisin / la voisine), werden es zwei Einträge — vom Vater
+angemerkt: „ein Freund“ gefragt, ist „un ami“ eindeutig. Der Test prüft, dass kein Eintrag
+auf beiden Seiten `;` hat. `(…)` ist optional, ein Artikel
 im Eintrag ist Pflicht. Der Lernstand
 hängt an `lektion.id + ":" + fr` — **ids nie umbenennen**, sonst ist der Lernstand weg.
 Die Beispiel-Lektion fliegt raus, sobald echte da sind.

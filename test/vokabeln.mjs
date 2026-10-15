@@ -124,6 +124,8 @@ ok(M.review(p, false, t0 + 3600e3).bad === 1, "Fehler heute wieder falsch → bl
 let seed = 1; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
 const cards = M.cardsOf(M.LEKTIONEN);
 ok(cards.length >= 10, "Beispiel-Lektion hat Wörter");
+/* Formen (;) nur, wenn die andere Seite keine eigenen Formen hat — sonst zwei Einträge */
+for(const c of cards) ok(!(c.f.includes(";") && c.d.includes(";")), `"${c.f}" / "${c.d}": Formen auf beiden Seiten gehören in zwei Einträge`);
 ok(new Set(cards.map(c => c.id)).size === cards.length, "Wort-ids eindeutig");
 let s = M.buildSession(cards, {}, { dir:"fd", mode:"due", count:10 }, t0, rnd);
 ok(s.length === 10 && s.every(x => x.dir === "fd"), "10 neue Wörter, Richtung FR→DE");

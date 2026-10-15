@@ -303,20 +303,94 @@
    Der Lernstand hängt an Lektions-id + französischem Wort. Wer das Wort korrigiert,
    setzt dieses eine Wort auf neu — gewollt, es ist ja eine andere Vokabel. */
 const LEKTIONEN = [
-  { id:"beispiel", titel:"Beispiel — wird durch Deine Lektionen ersetzt", vok:[
-    ["le chat", "die Katze"],
-    ["la maison", "das Haus"],
-    ["l'école", "die Schule"],
-    ["les parents", "die Eltern"],
-    ["un ami", "ein Freund"],
-    ["une amie", "eine Freundin"],
-    ["grand; grande", "groß"],
-    ["(se) promener", "spazieren gehen"],
-    ["le frère", "der Bruder"],
-    ["aujourd'hui", "heute"],
-    ["être", "sein", "Verb"],
-    ["Ça va ?", "Wie geht's?"],
-    ["les devoirs", "die Hausaufgaben"],
+  /* Blatt „Partie lexicale : la rentrée scolaire“, 2 Seiten, eingescannt vom Vater (15.10.2026).
+     Wo das Blatt nur eine französische Erklärung gibt, steht die deutsche Übersetzung von
+     Claude im Eintrag und die Erklärung vom Blatt als Hinweis („Ü“ im Kommentar). Die Nomen
+     zu den Adjektiven (→ la motivation …) stehen auf dem Blatt ohne Deutsch; ihre Übersetzung
+     ist ebenfalls von Claude („N“). */
+  { id:"rentree-1", titel:"Rentrée 1 · La vie au lycée", vok:[
+    ["les branches|les matières|les disciplines", "die Fächer", "n.f."],
+    ["un camarade de classe", "ein Klassenkamerad"],
+    ["un collègue", "ein Arbeitskollege", "≠ un camarade de classe"],
+    ["se présenter aux autres", "sich den anderen vorstellen"],
+    ["l'horaire", "der Stundenplan", "n.m."],
+    ["arriver à l'heure|être ponctuel", "pünktlich sein"],
+    ["arriver en retard", "zu spät kommen"],
+    ["un cours|une leçon", "eine Unterrichtsstunde"],
+    ["un cours obligatoire", "ein Pflichtfach|ein Pflichtkurs", "un cours que tous les élèves doivent suivre"],          /* Ü */
+    ["un cours facultatif|un cours à option", "ein Wahlfach|ein Wahlkurs", "un cours que l'on peut choisir, qui n'est pas obligatoire"],   /* Ü */
+    ["la cour de récréation", "der Pausenhof"],
+    ["présenter un exposé|faire une présentation", "einen Vortrag halten"],
+    ["poser une question", "eine Frage stellen"],
+    ["lever le doigt|lever la main", "den Finger heben|die Hand heben"],
+    ["apprendre par cœur", "auswendig lernen"],
+    ["réviser la matière", "den Stoff wiederholen", "= répéter la matière"],                                            /* Ü */
+    ["demander la parole", "sich zu Wort melden|ums Wort bitten", "= demander la permission de parler"],               /* Ü */
+    ["demander la permission (de faire qch)|demander l'autorisation (de faire qch)", "um Erlaubnis fragen(, etw. zu tun)"],
+    ["remettre un travail|rendre un travail", "eine Arbeit abgeben"],
+    ["réussir", "bestehen|erfolgreich sein"],
+    ["la réussite", "der Erfolg"],                                                                                       /* N */
+    ["échouer", "scheitern|durchfallen|nicht bestehen", "= ne pas réussir"],                                            /* Ü */
+    ["l'échec", "der Misserfolg|das Scheitern", "n.m."],                                                                 /* N */
+    ["un examen d'ajournement", "eine Nachprüfung", "lux.: Noexamen"],
+    ["aller aux toilettes", "zur Toilette gehen"],
+    ["on sonne|la sonnette retentit|la cloche retentit", "es klingelt"],
+    ["le directeur", "der Direktor"],
+    ["la directrice", "die Direktorin"],
+    ["le directeur adjoint", "der beigeordnete Direktor"],
+    ["la directrice adjointe", "die beigeordnete Direktorin"],
+    ["le secrétariat", "das Sekretariat"],
+    ["le concierge", "der Pförtner"],
+  ]},
+  { id:"rentree-2", titel:"Rentrée 2 · Les émotions et les attitudes", vok:[
+    ["être motivé", "motiviert sein"],
+    ["la motivation", "die Motivation"],                                                                                 /* N */
+    ["être nerveux|être agité", "nervös sein|ruhelos sein"],
+    ["la nervosité", "die Nervosität"],                                                                                  /* N */
+    ["l'agitation", "die Unruhe", "n.f."],                                                                               /* N */
+    ["être inquiet", "beunruhigt sein"],
+    ["l'inquiétude", "die Sorge|die Beunruhigung", "n.f."],                                                              /* N */
+    ["être soulagé", "erleichtert sein"],
+    ["le soulagement", "die Erleichterung"],                                                                             /* N */
+    ["se faire des soucis", "sich Sorgen machen"],
+    ["avoir confiance en soi", "Selbstvertrauen haben"],
+    ["se sentir à l'aise", "sich wohlfühlen", "= se sentir bien"],                                                       /* Ü */
+    ["être curieux", "neugierig sein"],
+    ["la curiosité", "die Neugier|die Neugierde"],                                                                       /* N */
+    ["être attentif", "aufmerksam sein"],
+    ["l'attention", "die Aufmerksamkeit", "n.f."],                                                                       /* N */
+    ["faire attention", "aufpassen"],                                                                                    /* N */
+    ["être paresseux", "faul sein"],
+    ["la paresse", "die Faulheit"],                                                                                      /* N */
+    ["être appliqué", "fleißig sein"],
+    ["l'application", "der Fleiß", "n.f."],                                                                              /* N */
+    ["être intéressé", "interessiert sein"],
+    ["l'intérêt", "das Interesse", "n.m."],                                                                              /* N */
+    ["être enthousiaste", "begeistert sein"],
+    ["l'enthousiasme", "die Begeisterung", "n.m."],                                                                      /* N */
+    ["participer activement au cours", "aktiv im Unterricht mitarbeiten"],
+    ["trouver le cours intéressant", "den Unterricht interessant finden"],
+    ["trouver le cours ennuyeux", "den Unterricht langweilig finden"],
+    ["un défi", "eine Herausforderung"],
+    ["un but|un objectif", "ein Ziel"],
+    ["atteindre un but|atteindre un objectif", "ein Ziel erreichen"],
+    ["faire de son mieux", "sein Bestes geben"],
+  ]},
+  { id:"rentree-3", titel:"Rentrée 3 · Les activités extrascolaires", vok:[
+    ["un loisir|un passe-temps", "ein Hobby", "une activité que l'on fait pendant son temps libre"],
+    ["une passion", "eine Leidenschaft", "une activité qu'on adore"],
+    ["être passionné (de qch)", "(etw.) leidenschaftlich mögen", "= adorer faire qch"],
+    ["être membre d'un club", "Mitglied eines Vereins sein"],
+    ["jouer d'un instrument", "ein Instrument spielen"],
+    ["jouer aux échecs", "Schach spielen"],
+    ["faire de l'équitation", "reiten"],
+    ["pratiquer un sport", "eine Sportart betreiben"],
+    ["les jeux vidéo", "die Computerspiele|die Videospiele"],
+    ["jouer à l'extérieur", "draußen spielen"],
+    ["jouer à l'intérieur", "drinnen spielen"],
+    ["visiter un musée", "ein Museum besichtigen"],
+    ["rendre visite (à qn)", "(jdn) besuchen", "Person besuchen — ≠ visiter (Ort)"],
+    ["les vacances", "die Ferien", "n.f."],
   ]},
 ];
 
@@ -572,7 +646,7 @@ function load(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ 
 let S = sanitize(load(KEY));
 let P = sanitizeP(load(KEY + "_p"));
 let DAYS = pruneDays(load(KEY + "_days") || {}, Date.now());
-if(!S.sel.length && LEKTIONEN.length) S.sel = [LEKTIONEN[LEKTIONEN.length - 1].id];
+if(!S.sel.length && LEKTIONEN.length) S.sel = LEKTIONEN.map(l => l.id);
 function persist(){ try { localStorage.setItem(KEY, JSON.stringify(S)); localStorage.setItem(KEY + "_p", JSON.stringify(P)); localStorage.setItem(KEY + "_days", JSON.stringify(DAYS)); } catch(e){} }
 
 let VIEW = "home";
@@ -925,7 +999,7 @@ function restore(text){
   const p = sanitizeP(d.p), st = sanitize(d.state);
   if(!confirm("Sicherung vom " + String(d.exported || "?").slice(0, 10) + (st.name ? " (" + st.name + ")" : "") + " laden?\n" +
     Object.keys(p).length + " gelernte Einträge.\nDas ersetzt den Lernstand auf diesem iPhone.")) return;
-  S = st; P = p; DAYS = pruneDays(d.days && typeof d.days === "object" ? d.days : {}, Date.now()); if(!S.sel.length && LEKTIONEN.length) S.sel = [LEKTIONEN[LEKTIONEN.length - 1].id];
+  S = st; P = p; DAYS = pruneDays(d.days && typeof d.days === "object" ? d.days : {}, Date.now()); if(!S.sel.length && LEKTIONEN.length) S.sel = LEKTIONEN.map(l => l.id);
   if(d.exported) lsSet("_exp", d.exported);
   lsSet("_dirty", null); lsSet("_snooze", null);
   persist(); renderHome();

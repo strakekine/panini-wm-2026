@@ -609,7 +609,17 @@ angemerkt: „ein Freund“ gefragt, ist „un ami“ eindeutig. Der Test prüft
 auf beiden Seiten `;` hat. `(…)` ist optional, ein Artikel
 im Eintrag ist Pflicht. Der Lernstand
 hängt an `lektion.id + ":" + fr` — **ids nie umbenennen**, sonst ist der Lernstand weg.
-Die Beispiel-Lektion fliegt raus, sobald echte da sind.
+**Eingetragen (15.10.2026):** Blatt „La rentrée scolaire“ als drei Lektionen nach seinen
+Abschnitten (`rentree-1` Vie au lycée 32, `rentree-2` Émotions 32, `rentree-3` Activités 14
+= 78). Beispiel-Lektion ist raus. Regeln beim Abtippen, so gehandhabt:
+Schrägstrich-Synonyme („arriver à l'heure / être ponctuel“) → `|`; „≠“-Paare und
+„intéressant / ennuyeux“ → getrennte Einträge; Genus-Angaben (n.f./n.m.) → Hinweis, wo `l'`/`les`
+es verdeckt; „qch“/„qn“-Teile optional in Klammern. Gibt das Blatt nur eine französische
+Erklärung (cours obligatoire, réviser la matière, demander la parole, échouer, se sentir à
+l'aise), steht die **deutsche Übersetzung von Claude** im Eintrag und die Erklärung als Hinweis
+(im Code `/* Ü */`). Die Nomen zu den Adjektiven („→ la motivation“) stehen auf dem Blatt ohne
+Deutsch und sind **eigene Einträge mit Claudes Übersetzung** (`/* N */`). Beides dem Vater
+gesagt, er kann es streichen lassen. Beim ersten Start sind **alle** Lektionen angehakt.
 
 **Prüfung — vom Vater so festgelegt, nicht weicher machen:** Tippfehler sind Fehler, kein
 „fast richtig“. Akzent falsch = Fehler. Steht ein Artikel da, muss er mit. Die Begründung

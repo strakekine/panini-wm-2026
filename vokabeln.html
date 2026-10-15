@@ -891,33 +891,41 @@ $("lCard").addEventListener("click", ev => {
 function goHome(){ stopListen(); Q = null; VIEW = "home"; document.body.dataset.view = VIEW; renderHome(); window.scrollTo(0, 0); }
 
 /* ----- Sprechen -----
-   Am iPhone vom Vater gemeldet (15.10.2026), zwei Fehler nacheinander:
-   1. Erste Fassung, neue Erkennung je Wort ohne stop(): erstes Wort ging, ab dem zweiten
-      nicht — iOS hielt die alte offen und das Mikrofon belegt.
-   2. Zweite Fassung, EINE Erkennung für alles: ab dem zweiten Wort stand "chat se promener"
-      im Feld — iOS hängt bei wiederverwendeter Erkennung das Neue an das Alte, und das
-      Endergebnis (isFinal) kommt dann auch nicht mehr verlässlich.
-   Darum jetzt: je Wort eine FRISCHE Erkennung, aber erst, wenn die vorige wirklich beendet
-   ist (onend); ein trotzdem vorangestellter alter Text wird abgeschnitten (PREV_RAW); und
-   ausgewertet wird nicht nur bei isFinal, sondern auch nach 1,5 s Stille oder bei onend
-   — was zuletzt gehört wurde. Im Chrome am Rechner tritt nichts davon auf; nachgestellt
-   wird es im Test mit einer Attrappe. Die Mikrofon-Nachfrage bei jedem App-Start macht
-   iOS selbst und lässt sich nicht abstellen. */
-const SILENCE_MS = 1500;
-let REC = null, REC_ON = false, REC_NEXT = false, PREV_RAW = "";
+   Am iPhone vom Vater gemeldet (15.10.2026), drei Fehler nacheinander — alle im Chrome am
+   Rechner unsichtbar, darum gibt es test/vokabeln-sprechen.mjs mit einer iOS-Attrappe:
+   1. Neue Erkennung je Wort ohne stop(): ab dem zweiten Wort Mikrofon belegt.
+   2. EINE Erkennung für alles: iOS hängt Neues an Altes ("chat se promener"), isFinal bleibt aus.
+   3. Frische Erkennung je Wort, aber erst nach onend der vorigen: iOS meldet onend nach
+      stop() offenbar nicht (oder nicht verlässlich) — die App hielt das Mikrofon für belegt,
+      wartete still, und ab dem zweiten Wort passierte beim Antippen gar nichts.
+   Darum jetzt: Auf onend wird für NICHTS mehr gewartet. Ist ein Wort ausgewertet oder die
+   Frage gewechselt, wird die Erkennung abgebrochen und sofort vergessen (Handler weg, `REC`
+   leer). Das nächste Antippen startet direkt eine frische — im Klick, wie iOS es will. Ist
+   das Mikrofon in dem Moment noch nicht frei (audio-capture, oder start() wirft), versucht
+   die App es nach 400 ms genau einmal selbst noch einmal. Alter Text, den iOS voranstellt,
+   wird abgeschnitten (PREV_RAW). Ausgewertet wird bei isFinal oder nach 1,5 s Stille; danach
+   bleibt die Lösung stehen, bis „Weiter“ getippt wird (vom Vater so gewollt). Die
+   Mikrofon-Nachfrage bei jedem App-Start macht iOS selbst und lässt sich nicht abstellen. */
+const SILENCE_MS = 1500, RETRY_MS = 400;
+let REC = null, PREV_RAW = "";
 function micIdle(){ const m = $("qMic"); m.classList.remove("live"); m.textContent = "🎤 SPRECHEN"; }
-/* Alles abbrechen, nichts mehr auswerten (Fragewechsel, Beenden, Tippen) */
-function stopListen(){
-  REC_NEXT = false;
-  if(REC){ REC.done = true; clearTimeout(REC.silence); if(REC_ON){ try { REC.abort(); } catch(e){} } }
+function micLive(){ const m = $("qMic"); m.classList.add("live"); m.textContent = "● ICH HÖRE …"; }
+/* Erkennung abbrechen und vergessen — ohne auf irgendeine Meldung vom iPhone zu warten */
+function drop(r){
+  if(!r) return;
+  r.done = true; clearTimeout(r.silence); clearTimeout(r.retry);
+  r.onresult = r.onerror = r.onend = null;
+  try { r.abort(); } catch(e){}
+  if(REC === r) REC = null;
 }
-/* Gehörtes einmal auswerten und die Erkennung beenden */
+function stopListen(){ drop(REC); }
+/* Gehörtes einmal auswerten, dann die Erkennung loswerden */
 function settle(r){
   if(r.done) return;
-  r.done = true; clearTimeout(r.silence);
-  if(REC_ON && REC === r){ try { r.stop(); } catch(e){} }
-  if(r.heard && r.heard.raw) PREV_RAW = r.heard.raw;
-  if(r.heard && r.heard.txt && Q && !Q.fb) answer(r.heard.txt, r.heard.alts);
+  const h = r.heard;
+  drop(r);
+  if(h && h.raw) PREV_RAW = h.raw;
+  if(h && h.txt && Q && !Q.fb) answer(h.txt, h.alts);
   else micIdle();
 }
 /* iOS stellt manchmal den Text der vorigen Erkennung voran: abschneiden */
@@ -926,17 +934,21 @@ function fresh(raw){
   if(PREV_RAW && t.length > PREV_RAW.length && t.startsWith(PREV_RAW)) return t.slice(PREV_RAW.length).trim();
   return t;
 }
-function listen(){
+function listen(nochmal){
   if(!SR || !Q || Q.fb) return;
   const it = cur(), k = key(it.cid, it.dir);
   /* Für das Zurücknehmen merken, wie das Fach vorher stand */
   Q.prev = Q.prev || {}; if(!(k in Q.prev)) Q.prev[k] = P[k] ? { ...P[k] } : null;
-  /* Die vorige läuft noch: erst sauber beenden, onend startet dann neu */
-  if(REC_ON){ REC_NEXT = true; REC.done = true; try { REC.abort(); } catch(e){} return; }
+  drop(REC);   /* eine alte, falls noch da, nie abwarten */
   const r = new SR();
   r.lang = it.dir === "df" ? "fr-FR" : "de-DE";
   r.interimResults = true; r.maxAlternatives = 5; r.continuous = false;
-  r.done = false; r.heard = null; r.silence = null;
+  r.done = false; r.heard = null; r.silence = null; r.retry = null; r.t0 = Date.now();
+  /* Mikrofon noch nicht frei: einmal kurz warten und neu versuchen */
+  const wiederholen = grund => {
+    if(!nochmal && Q && !Q.fb){ drop(r); $("qNote").textContent = "Mikrofon wird frei …"; setTimeout(() => { if(Q && !Q.fb && !REC) listen(true); }, RETRY_MS); return true; }
+    return false;
+  };
   r.onresult = e => {
     if(r.done || !Q || Q.fb) return;
     let raw = ""; for(let i = 0; i < e.results.length; i++) raw += e.results[i][0].transcript;
@@ -950,27 +962,24 @@ function listen(){
     else r.silence = setTimeout(() => settle(r), SILENCE_MS);
   };
   r.onerror = e => {
-    if(e.error === "aborted" || r.done) return;
-    if(e.error === "no-speech" && !(r.heard && r.heard.txt)){ r.done = true; micIdle(); $("qNote").textContent = "Nichts gehört — nochmal tippen und sprechen."; return; }
-    if(r.heard && r.heard.txt) return settle(r);   /* gehört ist gehört, onend wertet aus */
-    r.done = true; micIdle();
-    $("qNote").textContent = e.error === "not-allowed" ? "Mikrofon nicht erlaubt. Beim nächsten Fragen „Erlauben“ tippen — oder ins Feld tippen und das Mikrofon der Tastatur nehmen."
-      : "Spracherkennung geht gerade nicht ("+e.error+"). Tipp ins Feld und nimm das Mikrofon der Tastatur.";
+    if(r.done || e.error === "aborted") return;
+    if(r.heard && r.heard.txt) return settle(r);   /* gehört ist gehört */
+    if(e.error === "audio-capture" && wiederholen()) return;
+    drop(r); micIdle();
+    $("qNote").textContent = e.error === "no-speech" ? "Nichts gehört — nochmal tippen und sprechen."
+      : e.error === "not-allowed" ? "Mikrofon nicht erlaubt. Beim nächsten Fragen „Erlauben“ tippen — oder ins Feld tippen und das Mikrofon der Tastatur nehmen."
+      : "Spracherkennung geht gerade nicht ("+e.error+"). Nochmal tippen — oder ins Feld tippen und das Mikrofon der Tastatur nehmen.";
   };
-  r.onend = () => {
-    if(REC === r) REC_ON = false;
-    const abgebrochen = r.done;
-    settle(r);
-    if(abgebrochen && !REC_NEXT && Q && !Q.fb) micIdle();
-    if(REC_NEXT && REC === r){ REC_NEXT = false; listen(); }
-  };
+  /* Endet sie von selbst (Chrome tut das), wird ausgewertet, was da ist */
+  r.onend = () => { if(!r.done) settle(r); };
   REC = r;
   try {
-    r.start(); REC_ON = true;
-    const m = $("qMic"); m.classList.add("live"); m.textContent = "● ICH HÖRE …"; $("qNote").textContent = "";
+    r.start();
+    micLive(); $("qNote").textContent = "";
   } catch(e){
-    r.done = true; micIdle();
-    $("qNote").textContent = "Spracherkennung ließ sich nicht starten ("+(e && e.name || "?")+"). Tipp ins Feld und nimm das Mikrofon der Tastatur.";
+    if(wiederholen()) return;
+    drop(r); micIdle();
+    $("qNote").textContent = "Spracherkennung ließ sich nicht starten ("+(e && e.name || "?")+"). Nochmal tippen — oder ins Feld tippen und das Mikrofon der Tastatur nehmen.";
   }
 }
 
@@ -1026,7 +1035,7 @@ document.addEventListener("click", ev => {
     case "startBtn": { const s = buildSession(selCards(), P, opts(), Date.now()); if(s.length) startQuiz(s); return; }
     case "qGo": if(Q.fb) next(); else answer($("qIn").value); return;
     case "qSkip": answer(""); return;
-    case "qMic": if(REC_ON) stopListen(); else listen(); return;
+    case "qMic": if(REC){ stopListen(); micIdle(); } else listen(); return;
     case "qRetry": retry(); return;
     case "qStop":
       if(Object.keys(Q.first).length) finish(); else goHome(); return;

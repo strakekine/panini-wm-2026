@@ -633,21 +633,25 @@ Erkennung liefert bis zu 5 Lesarten; passt eine, gilt es als richtig (Homophone 
 verre/vert). Bei falscher gesprochener Antwort einmal pro Wort „Verhört? Nochmal“ — nimmt den
 Versuch samt Fach-Änderung zurück. Rückfall ist das Mikrofon der Tastatur (Text landet im
 Feld, wird aber dann wie getippt geprüft). Vorlesen ist ausdrücklich nicht gewünscht.
-**Am iPhone gemeldet, 15.10.2026 — zwei Fehler nacheinander, beide im Chrome unsichtbar:**
-1. Neue Erkennung je Wort ohne `stop()`: erstes Wort ging, ab dem zweiten nicht (iOS hält die
-   alte offen, Mikrofon belegt → `audio-capture`).
-2. Daraufhin EINE Erkennung für alles: ab dem zweiten Wort stand „chat se promener“ im Feld —
-   iOS hängt Neues an Altes, und `isFinal` kommt nicht mehr verlässlich.
-Jetzt: je Wort eine **frische** Erkennung, aber erst nach `onend` der vorigen (sonst
-`REC_NEXT`); vorangestellter alter Text wird abgeschnitten (`PREV_RAW`, `fresh()`);
-ausgewertet wird bei `isFinal`, nach 1,5 s Stille (`SILENCE_MS`) oder bei `onend` (`settle()`,
-einmal je Erkennung). `stopListen()` verwirft (Fragewechsel, Tippen). **Test:**
-`node test/vokabeln-sprechen.mjs` mit Attrappe, die alle drei Eigenheiten nachmacht (endet nie
-von selbst, keine zwei gleichzeitig, stellt alles Bisherige voran und meldet nur einmal
-`isFinal`); die Fassung davor scheitert dort genau wie am iPhone beim zweiten Wort.
-**Am Gerät noch nicht bestätigt.** Die Mikrofon-Nachfrage bei jedem App-Start macht iOS selbst
-(Home-Bildschirm-Apps merken sich die Erlaubnis nicht) — nicht abstellbar; in Safari lässt
-sie sich unter „aA → Website-Einstellungen → Mikrofon“ dauerhaft erlauben.
+**Am iPhone gemeldet, 15.10.2026 — drei Fehler nacheinander, alle im Chrome unsichtbar:**
+1. Neue Erkennung je Wort ohne `stop()`: ab dem zweiten Wort Mikrofon belegt (`audio-capture`).
+2. EINE Erkennung für alles: „chat se promener“ im Feld — iOS hängt Neues an Altes, `isFinal`
+   bleibt aus.
+3. Frische Erkennung je Wort, aber erst nach `onend` der vorigen: iOS meldet `onend` nach
+   `stop()` nicht (verlässlich) — die App hielt das Mikrofon für belegt, wartete still, beim
+   zweiten Antippen passierte nichts.
+Jetzt: **auf `onend` wird für nichts gewartet.** Ausgewertet oder Frage gewechselt → `drop()`:
+Handler weg, `abort()`, `REC` leer. Nächstes Antippen startet sofort eine frische Erkennung (im
+Klick). Mikrofon noch nicht frei (`audio-capture` oder `start()` wirft) → einmal nach 400 ms
+selbst neu (`RETRY_MS`). Vorangestellter alter Text wird abgeschnitten (`PREV_RAW`). Auswertung
+bei `isFinal` oder nach 1,5 s Stille (`SILENCE_MS`); die Lösung bleibt stehen, bis „Weiter“
+getippt wird — **kein automatisches Weiter**, vom Vater ausdrücklich so (sonst kann man die
+Lösung nicht lesen). **Test:** `node test/vokabeln-sprechen.mjs`, Attrappe in vier Varianten
+(mit/ohne `onend`, Mikrofon sofort/verzögert frei, schnelles Antippen nach „Weiter“); jede der
+drei früheren Fassungen scheitert dort beim zweiten Wort. **Am Gerät noch nicht bestätigt.**
+Die Mikrofon-Nachfrage bei jedem App-Start macht iOS selbst (Home-Bildschirm-Apps merken sich
+die Erlaubnis nicht) — nicht abstellbar; in Safari unter „aA → Website-Einstellungen →
+Mikrofon“ dauerhaft erlaubbar.
 
 **Karteikasten:** 5 Fächer 0–4, Abstände `FACH = [1,1,2,4,7]` Tage ab Tagesbeginn. Fach 4 ist
 das oberste und „sicher“; spätestens jede Woche kommt jedes Wort wieder (vom Vater: Fach 5 mit

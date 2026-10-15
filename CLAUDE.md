@@ -692,6 +692,16 @@ Sicherung als Datei über `navigator.share` wie in den anderen Apps. **Erinnerun
 nicht nach einer Woche ohne Sicherung, wer nicht gelernt hat, hat nichts zu verlieren.
 „Später“ = 3 Tage Ruhe. Sichern und Wiederherstellen löschen `_dirty` und `_snooze`.
 
-**Testen:** `node test/vokabeln.mjs` schneidet `Lektionen`…`Oberfläche` aus und prüft
-Antwortprüfung, Karteikasten und Rundenbau. Prüft auch die Beispiel-Lektion auf eindeutige ids
-— nach dem Eintragen echter Lektionen laufen lassen.
+**Testen — vor jedem Push alle drei, jeder mit eigenem Rückgabewert** (nicht über `| tail`
+verketten, das hat einmal einen roten Test verschluckt):
+- `node test/vokabeln.mjs` — Logik (Antwortprüfung, Karteikasten, Rundenbau, Wochenziel),
+  schneidet `Lektionen`…`Oberfläche` aus; prüft auch die echten Lektionen auf eindeutige ids
+  und `;` nur auf einer Seite — nach jedem Eintragen laufen lassen.
+- `node test/vokabeln-oberflaeche.mjs` — Browser: Runde, Wiederholung falscher Wörter, Fokus,
+  Akzentleiste, Neuladen, Nur lernen, „Alle“ ohne Aufstieg, „sicher“, Lerntag, Erinnerung.
+  **Nimmt nichts über den Inhalt an** (Lösungen über `variants()` aus der App, Runden bis zum
+  echten Ende) — lose Hilfsskripte mit „12 Wörtern“ oder „max. 30 Fragen“ sind mit der ersten
+  echten Lektion umgefallen. Geprüft: läuft mit 3 Wörtern wie mit 78, und ein eingebauter
+  Fehler in `review()` wird gefunden. Wer etwas am Ablauf ändert, ergänzt es hier statt in
+  einem Wegwerf-Skript.
+- `node test/vokabeln-sprechen.mjs` — Spracherkennung mit iOS-Attrappe (siehe Sprechen).

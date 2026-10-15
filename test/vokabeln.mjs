@@ -206,6 +206,12 @@ ok(s.every(x => P2[M.key(x.cid, "fd")].b <= 2), "mit 3 Wörtern kommen nur die w
 
 const st = M.lessonStats(cards, P, t0);
 ok(st.n === cards.length * 2 && st.neu === st.n - 2 && st.lern === 2 && st.sicher === 0, "Statistik");
+/* „heute fällig“ zählt Wörter, nicht Richtungen — nie mehr als die Lektion hat */
+for(const d of ["fd", "df", "mix"]){
+  const sd = M.lessonStats(cards, {}, t0, d);
+  ok(sd.due === cards.length, "neue Lektion, Richtung " + d + ": fällig = Wortzahl — ist " + sd.due);
+  ok(sd.due === M.buildSession(cards, {}, { dir:d, mode:"due", count:0 }, t0, rnd).length, "fällig = Länge einer ganzen Runde (" + d + ")");
+}
 
 /* --- Motivation: Wochenziel und Prozent --- */
 {

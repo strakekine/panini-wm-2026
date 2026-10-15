@@ -650,12 +650,18 @@ function buildSession(cards, P, o, now, rnd = Math.random){
   const n = o.count > 0 ? o.count : items.length;
   return items.slice(0, n).map(({ cid, dir }) => ({ cid, dir }));
 }
-function lessonStats(cards, P, now){
+/* due = WÖRTER, die eine Runde „Heute fällig“ in der gewählten Richtung bringen würde — wie
+   buildSession: je Wort höchstens einmal. Vorher zählte es beide Richtungen, und „118 heute
+   fällig“ bei 78 Wörtern verwirrte (vom Vater gemeldet). neu/lern/sicher zählen beide Richtungen. */
+function lessonStats(cards, P, now, dir = "mix"){
   let neu = 0, lern = 0, sicher = 0, due = 0;
-  for(const c of cards) for(const d of ["fd", "df"]){
-    const p = P[key(c.id, d)];
-    if(!p) neu++; else if(p.b >= SICHER) sicher++; else lern++;
-    if(isDue(p, now)) due++;
+  const dirs = dir === "mix" ? ["fd", "df"] : [dir];
+  for(const c of cards){
+    for(const d of ["fd", "df"]){
+      const p = P[key(c.id, d)];
+      if(!p) neu++; else if(p.b >= SICHER) sicher++; else lern++;
+    }
+    if(dirs.some(d => isDue(P[key(c.id, d)], now))) due++;
   }
   return { neu, lern, sicher, due, n:cards.length * 2 };
 }
@@ -701,7 +707,7 @@ function needBackup(dirty, snooze, now){
 /* Fassung — bei JEDER Änderung hochzählen. Steht unten im Startbild und als erste Zeile der
    Mitschrift; am iPhone lief einmal noch die alte Datei aus dem Zwischenspeicher, und die
    Mitschrift sah aus wie ein neuer Fehler. */
-const FASSUNG = "15.10.2026 n";
+const FASSUNG = "15.10.2026 o";
 const KEY = "vokabeln_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
@@ -787,12 +793,12 @@ function renderHome(){
   const all = LEKTIONEN.length > 1 && S.sel.length === LEKTIONEN.length;
   let h = "";
   if(LEKTIONEN.length > 1){
-    const st = lessonStats(CARDS, P, now);
+    const st = lessonStats(CARDS, P, now, S.dir);
     h += '<button class="les all'+(all ? " on" : "")+'" data-all="1"><span class="ck">'+(all ? "✓" : "")+'</span>'+
       '<span class="t"><b>ALLE LEKTIONEN</b><small>'+CARDS.length+' Wörter · '+st.due+' heute fällig</small></span>'+pcBox(st)+'</button>';
   }
   for(const l of LEKTIONEN){
-    const on = S.sel.includes(l.id), cs = CARDS.filter(c => c.lid === l.id), st = lessonStats(cs, P, now);
+    const on = S.sel.includes(l.id), cs = CARDS.filter(c => c.lid === l.id), st = lessonStats(cs, P, now, S.dir);
     h += '<button class="les'+(on ? " on" : "")+(pct(st) === 100 ? " full" : "")+'" data-les="'+esc(l.id)+'"><span class="ck">'+(on ? "✓" : "")+'</span>'+
       '<span class="t"><b>'+esc(l.titel)+'</b><small>'+cs.length+' Wörter · '+st.due+' heute fällig</small></span>'+pcBox(st)+'</button>';
   }

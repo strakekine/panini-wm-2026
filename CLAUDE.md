@@ -701,7 +701,7 @@ Vom Vater festgelegt: neue Wörter starten in **Fach 0**, das dieselbe Regel hat
 ein neues Wort kommt nie gleich nach 2 Tagen. Falsch → Fach 0, solange das Wort nie über
 Fach 1 hinaus war; war es schon einmal in Fach 2+ (`hi`), nur nach Fach 1. Immer **morgen**
 fällig, Marke `bad` (für „Meine Fehler“). Beide Richtungen zählen getrennt
-(`key = id>fd|df`). „Heute fällig“ = fällig + neu; gesehene zuerst, **unter ihnen das niedrigste Fach zuerst**
+(`key = id>fd|df`). „Heute fällig“ = fällig + neu (die Zahl im Startbild zählt **Wörter** in der gewählten Richtung, wie eine Runde sie bringt — vorher beide Richtungen, „118 fällig“ bei 78 Wörtern; `lessonStats(…, dir)`); gesehene zuerst, **unter ihnen das niedrigste Fach zuerst**
 (vom Vater: nach einer Pause stauen sich fällige Wörter, und eine 10er-Runde soll die
 wackeligen bringen, nicht Fach-4-Wörter). Innerhalb eines Fachs zufällig. Pausen bestrafen
 nicht: kein Wort fällt durchs Nichtlernen zurück, nur durch falsche Antworten. In der Runde kommt ein

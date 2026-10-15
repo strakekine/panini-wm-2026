@@ -649,7 +649,19 @@ Lektionen, Richtung aus der Einstellung (gemischt = je Wort zufällig), Lektions
 oder gemischt. Antippen deckt auf, nochmal antippen = nächstes Wort. Zählt nicht für die
 Fächer. Am Ende „Jetzt abfragen“ mit den aktuellen Einstellungen.
 
-**Speicher:** `vokabeln_v1` (Einstellungen, Name), `_p` (Lernstand), `_exp` (letzte
+**Motivation** (vom Vater gewünscht, Nr. 1 und 2 aus einem Vorschlag): oben im Startbild die
+Zahl **sicher** (Fach 4, beide Richtungen einzeln) und ein **Wochenziel** Mo–So mit 5
+Lerntagen; ein Lerntag = 10 erste Antworten an einem Tag (`DAY_MIN`), „Nur lernen“ zählt nicht.
+Bewusst **keine Prozentzahl oben** — jede neue Lektion würde sie drücken; Prozent nur je
+Lektion (`pct`, abgerundet, 100 % nur bei allem sicher, dann ✓). Bewusst **keine Serie**
+(fällt nach einem Krankheitstag auf null), keine Punkte je Antwort (mit „Alle“ austricksbar),
+kein Emil-gegen-Leo (unfair, bräuchte Server), keine Blitzrunde (belohnt Tempo statt
+Genauigkeit). Nach der Runde: „⭐ n Wörter jetzt sicher“ und „📅 Lerntag geschafft“, wenn
+der Tag in dieser Runde voll wurde. „Verhört? Nochmal“ nimmt beides zurück. Offen als
+zweiter Schritt: Klassenarbeit-Modus (Datum je Lektion, „Bereit: x %“).
+
+**Speicher:** `vokabeln_v1` (Einstellungen, Name), `_p` (Lernstand), `_days` (Antworten je
+Tag, 60 Tage, in der Sicherung mit drin), `_exp` (letzte
 Sicherung), `_dirty` (erste Antwort seit der letzten Sicherung), `_snooze` („Später“ bis).
 Sicherung als Datei über `navigator.share` wie in den anderen Apps. **Erinnerung**
 (`needBackup`): oben im Startbild, wenn die erste ungesicherte Antwort eine Woche alt ist —

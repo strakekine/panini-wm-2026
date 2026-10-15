@@ -124,6 +124,27 @@
   .mic{width:100%;margin-top:10px;min-height:64px;font-size:22px;background:var(--blue);color:#06142e}
   .mic.live{background:var(--bad);color:#fff}
 
+  /* Fortschritt oben im Startbild */
+  .prog{display:flex;gap:14px;align-items:center}
+  .prog .safe{flex:none;text-align:center;min-width:86px}
+  .prog .safe b{display:block;font-family:'Bebas Neue',sans-serif;font-size:46px;line-height:1;color:var(--good);letter-spacing:1px}
+  .prog .safe span{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+  .prog .wk{flex:1;min-width:0}
+  .days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:6px}
+  .days div{text-align:center;font-size:11px;font-weight:700;color:var(--muted)}
+  .days i{display:block;height:24px;border-radius:7px;background:var(--panel2);border:1px solid var(--line);margin-top:3px}
+  .days .on i{background:var(--gold);border-color:var(--gold)}
+  .days .today{color:var(--text)}
+  .days .today i{border-color:var(--text)}
+  .goal{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.4}
+  .goal b{color:var(--text)}
+  .goal.ok b{color:var(--gold)}
+  .les .pc{flex:none;width:58px;text-align:right}
+  .les .pc b{display:block;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.5px;line-height:1}
+  .les .pc .pr{margin-top:4px;width:100%}
+  .les.full .pc b{color:var(--good)}
+  .star{margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(62,207,106,.1);border:1px solid rgba(62,207,106,.35);font-size:15px;line-height:1.4}
+  .star.day{background:rgba(224,169,91,.1);border-color:rgba(224,169,91,.4)}
   .score{font-family:'Bebas Neue',sans-serif;font-size:54px;letter-spacing:1px;line-height:1;color:var(--gold)}
   .foot{color:var(--muted);font-size:11.5px;text-align:center;padding:18px 12px 0;line-height:1.5}
 </style>
@@ -154,6 +175,9 @@
 
 <!-- ============ Start ============ -->
 <div class="v-home" id="nagBox"></div>
+<div class="card v-home">
+  <div class="cbody"><div class="prog" id="progBox"></div></div>
+</div>
 <div class="card v-home">
   <div class="chead"><h2>Lektionen</h2><span class="hint" id="selHint"></span></div>
   <div class="cbody"><div class="lessons" id="lessons"></div></div>
@@ -472,6 +496,35 @@ function lessonStats(cards, P, now){
   }
   return { neu, lern, sicher, due, n:cards.length * 2 };
 }
+/* ----- Motivation -----
+   Gezählt wird nur, was sich nicht austricksen lässt: "sicher" heißt Fach 4, und dorthin
+   kommt ein Wort nur über Tage, nicht durch zehnmal "Alle". Oben steht die Zahl, nicht
+   Prozent — jede neue Lektion würde Prozent drücken, ohne dass etwas verlernt wurde.
+   Prozent nur je Lektion, die bleibt gleich groß.
+   Wochenziel statt Serie: Eine Serie fällt nach einem Krankheitstag auf null, ein
+   Wochenziel verzeiht das und beginnt jeden Montag neu. Ein Lerntag zählt ab 10 Antworten
+   (erste Versuche, "Nur lernen" zählt nicht) — eine einzige Antwort soll keinen Tag machen. */
+const DAY_MIN = 10, WEEK_GOAL = 5;
+const pct = st => Math.floor(100 * st.sicher / Math.max(1, st.n));   /* abrunden: 100 % nur, wenn alles sicher */
+function dayKey(t){ const d = new Date(t); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+const dayDone = e => !!e && e.n >= DAY_MIN;
+/* Woche Montag bis Sonntag: je Tag {label, done, today, future}, dazu die Zahl der Lerntage */
+function weekStatus(days, now){
+  const d = new Date(startOfDay(now)), wd = (d.getDay() + 6) % 7;   /* 0 = Montag */
+  const cells = [], labels = ["Mo","Di","Mi","Do","Fr","Sa","So"];
+  for(let i = 0; i < 7; i++){
+    const t = new Date(d.getFullYear(), d.getMonth(), d.getDate() - wd + i).getTime();
+    cells.push({ label:labels[i], done:dayDone(days[dayKey(t)]), today:i === wd, future:i > wd });
+  }
+  return { cells, count:cells.filter(c => c.done).length };
+}
+/* Nur die letzten 60 Tage aufheben */
+function pruneDays(days, now){
+  const out = {}, min = dayKey(now - 60 * DAY);
+  for(const k in days) if(k >= min && days[k] && days[k].n > 0) out[k] = { n:days[k].n|0 };
+  return out;
+}
+
 /* Erinnerung an die Sicherung. dirty = Zeitpunkt der ersten Antwort seit der letzten
    Sicherung (null = nichts Ungesichertes), snooze = "Später" bis. Erinnert wird, wenn das
    älter als eine Woche ist — nicht, weil eine Woche vergangen ist: wer nicht gelernt hat,
@@ -518,8 +571,9 @@ function markDirty(){ if(!lsGet("_dirty")) lsSet("_dirty", Date.now()); }
 function load(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }
 let S = sanitize(load(KEY));
 let P = sanitizeP(load(KEY + "_p"));
+let DAYS = pruneDays(load(KEY + "_days") || {}, Date.now());
 if(!S.sel.length && LEKTIONEN.length) S.sel = [LEKTIONEN[LEKTIONEN.length - 1].id];
-function persist(){ try { localStorage.setItem(KEY, JSON.stringify(S)); localStorage.setItem(KEY + "_p", JSON.stringify(P)); } catch(e){} }
+function persist(){ try { localStorage.setItem(KEY, JSON.stringify(S)); localStorage.setItem(KEY + "_p", JSON.stringify(P)); localStorage.setItem(KEY + "_days", JSON.stringify(DAYS)); } catch(e){} }
 
 let VIEW = "home";
 let Q = null;   /* laufende Abfrage */
@@ -531,6 +585,8 @@ function bar(st){
   const w = x => (100 * x / Math.max(1, st.n)).toFixed(1) + "%";
   return '<span class="pr"><i style="width:'+w(st.sicher)+';background:var(--good)"></i><i style="width:'+w(st.lern)+';background:var(--gold)"></i></span>';
 }
+/* Prozent sicher je Lektion, darunter der Balken (grün sicher, gelb am Lernen) */
+function pcBox(st){ const v = pct(st); return '<span class="pc"><b>'+(v === 100 ? "✓ " : "")+v+' %</b>'+bar(st)+'</span>'; }
 function renderHome(){
   const now = Date.now();
   const dirty = +lsGet("_dirty") || null, exp = lsGet("_exp");
@@ -541,17 +597,28 @@ function renderHome(){
       '<div class="btnrow"><button class="btn sm" id="nagSave">JETZT SICHERN</button><button class="btn ghost sm" id="nagLater">SPÄTER</button></div></div></div>'
     : "";
   $("title").innerHTML = "VOKABELN" + (S.name ? " <small>· " + esc(S.name.toUpperCase()) + "</small>" : "");
+  {
+    const total = lessonStats(CARDS, P, now), wk = weekStatus(DAYS, now), left = WEEK_GOAL - wk.count;
+    $("progBox").innerHTML =
+      '<div class="safe"><b>'+total.sicher+'</b><span>sicher</span></div>'+
+      '<div class="wk"><div class="lbl" style="margin:0">Diese Woche</div><div class="days">'+
+      wk.cells.map(c => '<div class="'+(c.done ? "on " : "")+(c.today ? "today" : "")+'">'+c.label+'<i></i></div>').join("")+
+      '</div><div class="goal'+(left <= 0 ? " ok" : "")+'">'+
+      (left <= 0 ? '<b>🎉 Wochenziel geschafft!</b> '+wk.count+' Lerntage.'
+                 : '<b>'+wk.count+' von '+WEEK_GOAL+'</b> Lerntagen. Ein Lerntag = '+DAY_MIN+' Antworten an einem Tag.')+
+      '</div></div>';
+  }
   const all = LEKTIONEN.length > 1 && S.sel.length === LEKTIONEN.length;
   let h = "";
   if(LEKTIONEN.length > 1){
     const st = lessonStats(CARDS, P, now);
     h += '<button class="les all'+(all ? " on" : "")+'" data-all="1"><span class="ck">'+(all ? "✓" : "")+'</span>'+
-      '<span class="t"><b>ALLE LEKTIONEN</b><small>'+CARDS.length+' Wörter · '+st.due+' heute fällig</small></span>'+bar(st)+'</button>';
+      '<span class="t"><b>ALLE LEKTIONEN</b><small>'+CARDS.length+' Wörter · '+st.due+' heute fällig</small></span>'+pcBox(st)+'</button>';
   }
   for(const l of LEKTIONEN){
     const on = S.sel.includes(l.id), cs = CARDS.filter(c => c.lid === l.id), st = lessonStats(cs, P, now);
-    h += '<button class="les'+(on ? " on" : "")+'" data-les="'+esc(l.id)+'"><span class="ck">'+(on ? "✓" : "")+'</span>'+
-      '<span class="t"><b>'+esc(l.titel)+'</b><small>'+cs.length+' Wörter · '+st.sicher+' von '+st.n+' sicher · '+st.due+' heute fällig</small></span>'+bar(st)+'</button>';
+    h += '<button class="les'+(on ? " on" : "")+(pct(st) === 100 ? " full" : "")+'" data-les="'+esc(l.id)+'"><span class="ck">'+(on ? "✓" : "")+'</span>'+
+      '<span class="t"><b>'+esc(l.titel)+'</b><small>'+cs.length+' Wörter · '+st.due+' heute fällig</small></span>'+pcBox(st)+'</button>';
   }
   $("lessons").innerHTML = h;
   $("selHint").textContent = S.sel.length + " gewählt";
@@ -588,7 +655,8 @@ function renderList(cs){
 const ACC = ["é","è","ê","à","â","ç","ù","û","î","ï","ô","ë","œ"];
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 function startQuiz(items){
-  Q = { items:items.slice(), i:0, first:{}, wrong:[], fb:null, retry:{}, total:items.length };
+  Q = { items:items.slice(), i:0, first:{}, wrong:[], fb:null, retry:{}, total:items.length,
+        gained:{}, counted:{}, dayBefore:dayDone(DAYS[dayKey(Date.now())]) };
   VIEW = "quiz"; document.body.dataset.view = VIEW; window.scrollTo(0, 0);
   showQ();
 }
@@ -630,7 +698,10 @@ function answer(text, alts){
   const k = key(it.cid, it.dir);
   if(!it.again && !(k in Q.first)){
     Q.first[k] = r.ok;
-    P[k] = review(P[k], r.ok, Date.now());
+    const now = Date.now(), vorher = P[k] ? P[k].b : -1;
+    P[k] = review(P[k], r.ok, now);
+    if(vorher < SICHER && P[k].b >= SICHER) Q.gained[k] = 1;
+    const dk = dayKey(now); DAYS[dk] = { n:(DAYS[dk] ? DAYS[dk].n : 0) + 1 }; Q.counted[k] = dk;
     if(!r.ok) Q.wrong.push(it);
     persist(); markDirty();
   }
@@ -664,6 +735,8 @@ function retry(){
   const it = cur(), k = key(it.cid, it.dir);
   Q.retry[k] = 1;
   if(Q.prev && Q.prev[k]) P[k] = Q.prev[k]; else delete P[k];
+  delete Q.gained[k];
+  const dk = Q.counted[k]; if(dk && DAYS[dk]) DAYS[dk].n = Math.max(0, DAYS[dk].n - 1); delete Q.counted[k];
   delete Q.first[k];
   Q.wrong = Q.wrong.filter(x => key(x.cid, x.dir) !== k);
   const j = Q.items.findIndex((x, n) => n > Q.i && x.again && key(x.cid, x.dir) === k);
@@ -680,6 +753,12 @@ function finish(){
   stopListen();
   const ks = Object.keys(Q.first), right = ks.filter(k => Q.first[k]).length;
   let h = '<div class="score">'+right+' / '+ks.length+'</div><div class="note" style="margin-top:4px">beim ersten Versuch richtig</div>';
+  const neu = Object.keys(Q.gained).length;
+  if(neu) h += '<div class="star">⭐ <b>'+neu+(neu === 1 ? " Wort ist" : " Wörter sind")+' jetzt sicher!</b> Insgesamt '+lessonStats(CARDS, P, Date.now()).sicher+'.</div>';
+  if(!Q.dayBefore && dayDone(DAYS[dayKey(Date.now())])){
+    const wk = weekStatus(DAYS, Date.now());
+    h += '<div class="star day">📅 <b>Lerntag geschafft!</b> '+(wk.count >= WEEK_GOAL ? "Wochenziel erreicht 🎉" : wk.count+" von "+WEEK_GOAL+" diese Woche.")+'</div>';
+  }
   if(Q.wrong.length){
     h += '<div class="lbl" style="margin-top:14px">Das war falsch</div><table class="w">';
     for(const it of Q.wrong){
@@ -770,7 +849,7 @@ function listen(){
 
 /* ----- Sicherung ----- */
 async function backup(btn){
-  const d = { app:"vokabeln", v:1, exported:new Date().toISOString(), state:S, p:P };
+  const d = { app:"vokabeln", v:1, exported:new Date().toISOString(), state:S, p:P, days:DAYS };
   const text = JSON.stringify(d);
   const name = "vokabeln-" + (S.name ? S.name.toLowerCase().replace(/[^a-z0-9äöü]+/g, "") + "-" : "") + new Date().toISOString().slice(0, 10) + ".json";
   const done = () => { lsSet("_exp", d.exported); lsSet("_dirty", null); lsSet("_snooze", null); renderHome(); };
@@ -793,7 +872,7 @@ function restore(text){
   const p = sanitizeP(d.p), st = sanitize(d.state);
   if(!confirm("Sicherung vom " + String(d.exported || "?").slice(0, 10) + (st.name ? " (" + st.name + ")" : "") + " laden?\n" +
     Object.keys(p).length + " gelernte Einträge.\nDas ersetzt den Lernstand auf diesem iPhone.")) return;
-  S = st; P = p; if(!S.sel.length && LEKTIONEN.length) S.sel = [LEKTIONEN[LEKTIONEN.length - 1].id];
+  S = st; P = p; DAYS = pruneDays(d.days && typeof d.days === "object" ? d.days : {}, Date.now()); if(!S.sel.length && LEKTIONEN.length) S.sel = [LEKTIONEN[LEKTIONEN.length - 1].id];
   if(d.exported) lsSet("_exp", d.exported);
   lsSet("_dirty", null); lsSet("_snooze", null);
   persist(); renderHome();
@@ -836,7 +915,7 @@ document.addEventListener("click", ev => {
     case "nagLater": lsSet("_snooze", Date.now() + SNOOZE_DAYS * DAY); renderHome(); return;
     case "restoreBtn": $("restoreFile").click(); return;
     case "resetBtn":
-      if(confirm("Den ganzen Lernstand auf diesem iPhone löschen? Alle Wörter sind danach wieder neu.")){ P = {}; persist(); renderHome(); }
+      if(confirm("Den ganzen Lernstand auf diesem iPhone löschen? Alle Wörter sind danach wieder neu.")){ P = {}; DAYS = {}; persist(); renderHome(); }
       return;
   }
 });

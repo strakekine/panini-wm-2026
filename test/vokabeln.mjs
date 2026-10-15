@@ -15,7 +15,7 @@ if(i < 0 || j < 0) throw new Error("Abschnittsmarken Lektionen/Oberfläche nicht
 const quelle = src.slice(src.lastIndexOf("/*", i), src.lastIndexOf("/*", j));
 const M = new Function(quelle + `
   return { LEKTIONEN, DAY, FACH, clean, variants, check, cardsOf, grade, review, isDue, buildSession,
-           lessonStats, startOfDay, key, needBackup };`)();
+           lessonStats, startOfDay, key, needBackup, weekStatus, dayKey, dayDone, pruneDays, pct, DAY_MIN };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text){ n++; if(!bed){ fehler++; console.log("✗ " + text); } }
@@ -164,6 +164,27 @@ ok(s.every(x => P2[M.key(x.cid, "fd")].b <= 2), "mit 3 Wörtern kommen nur die w
 
 const st = M.lessonStats(cards, P, t0);
 ok(st.n === cards.length * 2 && st.neu === st.n - 2 && st.lern === 2 && st.sicher === 0, "Statistik");
+
+/* --- Motivation: Wochenziel und Prozent --- */
+{
+  const mi = new Date(2026, 9, 14, 18).getTime();          /* Mittwoch, 14.10.2026 */
+  const days = {};
+  days[M.dayKey(mi - 2 * DAY)] = { n:12 };                 /* Montag: Lerntag */
+  days[M.dayKey(mi - DAY)] = { n:9 };                      /* Dienstag: knapp zu wenig */
+  days[M.dayKey(mi)] = { n:10 };                           /* Mittwoch: genau 10 */
+  days[M.dayKey(mi - 3 * DAY)] = { n:30 };                 /* Sonntag davor: andere Woche */
+  const w = M.weekStatus(days, mi);
+  ok(w.cells.map(c => c.label).join() === "Mo,Di,Mi,Do,Fr,Sa,So", "Woche beginnt Montag");
+  ok(w.cells.map(c => c.done ? 1 : 0).join("") === "1010000", "Lerntage Mo und Mi — ist " + w.cells.map(c => c.done ? 1 : 0).join(""));
+  ok(w.count === 2 && w.cells[2].today && w.cells[3].future, "Zählung, heute, Zukunft");
+  const so = new Date(2026, 9, 18, 21).getTime();          /* Sonntagabend derselben Woche */
+  ok(M.weekStatus(days, so).count === 2 && M.weekStatus(days, so).cells[6].today, "Sonntag gehört noch zur Woche");
+  ok(M.weekStatus(days, so + DAY).count === 0, "Montag danach: neue Woche, wieder 0");
+  ok(!M.dayDone({ n:M.DAY_MIN - 1 }) && M.dayDone({ n:M.DAY_MIN }), "Lerntag ab " + M.DAY_MIN + " Antworten");
+  const alt = M.pruneDays({ [M.dayKey(mi - 70 * DAY)]:{ n:20 }, [M.dayKey(mi)]:{ n:3 } }, mi);
+  ok(Object.keys(alt).length === 1, "alte Tage werden aufgeräumt");
+  ok(M.pct({ sicher:25, n:26 }) === 96 && M.pct({ sicher:26, n:26 }) === 100 && M.pct({ sicher:0, n:0 }) === 0, "Prozent abgerundet, 100 nur wenn alles sicher");
+}
 
 /* --- Erinnerung an die Sicherung --- */
 ok(!M.needBackup(null, null, t0), "nichts Ungesichertes → keine Erinnerung");

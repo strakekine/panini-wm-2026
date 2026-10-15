@@ -113,6 +113,21 @@ async function spielen(pg, falsch = []){
   await pg.close();
 }
 
+/* --- 3b. Sprechen blendet „Gemischt“ aus (geht am iPhone nicht), Tippen zeigt es wieder --- */
+{
+  const pg = await seite();
+  await pg.click('[data-opt="dir"] [data-v="mix"]');
+  await pg.click('[data-opt="input"] [data-v="voice"]');
+  ok(!(await pg.isVisible('[data-opt="dir"] [data-v="mix"]')), "Sprechen: „Gemischt“ ausgeblendet");
+  ok(await pg.evaluate(() => S.dir) === "df", "Sprechen: aus „Gemischt“ wird DE → FR — ist " + await pg.evaluate(() => S.dir));
+  await pg.reload();
+  ok(!(await pg.isVisible('[data-opt="dir"] [data-v="mix"]')), "bleibt nach Neuladen ausgeblendet");
+  await pg.click('[data-opt="input"] [data-v="type"]');
+  ok(await pg.isVisible('[data-opt="dir"] [data-v="mix"]'), "Tippen: „Gemischt“ wieder da");
+  ok(!pg.errs.length, "keine Fehler auf der Seite: " + pg.errs.join(" | "));
+  await pg.close();
+}
+
 /* --- 4. Sicherungs-Erinnerung --- */
 {
   const pg = await seite();

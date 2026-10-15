@@ -12,6 +12,9 @@
    Varianten:
    - ios:    wie oben. Die Sitzung lebt, bis die Seite zu ist; Ergebnisse an die erste Erkennung.
    - chrome: jede Erkennung für sich; je Äußerung ein neues Ergebnis mit isFinal; onend nach abort.
+   - ios + endet: wie ios, aber einige Zeit nach dem Wort endet die Sitzung von selbst mit
+     error audio-capture und onend (so in der Mitschrift vom 15.10.2026, Fassung e). Danach muss
+     das nächste Antippen eine neue starten, und es darf keine Fehlermeldung stehen bleiben.
    Gesprochen wird erst, nachdem der Knopf angetippt ist (window.__sprich). Ohne laufende
    Erkennung hört niemand zu. Attrappe immer unter BEIDEN Namen setzen, sonst nimmt die App die
    echte von Chrome, die im Testbrowser stumm bleibt.
@@ -24,6 +27,7 @@ const datei = process.argv[2] || path.join(path.dirname(fileURLToPath(import.met
 const VARIANTEN = [
   { name:"iOS: Sitzung lebt weiter, Ergebnisse an die erste", art:"ios",    pause:300 },
   { name:"iOS, Mikrofon gleich nach „Weiter“",                art:"ios",    pause:20 },
+  { name:"iOS: Sitzung endet nach dem Wort mit audio-capture", art:"ios",   pause:300, endet:true },
   { name:"Chrome: jede Erkennung für sich",                   art:"chrome", pause:300 },
 ];
 const WOERTER = 6;
@@ -67,6 +71,12 @@ for(const v of VARIANTEN){
         const send = t => { const alt = [{ transcript:t }]; alt.isFinal = false; ziel.onresult && ziel.onresult({ results:[alt] }); };
         setTimeout(() => send((text ? text + " " : "") + halb), 40);
         setTimeout(() => { text = (text ? text + " " : "") + wort; send(text); }, 120);
+        if(opt.endet) setTimeout(() => {
+          if(erste !== ziel) return;
+          erste = null; text = "";
+          ziel.onerror && ziel.onerror({ error:"audio-capture" });
+          ziel.onend && ziel.onend();
+        }, 1900);
         return;
       }
       const ziel = aktiv; if(!ziel || !ziel.on) return;
@@ -87,7 +97,7 @@ for(const v of VARIANTEN){
     await pg.evaluate(() => { const it = Q.items[Q.i], c = BYID[it.cid]; window.__sprich(variants(it.dir === "df" ? c.f : c.d)[0]); });
     await pg.waitForTimeout(2000);
     const fb = (await pg.textContent("#qFb")).trim(), feld = await pg.inputValue("#qIn"), note = await pg.textContent("#qNote");
-    if(fb.startsWith("✓")) gut++;
+    if(fb.startsWith("✓") && !note) gut++;
     else log.push((i + 1) + ": Feld " + JSON.stringify(feld) + " → " + (fb.slice(0, 30) || "keine Auswertung") + (note ? " | " + note : ""));
     if(!(await pg.isVisible("#qGo"))) break;
     await pg.click("#qGo"); await pg.waitForTimeout(v.pause);

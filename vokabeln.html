@@ -616,7 +616,7 @@ function needBackup(dirty, snooze, now){
 /* Fassung — bei JEDER Änderung hochzählen. Steht unten im Startbild und als erste Zeile der
    Mitschrift; am iPhone lief einmal noch die alte Datei aus dem Zwischenspeicher, und die
    Mitschrift sah aus wie ein neuer Fehler. */
-const FASSUNG = "15.10.2026 e";
+const FASSUNG = "15.10.2026 f";
 const KEY = "vokabeln_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
@@ -636,6 +636,11 @@ function sanitize(s){
     input: s.input === "voice" ? "voice" : "type",
   };
 }
+/* Sprechen + Gemischt geht am iPhone nicht: eine laufende Erkennung behält ihre Sprache, und
+   ein Neustart in der anderen Sprache klappt dort nicht (siehe Sprechen). Darum ist „Gemischt“
+   beim Sprechen ausgeblendet; wer es eingestellt hatte, bekommt DE → FR — beim Sprechen geht
+   es vor allem ums Französisch-Sagen. Vom Vater so gewünscht. */
+function fixDir(st){ if(st.input === "voice" && st.dir === "mix") st.dir = "df"; return st; }
 function sanitizeP(p){
   const out = {};
   if(p && typeof p === "object") for(const k in p){
@@ -651,7 +656,7 @@ function lsSet(k, v){ try { if(v == null) localStorage.removeItem(KEY + k); else
 /* Erste ungesicherte Antwort merken; spätere überschreiben sie nicht */
 function markDirty(){ if(!lsGet("_dirty")) lsSet("_dirty", Date.now()); }
 function load(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }
-let S = sanitize(load(KEY));
+let S = fixDir(sanitize(load(KEY)));
 let P = sanitizeP(load(KEY + "_p"));
 let DAYS = pruneDays(load(KEY + "_days") || {}, Date.now());
 if(!S.sel.length && LEKTIONEN.length) S.sel = LEKTIONEN.map(l => l.id);
@@ -706,7 +711,10 @@ function renderHome(){
   $("selHint").textContent = S.sel.length + " gewählt";
   document.querySelectorAll("[data-opt]").forEach(seg => {
     const v = String(S[seg.dataset.opt]);
-    seg.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === v));
+    seg.querySelectorAll("button").forEach(b => {
+      b.classList.toggle("on", b.dataset.v === v);
+      if(seg.dataset.opt === "dir" && b.dataset.v === "mix") b.style.display = S.input === "voice" ? "none" : "";
+    });
   });
   const cs = selCards(), sess = buildSession(cs, P, opts(), now);
   const info = !cs.length ? "Wähle oben mindestens eine Lektion."
@@ -985,6 +993,9 @@ function neueErkennung(lang){
     if(e.error === "no-speech") return;   /* läuft bei continuous meist weiter; sonst kommt onend */
     REC_ALIVE = false; REC = null; r.alt = true;
     if(LISTEN && LISTEN.txt) return settle();
+    /* Hört gerade keiner zu (iOS beendet die Sitzung einige Sekunden nach dem letzten Wort mit
+       audio-capture), ist das harmlos: das nächste Antippen startet eine neue. Nicht melden. */
+    if(!LISTEN) return;
     stopListen(); micIdle();
     $("qNote").textContent = e.error === "not-allowed" ? "Mikrofon nicht erlaubt. Beim nächsten Fragen „Erlauben“ tippen — oder ins Feld tippen und das Mikrofon der Tastatur nehmen."
       : "Spracherkennung geht gerade nicht ("+e.error+"). Nochmal tippen — oder ins Feld tippen und das Mikrofon der Tastatur nehmen.";
@@ -1053,7 +1064,7 @@ function restore(text){
   const p = sanitizeP(d.p), st = sanitize(d.state);
   if(!confirm("Sicherung vom " + String(d.exported || "?").slice(0, 10) + (st.name ? " (" + st.name + ")" : "") + " laden?\n" +
     Object.keys(p).length + " gelernte Einträge.\nDas ersetzt den Lernstand auf diesem iPhone.")) return;
-  S = st; P = p; DAYS = pruneDays(d.days && typeof d.days === "object" ? d.days : {}, Date.now()); if(!S.sel.length && LEKTIONEN.length) S.sel = LEKTIONEN.map(l => l.id);
+  S = fixDir(st); P = p; DAYS = pruneDays(d.days && typeof d.days === "object" ? d.days : {}, Date.now()); if(!S.sel.length && LEKTIONEN.length) S.sel = LEKTIONEN.map(l => l.id);
   if(d.exported) lsSet("_exp", d.exported);
   lsSet("_dirty", null); lsSet("_snooze", null);
   persist(); renderHome();
@@ -1073,7 +1084,7 @@ document.addEventListener("click", ev => {
   }
   const seg = b.closest("[data-opt]");
   if(seg && b.dataset.v != null){
-    const o = seg.dataset.opt; S[o] = o === "count" ? +b.dataset.v : b.dataset.v;
+    const o = seg.dataset.opt; S[o] = o === "count" ? +b.dataset.v : b.dataset.v; fixDir(S);
     persist(); renderHome(); return;
   }
   switch(b.id){

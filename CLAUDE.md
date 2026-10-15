@@ -652,10 +652,15 @@ man die Lösung nicht lesen). Abgeschaltet wird erst bei Ende/Abbruch der Abfrag
 (`endSession()`). Der orangene Mikrofon-Punkt bleibt darum während der Abfrage an.
 **Sprachwechsel geht so nicht:** eine laufende Erkennung behält ihre Sprache; bei „Gemischt“
 muss bei jedem Wechsel FR/DE neu gestartet werden — genau das, was iOS offenbar nicht kann.
-Fürs Sprechen also feste Richtung; die Mitschrift zeigt am Gerät, ob der Wechsel trotzdem geht
-(abgelöste Erkennungen protokollieren weiter als „(alt)“). **Am Gerät noch nicht bestätigt.**
+**Am Gerät bestätigt (Fassung e):** mehrere Wörter hintereinander gehen, Auswertung nimmt nur
+das Neue. Danach beendet iOS die Sitzung einige Sekunden nach dem letzten Wort von selbst mit
+`error audio-capture` + `onend`; das ist harmlos (nächstes Antippen startet eine neue, die
+funktioniert) und wird seit Fassung f **nicht mehr gemeldet**, wenn gerade niemand zuhört.
+**„Gemischt“ ist beim Sprechen ausgeblendet** (`fixDir()`, vom Vater gewünscht); war es
+eingestellt, wird DE → FR daraus. Gilt auch beim Laden und Wiederherstellen.
 **Test:** `node test/vokabeln-sprechen.mjs` mit Attrappe „ios“ (Sitzung lebt, Ergebnisse an die
-erste, Text gesammelt) und „chrome“ (jede Erkennung für sich, `isFinal`, `onend`). Die Fassungen
+erste, Text gesammelt; Variante „endet“ mit audio-capture nach dem Wort — dort darf keine
+Fehlermeldung stehen) und „chrome“ (jede Erkennung für sich, `isFinal`, `onend`). Die Fassungen
 1–4 scheitern in „ios“ beim zweiten Wort, genau wie am Gerät. **Attrappe immer unter beiden
 Namen setzen** (`SpeechRecognition` UND `webkitSpeechRecognition`), sonst nimmt die App die
 echte von Chrome, die im Testbrowser stumm bleibt — sieht aus wie ein App-Fehler, ist keiner.

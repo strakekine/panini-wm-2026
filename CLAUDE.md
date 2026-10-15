@@ -633,32 +633,35 @@ Erkennung liefert bis zu 5 Lesarten; passt eine, gilt es als richtig (Homophone 
 verre/vert). Bei falscher gesprochener Antwort einmal pro Wort „Verhört? Nochmal“ — nimmt den
 Versuch samt Fach-Änderung zurück. Rückfall ist das Mikrofon der Tastatur (Text landet im
 Feld, wird aber dann wie getippt geprüft). Vorlesen ist ausdrücklich nicht gewünscht.
-**Am iPhone gemeldet, 15.10.2026 — drei Fehler nacheinander, alle im Chrome unsichtbar:**
-1. Neue Erkennung je Wort ohne `stop()`: ab dem zweiten Wort Mikrofon belegt (`audio-capture`).
-2. EINE Erkennung für alles: „chat se promener“ im Feld — iOS hängt Neues an Altes, `isFinal`
-   bleibt aus.
-3. Frische Erkennung je Wort, aber erst nach `onend` der vorigen: iOS meldet `onend` nach
-   `stop()` nicht (verlässlich) — die App hielt das Mikrofon für belegt, wartete still, beim
-   zweiten Antippen passierte nichts.
-Jetzt: **auf `onend` wird für nichts gewartet.** Ausgewertet oder Frage gewechselt → `drop()`:
-Handler weg, `abort()`, `REC` leer. Nächstes Antippen startet sofort eine frische Erkennung (im
-Klick). Mikrofon noch nicht frei (`audio-capture` oder `start()` wirft) → einmal nach 400 ms
-selbst neu (`RETRY_MS`). Vorangestellter alter Text wird abgeschnitten (`PREV_RAW`). Auswertung
-bei `isFinal` oder nach 1,5 s Stille (`SILENCE_MS`); die Lösung bleibt stehen, bis „Weiter“
-getippt wird — **kein automatisches Weiter**, vom Vater ausdrücklich so (sonst kann man die
-Lösung nicht lesen). **Wächter** (`WATCH_MS` 2,5 s): meldet das iPhone nach `start()` gar nichts
-(kein onstart/audiostart/result), wird einmal neu gestartet. **Mitschrift** `#srLog` unter dem
-Knopf (nur im Sprechen-Modus, letzte 14 Meldungen mit Zeit): zum Eingrenzen am Gerät, nachdem
-der dritte Anlauf am iPhone **immer noch** nicht ging — der Vater schickt einen Screenshot
-davon. Wenn das Sprechen läuft, kann sie wieder weg (oder hinter einen Schalter). **Test:** `node test/vokabeln-sprechen.mjs`, Attrappe in vier Varianten
-(mit/ohne `onend`, Mikrofon sofort/verzögert frei, schnelles Antippen nach „Weiter“, erster
-Start nach jedem Wort stumm); jede der drei früheren Fassungen scheitert dort beim zweiten
-Wort, ohne Wächter scheitert die Stumm-Variante. **Attrappe immer unter beiden Namen setzen**
-(`SpeechRecognition` UND `webkitSpeechRecognition`), sonst nimmt die App die echte von Chrome,
-die im Testbrowser stumm bleibt — sieht aus wie ein App-Fehler, ist keiner. **Am Gerät noch nicht bestätigt.**
+**Am iPhone gemeldet, 15.10.2026 — vier Anläufe, alle im Chrome unsichtbar.** Der vierte
+brachte eine **Mitschrift** (`#srLog` unter dem Knopf, nur im Sprechen-Modus) und damit den
+Befund vom Gerät:
+```
+0.0s #1 start fr-FR · 1.3s onstart · 1.3s audiostart · 4.8s speechstart · result „Visiter un musée“ · 7.0s abbrechen
+0.0s #2 start fr-FR · 0.0s onstart · 0.0s audiostart · — dann nichts mehr
+```
+Deutung: **iOS beendet die erste Sitzung trotz `abort()` nicht.** Eine neue Erkennung meldet
+sofort „an“ (keine 1,3 s Anlauf), das Gehörte geht aber weiter an die **erste** — gesammelt in
+einem Text, ohne `isFinal`, ohne `onend`. Das erklärt alle früheren Fehlbilder („chat se
+promener“ = die erste Sitzung sammelte weiter; zweites Wort stumm = an weggeworfene Erkennung
+geliefert). **Darum jetzt: EINE Erkennung läuft die ganze Abfrage durch** (`continuous`), wird
+nicht abgebrochen; Antippen merkt sich den bisherigen Text (`LISTEN.base`), Antwort ist nur das
+Neue (`neuSeit()`, notfalls nach Wortzahl). Auswertung nach 1,5 s Stille (`SILENCE_MS`);
+„Weiter“ bleibt ein Knopf — **kein automatisches Weiter**, vom Vater ausdrücklich so (sonst kann
+man die Lösung nicht lesen). Abgeschaltet wird erst bei Ende/Abbruch der Abfrage
+(`endSession()`). Der orangene Mikrofon-Punkt bleibt darum während der Abfrage an.
+**Sprachwechsel geht so nicht:** eine laufende Erkennung behält ihre Sprache; bei „Gemischt“
+muss bei jedem Wechsel FR/DE neu gestartet werden — genau das, was iOS offenbar nicht kann.
+Fürs Sprechen also feste Richtung; die Mitschrift zeigt am Gerät, ob der Wechsel trotzdem geht
+(abgelöste Erkennungen protokollieren weiter als „(alt)“). **Am Gerät noch nicht bestätigt.**
+**Test:** `node test/vokabeln-sprechen.mjs` mit Attrappe „ios“ (Sitzung lebt, Ergebnisse an die
+erste, Text gesammelt) und „chrome“ (jede Erkennung für sich, `isFinal`, `onend`). Die Fassungen
+1–4 scheitern in „ios“ beim zweiten Wort, genau wie am Gerät. **Attrappe immer unter beiden
+Namen setzen** (`SpeechRecognition` UND `webkitSpeechRecognition`), sonst nimmt die App die
+echte von Chrome, die im Testbrowser stumm bleibt — sieht aus wie ein App-Fehler, ist keiner.
 Die Mikrofon-Nachfrage bei jedem App-Start macht iOS selbst (Home-Bildschirm-Apps merken sich
 die Erlaubnis nicht) — nicht abstellbar; in Safari unter „aA → Website-Einstellungen →
-Mikrofon“ dauerhaft erlaubbar.
+Mikrofon“ dauerhaft erlaubbar. Wenn das Sprechen läuft, kann die Mitschrift wieder weg.
 
 **Karteikasten:** 5 Fächer 0–4, Abstände `FACH = [1,1,2,4,7]` Tage ab Tagesbeginn. Fach 4 ist
 das oberste und „sicher“; spätestens jede Woche kommt jedes Wort wieder (vom Vater: Fach 5 mit

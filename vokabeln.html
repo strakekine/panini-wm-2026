@@ -829,7 +829,7 @@ function next(){
   showQ();
 }
 function finish(){
-  stopListen();
+  endSession();
   const ks = Object.keys(Q.first), right = ks.filter(k => Q.first[k]).length;
   let h = '<div class="score">'+right+' / '+ks.length+'</div><div class="note" style="margin-top:4px">beim ersten Versuch richtig</div>';
   const neu = Object.keys(Q.gained).length;
@@ -892,28 +892,32 @@ $("lCard").addEventListener("click", ev => {
   if(!L.open){ L.open = true; showLearn(); } else learnStep(1);
 });
 
-function goHome(){ stopListen(); Q = null; VIEW = "home"; document.body.dataset.view = VIEW; renderHome(); window.scrollTo(0, 0); }
+function goHome(){ endSession(); Q = null; VIEW = "home"; document.body.dataset.view = VIEW; renderHome(); window.scrollTo(0, 0); }
 
 /* ----- Sprechen -----
-   Am iPhone vom Vater gemeldet (15.10.2026), drei Fehler nacheinander — alle im Chrome am
-   Rechner unsichtbar, darum gibt es test/vokabeln-sprechen.mjs mit einer iOS-Attrappe:
+   Am iPhone vom Vater gemeldet (15.10.2026), vier Anläufe — alle im Chrome am Rechner
+   unsichtbar, darum test/vokabeln-sprechen.mjs mit einer iOS-Attrappe:
    1. Neue Erkennung je Wort ohne stop(): ab dem zweiten Wort Mikrofon belegt.
-   2. EINE Erkennung für alles: iOS hängt Neues an Altes ("chat se promener"), isFinal bleibt aus.
-   3. Frische Erkennung je Wort, aber erst nach onend der vorigen: iOS meldet onend nach
-      stop() offenbar nicht (oder nicht verlässlich) — die App hielt das Mikrofon für belegt,
-      wartete still, und ab dem zweiten Wort passierte beim Antippen gar nichts.
-   Darum jetzt: Auf onend wird für NICHTS mehr gewartet. Ist ein Wort ausgewertet oder die
-   Frage gewechselt, wird die Erkennung abgebrochen und sofort vergessen (Handler weg, `REC`
-   leer). Das nächste Antippen startet direkt eine frische — im Klick, wie iOS es will. Ist
-   das Mikrofon in dem Moment noch nicht frei (audio-capture, oder start() wirft), versucht
-   die App es nach 400 ms genau einmal selbst noch einmal. Alter Text, den iOS voranstellt,
-   wird abgeschnitten (PREV_RAW). Ausgewertet wird bei isFinal oder nach 1,5 s Stille; danach
-   bleibt die Lösung stehen, bis „Weiter“ getippt wird (vom Vater so gewollt). Die
-   Mikrofon-Nachfrage bei jedem App-Start macht iOS selbst und lässt sich nicht abstellen. */
-const SILENCE_MS = 1500, RETRY_MS = 400, WATCH_MS = 2500;
-let REC = null, PREV_RAW = "", SRNR = 0, SRT0 = 0;
-/* Mitschrift: jede Meldung des iPhones mit Zeit seit dem Antippen. Bleibt über die Fragen
-   hinweg stehen (letzte 14 Zeilen), damit man beim zweiten Wort sieht, was beim ersten war. */
+   2. EINE Erkennung, je Wort neu gestartet: "chat se promener" im Feld, isFinal bleibt aus.
+   3./4. Frische Erkennung je Wort, die alte abgebrochen: das zweite Wort kommt nie an.
+   Die Mitschrift (#srLog) vom iPhone hat es gezeigt: Beim zweiten Wort meldet die neue
+   Erkennung SOFORT onstart + audiostart (die erste brauchte 1,3 s) und danach nichts mehr.
+   Deutung: iOS beendet die erste Sitzung trotz abort() nicht; die neue hängt sich nur an,
+   das Gehörte geht weiter an die erste — die wir weggeworfen hatten. Passt zu Fehler 2.
+   Darum jetzt: EINE Erkennung läuft durch die ganze Abfrage (continuous), sie wird nicht
+   abgebrochen. Antippen merkt sich, was bis dahin gesammelt war (LISTEN.base), und nur das
+   Neue danach ist die Antwort. Ausgewertet wird nach 1,5 s Stille oder bei isFinal; „Weiter“
+   bleibt ein Knopf (vom Vater so gewollt). Erst beim Beenden der Abfrage wird sie
+   abgeschaltet (endSession). Endet sie von selbst (Chrome, oder iOS nach langer Stille), startet
+   das nächste Antippen eine neue. Die Sprache einer laufenden Erkennung lässt sich nicht
+   wechseln: bei „Gemischt“ muss bei jedem Wechsel FR/DE neu gestartet werden — genau das,
+   was iOS offenbar nicht kann. Fürs Sprechen also eine feste Richtung; die Mitschrift zeigt,
+   ob der Wechsel trotzdem geht. Alte, abgelöste Erkennungen protokollieren weiter, was bei
+   ihnen ankommt („alt“), statt stumm zu sein — damit sieht man es, falls iOS dorthin liefert.
+   Die Mikrofon-Nachfrage bei jedem App-Start macht iOS selbst und lässt sich nicht abstellen. */
+const SILENCE_MS = 1500, WATCH_MS = 4000;
+let REC = null, REC_ALIVE = false, LISTEN = null, SRNR = 0, SRT0 = 0;
+/* Mitschrift: jede Meldung mit Zeit seit dem letzten Antippen, letzte 14 Zeilen */
 const SRLOG = [];
 function srlog(t){
   SRLOG.push(((Date.now() - SRT0) / 1000).toFixed(1).padStart(5) + "s  " + t);
@@ -922,91 +926,100 @@ function srlog(t){
 }
 function micIdle(){ const m = $("qMic"); m.classList.remove("live"); m.textContent = "🎤 SPRECHEN"; }
 function micLive(){ const m = $("qMic"); m.classList.add("live"); m.textContent = "● ICH HÖRE …"; }
-/* Erkennung abbrechen und vergessen — ohne auf irgendeine Meldung vom iPhone zu warten */
-function drop(r){
-  if(!r) return;
-  if(!r.done) srlog("#" + r.nr + " abbrechen");
-  r.done = true; clearTimeout(r.silence); clearTimeout(r.retry); clearTimeout(r.watch);
-  r.onresult = r.onerror = r.onend = r.onstart = r.onaudiostart = r.onspeechstart = null;
-  try { r.abort(); } catch(e){}
-  if(REC === r) REC = null;
+/* Was seit dem Antippen dazugekommen ist. iOS sammelt alles in einem Text; Chrome liefert je
+   Sitzung neu. Passt der Anfang nicht mehr (iOS hat frühere Wörter korrigiert), zählt die
+   Wortzahl ab dem Stand beim Antippen. */
+function neuSeit(full, base){
+  const f = full.trim(), b = base.trim();
+  if(!b) return f;
+  if(f.startsWith(b)) return f.slice(b.length).trim();
+  return f.split(/\s+/).slice(b.split(/\s+/).length).join(" ");
 }
-function stopListen(){ drop(REC); }
-/* Gehörtes einmal auswerten, dann die Erkennung loswerden */
-function settle(r){
-  if(r.done) return;
-  const h = r.heard;
-  drop(r);
-  if(h && h.raw) PREV_RAW = h.raw;
-  if(h && h.txt && Q && !Q.fb) answer(h.txt, h.alts);
+/* Nur das Zuhören für diese Frage beenden — die Erkennung läuft weiter */
+function stopListen(){
+  if(LISTEN){ clearTimeout(LISTEN.silence); clearTimeout(LISTEN.watch); LISTEN = null; }
+}
+/* Abfrage zu Ende: Erkennung wirklich abschalten */
+function endSession(){
+  stopListen();
+  if(REC){ const r = REC; r.alt = true; REC = null; REC_ALIVE = false; try { r.abort(); } catch(e){} }
+}
+function settle(){
+  const L = LISTEN; if(!L) return;
+  stopListen();
+  if(L.txt && Q && !Q.fb){ srlog("auswerten „" + L.txt + "“"); answer(L.txt, L.alts); }
   else micIdle();
 }
-/* iOS stellt manchmal den Text der vorigen Erkennung voran: abschneiden */
-function fresh(raw){
-  const t = raw.trim();
-  if(PREV_RAW && t.length > PREV_RAW.length && t.startsWith(PREV_RAW)) return t.slice(PREV_RAW.length).trim();
-  return t;
-}
-function listen(nochmal){
-  if(!SR || !Q || Q.fb) return;
-  const it = cur(), k = key(it.cid, it.dir);
-  /* Für das Zurücknehmen merken, wie das Fach vorher stand */
-  Q.prev = Q.prev || {}; if(!(k in Q.prev)) Q.prev[k] = P[k] ? { ...P[k] } : null;
-  drop(REC);   /* eine alte, falls noch da, nie abwarten */
+function neueErkennung(lang){
   const r = new SR();
-  r.lang = it.dir === "df" ? "fr-FR" : "de-DE";
-  r.interimResults = true; r.maxAlternatives = 5; r.continuous = false;
-  r.done = false; r.heard = null; r.silence = null; r.retry = null; r.watch = null; r.lebt = false;
-  r.nr = ++SRNR; if(!nochmal) SRT0 = Date.now();
-  srlog("#" + r.nr + " start " + r.lang + (nochmal ? " (2. Versuch)" : ""));
-  const lebt = was => { r.lebt = true; clearTimeout(r.watch); srlog("#" + r.nr + " " + was); };
-  r.onstart = () => lebt("onstart");
-  r.onaudiostart = () => lebt("audiostart");
-  r.onspeechstart = () => lebt("speechstart");
-  /* Mikrofon noch nicht frei: einmal kurz warten und neu versuchen */
-  const wiederholen = grund => {
-    if(!nochmal && Q && !Q.fb){ drop(r); srlog("#" + r.nr + " neu in " + RETRY_MS + " ms"); $("qNote").textContent = "Mikrofon wird frei …"; setTimeout(() => { if(Q && !Q.fb && !REC) listen(true); }, RETRY_MS); return true; }
-    return false;
-  };
+  r.lang = lang; r.continuous = true; r.interimResults = true; r.maxAlternatives = 5;
+  r.nr = ++SRNR; r.full = ""; r.alt = false;
+  const tag = () => "#" + r.nr + (r.alt ? " (alt)" : "");
+  const lebt = was => { if(!r.alt && LISTEN) clearTimeout(LISTEN.watch); srlog(tag() + " " + was); };
+  r.onstart = () => { lebt("onstart"); };
+  r.onaudiostart = () => { lebt("audiostart"); };
+  r.onspeechstart = () => { lebt("speechstart"); };
   r.onresult = e => {
-    if(r.done || !Q || Q.fb) return;
-    let raw = ""; for(let i = 0; i < e.results.length; i++) raw += e.results[i][0].transcript;
-    raw = raw.trim();
+    let full = ""; for(let i = 0; i < e.results.length; i++) full += (i ? " " : "") + e.results[i][0].transcript.trim();
     const last = e.results[e.results.length - 1];
-    const alts = []; for(let i = 1; i < last.length; i++) alts.push(fresh(last[i].transcript));
-    r.heard = { raw, txt:fresh(raw), alts };
-    lebt("result" + (last.isFinal ? " final" : "") + " „" + raw + "“");
-    $("qIn").value = r.heard.txt;
-    clearTimeout(r.silence);
-    if(last.isFinal) settle(r);
-    else r.silence = setTimeout(() => settle(r), SILENCE_MS);
+    lebt("result" + (last.isFinal ? " final" : "") + " „" + full + "“");
+    if(r.alt) return;
+    r.full = full;
+    if(!LISTEN || !Q || Q.fb) return;
+    const txt = neuSeit(full, LISTEN.base);
+    if(!txt) return;
+    const alts = []; for(let i = 1; i < last.length; i++){ const a = neuSeit(last[i].transcript, e.results.length > 1 ? "" : LISTEN.base); if(a) alts.push(a); }
+    LISTEN.txt = txt; LISTEN.alts = alts;
+    $("qIn").value = txt;
+    clearTimeout(LISTEN.silence);
+    if(last.isFinal && !r.continuous) settle();
+    else LISTEN.silence = setTimeout(settle, SILENCE_MS);
   };
   r.onerror = e => {
-    srlog("#" + r.nr + " error " + e.error + (r.done ? " (schon erledigt)" : ""));
-    if(r.done || e.error === "aborted") return;
-    if(r.heard && r.heard.txt) return settle(r);   /* gehört ist gehört */
-    if(e.error === "audio-capture" && wiederholen()) return;
-    drop(r); micIdle();
-    $("qNote").textContent = e.error === "no-speech" ? "Nichts gehört — nochmal tippen und sprechen."
-      : e.error === "not-allowed" ? "Mikrofon nicht erlaubt. Beim nächsten Fragen „Erlauben“ tippen — oder ins Feld tippen und das Mikrofon der Tastatur nehmen."
+    srlog(tag() + " error " + e.error);
+    if(r.alt || e.error === "aborted") return;
+    if(e.error === "no-speech") return;   /* läuft bei continuous meist weiter; sonst kommt onend */
+    REC_ALIVE = false; REC = null; r.alt = true;
+    if(LISTEN && LISTEN.txt) return settle();
+    stopListen(); micIdle();
+    $("qNote").textContent = e.error === "not-allowed" ? "Mikrofon nicht erlaubt. Beim nächsten Fragen „Erlauben“ tippen — oder ins Feld tippen und das Mikrofon der Tastatur nehmen."
       : "Spracherkennung geht gerade nicht ("+e.error+"). Nochmal tippen — oder ins Feld tippen und das Mikrofon der Tastatur nehmen.";
   };
-  /* Endet sie von selbst (Chrome tut das), wird ausgewertet, was da ist */
-  r.onend = () => { srlog("#" + r.nr + " onend"); if(!r.done) settle(r); };
+  r.onend = () => {
+    srlog(tag() + " onend");
+    if(r.alt) return;
+    REC_ALIVE = false; REC = null; r.alt = true;
+    if(LISTEN && LISTEN.txt) settle();
+    else if(LISTEN){ stopListen(); micIdle(); }
+  };
+  return r;
+}
+function listen(){
+  if(!SR || !Q || Q.fb) return;
+  const it = cur(), k = key(it.cid, it.dir), lang = it.dir === "df" ? "fr-FR" : "de-DE";
+  /* Für das Zurücknehmen merken, wie das Fach vorher stand */
+  Q.prev = Q.prev || {}; if(!(k in Q.prev)) Q.prev[k] = P[k] ? { ...P[k] } : null;
+  stopListen();
+  SRT0 = Date.now();
+  /* Andere Sprache als die laufende: neu starten (iOS kann das womöglich nicht — siehe oben) */
+  if(REC && REC.lang !== lang){ srlog("Sprache wechselt → neu"); endSession(); }
+  LISTEN = { k, base:REC && REC_ALIVE ? REC.full : "", txt:"", alts:[], silence:null, watch:null };
+  if(REC && REC_ALIVE){
+    srlog("#" + REC.nr + " hört weiter, Stand „" + LISTEN.base + "“");
+    micLive(); $("qNote").textContent = "";
+    return;
+  }
+  const r = neueErkennung(lang);
+  srlog("#" + r.nr + " start " + lang);
   REC = r;
   try {
-    r.start();
+    r.start(); REC_ALIVE = true;
     micLive(); $("qNote").textContent = "";
-    /* Wächter: meldet das iPhone nach dem Start gar nichts, still hängen lassen wir es nicht */
-    r.watch = setTimeout(() => {
-      if(r.done || r.lebt) return;
-      srlog("#" + r.nr + " keine Meldung nach " + (WATCH_MS / 1000) + " s");
-      if(!wiederholen()){ drop(r); micIdle(); $("qNote").textContent = "Das iPhone meldet nichts. Nochmal tippen — oder ins Feld tippen und das Mikrofon der Tastatur nehmen."; }
-    }, WATCH_MS);
+    const L = LISTEN;
+    L.watch = setTimeout(() => { if(LISTEN === L && !L.txt) srlog("#" + r.nr + " nach " + WATCH_MS / 1000 + " s noch nichts gehört"); }, WATCH_MS);
   } catch(e){
     srlog("#" + r.nr + " start wirft " + (e && e.name));
-    if(wiederholen()) return;
-    drop(r); micIdle();
+    REC = null; REC_ALIVE = false; stopListen(); micIdle();
     $("qNote").textContent = "Spracherkennung ließ sich nicht starten ("+(e && e.name || "?")+"). Nochmal tippen — oder ins Feld tippen und das Mikrofon der Tastatur nehmen.";
   }
 }
@@ -1063,7 +1076,7 @@ document.addEventListener("click", ev => {
     case "startBtn": { const s = buildSession(selCards(), P, opts(), Date.now()); if(s.length) startQuiz(s); return; }
     case "qGo": if(Q.fb) next(); else answer($("qIn").value); return;
     case "qSkip": answer(""); return;
-    case "qMic": if(REC){ stopListen(); micIdle(); } else listen(); return;
+    case "qMic": if(LISTEN){ settle(); } else listen(); return;
     case "qRetry": retry(); return;
     case "qStop":
       if(Object.keys(Q.first).length) finish(); else goHome(); return;

@@ -153,6 +153,7 @@
 <main>
 
 <!-- ============ Start ============ -->
+<div class="v-home" id="nagBox"></div>
 <div class="card v-home">
   <div class="chead"><h2>Lektionen</h2><span class="hint" id="selHint"></span></div>
   <div class="cbody"><div class="lessons" id="lessons"></div></div>
@@ -465,6 +466,14 @@ function lessonStats(cards, P, now){
   }
   return { neu, lern, sicher, due, n:cards.length * 2 };
 }
+/* Erinnerung an die Sicherung. dirty = Zeitpunkt der ersten Antwort seit der letzten
+   Sicherung (null = nichts Ungesichertes), snooze = "Später" bis. Erinnert wird, wenn das
+   älter als eine Woche ist — nicht, weil eine Woche vergangen ist: wer nicht gelernt hat,
+   hat auch nichts zu verlieren. */
+const BACKUP_DAYS = 7, SNOOZE_DAYS = 3;
+function needBackup(dirty, snooze, now){
+  return !!dirty && now - dirty >= BACKUP_DAYS * DAY && !(snooze && snooze > now);
+}
 
 /* ===================== Oberfläche ===================== */
 const KEY = "vokabeln_v1";
@@ -495,6 +504,10 @@ function sanitizeP(p){
   }
   return out;
 }
+function lsGet(k){ try { return localStorage.getItem(KEY + k); } catch(e){ return null; } }
+function lsSet(k, v){ try { if(v == null) localStorage.removeItem(KEY + k); else localStorage.setItem(KEY + k, String(v)); } catch(e){} }
+/* Erste ungesicherte Antwort merken; spätere überschreiben sie nicht */
+function markDirty(){ if(!lsGet("_dirty")) lsSet("_dirty", Date.now()); }
 function load(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }
 let S = sanitize(load(KEY));
 let P = sanitizeP(load(KEY + "_p"));
@@ -513,6 +526,13 @@ function bar(st){
 }
 function renderHome(){
   const now = Date.now();
+  const dirty = +lsGet("_dirty") || null, exp = lsGet("_exp");
+  $("nagBox").innerHTML = needBackup(dirty, +lsGet("_snooze") || null, now)
+    ? '<div class="msg warn" style="margin-top:2px"><span>💾</span><div><b>Lernstand sichern!</b> '+
+      (exp ? "Die letzte Sicherung ist vom " + new Date(exp).toLocaleDateString("de-DE") + "." : "Du hast noch nie gesichert.")+
+      ' Geht das iPhone kaputt oder wird die App gelöscht, ist sonst alles weg. Speichere die Datei in „Dateien“ (iCloud Drive) oder schick sie Papa.'+
+      '<div class="btnrow"><button class="btn sm" id="nagSave">JETZT SICHERN</button><button class="btn ghost sm" id="nagLater">SPÄTER</button></div></div></div>'
+    : "";
   $("title").innerHTML = "VOKABELN" + (S.name ? " <small>· " + esc(S.name.toUpperCase()) + "</small>" : "");
   const all = LEKTIONEN.length > 1 && S.sel.length === LEKTIONEN.length;
   let h = "";
@@ -541,7 +561,6 @@ function renderHome(){
   $("learnBtn").disabled = !cs.length;
   if(document.activeElement !== $("nameIn")) $("nameIn").value = S.name;
   renderList(cs);
-  let exp = null; try { exp = localStorage.getItem(KEY + "_exp"); } catch(e){}
   $("backupNote").textContent = (exp ? "Letzte Sicherung: " + new Date(exp).toLocaleDateString("de-DE") + ". " : "Noch nie gesichert. ") +
     "Der Lernstand liegt nur auf diesem iPhone. Die Sicherung ist eine Datei, z. B. für iCloud Drive.";
 }
@@ -606,7 +625,7 @@ function answer(text, alts){
     Q.first[k] = r.ok;
     P[k] = review(P[k], r.ok, Date.now());
     if(!r.ok) Q.wrong.push(it);
-    persist();
+    persist(); markDirty();
   }
   if(!r.ok){
     /* Falsch beantwortete Wörter kommen in derselben Runde wieder, bis sie sitzen —
@@ -747,7 +766,7 @@ async function backup(btn){
   const d = { app:"vokabeln", v:1, exported:new Date().toISOString(), state:S, p:P };
   const text = JSON.stringify(d);
   const name = "vokabeln-" + (S.name ? S.name.toLowerCase().replace(/[^a-z0-9äöü]+/g, "") + "-" : "") + new Date().toISOString().slice(0, 10) + ".json";
-  const done = () => { try { localStorage.setItem(KEY + "_exp", d.exported); } catch(e){} renderHome(); };
+  const done = () => { lsSet("_exp", d.exported); lsSet("_dirty", null); lsSet("_snooze", null); renderHome(); };
   try {
     const file = new File([text], name, { type:"application/json" });
     if(navigator.canShare && navigator.canShare({ files:[file] })){
@@ -768,7 +787,8 @@ function restore(text){
   if(!confirm("Sicherung vom " + String(d.exported || "?").slice(0, 10) + (st.name ? " (" + st.name + ")" : "") + " laden?\n" +
     Object.keys(p).length + " gelernte Einträge.\nDas ersetzt den Lernstand auf diesem iPhone.")) return;
   S = st; P = p; if(!S.sel.length && LEKTIONEN.length) S.sel = [LEKTIONEN[LEKTIONEN.length - 1].id];
-  if(d.exported){ try { localStorage.setItem(KEY + "_exp", d.exported); } catch(e){} }
+  if(d.exported) lsSet("_exp", d.exported);
+  lsSet("_dirty", null); lsSet("_snooze", null);
   persist(); renderHome();
 }
 
@@ -805,7 +825,8 @@ document.addEventListener("click", ev => {
     case "lAgain": startLearn(L.mix); return;
     case "lQuiz": { const s = buildSession(selCards(), P, opts(), Date.now()); if(s.length) startQuiz(s); else goHome(); return; }
     case "resHome": goHome(); return;
-    case "backupBtn": backup(b); return;
+    case "backupBtn": case "nagSave": backup(b); return;
+    case "nagLater": lsSet("_snooze", Date.now() + SNOOZE_DAYS * DAY); renderHome(); return;
     case "restoreBtn": $("restoreFile").click(); return;
     case "resetBtn":
       if(confirm("Den ganzen Lernstand auf diesem iPhone löschen? Alle Wörter sind danach wieder neu.")){ P = {}; persist(); renderHome(); }

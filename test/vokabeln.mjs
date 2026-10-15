@@ -15,7 +15,7 @@ if(i < 0 || j < 0) throw new Error("Abschnittsmarken Lektionen/Oberfläche nicht
 const quelle = src.slice(src.lastIndexOf("/*", i), src.lastIndexOf("/*", j));
 const M = new Function(quelle + `
   return { LEKTIONEN, DAY, FACH, clean, variants, check, cardsOf, grade, review, isDue, buildSession,
-           lessonStats, startOfDay, key };`)();
+           lessonStats, startOfDay, key, needBackup };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text){ n++; if(!bed){ fehler++; console.log("✗ " + text); } }
@@ -152,6 +152,13 @@ ok(s.length === 1 && s[0].dir === "fd", "gemischt + Fehler nimmt die Richtung, i
 
 const st = M.lessonStats(cards, P, t0);
 ok(st.n === cards.length * 2 && st.neu === st.n - 2 && st.lern === 2 && st.sicher === 0, "Statistik");
+
+/* --- Erinnerung an die Sicherung --- */
+ok(!M.needBackup(null, null, t0), "nichts Ungesichertes → keine Erinnerung");
+ok(!M.needBackup(t0 - 6 * DAY, null, t0), "6 Tage ungesichert → noch nicht");
+ok(M.needBackup(t0 - 7 * DAY, null, t0), "7 Tage ungesichert → Erinnerung");
+ok(!M.needBackup(t0 - 9 * DAY, t0 + DAY, t0), "Später → ruhig");
+ok(M.needBackup(t0 - 9 * DAY, t0 - 1, t0), "Später abgelaufen → wieder da");
 
 console.log(fehler ? `${fehler} von ${n} Prüfungen fehlgeschlagen` : `Alle ${n} Prüfungen bestanden`);
 process.exit(fehler ? 1 : 0);

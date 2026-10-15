@@ -645,7 +645,11 @@ oder gemischt. Antippen deckt auf, nochmal antippen = nächstes Wort. Zählt nic
 Fächer. Am Ende „Jetzt abfragen“ mit den aktuellen Einstellungen.
 
 **Speicher:** `vokabeln_v1` (Einstellungen, Name), `_p` (Lernstand), `_exp` (letzte
-Sicherung). Sicherung als Datei über `navigator.share` wie in den anderen Apps.
+Sicherung), `_dirty` (erste Antwort seit der letzten Sicherung), `_snooze` („Später“ bis).
+Sicherung als Datei über `navigator.share` wie in den anderen Apps. **Erinnerung**
+(`needBackup`): oben im Startbild, wenn die erste ungesicherte Antwort eine Woche alt ist —
+nicht nach einer Woche ohne Sicherung, wer nicht gelernt hat, hat nichts zu verlieren.
+„Später“ = 3 Tage Ruhe. Sichern und Wiederherstellen löschen `_dirty` und `_snooze`.
 
 **Testen:** `node test/vokabeln.mjs` schneidet `Lektionen`…`Oberfläche` aus und prüft
 Antwortprüfung, Karteikasten und Rundenbau. Prüft auch die Beispiel-Lektion auf eindeutige ids

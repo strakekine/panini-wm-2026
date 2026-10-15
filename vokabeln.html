@@ -286,7 +286,7 @@
   <div class="cbody" id="resBody"></div>
 </div>
 
-<div class="foot v-home">Lektionen und Lernstand liegen nur auf diesem iPhone. Neue Lektionen kommen mit einer neuen Fassung der App.</div>
+<div class="foot v-home">Lektionen und Lernstand liegen nur auf diesem iPhone. Neue Lektionen kommen mit einer neuen Fassung der App.<br><span id="verFoot"></span></div>
 </main>
 
 <script>
@@ -613,6 +613,10 @@ function needBackup(dirty, snooze, now){
 }
 
 /* ===================== Oberfläche ===================== */
+/* Fassung — bei JEDER Änderung hochzählen. Steht unten im Startbild und als erste Zeile der
+   Mitschrift; am iPhone lief einmal noch die alte Datei aus dem Zwischenspeicher, und die
+   Mitschrift sah aus wie ein neuer Fehler. */
+const FASSUNG = "15.10.2026 e";
 const KEY = "vokabeln_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
@@ -922,7 +926,7 @@ const SRLOG = [];
 function srlog(t){
   SRLOG.push(((Date.now() - SRT0) / 1000).toFixed(1).padStart(5) + "s  " + t);
   while(SRLOG.length > 14) SRLOG.shift();
-  const el = document.getElementById("srLog"); if(el) el.textContent = SRLOG.join("\n");
+  const el = document.getElementById("srLog"); if(el) el.textContent = "Fassung " + FASSUNG + "\n" + SRLOG.join("\n");
 }
 function micIdle(){ const m = $("qMic"); m.classList.remove("live"); m.textContent = "🎤 SPRECHEN"; }
 function micLive(){ const m = $("qMic"); m.classList.add("live"); m.textContent = "● ICH HÖRE …"; }
@@ -1122,6 +1126,7 @@ $("restoreFile").addEventListener("change", async ev => {
 /* Mitternacht und Zurückkehren zur App: was dran ist, kann sich geändert haben */
 document.addEventListener("visibilitychange", () => { if(!document.hidden && VIEW === "home") renderHome(); });
 
+$("verFoot").textContent = "Fassung " + FASSUNG;
 renderHome();
 </script>
 </body>

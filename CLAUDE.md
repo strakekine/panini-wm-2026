@@ -698,6 +698,12 @@ Genauigkeit). Nach der Runde: „⭐ n Wörter jetzt sicher“ und „📅 Lernt
 der Tag in dieser Runde voll wurde. „Verhört? Nochmal“ nimmt beides zurück. Offen als
 zweiter Schritt: Klassenarbeit-Modus (Datum je Lektion, „Bereit: x %“).
 
+**Fassung:** `FASSUNG` (z. B. „15.10.2026 e“) steht unten im Startbild und als erste Zeile der
+Mitschrift — **bei jeder Änderung hochzählen**. Anlass: Am iPhone lief nach einem Push noch die
+alte Datei aus dem Zwischenspeicher (GitHub Pages hält bis zu 10 min, die Home-Bildschirm-App
+teils länger), und die Mitschrift sah aus wie ein neuer Fehler. Erst Fassung prüfen lassen,
+dann deuten.
+
 **Speicher:** `vokabeln_v1` (Einstellungen, Name), `_p` (Lernstand), `_days` (Antworten je
 Tag, 60 Tage, in der Sicherung mit drin), `_exp` (letzte
 Sicherung), `_dirty` (erste Antwort seit der letzten Sicherung), `_snooze` („Später“ bis).

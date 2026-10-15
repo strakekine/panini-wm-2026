@@ -206,6 +206,12 @@ ok(s.every(x => P2[M.key(x.cid, "fd")].b <= 2), "mit 3 Wörtern kommen nur die w
 
 const st = M.lessonStats(cards, P, t0);
 ok(st.n === cards.length * 2 && st.neu === st.n - 2 && st.lern === 2 && st.sicher === 0, "Statistik");
+{
+  const P3 = {}; cards.forEach(c => { P3[M.key(c.id, "df")] = { b:4, hi:4, due:t0 + DAY, n:4, w:0, ty:1 }; });
+  const s3 = M.lessonStats(cards, P3, t0);
+  ok(s3.per.df.sicher === cards.length && s3.per.fd.sicher === 0 && s3.per.df.n === cards.length, "Statistik je Richtung");
+  ok(M.pct(s3.per.df) === 100 && M.pct(s3) === 50, "nur DE → FR gelernt: dort 100 %, beide zusammen 50 %");
+}
 /* „heute fällig“ zählt Wörter, nicht Richtungen — nie mehr als die Lektion hat */
 for(const d of ["fd", "df", "mix"]){
   const sd = M.lessonStats(cards, {}, t0, d);

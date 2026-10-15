@@ -746,7 +746,7 @@ Fächer. Am Ende „Jetzt abfragen“ mit den aktuellen Einstellungen.
 Zahl **sicher** (Fach 4, beide Richtungen einzeln) und ein **Wochenziel** Mo–So mit 5
 Lerntagen; ein Lerntag = 10 erste Antworten an einem Tag (`DAY_MIN`), „Nur lernen“ zählt nicht.
 Bewusst **keine Prozentzahl oben** — jede neue Lektion würde sie drücken; Prozent nur je
-Lektion (`pct`, abgerundet, 100 % nur bei allem sicher, dann ✓). Bewusst **keine Serie**
+Lektion (`pct`, abgerundet, 100 % nur bei allem sicher, dann ✓). **Je Lektion groß die eingestellte Richtung, klein darunter die andere** (Fassung q, vom Vater: wer nur DE → FR übt, soll 100 % erreichen können; die kleine Zeile zeigt, was in der anderen Richtung fehlt). `lessonStats().per.fd/.df`, `ansicht()`, `pcBox(st, dir)`; bei „Gemischt“ groß beide zusammen. Der Balken folgt der großen Zahl. Bewusst **keine Serie**
 (fällt nach einem Krankheitstag auf null), keine Punkte je Antwort (mit „Alle“ austricksbar),
 kein Emil-gegen-Leo (unfair, bräuchte Server), keine Blitzrunde (belohnt Tempo statt
 Genauigkeit). Nach der Runde: „⭐ n Wörter jetzt sicher“ und „📅 Lerntag geschafft“, wenn

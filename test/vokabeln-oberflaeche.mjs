@@ -153,6 +153,25 @@ async function spielen(pg, falsch = []){
   await pg.close();
 }
 
+/* --- 3d. Prozent je Lektion: groß die eingestellte Richtung, klein die andere --- */
+{
+  const pg = await seite();
+  await pg.evaluate(() => { for(const c of CARDS) P[key(c.id, "df")] = { b:4, hi:4, due:Date.now() + 3 * DAY, n:4, w:0, ty:1 }; persist(); });
+  await pg.reload();
+  await pg.click('[data-opt="dir"] [data-v="df"]');
+  const les = '.les[data-les] .pc';
+  ok((await pg.textContent(les + " b")).includes("100 %"), "DE → FR eingestellt: groß 100 % — ist " + await pg.textContent(les + " b"));
+  ok((await pg.textContent(les + " small")).includes("FR → DE 0 %"), "klein die andere Richtung — ist " + await pg.textContent(les + " small"));
+  await pg.click('[data-opt="dir"] [data-v="fd"]');
+  ok((await pg.textContent(les + " b")).trim() === "0 %", "FR → DE eingestellt: groß 0 %");
+  ok((await pg.textContent(les + " small")).includes("DE → FR 100 %"), "klein DE → FR 100 %");
+  const breit = await pg.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
+  ok(breit, "kein seitliches Scrollen bei 390 px");
+  await pg.screenshot({ path: process.env.SHOT || "/dev/null" }).catch(() => {});
+  ok(!pg.errs.length, "keine Fehler auf der Seite: " + pg.errs.join(" | "));
+  await pg.close();
+}
+
 /* --- 4. Sicherungs-Erinnerung --- */
 {
   const pg = await seite();

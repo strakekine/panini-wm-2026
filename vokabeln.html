@@ -144,7 +144,8 @@
   .tipp > div{flex:1;min-width:0;font-size:14px;line-height:1.35}
   .tipp small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
   .tipp .btn{flex:none}
-  .les .pc{flex:none;width:58px;text-align:right}
+  .les .pc{flex:none;width:76px;text-align:right}
+  .les .pc small{display:block;font-size:10px;color:var(--muted);margin-top:4px;line-height:1.2}
   .les .pc b{display:block;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.5px;line-height:1}
   .les .pc .pr{margin-top:4px;width:100%}
   .les.full .pc b{color:var(--good)}
@@ -665,14 +666,15 @@ function buildSession(cards, P, o, now, rnd = Math.random){
 function lessonStats(cards, P, now, dir = "mix"){
   let neu = 0, lern = 0, sicher = 0, due = 0;
   const dirs = dir === "mix" ? ["fd", "df"] : [dir];
+  const per = { fd:{ sicher:0, lern:0, n:cards.length }, df:{ sicher:0, lern:0, n:cards.length } };
   for(const c of cards){
     for(const d of ["fd", "df"]){
       const p = P[key(c.id, d)];
-      if(!p) neu++; else if(p.b >= SICHER) sicher++; else lern++;
+      if(!p) neu++; else if(p.b >= SICHER){ sicher++; per[d].sicher++; } else { lern++; per[d].lern++; }
     }
     if(dirs.some(d => isDue(P[key(c.id, d)], now))) due++;
   }
-  return { neu, lern, sicher, due, n:cards.length * 2 };
+  return { neu, lern, sicher, due, n:cards.length * 2, per };
 }
 /* ----- Motivation -----
    Gezählt wird nur, was sich nicht austricksen lässt: "sicher" heißt Fach 4, und dorthin
@@ -716,7 +718,7 @@ function needBackup(dirty, snooze, now){
 /* Fassung — bei JEDER Änderung hochzählen. Steht unten im Startbild und als erste Zeile der
    Mitschrift; am iPhone lief einmal noch die alte Datei aus dem Zwischenspeicher, und die
    Mitschrift sah aus wie ein neuer Fehler. */
-const FASSUNG = "15.10.2026 p";
+const FASSUNG = "15.10.2026 q";
 const KEY = "vokabeln_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
@@ -773,7 +775,17 @@ function bar(st){
   return '<span class="pr"><i style="width:'+w(st.sicher)+';background:var(--good)"></i><i style="width:'+w(st.lern)+';background:var(--gold)"></i></span>';
 }
 /* Prozent sicher je Lektion, darunter der Balken (grün sicher, gelb am Lernen) */
-function pcBox(st){ const v = pct(st); return '<span class="pc"><b>'+(v === 100 ? "✓ " : "")+v+' %</b>'+bar(st)+'</span>'; }
+/* Prozent je Lektion (vom Vater): groß die eingestellte Richtung — dort sind 100 % erreichbar,
+   auch wer nur DE → FR übt —, klein darunter die andere, damit nicht verschwindet, was fehlt.
+   Bei „Gemischt“ (nur Tippen) groß beide zusammen, klein beide einzeln. */
+const RICHTUNG = { fd:"FR → DE", df:"DE → FR" };
+function ansicht(st, dir){ return dir === "mix" ? st : st.per[dir]; }
+function pcBox(st, dir){
+  const g = ansicht(st, dir), v = pct(g);
+  const klein = dir === "mix" ? RICHTUNG.df + " " + pct(st.per.df) + " % · " + RICHTUNG.fd + " " + pct(st.per.fd) + " %"
+                              : RICHTUNG[dir === "fd" ? "df" : "fd"] + " " + pct(st.per[dir === "fd" ? "df" : "fd"]) + " %";
+  return '<span class="pc"><b>'+(v === 100 ? "✓ " : "")+v+' %</b>'+bar(g)+'<small>'+klein+'</small></span>';
+}
 function renderHome(){
   const now = Date.now();
   const dirty = +lsGet("_dirty") || null, exp = lsGet("_exp");
@@ -804,12 +816,12 @@ function renderHome(){
   if(LEKTIONEN.length > 1){
     const st = lessonStats(CARDS, P, now, S.dir);
     h += '<button class="les all'+(all ? " on" : "")+'" data-all="1"><span class="ck">'+(all ? "✓" : "")+'</span>'+
-      '<span class="t"><b>ALLE LEKTIONEN</b><small>'+CARDS.length+' Wörter · '+st.due+' heute fällig</small></span>'+pcBox(st)+'</button>';
+      '<span class="t"><b>ALLE LEKTIONEN</b><small>'+CARDS.length+' Wörter · '+st.due+' heute fällig</small></span>'+pcBox(st, S.dir)+'</button>';
   }
   for(const l of LEKTIONEN){
     const on = S.sel.includes(l.id), cs = CARDS.filter(c => c.lid === l.id), st = lessonStats(cs, P, now, S.dir);
-    h += '<button class="les'+(on ? " on" : "")+(pct(st) === 100 ? " full" : "")+'" data-les="'+esc(l.id)+'"><span class="ck">'+(on ? "✓" : "")+'</span>'+
-      '<span class="t"><b>'+esc(l.titel)+'</b><small>'+cs.length+' Wörter · '+st.due+' heute fällig</small></span>'+pcBox(st)+'</button>';
+    h += '<button class="les'+(on ? " on" : "")+(pct(ansicht(st, S.dir)) === 100 ? " full" : "")+'" data-les="'+esc(l.id)+'"><span class="ck">'+(on ? "✓" : "")+'</span>'+
+      '<span class="t"><b>'+esc(l.titel)+'</b><small>'+cs.length+' Wörter · '+st.due+' heute fällig</small></span>'+pcBox(st, S.dir)+'</button>';
   }
   $("lessons").innerHTML = h;
   $("selHint").textContent = S.sel.length + " gewählt";

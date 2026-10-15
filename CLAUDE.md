@@ -597,7 +597,13 @@ ein** — keine Texterkennung in der App. Neue Lektionen = neue Fassung der Date
 Die iPhone-Regeln der Pizza-App gelten unverändert.
 
 **Lektionsformat:** `{id, titel, vok:[[fr, de, hinweis?], …]}`. `|` trennt gleichwertige
-Antworten (eine reicht), `(…)` ist optional, ein Artikel im Eintrag ist Pflicht. Der Lernstand
+Antworten (eine reicht, still), `;` trennt **Formen** eines Worts („grand; grande“, „un ami;
+une amie“, angezeigt mit Komma): beide zusammen richtig, eine allein auch richtig, aber mit
+gut sichtbarem Kasten „Vollständig heißt es: …“ (`check().part`) — so vom Vater gewünscht.
+Ein normales Komma ist **kein** Formtrenner, sonst ginge bei „Ça va, merci“ „merci“ allein
+durch. Beim Abtippen also männlich/weiblich und Einzahl/Mehrzahl mit `;` schreiben, und
+Buchkürzel wie „petit, e“ ausschreiben („petit; petite“). `(…)` ist optional, ein Artikel
+im Eintrag ist Pflicht. Der Lernstand
 hängt an `lektion.id + ":" + fr` — **ids nie umbenennen**, sonst ist der Lernstand weg.
 Die Beispiel-Lektion fliegt raus, sobald echte da sind.
 

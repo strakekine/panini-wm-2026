@@ -119,6 +119,8 @@
   .fb .h{font-weight:700;font-size:16px}
   .fb .sol{font-size:19px;font-weight:700;margin-top:3px}
   .fb small{display:block;color:var(--muted);font-size:13px;margin-top:3px}
+  .fb .full{margin-top:8px;padding:8px 10px;border-radius:8px;background:rgba(255,166,61,.14);border:1px solid rgba(255,166,61,.5);color:var(--warn);font-size:14px;font-weight:600}
+  .fb .full b{display:block;color:var(--text);font-size:19px;margin-top:2px}
   .mic{width:100%;margin-top:10px;min-height:64px;font-size:22px;background:var(--blue);color:#06142e}
   .mic.live{background:var(--bad);color:#fff}
 
@@ -263,6 +265,10 @@
    Jede Lektion: id (bleibt fest, daran hängt der Lernstand), titel, vok.
    Ein Eintrag: [französisch, deutsch, hinweis?]
    - Mehrere gültige Antworten mit "|" trennen: "groß|hoch". Eine davon reicht.
+   - Formen eines Worts (männlich/weiblich, Einzahl/Mehrzahl) mit ";" trennen:
+     "grand; grande". Angezeigt als "grand, grande". Beide zusammen sind richtig, eine
+     allein auch — dann aber mit gut sichtbarem Hinweis auf die vollständige Angabe.
+     Absichtlich nicht das Komma: bei "Ça va, merci" darf "merci" allein nicht durchgehen.
    - Was in Klammern steht, darf weg: "(se) promener" nimmt "se promener" und "promener".
    - Steht ein Artikel dabei, muss er mitgeschrieben werden.
    - Der Hinweis wird bei der Frage angezeigt (z. B. "Plural", "ugs.", "Verb").
@@ -274,8 +280,8 @@ const LEKTIONEN = [
     ["la maison", "das Haus"],
     ["l'école", "die Schule"],
     ["les parents", "die Eltern"],
-    ["un ami|une amie", "ein Freund|eine Freundin"],
-    ["grand, grande", "groß"],
+    ["un ami; une amie", "ein Freund; eine Freundin"],
+    ["grand; grande", "groß"],
     ["(se) promener", "spazieren gehen"],
     ["le frère", "der Bruder"],
     ["aujourd'hui", "heute"],
@@ -315,14 +321,26 @@ function expand(s){
   const pre = s.slice(0, m.index), post = s.slice(m.index + m[0].length);
   return [...expand(pre + m[1] + post), ...expand(pre + post)];
 }
+const FORMS = /\s*;\s*/;
+function addClean(out, v){ const c = clean(v); if(c && !out.includes(c)) out.push(c); }
+/* Vollständige Antworten: "grand; grande" → "grand, grande" */
 function variants(sol){
   const out = [];
   for(const alt of String(sol).split("|"))
-    for(const v of expand(alt)){ const c = clean(v); if(c && !out.includes(c)) out.push(c); }
+    for(const v of expand(alt.split(FORMS).join(", "))) addClean(out, v);
   return out;
 }
-/* Für die Anzeige: Varianten mit " / " statt "|" */
-function shown(sol){ return String(sol).split("|").map(s => s.trim()).join(" / "); }
+/* Einzelne Formen: "grand; grande" → "grand", "grande". Leer, wenn es keine gibt. */
+function forms(sol){
+  const out = [];
+  for(const alt of String(sol).split("|")){
+    const fs = alt.split(FORMS);
+    if(fs.length > 1) for(const f of fs) for(const v of expand(f)) addClean(out, v);
+  }
+  return out;
+}
+/* Für die Anzeige: Varianten mit " / " statt "|", Formen mit ", " statt ";" */
+function shown(sol){ return String(sol).split("|").map(s => s.trim().split(FORMS).join(", ")).join(" / "); }
 
 const ART = /^(le|la|les|un|une|des|du|de la|der|die|das|den|dem|ein|eine|einen) (.+)$/i;
 const ART_APO = /^(l'|de l')(.+)$/i;
@@ -346,11 +364,15 @@ function same(a, v, voice){
   if(a === v) return true;
   return a.length > 0 && a.slice(1) === v.slice(1) && a[0].toLocaleLowerCase("fr") === v[0] && a[0] !== v[0];
 }
-/* Ergebnis: { ok, why }. why ist nur die Erklärung — falsch bleibt falsch. */
+/* why ist nur die Erklärung — falsch bleibt falsch. */
+/* Ergebnis: { ok, why, part }. part = nur eine von mehreren Formen genannt — zählt als
+   richtig, die Oberfläche zeigt aber deutlich, wie es vollständig heißt. */
 function check(answer, sol, voice){
-  const a = clean(answer), vs = variants(sol);
+  const a = clean(answer), full = variants(sol), fs = forms(sol);
   if(!a) return { ok:false, why:"Keine Antwort." };
-  for(const v of vs) if(same(a, v, voice)) return { ok:true, why:"" };
+  for(const v of full) if(same(a, v, voice)) return { ok:true, why:"" };
+  for(const v of fs) if(same(a, v, voice)) return { ok:true, why:"", part:true };
+  const vs = [...full, ...fs];
   const low = s => s.toLocaleLowerCase("fr");
   /* Erklärung gegen die nächstliegende Variante */
   for(const v of vs){
@@ -573,7 +595,7 @@ function answer(text, alts){
   let r = check(text, sol, voice);
   /* Beim Sprechen liefert die Erkennung mehrere Lesarten (verre / vert / vers klingen gleich).
      Passt eine davon, war die Aussprache richtig — das Raten der Schreibweise ist nicht das Kind. */
-  if(!r.ok && alts) for(const a of alts){ if(check(a, sol, true).ok){ r = { ok:true, why:"" }; text = a; break; } }
+  if(!r.ok && alts) for(const a of alts){ const ra = check(a, sol, true); if(ra.ok){ r = ra; text = a; break; } }
   Q.fb = { ok:r.ok, text };
   const k = key(it.cid, it.dir);
   if(!it.again && !(k in Q.first)){
@@ -593,7 +615,8 @@ function answer(text, alts){
   let h = '<div class="fb '+(r.ok ? "ok" : "bad")+'">';
   if(r.ok){
     h += '<div class="h">✓ Richtig</div>';
-    const vs = String(sol).split("|"); if(vs.length > 1) h += '<small>Auch richtig: '+esc(shown(sol))+'</small>';
+    if(r.part) h += '<div class="full">Vollständig heißt es:<b>'+esc(shown(sol))+'</b></div>';
+    else if(String(sol).includes("|")) h += '<small>Auch richtig: '+esc(shown(sol))+'</small>';
   } else {
     h += '<div class="h">✗ '+(text.trim() ? "Falsch" : "Lösung")+(r.why && text.trim() ? " — "+esc(r.why) : "")+'</div>'+
       '<div class="sol">'+esc(shown(sol))+'</div>';

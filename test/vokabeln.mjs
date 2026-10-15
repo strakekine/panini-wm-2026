@@ -49,12 +49,24 @@ falsch("le chta", "le chat", "Zwei Buchstaben sind falsch.");
 falsch("le chap", "le chat", "Ein Buchstabe ist falsch.");
 falsch("le chien", "le chat", "");
 falsch("", "le chat", "Keine Antwort.");
-falsch("grand", "grand, grande");               /* beide Formen verlangt, wenn beide dastehen */
+falsch("grand", "grand, grande");               /* Komma ist kein Formtrenner (Ça va, merci) */
+
+/* --- Formen mit ";": eine reicht, aber mit Hinweis --- */
+const teil = (a, sol) => { const r = M.check(a, sol); ok(r.ok && r.part, `"${a}" für "${sol}" sollte richtig mit Hinweis sein`); };
+teil("grand", "grand; grande");
+teil("grande", "grand; grande");
+richtig("grand, grande", "grand; grande");
+ok(!M.check("grand, grande", "grand; grande").part, "beide Formen → kein Hinweis");
+teil("une amie", "un ami; une amie");
+falsch("amie", "un ami; une amie", "Der Artikel fehlt.");
+falsch("grnad", "grand; grande", "Zwei Buchstaben sind falsch.");
+ok(M.check("Grande", "grand; grande", true).part, "gesprochen: eine Form reicht auch");
 falsch("der Freund", "ein Freund|eine Freundin", "Falscher Artikel.");
 falsch("heute", "le chat");
 
 /* --- Varianten und Klammern --- */
 richtig("une amie", "un ami|une amie");
+ok(!M.check("une amie", "un ami|une amie").part, "| ist gleichwertig, kein Hinweis");
 richtig("groß", "groß|hoch");
 richtig("hoch", "groß|hoch");
 richtig("promener", "(se) promener");

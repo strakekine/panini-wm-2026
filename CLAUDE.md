@@ -618,7 +618,9 @@ es verdeckt; „qch“/„qn“-Teile optional in Klammern. Buchkürzel gelten *
 `ausgeschrieben()` in `addClean`: qn → quelqu'un, qch → quelque chose, jdn/jdm → jemanden/jemandem,
 etw. → etwas, dazu qqn/qqch/qc, jmdn./jmdm./jmd./jds., je mit oder ohne Punkt) — vom Vater
 gefunden: „rendre visite à quelqu'un“ war falsch. **Beim Abtippen eines neuen Blatts auf neue
-Kürzel achten und sie in `KUERZEL` nachtragen**, sonst gilt nur die abgekürzte Form. Gibt das Blatt nur eine französische
+Kürzel achten und sie in `KUERZEL` nachtragen**, sonst gilt nur die abgekürzte Form. Der Logik-Test
+**erzwingt** das: Er sucht in allen Lektionen nach Wörtern mit Punkt oder ohne Vokal und schlägt
+bei jedem fehl, das `KUERZEL` nicht kennt (`unbekannteKuerzel`, mit Gegenprobe z.B./o.Ä.). Gibt das Blatt nur eine französische
 Erklärung (cours obligatoire, réviser la matière, demander la parole, échouer, se sentir à
 l'aise), steht die **deutsche Übersetzung von Claude** im Eintrag und die Erklärung als Hinweis
 (im Code `/* Ü */`). Die Nomen zu den Adjektiven („→ la motivation“) stehen auf dem Blatt ohne

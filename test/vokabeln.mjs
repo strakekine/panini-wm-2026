@@ -15,7 +15,7 @@ if(i < 0 || j < 0) throw new Error("Abschnittsmarken Lektionen/Oberfläche nicht
 const quelle = src.slice(src.lastIndexOf("/*", i), src.lastIndexOf("/*", j));
 const M = new Function(quelle + `
   return { LEKTIONEN, DAY, FACH, clean, variants, check, cardsOf, grade, review, isDue, buildSession,
-           lessonStats, startOfDay, key, needBackup, klang, klingtWie, reviewAnswer, SICHER, tippKandidaten, weekStatus, dayKey, dayDone, pruneDays, pct, DAY_MIN };`)();
+           lessonStats, startOfDay, key, needBackup, klang, klingtWie, reviewAnswer, SICHER, tippKandidaten, ausgeschrieben, weekStatus, dayKey, dayDone, pruneDays, pct, DAY_MIN };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text){ n++; if(!bed){ fehler++; console.log("✗ " + text); } }
@@ -70,6 +70,28 @@ richtig("jmdn. anrufen", "jmdn. anrufen");
 richtig("jemand anderes", "jmd. anderes");
 falsch("etwasx", "etw.");
 ok(M.check("rendre visite à quelqu'un", "rendre visite (à qn)", true).ok, "ausgeschrieben auch gesprochen");
+
+/* --- Sperre für neue Kürzel (vom Vater: „die Logik soll auch in Zukunft greifen“) ---
+   Durchsucht alle Lektionen nach Wörtern, die wie Kürzel aussehen: mit Punkt (z.B., o.Ä., etw.)
+   oder ganz ohne Vokal (qn, qqch, jdn). Kennt die App eines davon nicht, schlägt der Test fehl —
+   dann gehört es in KUERZEL in vokabeln.html, sonst wäre das ausgeschriebene Wort „falsch“. */
+const VOKAL = /[aeiouyäöüéèêëàâîïôûùœæ]/i;
+function unbekannteKuerzel(lektionen){
+  const raus = [];
+  for(const l of lektionen) for(const [fr, de] of l.vok) for(const feld of [fr, de])
+    for(const w of String(feld).split(/[\s()|;,/]+|'(?=\S)/)){
+      const kurz = /^[a-zäöüß.]+\.$/i.test(w) || (/^[a-zß]{2,}$/i.test(w) && !VOKAL.test(w));
+      if(kurz && M.ausgeschrieben(" " + w + " ") === " " + w + " ") raus.push(l.id + ": „" + w + "“ in „" + feld + "“");
+    }
+  return raus;
+}
+{
+  const u = unbekannteKuerzel(M.LEKTIONEN);
+  ok(!u.length, "Unbekannte Kürzel — in KUERZEL eintragen: " + u.join(" · "));
+  /* Gegenprobe: die Sperre schlägt an */
+  const probe = unbekannteKuerzel([{ id:"probe", vok:[["faire qch z.B.", "o.Ä. tun"], ["rendre visite (à qqn)", "jdn besuchen"]] }]);
+  ok(probe.length === 2 && probe.join().includes("z.B.") && probe.join().includes("o.Ä."), "Kürzel-Sperre erkennt unbekannte Kürzel — fand: " + probe.join(" · "));
+}
 
 /* --- Formen mit ";": eine reicht, aber mit Hinweis --- */
 const teil = (a, sol) => { const r = M.check(a, sol); ok(r.ok && r.part, `"${a}" für "${sol}" sollte richtig mit Hinweis sein`); };

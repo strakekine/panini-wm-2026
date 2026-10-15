@@ -60,6 +60,15 @@ richtig("jemanden besuchen", "(jdn) besuchen");
 richtig("etwas leidenschaftlich mögen", "(etw.) leidenschaftlich mögen");
 richtig("être passionné de quelque chose", "être passionné (de qch)");
 falsch("rendre visite à quelqu'une", "rendre visite (à qn)");
+richtig("parler à quelqu'un", "parler à qqn");
+richtig("faire quelque chose", "faire qqch");
+richtig("faire quelque chose", "faire qc");
+richtig("jemanden anrufen", "jmdn. anrufen");
+richtig("jemandem helfen", "jmdm. helfen");
+richtig("jemandes Freund", "jds. Freund");
+richtig("jmdn. anrufen", "jmdn. anrufen");
+richtig("jemand anderes", "jmd. anderes");
+falsch("etwasx", "etw.");
 ok(M.check("rendre visite à quelqu'un", "rendre visite (à qn)", true).ok, "ausgeschrieben auch gesprochen");
 
 /* --- Formen mit ";": eine reicht, aber mit Hinweis --- */

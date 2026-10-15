@@ -440,9 +440,13 @@ function expand(s){
 const FORMS = /\s*;\s*/;
 /* Buchkürzel gelten auch ausgeschrieben: „rendre visite à quelqu'un“ ist so richtig wie
    „… à qn“ (vom Vater gefunden — gesprochen sagt niemand „qn“). */
-const KUERZEL = [[/\bqn\b/g, "quelqu'un"], [/\bqch\b/g, "quelque chose"],
-  [/\bjdn\b/g, "jemanden"], [/\bjdm\b/g, "jemandem"], [/\betw\.?(?=\s|,|$)/g, "etwas"]];
-function ausgeschrieben(v){ let r = v; for(const [re, w] of KUERZEL) r = r.replace(re, w); return r; }
+/* Neues Kürzel auf einem Blatt? Hier eintragen — sonst gilt nur die abgekürzte Form. */
+const KUERZEL = [
+  ["qn|qqn|qn\\.|qqn\\.", "quelqu'un"], ["qch|qqch|qc|qch\\.|qqch\\.|qc\\.", "quelque chose"],
+  ["jdn|jmdn|jdn\\.|jmdn\\.", "jemanden"], ["jmd\\.|jmd|jd\\.", "jemand"], ["jdm|jmdm|jdm\\.|jmdm\\.", "jemandem"],
+  ["jds|jmds|jds\\.|jmds\\.", "jemandes"], ["etw\\.|etw", "etwas"]
+].map(([k, w]) => [new RegExp("(^|[\\s(,'])(?:" + k + ")(?=$|[\\s),])", "g"), w]);
+function ausgeschrieben(v){ let r = v; for(const [re, w] of KUERZEL) r = r.replace(re, "$1" + w); return r; }
 function addClean(out, v){
   for(const x of [v, ausgeschrieben(v)]){ const c = clean(x); if(c && !out.includes(c)) out.push(c); }
 }
@@ -697,7 +701,7 @@ function needBackup(dirty, snooze, now){
 /* Fassung — bei JEDER Änderung hochzählen. Steht unten im Startbild und als erste Zeile der
    Mitschrift; am iPhone lief einmal noch die alte Datei aus dem Zwischenspeicher, und die
    Mitschrift sah aus wie ein neuer Fehler. */
-const FASSUNG = "15.10.2026 m";
+const FASSUNG = "15.10.2026 n";
 const KEY = "vokabeln_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }

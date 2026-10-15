@@ -74,14 +74,20 @@ falsch("le être", "être", "Hier gehört kein Artikel dazu.");
 const { DAY } = M;
 const t0 = new Date(2026, 9, 15, 17, 30).getTime(), heute = M.startOfDay(t0);
 let p = M.grade(null, true, t0);
-ok(p.b === 2 && p.due === heute + 2 * DAY, "neu und richtig → Fach 2, in 2 Tagen");
-ok(M.grade(null, false, t0).b === 1 && M.grade(null, false, t0).due === heute + DAY, "neu und falsch → Fach 1, morgen");
-p = M.grade(p, true, t0 + 2 * DAY);
-ok(p.b === 3 && p.due === heute + 2 * DAY + 4 * DAY, "Fach 3 → in 4 Tagen");
+ok(p.b === 1 && p.due === heute + DAY, "neu und richtig → Fach 1, morgen");
+ok(M.grade(null, false, t0).b === 0 && M.grade(null, false, t0).due === heute + DAY, "neu und falsch → Fach 0, morgen");
+let a0 = M.grade(M.grade(null, false, t0), true, t0 + DAY);
+ok(a0.b === 1 && a0.due === heute + 2 * DAY, "aus Fach 0 richtig → Fach 1, wieder morgen");
+ok(M.grade(a0, false, t0 + 2 * DAY).b === 0, "nie über Fach 1 hinaus, falsch → zurück nach Fach 0");
+p = M.grade(p, true, t0 + DAY);
+ok(p.b === 2 && p.due === heute + DAY + 2 * DAY, "Fach 2 → in 2 Tagen");
+p = M.grade(p, true, t0 + 3 * DAY);
+ok(p.b === 3 && p.due === heute + 3 * DAY + 4 * DAY, "Fach 3 → in 4 Tagen");
 for(let k = 0; k < 6; k++) p = M.grade(p, true, t0);
 ok(p.b === 5 && p.due === heute + 16 * DAY, "oben bleibt Fach 5, 16 Tage");
 p = M.grade(p, false, t0);
-ok(p.b === 1 && p.due === heute + DAY && p.bad === 1 && p.w === 1, "falsch → Fach 1, morgen wieder, als Fehler markiert");
+ok(p.b === 1 && p.due === heute + DAY && p.bad === 1 && p.w === 1, "war schon höher, falsch → Fach 1 (nicht 0), morgen, als Fehler markiert");
+ok(M.grade(p, false, t0).b === 1, "und nochmal falsch → bleibt in Fach 1");
 p = M.grade(p, true, t0);
 ok(p.b === 2 && !p.bad, "danach richtig → Fehlermarke weg");
 ok(M.isDue(undefined, t0) && !M.isDue({ due:t0 + 1 }, t0), "isDue");
@@ -93,13 +99,13 @@ p = M.review(wartet, false, t0);
 ok(p.b === 1 && p.bad === 1, "wartendes Wort falsch → Fach 1");
 p = M.review({ b:4, due:t0 - 1, n:4, w:0 }, true, t0);
 ok(p.b === 5, "fälliges Wort richtig → steigt auf");
-ok(M.review(undefined, true, t0).b === 2, "neues Wort richtig → Fach 2");
+ok(M.review(undefined, true, t0).b === 1, "neues Wort richtig → Fach 1");
 
 /* "Fehler" am selben Tag: falsch → morgen fällig; heute nochmal richtig → Fehlermarke weg,
-   Fach 1 und Termin morgen bleiben */
+   Fach 0 und Termin morgen bleiben */
 p = M.grade(null, false, t0);
 const q = M.review(p, true, t0 + 3600e3);
-ok(q.b === 1 && !q.bad && q.due === heute + DAY, "Fehler heute richtig → raus aus 'Fehler', morgen trotzdem dran");
+ok(q.b === 0 && !q.bad && q.due === heute + DAY, "Fehler heute richtig → raus aus 'Fehler', morgen trotzdem dran");
 ok(M.review(p, false, t0 + 3600e3).bad === 1, "Fehler heute wieder falsch → bleibt in 'Fehler'");
 
 /* --- Rundenbau --- */

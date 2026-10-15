@@ -615,10 +615,11 @@ Versuch samt Fach-Änderung zurück. Ob die API im Home-Bildschirm-Modus geht, i
 noch nicht geprüft**; Rückfall ist das Mikrofon der Tastatur (Text landet im Feld, wird aber
 dann wie getippt geprüft). Vorlesen ist ausdrücklich nicht gewünscht.
 
-**Karteikasten:** 5 Fächer, Abstände `FACH = [0,1,2,4,8,16]` Tage ab Tagesbeginn. Neue Wörter
-zählen als Fach 1 — richtig beim ersten Mal → Fach 2 (vom Vater angemerkt: sonst endeten
-richtig und falsch am ersten Tag im selben Fach). Falsch →
-Fach 1, **morgen** fällig, Marke `bad` (für „Fehler“). Beide Richtungen zählen getrennt
+**Karteikasten:** 6 Fächer 0–5, Abstände `FACH = [1,1,2,4,8,16]` Tage ab Tagesbeginn.
+Vom Vater festgelegt: neue Wörter starten in **Fach 0**, das dieselbe Regel hat wie Fach 1 —
+ein neues Wort kommt nie gleich nach 2 Tagen. Falsch → Fach 0, solange das Wort nie über
+Fach 1 hinaus war; war es schon einmal in Fach 2+ (`hi`), nur nach Fach 1. Immer **morgen**
+fällig, Marke `bad` (für „Meine Fehler“). Beide Richtungen zählen getrennt
 (`key = id>fd|df`). „Heute fällig“ = fällig + neu, gesehene zuerst. In der Runde kommt ein
 falsches Wort 4 Fragen später wieder, bis es sitzt, zählt dann aber nicht mehr fürs Fach.
 „Alle“ fragt auch wartende Wörter; dort gilt `review()`: richtig bei einem noch nicht
@@ -626,7 +627,7 @@ fälligen Wort ändert nichts (der Abstand, den das Fach misst, war nicht da —
 ein Durchgang vor der Klassenarbeit die halbe Lektion ein Fach hoch), falsch zählt immer.
 Den Knopf „Fehler nochmal“ direkt nach der Runde gibt es bewusst **nicht** mehr: die Wörter
 waren in der Runde gerade richtig, eine Minute später prüft das nur das Kurzzeitgedächtnis.
-Wer heute nochmal will, nimmt „Fehler“ im Startbild (filtert `bad`, nicht nach Fälligkeit).
+Wer heute nochmal will, nimmt „Meine Fehler“ im Startbild (filtert `bad`, nicht nach Fälligkeit).
 
 **Nur lernen** (Knopf oben im Startbild): Karteikarten ohne Abfrage über die gewählten
 Lektionen, Richtung aus der Einstellung (gemischt = je Wort zufällig), Lektionsreihenfolge

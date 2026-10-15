@@ -1,6 +1,6 @@
 # panini-wm-2026
 
-Fünf voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
+Sechs voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
 
 - **`panini*.html`** — Sticker-Tracker für die Panini WM 2026 (Emil, Leo, generisch).
   Reine Einzeldatei-Webapps, kein Build, kein Framework.
@@ -24,6 +24,8 @@ Fünf voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
   Kalender-Export und Küchenmodus. Auch Einzeldatei. Details unten.
 - **`brot.html`** — Brotplaner: Überblick über einen Backvorgang (Sauerteig, Roggen, Hefe),
   Anstellgut-Fütterung, laufender Teig mit echten Zeiten. Einzeldatei. Details unten.
+- **`vokabeln.html`** — Französisch-Vokabeltrainer für Emil und Leo (jeder sein iPhone).
+  Lektionen kommen aus eingescannten PDFs, die Claude abtippt. Einzeldatei. Details unten.
 - **`pine/`** — TradingView Pine-Script-Indikatoren. Eigener Kontext, eigene Regeln:
   siehe **`pine/CLAUDE.md`**, bevor dort etwas geändert wird.
 
@@ -586,3 +588,41 @@ Laib wird auf den Gusseisentopf übersetzt — Buns, Brötchen, Baguettes, Kaste
 die erste Fassung der Anleitung hat auch Buns in den Topf geschickt);
 3. Rückwärtsplanung auf die Essenszeit mit Wochenplan (erledigt); 4. Lernen aus echten Zeiten,
 Kalender, Küchenmodus (erledigt). **Am iPhone noch nicht ausprobiert** — Stand 11.10.2026.
+
+## Vokabeltrainer (`vokabeln.html`) — Stand und Regeln
+
+Nutzer: Emil und Leo lernen Französisch, jeder auf seinem iPhone. Der Vater schickt die
+Vokabeln als eingescanntes PDF; **Claude liest sie und trägt sie als Lektion in `LEKTIONEN`
+ein** — keine Texterkennung in der App. Neue Lektionen = neue Fassung der Datei.
+Die iPhone-Regeln der Pizza-App gelten unverändert.
+
+**Lektionsformat:** `{id, titel, vok:[[fr, de, hinweis?], …]}`. `|` trennt gleichwertige
+Antworten (eine reicht), `(…)` ist optional, ein Artikel im Eintrag ist Pflicht. Der Lernstand
+hängt an `lektion.id + ":" + fr` — **ids nie umbenennen**, sonst ist der Lernstand weg.
+Die Beispiel-Lektion fliegt raus, sobald echte da sind.
+
+**Prüfung — vom Vater so festgelegt, nicht weicher machen:** Tippfehler sind Fehler, kein
+„fast richtig“. Akzent falsch = Fehler. Steht ein Artikel da, muss er mit. Die Begründung
+(„Artikel fehlt“, „Akzent“, „ein Buchstabe“) ist nur Erklärung. Vereinheitlicht wird nur, was
+kein Wissen ist (`clean()`): iOS-Apostroph ’, Leerzeichen, Satzzeichen am Ende, ein
+Großbuchstabe am Anfang. Kleinbuchstabe statt Großbuchstabe („katze“) ist ein Fehler.
+Autokorrektur ist im Feld aus — sie würde Tippfehler stillschweigend reparieren.
+
+**Sprechen:** Web-Speech-API (`fr-FR`/`de-DE`). Gesprochen zählt Groß/Klein nicht. Die
+Erkennung liefert bis zu 5 Lesarten; passt eine, gilt es als richtig (Homophone wie
+verre/vert). Bei falscher gesprochener Antwort einmal pro Wort „Verhört? Nochmal“ — nimmt den
+Versuch samt Fach-Änderung zurück. Ob die API im Home-Bildschirm-Modus geht, ist **am iPhone
+noch nicht geprüft**; Rückfall ist das Mikrofon der Tastatur (Text landet im Feld, wird aber
+dann wie getippt geprüft). Vorlesen ist ausdrücklich nicht gewünscht.
+
+**Karteikasten:** 5 Fächer, Abstände `FACH = [0,1,2,4,8,16]` Tage ab Tagesbeginn; falsch →
+Fach 1, sofort fällig, Marke `bad` (für „Fehler“). Beide Richtungen zählen getrennt
+(`key = id>fd|df`). „Dran“ = fällig + neu, gesehene zuerst. In der Runde kommt ein falsches
+Wort 4 Fragen später wieder, bis es sitzt, zählt dann aber nicht mehr fürs Fach.
+
+**Speicher:** `vokabeln_v1` (Einstellungen, Name), `_p` (Lernstand), `_exp` (letzte
+Sicherung). Sicherung als Datei über `navigator.share` wie in den anderen Apps.
+
+**Testen:** `node test/vokabeln.mjs` schneidet `Lektionen`…`Oberfläche` aus und prüft
+Antwortprüfung, Karteikasten und Rundenbau. Prüft auch die Beispiel-Lektion auf eindeutige ids
+— nach dem Eintragen echter Lektionen laufen lassen.

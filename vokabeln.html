@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<!-- KEIN viewport-fit=cover — siehe CLAUDE.md, Abschnitt iPhone-Regeln der Pizza-App. -->
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vokabeln</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vokabeln">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0e1116">
+<!-- iOS nimmt für das Home-Icon nur PNG, kein SVG -->
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,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">
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230e1116'/><text x='50' y='68' font-size='50' font-weight='700' font-family='sans-serif' fill='%23e0a95b' text-anchor='middle'>Aa</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --panel2:#1c232c; --line:#2a313c;
+    --text:#e8ecf1; --muted:#8a94a3; --gold:#e0a95b; --accent:#e0a95b;
+    --good:#3ecf6a; --warn:#ffa63d; --bad:#ff5d6b; --blue:#6f9cff;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Barlow,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  header{position:sticky;top:0;z-index:20;background:rgba(22,27,34,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .wrap{max-width:720px;margin:0 auto;padding:12px 14px 10px}
+  h1{font-family:'Bebas Neue',sans-serif;letter-spacing:1.5px;margin:0;font-size:26px;color:var(--gold);line-height:1.1}
+  h1 small{color:var(--muted);font-size:20px}
+  main{max-width:720px;margin:0 auto;padding:10px 12px 90px}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+
+  /* Drei Sichten, eine DOM */
+  body[data-view="home"] .v-quiz, body[data-view="home"] .v-res{display:none}
+  body[data-view="quiz"] .v-home, body[data-view="quiz"] .v-res{display:none}
+  body[data-view="res"] .v-home, body[data-view="res"] .v-quiz{display:none}
+  body[data-view="quiz"] .v-head{display:none}
+
+  .seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{flex:1;background:transparent;color:var(--muted);border:0;padding:10px 6px;font-family:inherit;font-weight:700;font-size:13.5px;cursor:pointer;letter-spacing:.3px}
+  .seg button.on{background:var(--accent);color:#1a1300}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin:12px 0;overflow:hidden}
+  .chead{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--panel2);border-bottom:1px solid var(--line)}
+  .chead h2{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1px;margin:0;flex:1}
+  .chead .hint{font-size:12px;color:var(--muted);text-align:right}
+  .cbody{padding:12px}
+  details.card > summary{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--panel2);cursor:pointer;list-style:none;font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1px}
+  details.card > summary::-webkit-details-marker{display:none}
+  details.card > summary::after{content:"▾";color:var(--muted);font-family:Barlow;font-size:14px;margin-left:auto;transition:transform .2s}
+  details.card[open] > summary{border-bottom:1px solid var(--line)}
+  details.card[open] > summary::after{transform:rotate(180deg)}
+  details.card > summary .hint{font-family:Barlow;font-size:12px;letter-spacing:0;color:var(--muted);font-weight:600}
+
+  .lessons{display:flex;flex-direction:column;gap:6px}
+  .les{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;color:var(--text);font-family:inherit;text-align:left;width:100%}
+  .les.on{border-color:var(--accent);background:rgba(224,169,91,.1)}
+  .les .ck{flex:none;width:22px;height:22px;border-radius:6px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#1a1300}
+  .les.on .ck{background:var(--accent);border-color:var(--accent)}
+  .les .t{flex:1;min-width:0}
+  .les .t b{display:block;font-size:15px}
+  .les .t small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+  .les .pr{flex:none;width:54px;height:6px;border-radius:3px;background:var(--line);overflow:hidden;display:flex}
+  .les .pr i{display:block;height:100%}
+  .les.all .t b{font-family:'Bebas Neue',sans-serif;letter-spacing:1px;font-size:17px}
+
+  .opts{display:flex;flex-direction:column;gap:10px}
+  .lbl{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:5px}
+
+  .btn{background:var(--gold);color:#1a1300;border:0;border-radius:10px;padding:11px 15px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;cursor:pointer;min-height:46px}
+  .btn.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+  .btn.sm{padding:7px 11px;font-size:15px;min-height:36px}
+  .btn.wide{width:100%}
+  .btn:disabled{opacity:.45}
+  .btn:active{transform:scale(.97)}
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  .btnrow .btn{flex:1}
+  .note{font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:10px}
+  input{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 11px;font-size:16px;font-family:inherit;width:100%;min-height:44px}
+  input:focus{outline:none;border-color:var(--accent)}
+  label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:600}
+
+  .msg{display:flex;gap:9px;padding:9px 10px;border-radius:10px;font-size:13.5px;line-height:1.4;align-items:flex-start;margin-top:10px}
+  .msg.warn{background:rgba(255,166,61,.1);border:1px solid rgba(255,166,61,.35)}
+  .msg.info{background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+
+  table.w{width:100%;border-collapse:collapse;font-size:14.5px}
+  table.w td{padding:7px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.w tr:last-child td{border-bottom:0}
+  table.w td.b{width:16px;padding-right:0}
+  table.w small{color:var(--muted)}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-top:5px}
+
+  /* Abfrage */
+  .qtop{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .qbar{height:5px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:8px}
+  .qbar i{display:block;height:100%;background:var(--gold);transition:width .25s}
+  .qcount{font-family:Menlo,monospace;font-size:13px;color:var(--muted);font-weight:700}
+  .qdir{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+  .qword{font-size:30px;font-weight:700;line-height:1.2;margin:6px 0 2px;word-break:break-word}
+  .qhint{font-size:14px;color:var(--muted);min-height:18px}
+  .qin{margin-top:12px;font-size:20px;min-height:52px}
+  .qin.ok{border-color:var(--good)}
+  .qin.bad{border-color:var(--bad)}
+  .acc{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+  .acc button{flex:1 0 auto;min-width:34px;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:8px;font-size:17px;padding:7px 0;font-family:inherit;cursor:pointer}
+  .acc button:active{background:var(--line)}
+  .fb{border-radius:12px;padding:10px 12px;margin-top:10px;font-size:15px;line-height:1.45}
+  .fb.ok{background:rgba(62,207,106,.12);border:1px solid rgba(62,207,106,.4)}
+  .fb.bad{background:rgba(255,93,107,.1);border:1px solid rgba(255,93,107,.4)}
+  .fb .h{font-weight:700;font-size:16px}
+  .fb .sol{font-size:19px;font-weight:700;margin-top:3px}
+  .fb small{display:block;color:var(--muted);font-size:13px;margin-top:3px}
+  .mic{width:100%;margin-top:10px;min-height:64px;font-size:22px;background:var(--blue);color:#06142e}
+  .mic.live{background:var(--bad);color:#fff}
+
+  .score{font-family:'Bebas Neue',sans-serif;font-size:54px;letter-spacing:1px;line-height:1;color:var(--gold)}
+  .foot{color:var(--muted);font-size:11.5px;text-align:center;padding:18px 12px 0;line-height:1.5}
+</style>
+</head>
+<body data-view="home">
+
+<header>
+  <div class="wrap">
+    <div class="top v-head"><h1 id="title">VOKABELN</h1></div>
+    <div class="v-quiz">
+      <div class="qtop">
+        <span class="qcount" id="qCount">1 / 10</span>
+        <button class="btn ghost sm" id="qStop">BEENDEN</button>
+      </div>
+      <div class="qbar"><i id="qBar" style="width:0"></i></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ Start ============ -->
+<div class="card v-home">
+  <div class="chead"><h2>Lektionen</h2><span class="hint" id="selHint"></span></div>
+  <div class="cbody"><div class="lessons" id="lessons"></div></div>
+</div>
+
+<div class="card v-home">
+  <div class="chead"><h2>Abfrage</h2></div>
+  <div class="cbody">
+    <div class="opts">
+      <div><div class="lbl">Richtung</div>
+        <div class="seg" data-opt="dir"><button data-v="fd">FR → DE</button><button data-v="df">DE → FR</button><button data-v="mix">GEMISCHT</button></div></div>
+      <div><div class="lbl">Welche Wörter</div>
+        <div class="seg" data-opt="mode"><button data-v="due">DRAN</button><button data-v="all">ALLE</button><button data-v="err">FEHLER</button></div></div>
+      <div><div class="lbl">Wie viele</div>
+        <div class="seg" data-opt="count"><button data-v="10">10</button><button data-v="20">20</button><button data-v="0">ALLE</button></div></div>
+      <div><div class="lbl">Antworten</div>
+        <div class="seg" data-opt="input"><button data-v="type">⌨︎ TIPPEN</button><button data-v="voice">🎤 SPRECHEN</button></div></div>
+    </div>
+    <div id="startInfo" class="note"></div>
+    <button class="btn wide" id="startBtn" style="margin-top:10px">LOS</button>
+  </div>
+</div>
+
+<details class="card v-home" id="listCard">
+  <summary>Wörter ansehen <span class="hint" id="listHint"></span></summary>
+  <div class="cbody" id="wordList"></div>
+</details>
+
+<details class="card v-home">
+  <summary>So funktioniert's</summary>
+  <div class="cbody" style="font-size:14px;line-height:1.5">
+    <p style="margin-top:0"><b>Geprüft wird genau.</b> Ein Tippfehler ist ein Fehler, ein falscher oder fehlender
+    Akzent auch. Steht bei der Vokabel ein Artikel (<i>le chat</i>, <i>die Katze</i>), muss er mit.
+    Ein Großbuchstabe am Anfang ist egal, ein kleiner, wo ein großer hingehört („katze“), nicht.</p>
+    <p>Gibt es mehrere Übersetzungen, reicht eine davon. Was in Klammern steht, darf man weglassen:
+    bei <i>(se) promener</i> zählt beides.</p>
+    <p><b>Karteikasten:</b> Jedes Wort wandert in fünf Fächern nach oben, wenn Du es weißt,
+    und nach jedem Fehler zurück ins erste. Fach 1 kommt am nächsten Tag wieder, Fach 5 erst nach
+    16 Tagen. „Dran“ fragt nur, was heute fällig ist, dazu neue Wörter. Beide Richtungen
+    zählen getrennt — wer <i>le chat</i> erkennt, kann es noch lange nicht schreiben.</p>
+    <p><b>Sprechen:</b> Mit „🎤 Sprechen“ tippst Du auf den blauen Knopf und sagst die Antwort.
+    Groß und klein zählt dann nicht, man hört es ja nicht. Hat das iPhone sich verhört, darfst Du
+    einmal pro Wort neu sprechen. Klappt der Knopf nicht, nimm das Mikrofon unten auf der Tastatur —
+    für Französisch muss dafür die französische Tastatur eingerichtet sein
+    (Einstellungen → Allgemein → Tastatur → Tastaturen).</p>
+    <p style="margin-bottom:0">Akzente gehen über die Leiste unter dem Feld oder durch langes Drücken
+    auf den Buchstaben.</p>
+  </div>
+</details>
+
+<details class="card v-home">
+  <summary>Name &amp; Sicherung</summary>
+  <div class="cbody">
+    <label class="f">Wer lernt auf diesem iPhone?<input id="nameIn" autocomplete="off" autocapitalize="words" placeholder="Name"></label>
+    <div class="btnrow">
+      <button class="btn ghost sm" id="backupBtn">SICHERN</button>
+      <button class="btn ghost sm" id="restoreBtn">WIEDERHERSTELLEN</button>
+      <input type="file" id="restoreFile" accept="application/json,.json" style="display:none">
+    </div>
+    <div class="note" id="backupNote"></div>
+    <div class="btnrow"><button class="btn ghost sm" id="resetBtn">LERNSTAND LÖSCHEN</button></div>
+  </div>
+</details>
+
+<!-- ============ Abfrage ============ -->
+<div class="card v-quiz">
+  <div class="cbody">
+    <div class="qdir" id="qDir"></div>
+    <div class="qword" id="qWord"></div>
+    <div class="qhint" id="qHint"></div>
+    <input class="qin" id="qIn" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" placeholder="Antwort">
+    <div class="acc" id="qAcc"></div>
+    <button class="btn mic" id="qMic">🎤 SPRECHEN</button>
+    <div id="qFb"></div>
+    <div class="btnrow">
+      <button class="btn ghost" id="qSkip">WEISS NICHT</button>
+      <button class="btn" id="qGo">PRÜFEN</button>
+    </div>
+    <div class="note" id="qNote"></div>
+  </div>
+</div>
+
+<!-- ============ Ergebnis ============ -->
+<div class="card v-res">
+  <div class="chead"><h2>Geschafft</h2></div>
+  <div class="cbody" id="resBody"></div>
+</div>
+
+<div class="foot v-home">Lektionen und Lernstand liegen nur auf diesem iPhone. Neue Lektionen kommen mit einer neuen Fassung der App.</div>
+</main>
+
+<script>
+/* ===================== Lektionen =====================
+   Jede Lektion: id (bleibt fest, daran hängt der Lernstand), titel, vok.
+   Ein Eintrag: [französisch, deutsch, hinweis?]
+   - Mehrere gültige Antworten mit "|" trennen: "groß|hoch". Eine davon reicht.
+   - Was in Klammern steht, darf weg: "(se) promener" nimmt "se promener" und "promener".
+   - Steht ein Artikel dabei, muss er mitgeschrieben werden.
+   - Der Hinweis wird bei der Frage angezeigt (z. B. "Plural", "ugs.", "Verb").
+   Der Lernstand hängt an Lektions-id + französischem Wort. Wer das Wort korrigiert,
+   setzt dieses eine Wort auf neu — gewollt, es ist ja eine andere Vokabel. */
+const LEKTIONEN = [
+  { id:"beispiel", titel:"Beispiel — wird durch Deine Lektionen ersetzt", vok:[
+    ["le chat", "die Katze"],
+    ["la maison", "das Haus"],
+    ["l'école", "die Schule"],
+    ["les parents", "die Eltern"],
+    ["un ami|une amie", "ein Freund|eine Freundin"],
+    ["grand, grande", "groß"],
+    ["(se) promener", "spazieren gehen"],
+    ["le frère", "der Bruder"],
+    ["aujourd'hui", "heute"],
+    ["être", "sein", "Verb"],
+    ["Ça va ?", "Wie geht's?"],
+    ["les devoirs", "die Hausaufgaben"],
+  ]},
+];
+
+/* ===================== Logik =====================
+   Alles bis zur Marke "Oberfläche" fasst kein DOM an und wird von test/vokabeln.mjs
+   geprüft. */
+const DAY = 864e5;
+/* Tage bis zur nächsten Abfrage, wenn ein Wort richtig war und jetzt in Fach b liegt.
+   Fach 0 = noch nie gefragt. */
+const FACH = [0, 1, 2, 4, 8, 16];
+const SICHER = 4;   /* ab Fach 4 gilt ein Wort als sicher */
+
+/* Vereinheitlichen, was nichts mit Wissen zu tun hat: iOS setzt typografische
+   Apostrophe (’), Diktat hängt Punkte an, Leerzeichen doppeln sich. Akzente und
+   Groß-/Kleinschreibung bleiben unangetastet — die sind Wissen. */
+function clean(s){
+  return String(s == null ? "" : s).normalize("NFC")
+    .replace(/[’‘`´ʼ]/g, "'").replace(/[‐‑–—]/g, "-").replace(/[«»“”„"]/g, "")
+    .replace(/\s+/g, " ").trim()
+    .replace(/\s*'\s*/g, "'")
+    .replace(/\s*,\s*/g, ", ").replace(/\s*\/\s*/g, "/")
+    .replace(/[\s.!?;:,…]+$/, "").replace(/^[¿¡\s]+/, "")
+    .trim();
+}
+/* "(se) promener" → ["se promener", "promener"]; "groß|hoch" → ["groß", "hoch"] */
+function expand(s){
+  const m = s.match(/\(([^()]*)\)/);
+  if(!m) return [s];
+  const pre = s.slice(0, m.index), post = s.slice(m.index + m[0].length);
+  return [...expand(pre + m[1] + post), ...expand(pre + post)];
+}
+function variants(sol){
+  const out = [];
+  for(const alt of String(sol).split("|"))
+    for(const v of expand(alt)){ const c = clean(v); if(c && !out.includes(c)) out.push(c); }
+  return out;
+}
+/* Für die Anzeige: Varianten mit " / " statt "|" */
+function shown(sol){ return String(sol).split("|").map(s => s.trim()).join(" / "); }
+
+const ART = /^(le|la|les|un|une|des|du|de la|der|die|das|den|dem|ein|eine|einen) (.+)$/i;
+const ART_APO = /^(l'|de l')(.+)$/i;
+function splitArt(s){
+  let m = s.match(ART_APO); if(m) return { art:m[1].toLowerCase(), rest:m[2] };
+  m = s.match(ART);         if(m) return { art:m[1].toLowerCase(), rest:m[2] };
+  return null;
+}
+function noAccent(s){ return s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/œ/g, "oe").replace(/æ/g, "ae"); }
+function lev(a, b){
+  const d = Array.from({ length:a.length + 1 }, (_, i) => [i]);
+  for(let j = 1; j <= b.length; j++) d[0][j] = j;
+  for(let i = 1; i <= a.length; i++) for(let j = 1; j <= b.length; j++)
+    d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+  return d[a.length][b.length];
+}
+/* Gleich? Beim Tippen zählt Groß/Klein, nur ein Großbuchstabe am Satzanfang ist erlaubt
+   (le chat → "Le chat"). Gesprochen gibt es kein Groß/Klein. */
+function same(a, v, voice){
+  if(voice) return a.toLocaleLowerCase("fr") === v.toLocaleLowerCase("fr");
+  if(a === v) return true;
+  return a.length > 0 && a.slice(1) === v.slice(1) && a[0].toLocaleLowerCase("fr") === v[0] && a[0] !== v[0];
+}
+/* Ergebnis: { ok, why }. why ist nur die Erklärung — falsch bleibt falsch. */
+function check(answer, sol, voice){
+  const a = clean(answer), vs = variants(sol);
+  if(!a) return { ok:false, why:"Keine Antwort." };
+  for(const v of vs) if(same(a, v, voice)) return { ok:true, why:"" };
+  const low = s => s.toLocaleLowerCase("fr");
+  /* Erklärung gegen die nächstliegende Variante */
+  for(const v of vs){
+    const sa = splitArt(a), sv = splitArt(v);
+    if(sv && !sa && same(a, sv.rest, voice)) return { ok:false, why:"Der Artikel fehlt." };
+    if(sv && sa && sa.art !== sv.art && same(sa.rest, sv.rest, voice)) return { ok:false, why:"Falscher Artikel." };
+    if(sa && !sv && same(sa.rest, v, voice)) return { ok:false, why:"Hier gehört kein Artikel dazu." };
+  }
+  for(const v of vs){
+    if(!voice && low(a) === low(v)) return { ok:false, why:"Groß- und Kleinschreibung." };
+    if(noAccent(low(a)) === noAccent(low(v))) return { ok:false, why:"Akzent fehlt oder ist falsch." };
+  }
+  let best = Infinity;
+  for(const v of vs) best = Math.min(best, lev(low(a), low(v)));
+  if(best <= 2) return { ok:false, why:best === 1 ? "Ein Buchstabe ist falsch." : "Zwei Buchstaben sind falsch." };
+  return { ok:false, why:"" };
+}
+
+function cardsOf(lessons){
+  const out = [];
+  for(const l of lessons) for(const e of l.vok)
+    out.push({ id:l.id + ":" + e[0], lid:l.id, f:e[0], d:e[1], h:e[2] || "" });
+  return out;
+}
+const key = (cid, dir) => cid + ">" + dir;
+function startOfDay(t){ const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); }
+/* Karteikasten: richtig → ein Fach höher, fällig nach FACH[b] Tagen (ab Tagesbeginn,
+   damit "morgen" auch morgen früh heißt); falsch → Fach 1, sofort wieder fällig. */
+function grade(p, right, now){
+  p = p ? { ...p } : { b:0, due:0, n:0, w:0 };
+  p.n++; p.last = now;
+  if(right){ p.b = Math.min(5, p.b + 1); p.due = startOfDay(now) + FACH[p.b] * DAY; }
+  else { p.b = 1; p.w++; p.due = now; p.bad = 1; }
+  if(right) delete p.bad;
+  return p;
+}
+const isDue = (p, now) => !p || p.due <= now;
+function shuffle(a, rnd){
+  for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+/* Die Abfrage zusammenstellen. mode: due (fällig + neu), all, err (zuletzt falsch).
+   dir: fd (Französisch gefragt, Deutsch antworten), df, mix (je Wort die Richtung,
+   die eher dran ist). Bei "due" kommen schon gesehene, fällige Wörter vor neuen. */
+function buildSession(cards, P, o, now, rnd = Math.random){
+  const items = [];
+  for(const c of cards){
+    let dirs = o.dir === "mix" ? ["fd", "df"] : [o.dir];
+    const want = d => {
+      const p = P[key(c.id, d)];
+      if(o.mode === "err") return !!(p && p.bad);
+      if(o.mode === "due") return isDue(p, now);
+      return true;
+    };
+    dirs = dirs.filter(want);
+    if(!dirs.length) continue;
+    const dir = dirs.length > 1 ? dirs[Math.floor(rnd() * dirs.length)] : dirs[0];
+    const p = P[key(c.id, dir)];
+    items.push({ cid:c.id, dir, rank:o.mode === "due" && !p ? 1 : 0 });
+  }
+  shuffle(items, rnd);
+  items.sort((a, b) => a.rank - b.rank);
+  const n = o.count > 0 ? o.count : items.length;
+  return items.slice(0, n).map(({ cid, dir }) => ({ cid, dir }));
+}
+function lessonStats(cards, P, now){
+  let neu = 0, lern = 0, sicher = 0, due = 0;
+  for(const c of cards) for(const d of ["fd", "df"]){
+    const p = P[key(c.id, d)];
+    if(!p) neu++; else if(p.b >= SICHER) sicher++; else lern++;
+    if(isDue(p, now)) due++;
+  }
+  return { neu, lern, sicher, due, n:cards.length * 2 };
+}
+
+/* ===================== Oberfläche ===================== */
+const KEY = "vokabeln_v1";
+const $ = id => document.getElementById(id);
+function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+function flash(btn, text){ const o = btn.textContent; btn.textContent = text; setTimeout(() => { btn.textContent = o; }, 1600); }
+const CARDS = cardsOf(LEKTIONEN);
+const BYID = Object.fromEntries(CARDS.map(c => [c.id, c]));
+
+function sanitize(s){
+  s = s && typeof s === "object" ? s : {};
+  const lids = LEKTIONEN.map(l => l.id);
+  return {
+    name: typeof s.name === "string" ? s.name.slice(0, 40) : "",
+    sel: Array.isArray(s.sel) ? s.sel.filter(x => lids.includes(x)) : [],
+    dir: ["fd", "df", "mix"].includes(s.dir) ? s.dir : "fd",
+    mode: ["due", "all", "err"].includes(s.mode) ? s.mode : "due",
+    count: [0, 10, 20].includes(+s.count) ? +s.count : 10,
+    input: s.input === "voice" ? "voice" : "type",
+  };
+}
+function sanitizeP(p){
+  const out = {};
+  if(p && typeof p === "object") for(const k in p){
+    const v = p[k];
+    if(v && typeof v === "object" && v.b >= 0 && v.b <= 5 && isFinite(v.due))
+      out[k] = { b:v.b|0, due:+v.due, n:v.n|0, w:v.w|0, last:+v.last || 0, ...(v.bad ? { bad:1 } : {}) };
+  }
+  return out;
+}
+function load(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }
+let S = sanitize(load(KEY));
+let P = sanitizeP(load(KEY + "_p"));
+if(!S.sel.length && LEKTIONEN.length) S.sel = [LEKTIONEN[LEKTIONEN.length - 1].id];
+function persist(){ try { localStorage.setItem(KEY, JSON.stringify(S)); localStorage.setItem(KEY + "_p", JSON.stringify(P)); } catch(e){} }
+
+let VIEW = "home";
+let Q = null;   /* laufende Abfrage */
+
+function selCards(){ return CARDS.filter(c => S.sel.includes(c.lid)); }
+function opts(){ return { dir:S.dir, mode:S.mode, count:S.count }; }
+
+function bar(st){
+  const w = x => (100 * x / Math.max(1, st.n)).toFixed(1) + "%";
+  return '<span class="pr"><i style="width:'+w(st.sicher)+';background:var(--good)"></i><i style="width:'+w(st.lern)+';background:var(--gold)"></i></span>';
+}
+function renderHome(){
+  const now = Date.now();
+  $("title").innerHTML = "VOKABELN" + (S.name ? " <small>· " + esc(S.name.toUpperCase()) + "</small>" : "");
+  const all = LEKTIONEN.length > 1 && S.sel.length === LEKTIONEN.length;
+  let h = "";
+  if(LEKTIONEN.length > 1){
+    const st = lessonStats(CARDS, P, now);
+    h += '<button class="les all'+(all ? " on" : "")+'" data-all="1"><span class="ck">'+(all ? "✓" : "")+'</span>'+
+      '<span class="t"><b>ALLE LEKTIONEN</b><small>'+CARDS.length+' Wörter · '+st.due+' dran</small></span>'+bar(st)+'</button>';
+  }
+  for(const l of LEKTIONEN){
+    const on = S.sel.includes(l.id), cs = CARDS.filter(c => c.lid === l.id), st = lessonStats(cs, P, now);
+    h += '<button class="les'+(on ? " on" : "")+'" data-les="'+esc(l.id)+'"><span class="ck">'+(on ? "✓" : "")+'</span>'+
+      '<span class="t"><b>'+esc(l.titel)+'</b><small>'+cs.length+' Wörter · '+st.sicher+' von '+st.n+' sicher · '+st.due+' dran</small></span>'+bar(st)+'</button>';
+  }
+  $("lessons").innerHTML = h;
+  $("selHint").textContent = S.sel.length + " gewählt";
+  document.querySelectorAll("[data-opt]").forEach(seg => {
+    const v = String(S[seg.dataset.opt]);
+    seg.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === v));
+  });
+  const cs = selCards(), sess = buildSession(cs, P, opts(), now);
+  const info = !cs.length ? "Wähle oben mindestens eine Lektion."
+    : !sess.length ? (S.mode === "err" ? "Keine Fehler offen — gut so." : "Heute ist nichts mehr dran. Mit „Alle“ geht es trotzdem.")
+    : sess.length + (sess.length === 1 ? " Wort" : " Wörter") + " in dieser Runde.";
+  $("startInfo").textContent = info;
+  $("startBtn").disabled = !sess.length;
+  if(document.activeElement !== $("nameIn")) $("nameIn").value = S.name;
+  renderList(cs);
+  let exp = null; try { exp = localStorage.getItem(KEY + "_exp"); } catch(e){}
+  $("backupNote").textContent = (exp ? "Letzte Sicherung: " + new Date(exp).toLocaleDateString("de-DE") + ". " : "Noch nie gesichert. ") +
+    "Der Lernstand liegt nur auf diesem iPhone. Die Sicherung ist eine Datei, z. B. für iCloud Drive.";
+}
+function renderList(cs){
+  $("listHint").textContent = cs.length + " Wörter";
+  if(!$("listCard").open){ return; }
+  const col = p => !p ? "var(--line)" : p.bad ? "var(--bad)" : p.b >= SICHER ? "var(--good)" : "var(--gold)";
+  let h = '<table class="w">';
+  for(const c of cs){
+    const a = P[key(c.id, "fd")], b = P[key(c.id, "df")];
+    h += '<tr><td class="b"><span class="dot" style="background:'+col(a)+'"></span><br><span class="dot" style="background:'+col(b)+'"></span></td>'+
+      '<td><b>'+esc(shown(c.f))+'</b>'+(c.h ? ' <small>('+esc(c.h)+')</small>' : '')+'</td><td>'+esc(shown(c.d))+'</td></tr>';
+  }
+  $("wordList").innerHTML = h + '</table><div class="note">Punkte: oben FR → DE, unten DE → FR. Grau neu, gelb am Lernen, grün sicher, rot zuletzt falsch.</div>';
+}
+
+/* ----- Abfrage ----- */
+const ACC = ["é","è","ê","à","â","ç","ù","û","î","ï","ô","ë","œ"];
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+function startQuiz(items){
+  Q = { items:items.slice(), i:0, first:{}, wrong:[], fb:null, retry:{}, total:items.length };
+  VIEW = "quiz"; document.body.dataset.view = VIEW; window.scrollTo(0, 0);
+  showQ();
+}
+function cur(){ return Q.items[Q.i]; }
+function showQ(){
+  const it = cur(), c = BYID[it.cid], fr = it.dir === "df";
+  Q.fb = null; Q.heard = null;
+  const done = Object.keys(Q.first).length;
+  $("qCount").textContent = done + " / " + Q.total + " geschafft";
+  $("qBar").style.width = (100 * done / Q.total) + "%";
+  $("qDir").textContent = fr ? "Deutsch → Französisch" : "Französisch → Deutsch";
+  $("qWord").textContent = shown(fr ? c.d : c.f);
+  $("qHint").textContent = (c.h ? c.h : "") + (it.again ? (c.h ? " · " : "") + "noch einmal" : "");
+  const inp = $("qIn");
+  inp.value = ""; inp.className = "qin"; inp.lang = fr ? "fr" : "de";
+  inp.placeholder = fr ? "auf Französisch" : "auf Deutsch";
+  $("qAcc").innerHTML = fr ? ACC.map(a => '<button data-acc="'+a+'">'+a+'</button>').join("") : "";
+  $("qAcc").style.display = fr ? "" : "none";
+  $("qFb").innerHTML = "";
+  $("qGo").textContent = "PRÜFEN";
+  $("qSkip").style.display = "";
+  const voice = S.input === "voice";
+  $("qMic").style.display = voice && SR ? "" : "none";
+  $("qMic").textContent = "🎤 SPRECHEN"; $("qMic").classList.remove("live");
+  $("qNote").textContent = voice && !SR ? "Spracherkennung geht in dieser Ansicht nicht. Tipp ins Feld und nimm das Mikrofon unten auf der Tastatur." : "";
+  /* Fokus nur beim Tippen: beim Sprechen würde die Tastatur den Knopf verdecken.
+     Läuft synchron im Klick, sonst öffnet iOS die Tastatur nicht. */
+  if(!voice || !SR) inp.focus(); else inp.blur();
+}
+function answer(text, alts){
+  if(Q.fb) return;
+  const it = cur(), c = BYID[it.cid], sol = it.dir === "df" ? c.f : c.d;
+  const voice = S.input === "voice";
+  let r = check(text, sol, voice);
+  /* Beim Sprechen liefert die Erkennung mehrere Lesarten (verre / vert / vers klingen gleich).
+     Passt eine davon, war die Aussprache richtig — das Raten der Schreibweise ist nicht das Kind. */
+  if(!r.ok && alts) for(const a of alts){ if(check(a, sol, true).ok){ r = { ok:true, why:"" }; text = a; break; } }
+  Q.fb = { ok:r.ok, text };
+  const k = key(it.cid, it.dir);
+  if(!it.again && !(k in Q.first)){
+    Q.first[k] = r.ok;
+    P[k] = grade(P[k], r.ok, Date.now());
+    if(!r.ok) Q.wrong.push(it);
+    persist();
+  }
+  if(!r.ok){
+    /* Falsch beantwortete Wörter kommen in derselben Runde wieder, bis sie sitzen —
+       zählen dann aber nicht mehr fürs Fach. */
+    const at = Math.min(Q.items.length, Q.i + 4);
+    Q.items.splice(at, 0, { ...it, again:true });
+  }
+  $("qIn").className = "qin " + (r.ok ? "ok" : "bad");
+  if(voice) $("qIn").value = text;
+  let h = '<div class="fb '+(r.ok ? "ok" : "bad")+'">';
+  if(r.ok){
+    h += '<div class="h">✓ Richtig</div>';
+    const vs = String(sol).split("|"); if(vs.length > 1) h += '<small>Auch richtig: '+esc(shown(sol))+'</small>';
+  } else {
+    h += '<div class="h">✗ '+(text.trim() ? "Falsch" : "Lösung")+(r.why && text.trim() ? " — "+esc(r.why) : "")+'</div>'+
+      '<div class="sol">'+esc(shown(sol))+'</div>';
+    if(text.trim()) h += '<small>Deine Antwort: '+esc(text)+'</small>';
+    if(voice && SR && text.trim() && !Q.retry[k] && !it.again) h += '<button class="btn ghost sm" id="qRetry" style="margin-top:8px">VERHÖRT? NOCHMAL SPRECHEN</button>';
+  }
+  $("qFb").innerHTML = h + '</div>';
+  $("qGo").textContent = "WEITER";
+  $("qSkip").style.display = "none";
+  $("qMic").style.display = "none";
+}
+/* Einmal pro Wort: die falsche Antwort zurücknehmen und neu sprechen. Nur beim Sprechen —
+   beim Tippen gibt es nichts, was sich verhören könnte. */
+function retry(){
+  const it = cur(), k = key(it.cid, it.dir);
+  Q.retry[k] = 1;
+  if(Q.prev && Q.prev[k]) P[k] = Q.prev[k]; else delete P[k];
+  delete Q.first[k];
+  Q.wrong = Q.wrong.filter(x => key(x.cid, x.dir) !== k);
+  const j = Q.items.findIndex((x, n) => n > Q.i && x.again && key(x.cid, x.dir) === k);
+  if(j > 0) Q.items.splice(j, 1);
+  persist();
+  showQ(); listen();
+}
+function next(){
+  Q.i++;
+  if(Q.i >= Q.items.length) return finish();
+  showQ();
+}
+function finish(){
+  stopListen();
+  const ks = Object.keys(Q.first), right = ks.filter(k => Q.first[k]).length;
+  let h = '<div class="score">'+right+' / '+ks.length+'</div><div class="note" style="margin-top:4px">beim ersten Versuch richtig</div>';
+  if(Q.wrong.length){
+    h += '<div class="lbl" style="margin-top:14px">Das war falsch</div><table class="w">';
+    for(const it of Q.wrong){
+      const c = BYID[it.cid];
+      h += '<tr><td><b>'+esc(shown(it.dir === "df" ? c.d : c.f))+'</b></td><td>'+esc(shown(it.dir === "df" ? c.f : c.d))+'</td></tr>';
+    }
+    h += '</table><div class="btnrow"><button class="btn" id="resAgain">FEHLER NOCHMAL</button></div>';
+  }
+  h += '<div class="btnrow"><button class="btn ghost" id="resHome">ZURÜCK</button></div>';
+  $("resBody").innerHTML = h;
+  Q.last = Q.wrong.slice();
+  VIEW = "res"; document.body.dataset.view = VIEW; window.scrollTo(0, 0);
+  document.activeElement && document.activeElement.blur();
+}
+function goHome(){ stopListen(); Q = null; VIEW = "home"; document.body.dataset.view = VIEW; renderHome(); window.scrollTo(0, 0); }
+
+/* ----- Sprechen ----- */
+let REC = null;
+function stopListen(){ if(REC){ try { REC.abort(); } catch(e){} REC = null; } }
+function listen(){
+  if(!SR || !Q || Q.fb) return;
+  stopListen();
+  const it = cur(), mic = $("qMic");
+  /* Für das Zurücknehmen merken, wie das Fach vorher stand */
+  Q.prev = Q.prev || {}; const k = key(it.cid, it.dir); if(!(k in Q.prev)) Q.prev[k] = P[k] ? { ...P[k] } : null;
+  const r = new SR();
+  r.lang = it.dir === "df" ? "fr-FR" : "de-DE";
+  r.interimResults = true; r.maxAlternatives = 5; r.continuous = false;
+  let got = false;
+  r.onresult = e => {
+    const res = e.results[e.results.length - 1];
+    $("qIn").value = res[0].transcript;
+    if(res.isFinal){
+      got = true; REC = null;
+      const alts = []; for(let i = 1; i < res.length; i++) alts.push(res[i].transcript);
+      answer(res[0].transcript, alts);
+    }
+  };
+  r.onerror = e => {
+    REC = null; mic.classList.remove("live"); mic.textContent = "🎤 SPRECHEN";
+    if(e.error === "no-speech") $("qNote").textContent = "Nichts gehört — nochmal tippen und sprechen.";
+    else if(e.error !== "aborted") $("qNote").textContent = "Spracherkennung geht gerade nicht ("+e.error+"). Tipp ins Feld und nimm das Mikrofon der Tastatur.";
+  };
+  r.onend = () => { if(!got){ mic.classList.remove("live"); mic.textContent = "🎤 SPRECHEN"; } REC = null; };
+  try { r.start(); REC = r; mic.classList.add("live"); mic.textContent = "● ICH HÖRE …"; $("qNote").textContent = ""; }
+  catch(e){ $("qNote").textContent = "Spracherkennung ließ sich nicht starten. Tipp ins Feld und nimm das Mikrofon der Tastatur."; }
+}
+
+/* ----- Sicherung ----- */
+async function backup(btn){
+  const d = { app:"vokabeln", v:1, exported:new Date().toISOString(), state:S, p:P };
+  const text = JSON.stringify(d);
+  const name = "vokabeln-" + (S.name ? S.name.toLowerCase().replace(/[^a-z0-9äöü]+/g, "") + "-" : "") + new Date().toISOString().slice(0, 10) + ".json";
+  const done = () => { try { localStorage.setItem(KEY + "_exp", d.exported); } catch(e){} renderHome(); };
+  try {
+    const file = new File([text], name, { type:"application/json" });
+    if(navigator.canShare && navigator.canShare({ files:[file] })){
+      await navigator.share({ files:[file], title:"Vokabel-Sicherung" });
+      done(); return;
+    }
+  } catch(e){ if(e && e.name === "AbortError") return; }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type:"application/json" }));
+  a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  flash(btn, "GESPEICHERT"); done();
+}
+function restore(text){
+  let d = null; try { d = JSON.parse(text); } catch(e){}
+  if(!d || d.app !== "vokabeln"){ alert("Das ist keine Vokabel-Sicherung."); return; }
+  const p = sanitizeP(d.p), st = sanitize(d.state);
+  if(!confirm("Sicherung vom " + String(d.exported || "?").slice(0, 10) + (st.name ? " (" + st.name + ")" : "") + " laden?\n" +
+    Object.keys(p).length + " gelernte Einträge.\nDas ersetzt den Lernstand auf diesem iPhone.")) return;
+  S = st; P = p; if(!S.sel.length && LEKTIONEN.length) S.sel = [LEKTIONEN[LEKTIONEN.length - 1].id];
+  if(d.exported){ try { localStorage.setItem(KEY + "_exp", d.exported); } catch(e){} }
+  persist(); renderHome();
+}
+
+/* ----- Ereignisse ----- */
+document.addEventListener("click", ev => {
+  const b = ev.target.closest("button"); if(!b) return;
+  if(b.dataset.les){
+    const id = b.dataset.les;
+    S.sel = S.sel.includes(id) ? S.sel.filter(x => x !== id) : [...S.sel, id];
+    persist(); renderHome(); return;
+  }
+  if(b.dataset.all){
+    S.sel = S.sel.length === LEKTIONEN.length ? [] : LEKTIONEN.map(l => l.id);
+    persist(); renderHome(); return;
+  }
+  const seg = b.closest("[data-opt]");
+  if(seg && b.dataset.v != null){
+    const o = seg.dataset.opt; S[o] = o === "count" ? +b.dataset.v : b.dataset.v;
+    persist(); renderHome(); return;
+  }
+  switch(b.id){
+    case "startBtn": { const s = buildSession(selCards(), P, opts(), Date.now()); if(s.length) startQuiz(s); return; }
+    case "qGo": if(Q.fb) next(); else answer($("qIn").value); return;
+    case "qSkip": answer(""); return;
+    case "qMic": if(REC) stopListen(); else listen(); return;
+    case "qRetry": retry(); return;
+    case "qStop":
+      if(Object.keys(Q.first).length) finish(); else goHome(); return;
+    case "resAgain": startQuiz(Q.last.map(({ cid, dir }) => ({ cid, dir }))); return;
+    case "resHome": goHome(); return;
+    case "backupBtn": backup(b); return;
+    case "restoreBtn": $("restoreFile").click(); return;
+    case "resetBtn":
+      if(confirm("Den ganzen Lernstand auf diesem iPhone löschen? Alle Wörter sind danach wieder neu.")){ P = {}; persist(); renderHome(); }
+      return;
+  }
+});
+/* Akzent-Leiste: pointerdown ohne Fokuswechsel, sonst klappt die Tastatur bei jedem Akzent ein. */
+$("qAcc").addEventListener("pointerdown", ev => {
+  const b = ev.target.closest("[data-acc]"); if(!b) return;
+  ev.preventDefault();
+  const inp = $("qIn"); if(Q && Q.fb) return;
+  const s = inp.selectionStart ?? inp.value.length, e = inp.selectionEnd ?? s;
+  inp.value = inp.value.slice(0, s) + b.dataset.acc + inp.value.slice(e);
+  inp.setSelectionRange(s + 1, s + 1);
+  if(document.activeElement !== inp) inp.focus();
+});
+$("qAcc").addEventListener("click", ev => ev.preventDefault());
+$("qIn").addEventListener("keydown", ev => {
+  if(ev.key !== "Enter") return;
+  ev.preventDefault();
+  if(Q.fb) next(); else answer($("qIn").value);
+});
+$("qIn").addEventListener("input", () => { if(Q && Q.fb) $("qIn").value = Q.fb.text; });
+$("nameIn").addEventListener("input", () => { S.name = $("nameIn").value.slice(0, 40); persist(); $("title").innerHTML = "VOKABELN" + (S.name ? " <small>· " + esc(S.name.toUpperCase()) + "</small>" : ""); });
+$("listCard").addEventListener("toggle", () => renderList(selCards()));
+$("restoreFile").addEventListener("change", async ev => {
+  const f = ev.target.files && ev.target.files[0]; if(!f) return;
+  restore(await f.text()); ev.target.value = "";
+});
+/* Mitternacht und Zurückkehren zur App: was dran ist, kann sich geändert haben */
+document.addEventListener("visibilitychange", () => { if(!document.hidden && VIEW === "home") renderHome(); });
+
+renderHome();
+</script>
+</body>
+</html>

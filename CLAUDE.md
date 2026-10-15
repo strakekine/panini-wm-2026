@@ -666,7 +666,9 @@ Namen setzen** (`SpeechRecognition` UND `webkitSpeechRecognition`), sonst nimmt 
 echte von Chrome, die im Testbrowser stumm bleibt — sieht aus wie ein App-Fehler, ist keiner.
 Die Mikrofon-Nachfrage bei jedem App-Start macht iOS selbst (Home-Bildschirm-Apps merken sich
 die Erlaubnis nicht) — nicht abstellbar; in Safari unter „aA → Website-Einstellungen →
-Mikrofon“ dauerhaft erlaubbar. Wenn das Sprechen läuft, kann die Mitschrift wieder weg.
+Mikrofon“ dauerhaft erlaubbar. **Mitschrift seit Fassung g ausgeblendet** (vom Vater: für die
+Jungs verwirrend); `srlog()` führt sie weiter in `SRLOG`, sichtbar wird sie wieder mit einem
+`<div id="srLog">` unter `#qNote`.
 
 **Karteikasten:** 5 Fächer 0–4, Abstände `FACH = [1,1,2,4,7]` Tage ab Tagesbeginn. Fach 4 ist
 das oberste und „sicher“; spätestens jede Woche kommt jedes Wort wieder (vom Vater: Fach 5 mit

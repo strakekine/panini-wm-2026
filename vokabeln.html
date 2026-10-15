@@ -84,9 +84,6 @@
   .btnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
   .btnrow .btn{flex:1}
   .note{font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:10px}
-  /* Mitschrift der Spracherkennung — zum Eingrenzen am iPhone, nur im Sprechen-Modus */
-  .srlog{font-family:Menlo,monospace;font-size:10.5px;color:var(--muted);line-height:1.5;margin-top:8px;white-space:pre-wrap;word-break:break-word;opacity:.8}
-  .srlog:empty{display:none}
   input{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 11px;font-size:16px;font-family:inherit;width:100%;min-height:44px}
   input:focus{outline:none;border-color:var(--accent)}
   label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:600}
@@ -267,7 +264,6 @@
       <button class="btn" id="qGo">PRÜFEN</button>
     </div>
     <div class="note" id="qNote"></div>
-    <div class="srlog" id="srLog"></div>
   </div>
 </div>
 
@@ -616,7 +612,7 @@ function needBackup(dirty, snooze, now){
 /* Fassung — bei JEDER Änderung hochzählen. Steht unten im Startbild und als erste Zeile der
    Mitschrift; am iPhone lief einmal noch die alte Datei aus dem Zwischenspeicher, und die
    Mitschrift sah aus wie ein neuer Fehler. */
-const FASSUNG = "15.10.2026 f";
+const FASSUNG = "15.10.2026 g";
 const KEY = "vokabeln_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
@@ -929,7 +925,9 @@ function goHome(){ endSession(); Q = null; VIEW = "home"; document.body.dataset.
    Die Mikrofon-Nachfrage bei jedem App-Start macht iOS selbst und lässt sich nicht abstellen. */
 const SILENCE_MS = 1500, WATCH_MS = 4000;
 let REC = null, REC_ALIVE = false, LISTEN = null, SRNR = 0, SRT0 = 0;
-/* Mitschrift: jede Meldung mit Zeit seit dem letzten Antippen, letzte 14 Zeilen */
+/* Mitschrift: jede Meldung mit Zeit seit dem letzten Antippen, letzte 14 Zeilen. Wird nicht
+   mehr angezeigt (vom Vater: für die Jungs verwirrend), aber weiter geführt — zum Wieder-
+   einschalten bei Bedarf ein <div id="srLog"> unter #qNote setzen; in der Konsole: SRLOG. */
 const SRLOG = [];
 function srlog(t){
   SRLOG.push(((Date.now() - SRT0) / 1000).toFixed(1).padStart(5) + "s  " + t);

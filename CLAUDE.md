@@ -625,7 +625,9 @@ Versuch samt Fach-Änderung zurück. Ob die API im Home-Bildschirm-Modus geht, i
 noch nicht geprüft**; Rückfall ist das Mikrofon der Tastatur (Text landet im Feld, wird aber
 dann wie getippt geprüft). Vorlesen ist ausdrücklich nicht gewünscht.
 
-**Karteikasten:** 6 Fächer 0–5, Abstände `FACH = [1,1,2,4,8,16]` Tage ab Tagesbeginn.
+**Karteikasten:** 5 Fächer 0–4, Abstände `FACH = [1,1,2,4,7]` Tage ab Tagesbeginn. Fach 4 ist
+das oberste und „sicher“; spätestens jede Woche kommt jedes Wort wieder (vom Vater: Fach 5 mit
+16 Tagen war zu lang, `sanitizeP` setzt Altbestand aus Fach 5 auf 4 und kürzt den Termin).
 Vom Vater festgelegt: neue Wörter starten in **Fach 0**, das dieselbe Regel hat wie Fach 1 —
 ein neues Wort kommt nie gleich nach 2 Tagen. Falsch → Fach 0, solange das Wort nie über
 Fach 1 hinaus war; war es schon einmal in Fach 2+ (`hi`), nur nach Fach 1. Immer **morgen**

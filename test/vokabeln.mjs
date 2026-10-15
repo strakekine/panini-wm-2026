@@ -96,7 +96,8 @@ ok(p.b === 2 && p.due === heute + DAY + 2 * DAY, "Fach 2 → in 2 Tagen");
 p = M.grade(p, true, t0 + 3 * DAY);
 ok(p.b === 3 && p.due === heute + 3 * DAY + 4 * DAY, "Fach 3 → in 4 Tagen");
 for(let k = 0; k < 6; k++) p = M.grade(p, true, t0);
-ok(p.b === 5 && p.due === heute + 16 * DAY, "oben bleibt Fach 5, 16 Tage");
+ok(p.b === 4 && p.due === heute + 7 * DAY, "oben bleibt Fach 4, 7 Tage");
+ok(M.FACH.every(d => d <= 7), "kein Fach wartet länger als eine Woche");
 p = M.grade(p, false, t0);
 ok(p.b === 1 && p.due === heute + DAY && p.bad === 1 && p.w === 1, "war schon höher, falsch → Fach 1 (nicht 0), morgen, als Fehler markiert");
 ok(M.grade(p, false, t0).b === 1, "und nochmal falsch → bleibt in Fach 1");
@@ -110,7 +111,9 @@ ok(M.review(wartet, true, t0) === wartet, "wartendes Wort richtig → bleibt unv
 p = M.review(wartet, false, t0);
 ok(p.b === 1 && p.bad === 1, "wartendes Wort falsch → Fach 1");
 p = M.review({ b:4, due:t0 - 1, n:4, w:0 }, true, t0);
-ok(p.b === 5, "fälliges Wort richtig → steigt auf");
+ok(p.b === 4 && p.due === heute + 7 * DAY, "fälliges Wort in Fach 4 richtig → bleibt oben, 7 Tage");
+p = M.review({ b:3, due:t0 - 1, n:3, w:0 }, true, t0);
+ok(p.b === 4, "fälliges Wort richtig → steigt auf");
 ok(M.review(undefined, true, t0).b === 1, "neues Wort richtig → Fach 1");
 
 /* "Fehler" am selben Tag: falsch → morgen fällig; heute nochmal richtig → Fehlermarke weg,

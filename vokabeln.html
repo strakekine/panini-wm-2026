@@ -191,8 +191,8 @@
     <p>Gibt es mehrere Übersetzungen, reicht eine davon. Was in Klammern steht, darf man weglassen:
     bei <i>(se) promener</i> zählt beides.</p>
     <p><b>Karteikasten:</b> Neue Wörter starten in Fach 0. Weißt Du ein Wort, wandert es ein Fach
-    höher; Fach 0 und 1 kommen am nächsten Tag wieder, Fach 2 nach 2, Fach 3 nach 4, Fach 4 nach 8
-    und Fach 5 nach 16 Tagen. Nach einem Fehler geht es zurück: nach Fach 0, wenn das Wort noch
+    höher; Fach 0 und 1 kommen am nächsten Tag wieder, Fach 2 nach 2, Fach 3 nach 4 und Fach 4 nach 7
+    Tagen — spätestens jede Woche ist also jedes Wort wieder dran. Nach einem Fehler geht es zurück: nach Fach 0, wenn das Wort noch
     nie weiter als Fach 1 war, sonst nach Fach 1. Beide Richtungen zählen getrennt — wer <i>le chat</i> erkennt, kann es noch lange
     nicht schreiben.</p>
     <p><b>Welche Wörter:</b> „Heute fällig“ nimmt die neuen Wörter und die, deren Wartezeit um ist.
@@ -300,12 +300,15 @@ const LEKTIONEN = [
    Alles bis zur Marke "Oberfläche" fasst kein DOM an und wird von test/vokabeln.mjs
    geprüft. */
 const DAY = 864e5;
-/* Tage bis zur nächsten Abfrage für ein Wort in Fach b. Sechs Fächer, 0 bis 5.
+/* Tage bis zur nächsten Abfrage für ein Wort in Fach b. Fünf Fächer, 0 bis 4.
    Fach 0 ist das Anfängerfach: neue Wörter starten dort, und es hat dieselbe Regel wie
    Fach 1 (morgen wieder). So kommt ein neues Wort nie gleich nach zwei Tagen, auch wenn
    es beim ersten Mal sitzt — so vom Vater festgelegt. */
-const FACH = [1, 1, 2, 4, 8, 16];
-const SICHER = 4;   /* ab Fach 4 gilt ein Wort als sicher */
+/* Oberstes Fach ist 4 mit 7 Tagen: vom Vater festgelegt, spätestens jede Woche kommt
+   jedes Wort wieder. Ein Fach 5 mit 16 Tagen gab es, war ihm zu lang. */
+const FACH = [1, 1, 2, 4, 7];
+const TOP = FACH.length - 1;
+const SICHER = 4;   /* Fach 4 = sicher */
 
 /* Vereinheitlichen, was nichts mit Wissen zu tun hat: iOS setzt typografische
    Apostrophe (’), Diktat hängt Punkte an, Leerzeichen doppeln sich. Akzente und
@@ -413,7 +416,7 @@ function startOfDay(t){ const d = new Date(t); d.setHours(0, 0, 0, 0); return d.
 function grade(p, right, now){
   p = p ? { ...p, hi:Math.max(p.hi || 0, p.b) } : { b:0, hi:0, due:0, n:0, w:0 };
   p.n++; p.last = now;
-  if(right){ p.b = Math.min(5, p.b + 1); p.hi = Math.max(p.hi, p.b); p.due = startOfDay(now) + FACH[p.b] * DAY; }
+  if(right){ p.b = Math.min(TOP, p.b + 1); p.hi = Math.max(p.hi, p.b); p.due = startOfDay(now) + FACH[p.b] * DAY; }
   else { p.b = p.hi >= 2 ? 1 : 0; p.w++; p.due = startOfDay(now) + DAY; p.bad = 1; }
   if(right) delete p.bad;
   return p;
@@ -499,8 +502,9 @@ function sanitizeP(p){
   const out = {};
   if(p && typeof p === "object") for(const k in p){
     const v = p[k];
+    /* Altbestand aus Fach 5 (gab es bis Oktober 2026) landet in Fach 4 */
     if(v && typeof v === "object" && v.b >= 0 && v.b <= 5 && isFinite(v.due))
-      out[k] = { b:v.b|0, hi:Math.max(v.hi|0, v.b|0), due:+v.due, n:v.n|0, w:v.w|0, last:+v.last || 0, ...(v.bad ? { bad:1 } : {}) };
+      out[k] = { b:Math.min(TOP, v.b|0), hi:Math.min(TOP, Math.max(v.hi|0, v.b|0)), due:Math.min(+v.due, (+v.last || +v.due) + FACH[TOP] * DAY), n:v.n|0, w:v.w|0, last:+v.last || 0, ...(v.bad ? { bad:1 } : {}) };
   }
   return out;
 }

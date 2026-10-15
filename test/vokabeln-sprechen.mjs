@@ -29,6 +29,7 @@ const VARIANTEN = [
   { name:"iOS, Mikrofon gleich nach „Weiter“",                art:"ios",    pause:20 },
   { name:"iOS: Sitzung endet nach dem Wort mit audio-capture", art:"ios",   pause:300, endet:true },
   { name:"Chrome: jede Erkennung für sich",                   art:"chrome", pause:300 },
+  { name:"iOS schreibt -é statt -er (DE → FR)",              art:"ios",    pause:300, klang:true },
 ];
 const WOERTER = 6;
 
@@ -89,12 +90,27 @@ for(const v of VARIANTEN){
   }, v);
   await pg.goto("file://" + datei);
   await pg.click('[data-opt="input"] [data-v="voice"]');
+  if(v.klang) await pg.click('[data-opt="dir"] [data-v="df"]');
   await pg.click("#startBtn");
+  /* Klang-Variante: nur Vokabeln mit -er-Endung, sonst prüft der Zufall nichts */
+  if(v.klang) await pg.evaluate(n => {
+    const er = CARDS.filter(c => /[a-zà-ÿ]{2,}er\b/.test(variants(c.f)[0])).slice(0, n);
+    Q.items = er.map(c => ({ cid:c.id, dir:"df" })); Q.total = Q.items.length; Q.i = 0; showQ();
+  }, WOERTER);
+  let umgeschrieben = 0;
   let gut = 0; const log = [];
   for(let i = 0; i < WOERTER; i++){
     if(!(await pg.isVisible("#qMic"))){ log.push((i + 1) + ": Mikrofon-Knopf weg"); break; }
     await pg.click("#qMic"); await pg.waitForTimeout(150);
-    await pg.evaluate(() => { const it = Q.items[Q.i], c = BYID[it.cid]; window.__sprich(variants(it.dir === "df" ? c.f : c.d)[0]); });
+    umgeschrieben += await pg.evaluate(klang => {
+      const it = Q.items[Q.i], c = BYID[it.cid];
+      let w = variants(it.dir === "df" ? c.f : c.d)[0];
+      const vorher = w;
+      /* wie am iPhone: gleich klingende Endung falsch geschrieben, Großbuchstabe am Anfang */
+      if(klang) w = w.replace(/([a-zà-ÿ]{2,})er\b/g, "$1é").replace(/^./, x => x.toUpperCase());
+      window.__sprich(w);
+      return klang && w.toLowerCase() !== vorher.toLowerCase() ? 1 : 0;
+    }, !!v.klang);
     await pg.waitForTimeout(2000);
     const fb = (await pg.textContent("#qFb")).trim(), feld = await pg.inputValue("#qIn"), note = await pg.textContent("#qNote");
     if(fb.startsWith("✓") && !note) gut++;
@@ -102,6 +118,7 @@ for(const v of VARIANTEN){
     if(!(await pg.isVisible("#qGo"))) break;
     await pg.click("#qGo"); await pg.waitForTimeout(v.pause);
   }
+  if(v.klang) console.log("    (davon " + umgeschrieben + " mit falsch geschriebener Endung gesprochen)");
   const okay = gut === WOERTER && !errs.length;
   if(!okay) fehler++;
   console.log((okay ? "✓ " : "✗ ") + v.name + ": " + gut + " von " + WOERTER + (log.length ? "\n    " + log.join("\n    ") : "") + (errs.length ? "\n    Seitenfehler: " + errs.join(" | ") : ""));

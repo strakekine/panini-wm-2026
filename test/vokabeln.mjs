@@ -15,7 +15,7 @@ if(i < 0 || j < 0) throw new Error("Abschnittsmarken Lektionen/Oberfläche nicht
 const quelle = src.slice(src.lastIndexOf("/*", i), src.lastIndexOf("/*", j));
 const M = new Function(quelle + `
   return { LEKTIONEN, DAY, FACH, clean, variants, check, cardsOf, grade, review, isDue, buildSession,
-           lessonStats, startOfDay, key, needBackup, weekStatus, dayKey, dayDone, pruneDays, pct, DAY_MIN };`)();
+           lessonStats, startOfDay, key, needBackup, klang, klingtWie, weekStatus, dayKey, dayDone, pruneDays, pct, DAY_MIN };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text){ n++; if(!bed){ fehler++; console.log("✗ " + text); } }
@@ -184,6 +184,36 @@ ok(st.n === cards.length * 2 && st.neu === st.n - 2 && st.lern === 2 && st.siche
   const alt = M.pruneDays({ [M.dayKey(mi - 70 * DAY)]:{ n:20 }, [M.dayKey(mi)]:{ n:3 } }, mi);
   ok(Object.keys(alt).length === 1, "alte Tage werden aufgeräumt");
   ok(M.pct({ sicher:25, n:26 }) === 96 && M.pct({ sicher:26, n:26 }) === 100 && M.pct({ sicher:0, n:0 }) === 0, "Prozent abgerundet, 100 nur wenn alles sicher");
+}
+
+/* --- Gleicher Klang beim Sprechen (Französisch) --- */
+{
+  const ja = (h, sol) => ok(!!M.klingtWie(h, sol), `"${h}" klingt wie "${sol}"`);
+  const nein = (h, sol) => ok(!M.klingtWie(h, sol), `"${h}" klingt NICHT wie "${sol}"`);
+  ja("Arrivé en retard", "arriver en retard");          /* der Fall vom iPhone */
+  ja("arrivez en retard", "arriver en retard");
+  ja("être motivée", "être motivé");
+  ja("réviser la matières", "réviser la matière");
+  ja("lever la mains", "lever le doigt|lever la main");
+  ja("les jeu vidéo", "les jeux vidéo");
+  ja("un cour obligatoire", "un cours obligatoire");
+  ja("grande", "grand; grande");
+  nein("arrivé", "arriver en retard");                   /* fehlender Teil bleibt falsch */
+  nein("en retard", "arriver en retard");
+  nein("directeur", "le directeur");                     /* Artikel fehlt bleibt falsch */
+  nein("les directeur", "le directeur");                 /* le / les klingen verschieden */
+  nein("des vacances", "les vacances");
+  nein("arrive en retard", "arriver en retard");         /* arrive ≠ arriver */
+  nein("le chien", "le chat");
+  nein("", "le chat");
+  /* In den echten Lektionen dürfen zwei verschiedene Vokabeln nicht gleich „klingen“ —
+     sonst ginge beim Sprechen die eine als die andere durch. Nach jedem Eintragen wichtig. */
+  const seen = new Map();
+  for(const c of M.cardsOf(M.LEKTIONEN)) for(const v of [...M.variants(c.f)]){
+    const k = M.klang(v), alt = seen.get(k);
+    ok(!alt || alt === c.f, `Klang-Kollision: "${alt}" und "${c.f}" klingen für die App gleich („${k}“)`);
+    seen.set(k, c.f);
+  }
 }
 
 /* --- Erinnerung an die Sicherung --- */

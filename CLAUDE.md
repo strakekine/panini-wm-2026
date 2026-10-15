@@ -631,7 +631,15 @@ Autokorrektur ist im Feld aus — sie würde Tippfehler stillschweigend reparier
 **Sprechen:** Web-Speech-API (`fr-FR`/`de-DE`). Gesprochen zählt Groß/Klein nicht. Die
 Erkennung liefert bis zu 5 Lesarten; passt eine, gilt es als richtig (Homophone wie
 verre/vert). Bei falscher gesprochener Antwort einmal pro Wort „Verhört? Nochmal“ — nimmt den
-Versuch samt Fach-Änderung zurück. Rückfall ist das Mikrofon der Tastatur (Text landet im
+Versuch samt Fach-Änderung zurück. **Gleicher Klang** (`klang()`, `klingtWie()`, nur Sprechen
+und nur bei Antwort auf Französisch): Die Erkennung schrieb am iPhone zweimal „Arrivé en retard“
+für gesprochenes „arriver en retard“. Gleich klingende stumme Endungen (`-é/-ée/-és/-er/-ez/
+-ai/-ais/-ait/-aient` → „é“, Plural-`s/x` weg) zählen darum als richtig, mit gelbem Kasten
+„Richtig gesprochen — geschrieben wird es: …“. Vom Vater gewählt **statt** eines Knopfs
+„selbst korrigieren“ (Schlupfloch: Lösung abtippen). Bewusst eng: Wörter bis 3 Buchstaben
+bleiben unberührt (le/les, de/des, ce/ces klingen verschieden), Artikel und Wortstamm müssen
+stimmen. Der Logik-Test prüft, dass keine zwei Vokabeln der echten Lektionen gleich „klingen“
+— nach jedem Eintragen wichtig. Rückfall ist das Mikrofon der Tastatur (Text landet im
 Feld, wird aber dann wie getippt geprüft). Vorlesen ist ausdrücklich nicht gewünscht.
 **Am iPhone gemeldet, 15.10.2026 — vier Anläufe, alle im Chrome unsichtbar.** Der vierte
 brachte eine **Mitschrift** (`#srLog` unter dem Knopf, nur im Sprechen-Modus) und damit den

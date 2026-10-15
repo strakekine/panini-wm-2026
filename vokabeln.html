@@ -497,6 +497,32 @@ function check(answer, sol, voice){
   return { ok:false, why:"" };
 }
 
+/* ----- Gleicher Klang (nur Sprechen, nur Französisch) -----
+   Die Spracherkennung muss bei gleich klingenden Endungen die Schreibweise raten: am iPhone
+   wurde aus gesprochenem „arriver en retard“ zweimal „Arrivé en retard“. Das Kind hat richtig
+   gesprochen. Beim Sprechen zählt darum, was gleich KLINGT — die Schreibweise prüft der
+   Tippen-Modus. Vom Vater so entschieden, statt eines Knopfs „selbst korrigieren“ (der wäre ein
+   Schlupfloch: Lösung steht darüber, abtippen, Fehler weg).
+   Bewusst eng: nur stumme Endungen, nur Wörter mit mehr als 3 Buchstaben — sonst würden
+   le/les, de/des, ce/ces zusammenfallen, die verschieden klingen. Alles andere (Artikel,
+   Wortstamm, andere Wörter) muss stimmen. verre/vert/vers fängt das nicht; dafür gibt es
+   „Verhört? Nochmal sprechen“. */
+function klangWort(w){
+  if(w.length <= 3) return w;
+  const e = w.replace(/(aient|ais|ait|ai|ées|ée|és|ez|er|é)$/, "é");
+  if(e !== w) return e;
+  return w.replace(/[sx]$/, "");
+}
+function klang(s){
+  return clean(s).toLocaleLowerCase("fr").replace(/'/g, "' ").split(/\s+/).filter(Boolean).map(klangWort).join(" ");
+}
+/* Klingt das Gehörte wie eine Lösungsvariante? Liefert die Variante oder null. */
+function klingtWie(heard, sol){
+  const k = klang(heard); if(!k) return null;
+  for(const v of [...variants(sol), ...forms(sol)]) if(klang(v) === k) return v;
+  return null;
+}
+
 function cardsOf(lessons){
   const out = [];
   for(const l of lessons) for(const e of l.vok)
@@ -612,7 +638,7 @@ function needBackup(dirty, snooze, now){
 /* Fassung — bei JEDER Änderung hochzählen. Steht unten im Startbild und als erste Zeile der
    Mitschrift; am iPhone lief einmal noch die alte Datei aus dem Zwischenspeicher, und die
    Mitschrift sah aus wie ein neuer Fehler. */
-const FASSUNG = "15.10.2026 g";
+const FASSUNG = "15.10.2026 h";
 const KEY = "vokabeln_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
@@ -781,6 +807,8 @@ function answer(text, alts){
   /* Beim Sprechen liefert die Erkennung mehrere Lesarten (verre / vert / vers klingen gleich).
      Passt eine davon, war die Aussprache richtig — das Raten der Schreibweise ist nicht das Kind. */
   if(!r.ok && alts) for(const a of alts){ const ra = check(a, sol, true); if(ra.ok){ r = ra; text = a; break; } }
+  /* Gleicher Klang, andere Schreibweise (arrivé / arriver): richtig gesprochen */
+  if(!r.ok && voice && it.dir === "df") for(const a of [text, ...(alts || [])]){ if(klingtWie(a, sol)){ r = { ok:true, why:"", klang:true }; break; } }
   Q.fb = { ok:r.ok, text };
   const k = key(it.cid, it.dir);
   if(!it.again && !(k in Q.first)){
@@ -803,7 +831,8 @@ function answer(text, alts){
   let h = '<div class="fb '+(r.ok ? "ok" : "bad")+'">';
   if(r.ok){
     h += '<div class="h">✓ Richtig</div>';
-    if(r.part) h += '<div class="full">Vollständig heißt es:<b>'+esc(shown(sol))+'</b></div>';
+    if(r.klang) h += '<div class="full">Richtig gesprochen — geschrieben wird es:<b>'+esc(shown(sol))+'</b></div>';
+    else if(r.part) h += '<div class="full">Vollständig heißt es:<b>'+esc(shown(sol))+'</b></div>';
     else if(String(sol).includes("|")) h += '<small>Auch richtig: '+esc(shown(sol))+'</small>';
   } else {
     h += '<div class="h">✗ '+(text.trim() ? "Falsch" : "Lösung")+(r.why && text.trim() ? " — "+esc(r.why) : "")+'</div>'+

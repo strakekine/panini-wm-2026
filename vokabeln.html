@@ -390,7 +390,13 @@ const isDue = (p, now) => !p || p.due <= now;
 /* Bei "Alle" kommen auch Wörter dran, die noch warten. Richtig heißt dann nichts — der
    Abstand, den das Fach messen soll, war nicht da —, das Wort bleibt, wo es ist.
    Falsch zählt immer: wer es nach drei Tagen nicht weiß, weiß es nach acht erst recht nicht. */
-function review(p, right, now){ return right && p && !isDue(p, now) ? p : grade(p, right, now); }
+function review(p, right, now){
+  if(!right || !p || isDue(p, now)) return grade(p, right, now);
+  /* Fach und Termin bleiben; nur die Fehlermarke geht weg, sonst würde "Fehler" am selben
+     Tag nie leer — das Wort war ja gestern falsch und ist erst morgen wieder fällig. */
+  if(!p.bad) return p;
+  const q = { ...p }; delete q.bad; return q;
+}
 function shuffle(a, rnd){
   for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
   return a;

@@ -94,6 +94,13 @@ p = M.review({ b:4, due:t0 - 1, n:4, w:0 }, true, t0);
 ok(p.b === 5, "fälliges Wort richtig → steigt auf");
 ok(M.review(undefined, true, t0).b === 1, "neues Wort richtig → Fach 1");
 
+/* "Fehler" am selben Tag: falsch → morgen fällig; heute nochmal richtig → Fehlermarke weg,
+   Fach 1 und Termin morgen bleiben */
+p = M.grade(null, false, t0);
+const q = M.review(p, true, t0 + 3600e3);
+ok(q.b === 1 && !q.bad && q.due === heute + DAY, "Fehler heute richtig → raus aus 'Fehler', morgen trotzdem dran");
+ok(M.review(p, false, t0 + 3600e3).bad === 1, "Fehler heute wieder falsch → bleibt in 'Fehler'");
+
 /* --- Rundenbau --- */
 let seed = 1; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
 const cards = M.cardsOf(M.LEKTIONEN);

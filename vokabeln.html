@@ -84,6 +84,9 @@
   .btnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
   .btnrow .btn{flex:1}
   .note{font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:10px}
+  /* Mitschrift der Spracherkennung — zum Eingrenzen am iPhone, nur im Sprechen-Modus */
+  .srlog{font-family:Menlo,monospace;font-size:10.5px;color:var(--muted);line-height:1.5;margin-top:8px;white-space:pre-wrap;word-break:break-word;opacity:.8}
+  .srlog:empty{display:none}
   input{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 11px;font-size:16px;font-family:inherit;width:100%;min-height:44px}
   input:focus{outline:none;border-color:var(--accent)}
   label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:600}
@@ -264,6 +267,7 @@
       <button class="btn" id="qGo">PRÜFEN</button>
     </div>
     <div class="note" id="qNote"></div>
+    <div class="srlog" id="srLog"></div>
   </div>
 </div>
 
@@ -906,15 +910,24 @@ function goHome(){ stopListen(); Q = null; VIEW = "home"; document.body.dataset.
    wird abgeschnitten (PREV_RAW). Ausgewertet wird bei isFinal oder nach 1,5 s Stille; danach
    bleibt die Lösung stehen, bis „Weiter“ getippt wird (vom Vater so gewollt). Die
    Mikrofon-Nachfrage bei jedem App-Start macht iOS selbst und lässt sich nicht abstellen. */
-const SILENCE_MS = 1500, RETRY_MS = 400;
-let REC = null, PREV_RAW = "";
+const SILENCE_MS = 1500, RETRY_MS = 400, WATCH_MS = 2500;
+let REC = null, PREV_RAW = "", SRNR = 0, SRT0 = 0;
+/* Mitschrift: jede Meldung des iPhones mit Zeit seit dem Antippen. Bleibt über die Fragen
+   hinweg stehen (letzte 14 Zeilen), damit man beim zweiten Wort sieht, was beim ersten war. */
+const SRLOG = [];
+function srlog(t){
+  SRLOG.push(((Date.now() - SRT0) / 1000).toFixed(1).padStart(5) + "s  " + t);
+  while(SRLOG.length > 14) SRLOG.shift();
+  const el = document.getElementById("srLog"); if(el) el.textContent = SRLOG.join("\n");
+}
 function micIdle(){ const m = $("qMic"); m.classList.remove("live"); m.textContent = "🎤 SPRECHEN"; }
 function micLive(){ const m = $("qMic"); m.classList.add("live"); m.textContent = "● ICH HÖRE …"; }
 /* Erkennung abbrechen und vergessen — ohne auf irgendeine Meldung vom iPhone zu warten */
 function drop(r){
   if(!r) return;
-  r.done = true; clearTimeout(r.silence); clearTimeout(r.retry);
-  r.onresult = r.onerror = r.onend = null;
+  if(!r.done) srlog("#" + r.nr + " abbrechen");
+  r.done = true; clearTimeout(r.silence); clearTimeout(r.retry); clearTimeout(r.watch);
+  r.onresult = r.onerror = r.onend = r.onstart = r.onaudiostart = r.onspeechstart = null;
   try { r.abort(); } catch(e){}
   if(REC === r) REC = null;
 }
@@ -943,10 +956,16 @@ function listen(nochmal){
   const r = new SR();
   r.lang = it.dir === "df" ? "fr-FR" : "de-DE";
   r.interimResults = true; r.maxAlternatives = 5; r.continuous = false;
-  r.done = false; r.heard = null; r.silence = null; r.retry = null; r.t0 = Date.now();
+  r.done = false; r.heard = null; r.silence = null; r.retry = null; r.watch = null; r.lebt = false;
+  r.nr = ++SRNR; if(!nochmal) SRT0 = Date.now();
+  srlog("#" + r.nr + " start " + r.lang + (nochmal ? " (2. Versuch)" : ""));
+  const lebt = was => { r.lebt = true; clearTimeout(r.watch); srlog("#" + r.nr + " " + was); };
+  r.onstart = () => lebt("onstart");
+  r.onaudiostart = () => lebt("audiostart");
+  r.onspeechstart = () => lebt("speechstart");
   /* Mikrofon noch nicht frei: einmal kurz warten und neu versuchen */
   const wiederholen = grund => {
-    if(!nochmal && Q && !Q.fb){ drop(r); $("qNote").textContent = "Mikrofon wird frei …"; setTimeout(() => { if(Q && !Q.fb && !REC) listen(true); }, RETRY_MS); return true; }
+    if(!nochmal && Q && !Q.fb){ drop(r); srlog("#" + r.nr + " neu in " + RETRY_MS + " ms"); $("qNote").textContent = "Mikrofon wird frei …"; setTimeout(() => { if(Q && !Q.fb && !REC) listen(true); }, RETRY_MS); return true; }
     return false;
   };
   r.onresult = e => {
@@ -956,12 +975,14 @@ function listen(nochmal){
     const last = e.results[e.results.length - 1];
     const alts = []; for(let i = 1; i < last.length; i++) alts.push(fresh(last[i].transcript));
     r.heard = { raw, txt:fresh(raw), alts };
+    lebt("result" + (last.isFinal ? " final" : "") + " „" + raw + "“");
     $("qIn").value = r.heard.txt;
     clearTimeout(r.silence);
     if(last.isFinal) settle(r);
     else r.silence = setTimeout(() => settle(r), SILENCE_MS);
   };
   r.onerror = e => {
+    srlog("#" + r.nr + " error " + e.error + (r.done ? " (schon erledigt)" : ""));
     if(r.done || e.error === "aborted") return;
     if(r.heard && r.heard.txt) return settle(r);   /* gehört ist gehört */
     if(e.error === "audio-capture" && wiederholen()) return;
@@ -971,12 +992,19 @@ function listen(nochmal){
       : "Spracherkennung geht gerade nicht ("+e.error+"). Nochmal tippen — oder ins Feld tippen und das Mikrofon der Tastatur nehmen.";
   };
   /* Endet sie von selbst (Chrome tut das), wird ausgewertet, was da ist */
-  r.onend = () => { if(!r.done) settle(r); };
+  r.onend = () => { srlog("#" + r.nr + " onend"); if(!r.done) settle(r); };
   REC = r;
   try {
     r.start();
     micLive(); $("qNote").textContent = "";
+    /* Wächter: meldet das iPhone nach dem Start gar nichts, still hängen lassen wir es nicht */
+    r.watch = setTimeout(() => {
+      if(r.done || r.lebt) return;
+      srlog("#" + r.nr + " keine Meldung nach " + (WATCH_MS / 1000) + " s");
+      if(!wiederholen()){ drop(r); micIdle(); $("qNote").textContent = "Das iPhone meldet nichts. Nochmal tippen — oder ins Feld tippen und das Mikrofon der Tastatur nehmen."; }
+    }, WATCH_MS);
   } catch(e){
+    srlog("#" + r.nr + " start wirft " + (e && e.name));
     if(wiederholen()) return;
     drop(r); micIdle();
     $("qNote").textContent = "Spracherkennung ließ sich nicht starten ("+(e && e.name || "?")+"). Nochmal tippen — oder ins Feld tippen und das Mikrofon der Tastatur nehmen.";

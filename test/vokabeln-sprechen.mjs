@@ -12,6 +12,8 @@
    - nur die allererste Sitzung meldet isFinal, danach nur Zwischenstände
    - noEnd: meldet nach stop()/abort() NIE onend (Fehler 3 vom 15.10.2026)
    - freiMs: gibt das Mikrofon erst so viele ms nach stop()/abort() frei
+   - stumm: der erste start() nach jedem beendeten Wort bleibt völlig stumm (keine Meldung,
+     kein Fehler) — prüft den Wächter, der nach 2,5 s selbst neu startet
    Gegenproben: Jede der drei früheren Fassungen scheitert hier beim zweiten Wort. */
 import path from "path";
 import { fileURLToPath } from "url";
@@ -23,6 +25,7 @@ const VARIANTEN = [
   { name:"meldet nie onend",                           noEnd:true,  freiMs:0,   pause:300 },
   { name:"nie onend, Mikrofon erst nach 250 ms frei",  noEnd:true,  freiMs:250, pause:300 },
   { name:"wie oben, Mikrofon sofort nach „Weiter“",    noEnd:true,  freiMs:250, pause:20 },
+  { name:"erster Start nach jedem Wort bleibt stumm",  noEnd:true,  freiMs:0,   pause:20, stumm:true, warten:6000 },
 ];
 const WOERTER = 6;
 
@@ -32,7 +35,7 @@ for(const v of VARIANTEN){
   const pg = await b.newPage({ viewport:{ width:390, height:780 } });
   const errs = []; pg.on("pageerror", e => errs.push(String(e)));
   await pg.addInitScript(opt => {
-    let belegt = null, alles = "", sitzung = 0;
+    let belegt = null, alles = "", sitzung = 0, naechsterStumm = false;
     class FakeSR {
       constructor(){ this.on = false; }
       start(){
@@ -41,6 +44,7 @@ for(const v of VARIANTEN){
           setTimeout(() => { this.onerror && this.onerror({ error:"audio-capture" }); if(!opt.noEnd) this.onend && this.onend(); }, 10);
           return;
         }
+        if(opt.stumm && naechsterStumm){ naechsterStumm = false; this.on = true; this.stumm = true; return; }
         belegt = this; this.on = true; const nr = ++sitzung;
         const wort = window.__say(), vorher = alles;
         const send = (t, fin) => { if(!this.on) return; const alt = [{ transcript:(vorher ? vorher + " " : "") + t }]; alt.isFinal = fin; this.onresult && this.onresult({ results:[alt] }); };
@@ -48,7 +52,8 @@ for(const v of VARIANTEN){
         setTimeout(() => { send(wort, nr === 1); alles = (vorher ? vorher + " " : "") + wort; }, 120);
       }
       _end(){
-        if(!this.on) return; this.on = false;
+        if(!this.on) return; this.on = false; if(this.stumm) return;
+        naechsterStumm = true;
         const frei = () => { if(belegt === this) belegt = null; };
         if(opt.freiMs) setTimeout(frei, opt.freiMs); else frei();
         if(!opt.noEnd) setTimeout(() => this.onend && this.onend(), 50);
@@ -65,7 +70,7 @@ for(const v of VARIANTEN){
   let gut = 0; const log = [];
   for(let i = 0; i < WOERTER; i++){
     if(!(await pg.isVisible("#qMic"))){ log.push((i + 1) + ": Mikrofon-Knopf weg"); break; }
-    await pg.click("#qMic"); await pg.waitForTimeout(2300);
+    await pg.click("#qMic"); await pg.waitForTimeout(v.warten || 2300);
     const fb = (await pg.textContent("#qFb")).trim(), feld = await pg.inputValue("#qIn"), note = await pg.textContent("#qNote");
     if(fb.startsWith("✓")) gut++;
     else log.push((i + 1) + ": Feld " + JSON.stringify(feld) + " → " + (fb.slice(0, 30) || "keine Auswertung") + (note ? " | " + note : ""));

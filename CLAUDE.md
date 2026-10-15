@@ -646,9 +646,16 @@ Klick). Mikrofon noch nicht frei (`audio-capture` oder `start()` wirft) → einm
 selbst neu (`RETRY_MS`). Vorangestellter alter Text wird abgeschnitten (`PREV_RAW`). Auswertung
 bei `isFinal` oder nach 1,5 s Stille (`SILENCE_MS`); die Lösung bleibt stehen, bis „Weiter“
 getippt wird — **kein automatisches Weiter**, vom Vater ausdrücklich so (sonst kann man die
-Lösung nicht lesen). **Test:** `node test/vokabeln-sprechen.mjs`, Attrappe in vier Varianten
-(mit/ohne `onend`, Mikrofon sofort/verzögert frei, schnelles Antippen nach „Weiter“); jede der
-drei früheren Fassungen scheitert dort beim zweiten Wort. **Am Gerät noch nicht bestätigt.**
+Lösung nicht lesen). **Wächter** (`WATCH_MS` 2,5 s): meldet das iPhone nach `start()` gar nichts
+(kein onstart/audiostart/result), wird einmal neu gestartet. **Mitschrift** `#srLog` unter dem
+Knopf (nur im Sprechen-Modus, letzte 14 Meldungen mit Zeit): zum Eingrenzen am Gerät, nachdem
+der dritte Anlauf am iPhone **immer noch** nicht ging — der Vater schickt einen Screenshot
+davon. Wenn das Sprechen läuft, kann sie wieder weg (oder hinter einen Schalter). **Test:** `node test/vokabeln-sprechen.mjs`, Attrappe in vier Varianten
+(mit/ohne `onend`, Mikrofon sofort/verzögert frei, schnelles Antippen nach „Weiter“, erster
+Start nach jedem Wort stumm); jede der drei früheren Fassungen scheitert dort beim zweiten
+Wort, ohne Wächter scheitert die Stumm-Variante. **Attrappe immer unter beiden Namen setzen**
+(`SpeechRecognition` UND `webkitSpeechRecognition`), sonst nimmt die App die echte von Chrome,
+die im Testbrowser stumm bleibt — sieht aus wie ein App-Fehler, ist keiner. **Am Gerät noch nicht bestätigt.**
 Die Mikrofon-Nachfrage bei jedem App-Start macht iOS selbst (Home-Bildschirm-Apps merken sich
 die Erlaubnis nicht) — nicht abstellbar; in Safari unter „aA → Website-Einstellungen →
 Mikrofon“ dauerhaft erlaubbar.

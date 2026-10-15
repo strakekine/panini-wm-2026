@@ -213,6 +213,25 @@ for(const d of ["fd", "df", "mix"]){
   ok(sd.due === M.buildSession(cards, {}, { dir:d, mode:"due", count:0 }, t0, rnd).length, "fällig = Länge einer ganzen Runde (" + d + ")");
 }
 
+/* --- FR → DE: kurze Leiter 0 → 3 → 4, Fehler → 1 → 3 → 4 (vom Vater) --- */
+{
+  const ra = (p, r, t, getippt = false) => M.reviewAnswer(p, r, t, getippt, false);
+  let p = ra(undefined, true, t0);
+  ok(p.b === 3 && p.due === heute + 4 * DAY, "FR → DE: neu und richtig → gleich Fach 3, in 4 Tagen — ist " + p.b);
+  p = ra(p, true, t0 + 4 * DAY);
+  ok(p.b === 4, "FR → DE: dann Fach 4 = sicher");
+  p = ra(p, false, t0 + 11 * DAY);
+  ok(p.b === 1 && p.bad, "FR → DE: falsch → Fach 1");
+  p = ra(p, true, t0 + 12 * DAY);
+  ok(p.b === 3, "FR → DE: nach dem Fehler richtig → wieder Fach 3");
+  ok(ra(undefined, false, t0).b === 1, "FR → DE: neu und falsch → Fach 1");
+  ok(ra({ b:2, hi:2, due:t0 - 1, n:2, w:0 }, true, t0).b === 3, "FR → DE: Altbestand Fach 2 → 3");
+  /* DE → FR bleibt bei der ganzen Leiter */
+  const q = M.reviewAnswer(undefined, true, t0, true, true);
+  ok(q.b === 1, "DE → FR: neu und richtig → Fach 1 (ganze Leiter) — ist " + q.b);
+  ok(M.reviewAnswer(undefined, false, t0, true, true).b === 0, "DE → FR: neu und falsch → Fach 0");
+}
+
 /* --- Motivation: Wochenziel und Prozent --- */
 {
   const mi = new Date(2026, 9, 14, 18).getTime();          /* Mittwoch, 14.10.2026 */

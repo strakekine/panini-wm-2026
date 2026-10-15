@@ -224,6 +224,9 @@
     Tagen — spätestens jede Woche ist also jedes Wort wieder dran. Nach einem Fehler geht es zurück: nach Fach 0, wenn das Wort noch
     nie weiter als Fach 1 war, sonst nach Fach 1. Beide Richtungen zählen getrennt — wer <i>le chat</i> erkennt, kann es noch lange
     nicht schreiben.</p>
+    <p><b>Französisch → Deutsch geht schneller:</b> Erkennen ist leichter als selbst sagen. Dort
+    springt ein Wort beim ersten Richtig gleich in Fach 3 (in 4 Tagen wieder), danach in Fach 4.
+    Nach einem Fehler geht es nach Fach 1 und von dort wieder direkt nach Fach 3.</p>
     <p><b>Sicher heißt schreiben können:</b> Bei Deutsch → Französisch kommt ein Wort nur dann in
     Fach 4, wenn es mindestens einmal richtig <i>getippt</i> wurde. Wer es schon einmal richtig
     getippt hat, darf es danach auch sprechen. Nach einem Fehler muss es wieder einmal getippt
@@ -558,11 +561,17 @@ function startOfDay(t){ const d = new Date(t); d.setHours(0, 0, 0, 0); return d.
    (hi), nur nach Fach 1 — es zurück zu den Anfängern zu werfen wäre zu hart. Nicht sofort:
    in der Runde kommt das Wort ohnehin wieder, bis es sitzt, und eine zweite Runde gleich
    danach prüft nur das Kurzzeitgedächtnis. Wer heute nochmal will, nimmt "Meine Fehler". */
-function grade(p, right, now){
+/* kurz = FR → DE (vom Vater: „nicht so wichtig“, weniger Fächer): richtig springt aus Fach 0
+   oder 1 gleich nach 3 (in 4 Tagen), von dort nach 4; falsch immer nach Fach 1 (morgen).
+   DE → FR läuft die ganze Leiter 0 → 1 → 2 → 3 → 4. */
+function grade(p, right, now, kurz = false){
   p = p ? { ...p, hi:Math.max(p.hi || 0, p.b) } : { b:0, hi:0, due:0, n:0, w:0 };
   p.n++; p.last = now;
-  if(right){ p.b = Math.min(TOP, p.b + 1); p.hi = Math.max(p.hi, p.b); p.due = startOfDay(now) + FACH[p.b] * DAY; }
-  else { p.b = p.hi >= 2 ? 1 : 0; p.w++; p.due = startOfDay(now) + DAY; p.bad = 1; }
+  if(right){
+    p.b = kurz && p.b < 3 ? 3 : Math.min(TOP, p.b + 1);
+    p.hi = Math.max(p.hi, p.b); p.due = startOfDay(now) + FACH[p.b] * DAY;
+  }
+  else { p.b = kurz || p.hi >= 2 ? 1 : 0; p.w++; p.due = startOfDay(now) + DAY; p.bad = 1; }
   if(right) delete p.bad;
   return p;
 }
@@ -570,8 +579,8 @@ const isDue = (p, now) => !p || p.due <= now;
 /* Bei "Alle" kommen auch Wörter dran, die noch warten. Richtig heißt dann nichts — der
    Abstand, den das Fach messen soll, war nicht da —, das Wort bleibt, wo es ist.
    Falsch zählt immer: wer es nach drei Tagen nicht weiß, weiß es nach acht erst recht nicht. */
-function review(p, right, now){
-  if(!right || !p || isDue(p, now)) return grade(p, right, now);
+function review(p, right, now, kurz = false){
+  if(!right || !p || isDue(p, now)) return grade(p, right, now, kurz);
   /* Fach und Termin bleiben; nur die Fehlermarke geht weg, sonst würde "Meine Fehler" am selben
      Tag nie leer — das Wort war ja gestern falsch und ist erst morgen wieder fällig. */
   if(!p.bad) return p;
@@ -591,7 +600,7 @@ function reviewAnswer(p, right, now, getippt, brauchtTippen){
     const q = { ...p, b:SICHER, hi:Math.max(p.hi || 0, SICHER), ty:1, n:(p.n || 0) + 1, last:now, due:startOfDay(now) + FACH[SICHER] * DAY };
     delete q.wt; delete q.bad; return q;
   }
-  let q = review(p, right, now);
+  let q = review(p, right, now, !brauchtTippen);   /* FR → DE: kurze Leiter */
   /* „Alle“, noch nicht fällig: Fach und Termin bleiben — aber richtig getippt ist richtig
      getippt, die Schreibweise ist damit bewiesen */
   if(q === p) return right && getippt && p && !p.ty ? { ...p, ty:1 } : q;
@@ -707,7 +716,7 @@ function needBackup(dirty, snooze, now){
 /* Fassung — bei JEDER Änderung hochzählen. Steht unten im Startbild und als erste Zeile der
    Mitschrift; am iPhone lief einmal noch die alte Datei aus dem Zwischenspeicher, und die
    Mitschrift sah aus wie ein neuer Fehler. */
-const FASSUNG = "15.10.2026 o";
+const FASSUNG = "15.10.2026 p";
 const KEY = "vokabeln_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }

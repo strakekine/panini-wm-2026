@@ -712,6 +712,11 @@ ein Durchgang vor der Klassenarbeit die halbe Lektion ein Fach hoch), falsch zä
 Den Knopf „Fehler nochmal“ direkt nach der Runde gibt es bewusst **nicht** mehr: die Wörter
 waren in der Runde gerade richtig, eine Minute später prüft das nur das Kurzzeitgedächtnis.
 Wer heute nochmal will, nimmt „Meine Fehler“ im Startbild (filtert `bad`, nicht nach Fälligkeit).
+**FR → DE hat die kurze Leiter** (Fassung p, vom Vater: „nicht so wichtig“): richtig aus Fach 0
+oder 1 → gleich Fach 3 (4 Tage), dann 4; falsch → immer Fach 1, von dort wieder direkt nach 3.
+`grade(…, kurz)`, durchgereicht über `review` und `reviewAnswer` (kurz = Richtung braucht kein
+Tippen, also FR → DE). DE → FR läuft die ganze Leiter 0 → 1 → 2 → 3 → 4. Altbestand in Fach 1/2
+springt beim nächsten Richtig nach 3, keine Umrechnung nötig.
 
 **„Sicher“ bei DE → FR heißt schreiben können** (`reviewAnswer()`, vom Vater festgelegt): In
 Richtung DE → FR kommt ein Wort nur nach Fach 4, wenn es mindestens einmal richtig **getippt**

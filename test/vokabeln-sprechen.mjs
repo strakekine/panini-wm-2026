@@ -202,6 +202,14 @@ for(const v of VARIANTEN){
   fb = await pg.textContent("#qFb");
   ok(fb.includes("✗") && (await pg.$("#qFb .sol")) && !(await pg.$("#qType")), "5: falsch getippt → Lösung, kein weiterer Versuch");
   ok(await pg.evaluate(() => Object.values(Q.first)[4] === false), "5: zählt als Fehler");
+  await pg.click("#qGo"); await pg.waitForTimeout(50);
+
+  /* 6. Wiederholung in der Runde: auch dort wieder zweiter Versuch statt sofort Lösung */
+  ok(await pg.evaluate(() => !!Q.items[Q.i].again), "6: ein Wort kommt in der Runde wieder");
+  sol = await loesung();
+  await sag("pas du tout");
+  fb = await pg.textContent("#qFb");
+  ok(!fb.includes(sol) && (await pg.$("#qRetry")) && (await pg.$("#qType")), "6: Wiederholung falsch gesprochen → Lösung verdeckt, Nochmal/Tippen da");
 
   const okay = !fehl.length && !errs.length;
   if(!okay) fehler++;

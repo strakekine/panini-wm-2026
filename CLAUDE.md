@@ -614,7 +614,9 @@ Abschnitten (`rentree-1` Vie au lycée 32, `rentree-2` Émotions 32, `rentree-3`
 = 78). Beispiel-Lektion ist raus. Regeln beim Abtippen, so gehandhabt:
 Schrägstrich-Synonyme („arriver à l'heure / être ponctuel“) → `|`; „≠“-Paare und
 „intéressant / ennuyeux“ → getrennte Einträge; Genus-Angaben (n.f./n.m.) → Hinweis, wo `l'`/`les`
-es verdeckt; „qch“/„qn“-Teile optional in Klammern. Gibt das Blatt nur eine französische
+es verdeckt; „qch“/„qn“-Teile optional in Klammern. Buchkürzel gelten **auch ausgeschrieben** (`KUERZEL`,
+`ausgeschrieben()` in `addClean`: qn → quelqu'un, qch → quelque chose, jdn/jdm → jemanden/jemandem,
+etw. → etwas) — vom Vater gefunden: „rendre visite à quelqu'un“ war falsch. Gibt das Blatt nur eine französische
 Erklärung (cours obligatoire, réviser la matière, demander la parole, échouer, se sentir à
 l'aise), steht die **deutsche Übersetzung von Claude** im Eintrag und die Erklärung als Hinweis
 (im Code `/* Ü */`). Die Nomen zu den Adjektiven („→ la motivation“) stehen auf dem Blatt ohne
@@ -638,7 +640,8 @@ Versuch zählt normal, ist er wieder falsch, kommt die Lösung sofort und es ist
 instrument“ versteht das iPhone nicht) schaltet für dieses eine Wort aufs Tippen um (`Q.tipp`,
 `sprichtGerade()`; `next()` setzt zurück): Tastatur auf, kein Mikrofon, streng geprüft und als
 getippt gewertet (setzt `ty`). Bleibt auch nach dem zweiten Sprechversuch frei (dann ohne
-Nochmal-Knopf); falsch getippt → Lösung, Fehler. Bewertet wird erst bei der Entscheidung (`Q.fb.pending`) —
+Nochmal-Knopf); falsch getippt → Lösung, Fehler. Auch beim **Wiederholen in der Runde** (`again`) gibt es
+Nochmal/Tippen wieder (Fassung m; `next()` leert `Q.retry`) — vorher kam dort sofort die Lösung. Bewertet wird erst bei der Entscheidung (`Q.fb.pending`) —
 vorher hätte „Nochmal“ mit sichtbarer Lösung einfach Nachsprechen belohnt. Die Lösung steht
 überall groß (`.fb .sol`, `.full b`, 25–27 px). **Gleicher Klang** (`klang()`, `klingtWie()`, nur Sprechen
 und nur bei Antwort auf Französisch): Die Erkennung schrieb am iPhone zweimal „Arrivé en retard“

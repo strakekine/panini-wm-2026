@@ -51,6 +51,17 @@ falsch("le chien", "le chat", "");
 falsch("", "le chat", "Keine Antwort.");
 falsch("grand", "grand, grande");               /* Komma ist kein Formtrenner (Ça va, merci) */
 
+/* --- Buchkürzel gelten auch ausgeschrieben (vom Vater: „rendre visite à quelqu'un“ war falsch) --- */
+richtig("rendre visite à quelqu'un", "rendre visite (à qn)");
+richtig("Rendre visite à quelqu’un", "rendre visite (à qn)");
+richtig("rendre visite à qn", "rendre visite (à qn)");
+richtig("rendre visite", "rendre visite (à qn)");
+richtig("jemanden besuchen", "(jdn) besuchen");
+richtig("etwas leidenschaftlich mögen", "(etw.) leidenschaftlich mögen");
+richtig("être passionné de quelque chose", "être passionné (de qch)");
+falsch("rendre visite à quelqu'une", "rendre visite (à qn)");
+ok(M.check("rendre visite à quelqu'un", "rendre visite (à qn)", true).ok, "ausgeschrieben auch gesprochen");
+
 /* --- Formen mit ";": eine reicht, aber mit Hinweis --- */
 const teil = (a, sol) => { const r = M.check(a, sol); ok(r.ok && r.part, `"${a}" für "${sol}" sollte richtig mit Hinweis sein`); };
 teil("grand", "grand; grande");

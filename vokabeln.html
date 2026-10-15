@@ -438,7 +438,14 @@ function expand(s){
   return [...expand(pre + m[1] + post), ...expand(pre + post)];
 }
 const FORMS = /\s*;\s*/;
-function addClean(out, v){ const c = clean(v); if(c && !out.includes(c)) out.push(c); }
+/* Buchkürzel gelten auch ausgeschrieben: „rendre visite à quelqu'un“ ist so richtig wie
+   „… à qn“ (vom Vater gefunden — gesprochen sagt niemand „qn“). */
+const KUERZEL = [[/\bqn\b/g, "quelqu'un"], [/\bqch\b/g, "quelque chose"],
+  [/\bjdn\b/g, "jemanden"], [/\bjdm\b/g, "jemandem"], [/\betw\.?(?=\s|,|$)/g, "etwas"]];
+function ausgeschrieben(v){ let r = v; for(const [re, w] of KUERZEL) r = r.replace(re, w); return r; }
+function addClean(out, v){
+  for(const x of [v, ausgeschrieben(v)]){ const c = clean(x); if(c && !out.includes(c)) out.push(c); }
+}
 /* Vollständige Antworten: "grand; grande" → "grand, grande" */
 function variants(sol){
   const out = [];
@@ -690,7 +697,7 @@ function needBackup(dirty, snooze, now){
 /* Fassung — bei JEDER Änderung hochzählen. Steht unten im Startbild und als erste Zeile der
    Mitschrift; am iPhone lief einmal noch die alte Datei aus dem Zwischenspeicher, und die
    Mitschrift sah aus wie ein neuer Fehler. */
-const FASSUNG = "15.10.2026 l";
+const FASSUNG = "15.10.2026 m";
 const KEY = "vokabeln_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
@@ -876,7 +883,7 @@ function answer(text, alts, endgueltig){
   /* „Antwort tippen“ (einmal pro Wort) bleibt auch nach dem zweiten Sprechversuch frei: manches
      versteht das iPhone einfach nicht („jouer d'un instrument“). Getippt wird streng geprüft,
      die Lösung war nicht zu sehen — kein Schlupfloch. Getippt ist voice aus, also endgültig. */
-  if(!r.ok && voice && SR && text.trim() && !endgueltig && !it.again){
+  if(!r.ok && voice && SR && text.trim() && !endgueltig){
     const nochmal = !Q.retry[k];
     Q.fb = { pending:true, text, alts };
     $("qIn").className = "qin bad"; $("qIn").value = text;
@@ -954,6 +961,7 @@ function zeigeLoesung(){
 }
 function next(){
   Q.i++; Q.tipp = null;
+  Q.retry = {};   /* kommt das Wort in der Runde wieder, gibt es dort wieder einen zweiten Versuch */
   if(Q.i >= Q.items.length) return finish();
   showQ();
 }

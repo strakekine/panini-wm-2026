@@ -744,16 +744,21 @@ Fächer. Am Ende „Jetzt abfragen“ mit den aktuellen Einstellungen.
 
 **Motivation** (vom Vater gewünscht, Nr. 1 und 2 aus einem Vorschlag): oben im Startbild die
 Zahl **sicher** (Fach 4, beide Richtungen einzeln) und ein **Wochenziel** Mo–So mit 5
-Lerntagen; ein Lerntag = 10 erste Antworten an einem Tag (`DAY_MIN`), „Nur lernen“ zählt nicht.
+Lerntagen; ein Lerntag = 40 erste Antworten an einem Tag, davon 20 richtig (`DAY_MIN`, siehe unten), „Nur lernen“ zählt nicht.
 Bewusst **keine Prozentzahl oben** — jede neue Lektion würde sie drücken; Prozent nur je
 Lektion (`pct`, abgerundet, 100 % nur bei allem sicher, dann ✓). **Je Lektion groß die eingestellte Richtung, klein darunter die andere** (Fassung q, vom Vater: wer nur DE → FR übt, soll 100 % erreichen können; die kleine Zeile zeigt, was in der anderen Richtung fehlt). `lessonStats().per.fd/.df`, `ansicht()`, `pcBox(st, dir)`; bei „Gemischt“ groß beide zusammen. Der Balken folgt der großen Zahl. Bewusst **keine Serie**
 (fällt nach einem Krankheitstag auf null), keine Punkte je Antwort (mit „Alle“ austricksbar),
 kein Emil-gegen-Leo (unfair, bräuchte Server), keine Blitzrunde (belohnt Tempo statt
 Genauigkeit). Nach der Runde: „⭐ n Wörter jetzt sicher“ und „📅 Lerntag geschafft“, wenn
 der Tag in dieser Runde voll wurde.
-**Lerntag seit Fassung r:** 10 erste Antworten, **davon mindestens 5 richtig** (`DAY_RIGHT`,
-`countDay`, Tageseintrag `{n, r}`); alte Einträge ohne `r` gelten nach alter Regel. Grund: seit
-es Sterne gibt, wäre zehnmal „Weiß nicht“ ein geschenkter Lerntag.
+**Lerntag seit Fassung s:** **40** erste Antworten, **davon mindestens 20 richtig** (`DAY_MIN`,
+`DAY_RIGHT`, `countDay`, Tageseintrag `{n, r, v:2}`; vom Vater: „mit 10 war's zu schnell“). Runde
+jetzt wählbar 20 / **40** / Alle, Vorgabe 40 (alte Einstellung 10 → 40). Geschafft bleibt
+geschafft: Tage ohne `v` behalten ihre Regel (ohne `r`: 10 Antworten; mit `r`: 10, davon 5 —
+Fassung r), auch ein heute schon angefangener Tag. Startbild zeigt „Heute: n von 40 …“.
+Grund für „richtig“: seit es Sterne gibt, wäre 40-mal „Weiß nicht“ ein geschenkter Lerntag.
+Achtung: sind weniger als 40 Wörter fällig, reicht „Heute fällig“ allein nicht — dann mit
+„Alle“ weiterüben (zählt für den Lerntag, schiebt aber keine Fächer).
 **Sterne** (Fassung r, vom Vater gewünscht): Woche Mo–So mit 5 Lerntagen = 1 Stern (`sternWochen`,
 nachgetragen aus `DAYS` per `sterneNachtragen`, nie entfernt — `DAYS` hält nur 60 Tage). Gespeichert
 unter `_stars` = `{w:[Montage], red:[{t,n,was}]}`, in der Sicherung mit drin, „Lernstand löschen“

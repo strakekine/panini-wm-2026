@@ -253,23 +253,29 @@ for(const d of ["fd", "df", "mix"]){
   const so = new Date(2026, 9, 18, 21).getTime();          /* Sonntagabend derselben Woche */
   ok(M.weekStatus(days, so).count === 2 && M.weekStatus(days, so).cells[6].today, "Sonntag gehört noch zur Woche");
   ok(M.weekStatus(days, so + DAY).count === 0, "Montag danach: neue Woche, wieder 0");
-  ok(!M.dayDone({ n:M.DAY_MIN - 1 }) && M.dayDone({ n:M.DAY_MIN }), "Lerntag ab " + M.DAY_MIN + " Antworten");
+  ok(!M.dayDone({ n:9 }) && M.dayDone({ n:10 }), "alter Tag (ohne r): Lerntag ab 10 Antworten");
   const alt = M.pruneDays({ [M.dayKey(mi - 70 * DAY)]:{ n:20 }, [M.dayKey(mi)]:{ n:3 } }, mi);
   ok(Object.keys(alt).length === 1, "alte Tage werden aufgeräumt");
   /* Lerntag ehrlich: 10 Antworten, davon 5 richtig; alte Einträge ohne r nach alter Regel */
-  ok(!M.dayDone({ n:10, r:4 }) && M.dayDone({ n:10, r:5 }) && M.dayDone({ n:12 }), "Lerntag: 10 Antworten, davon " + M.DAY_RIGHT + " richtig");
-  let e; for(let i = 0; i < 10; i++) e = M.countDay(e, false);
-  ok(e.n === 10 && e.r === 0 && !M.dayDone(e), "zehnmal falsch/„Weiß nicht“ ist kein Lerntag");
+  ok(!M.dayDone({ n:10, r:4 }) && M.dayDone({ n:10, r:5 }) && M.dayDone({ n:12 }), "Tag aus Fassung r: 10 Antworten, davon 5 richtig — bleibt gültig");
+  ok(M.DAY_MIN === 40 && M.DAY_RIGHT === 20, "Lerntag jetzt 40 Antworten, davon 20 richtig");
+  ok(!M.dayDone({ n:39, r:39, v:2 }) && !M.dayDone({ n:40, r:19, v:2 }) && M.dayDone({ n:40, r:20, v:2 }), "neuer Tag: 40 Antworten, davon 20 richtig");
+  let e; for(let i = 0; i < 40; i++) e = M.countDay(e, false);
+  ok(e.n === 40 && e.r === 0 && e.v === 2 && !M.dayDone(e), "vierzigmal falsch/„Weiß nicht“ ist kein Lerntag");
+  e = undefined; for(let i = 0; i < 10; i++) e = M.countDay(e, true);
+  ok(!M.dayDone(e), "neuer Tag mit 10 richtigen reicht nicht mehr");
+  ok(M.countDay({ n:10, r:6 }, true).v === undefined && M.dayDone(M.countDay({ n:10, r:6 }, true)), "heute schon nach alter Regel geschafft → bleibt geschafft");
   ok(M.countDay({ n:8 }, true).r === 9, "alter Eintrag ohne r: weiterzählen ohne ihn abzuwerten");
   ok(M.pruneDays({ [M.dayKey(mi)]:{ n:10, r:7 } }, mi)[M.dayKey(mi)].r === 7, "pruneDays behält r");
+  ok(M.pruneDays({ [M.dayKey(mi)]:{ n:40, r:30, v:2 } }, mi)[M.dayKey(mi)].v === 2, "pruneDays behält v");
   /* Sterne: Woche mit 5 Lerntagen = 1 Stern, nie verloren, Einlösen zieht ab */
   const mo = M.wochenStart(mi), d5 = {};
-  for(let i = 0; i < 5; i++) d5[M.dayKey(mo + i * DAY + 3600e3 * 12)] = { n:10, r:8 };
+  for(let i = 0; i < 5; i++) d5[M.dayKey(mo + i * DAY + 3600e3 * 12)] = { n:40, r:30, v:2 };
   ok(M.dayKey(mo) === "2026-10-12", "Woche beginnt am Montag 12.10. — ist " + M.dayKey(mo));
   ok(M.sternWochen(d5).join() === "2026-10-12", "5 Lerntage → Stern für diese Woche");
   const d4 = { ...d5 }; delete d4[M.dayKey(mo + 12 * 3600e3)];
   ok(M.sternWochen(d4).length === 0, "4 Lerntage → kein Stern");
-  const ueber = {}; for(let i = 3; i < 8; i++) ueber[M.dayKey(mo + i * DAY + 12 * 3600e3)] = { n:10, r:9 };
+  const ueber = {}; for(let i = 3; i < 8; i++) ueber[M.dayKey(mo + i * DAY + 12 * 3600e3)] = { n:40, r:39, v:2 };
   ok(M.sternWochen(ueber).length === 0, "5 Tage über zwei Wochen verteilt → kein Stern");
   let st = M.sterneNachtragen(M.sanitizeStars(null), d5);
   ok(M.sterneStand(st) === 1, "ein Stern verdient");

@@ -48,7 +48,7 @@ async function spielen(pg, falsch = []){
   ok(alle > 0, "es gibt Lektionen");
   await pg.click("#startBtn");
   const geplant = await pg.evaluate(() => Q.total);
-  ok(geplant === Math.min(10, alle * 1), "Runde hat 10 Wörter (oder alle, wenn weniger) — ist " + geplant);
+  ok(geplant === Math.min(40, alle * 1), "Runde hat 40 Wörter (oder alle, wenn weniger) — ist " + geplant);
   await pg.type("#qIn", "xx"); await pg.keyboard.press("Enter");
   ok((await pg.textContent("#qFb")).includes("✗"), "falsche Antwort wird als falsch gezeigt");
   ok(await pg.evaluate(() => document.activeElement.id === "qIn"), "Fokus bleibt im Feld (Tastatur bleibt offen)");
@@ -65,6 +65,8 @@ async function spielen(pg, falsch = []){
   ok(res.includes("kommen morgen wieder"), "Hinweis: Fehler kommen morgen wieder");
   ok(!(await pg.$("#resAgain")), "kein Knopf „Fehler nochmal“");
   await pg.click("#resHome");
+  const heute = await pg.textContent("#progBox");
+  ok(geplant >= 40 ? heute.includes("Heute ist ein Lerntag") : heute.includes("Heute: " + geplant + " von 40"), "Startbild zeigt den heutigen Lerntag — " + heute.slice(-60));
   await pg.reload();
   ok(await pg.evaluate(() => Object.keys(P).length) === geplant, "Lernstand übersteht Neuladen");
   ok(!pg.errs.length, "keine Fehler auf der Seite: " + pg.errs.join(" | "));
@@ -108,7 +110,7 @@ async function spielen(pg, falsch = []){
   ok(faellig === 4, "fälliges Wort aus Fach 3 wird sicher — ist " + faellig);
   const res = await pg.textContent("#resBody");
   ok(res.includes("jetzt sicher"), "Ergebnis meldet neu sichere Wörter");
-  if(await pg.evaluate(() => selCards().length) >= 10) ok(res.includes("Lerntag geschafft"), "Ergebnis meldet den Lerntag");
+  if(await pg.evaluate(() => selCards().length >= DAY_MIN)) ok(res.includes("Lerntag geschafft"), "Ergebnis meldet den Lerntag");
   ok(!pg.errs.length, "keine Fehler auf der Seite: " + pg.errs.join(" | "));
   await pg.close();
 }
@@ -179,7 +181,7 @@ async function spielen(pg, falsch = []){
   ok(!(await pg.isVisible("#starRedeem")), "ohne Sterne kein Einlösen");
   await pg.evaluate(() => {   /* letzte Woche: Mo–Fr je 10 Antworten, 8 richtig */
     const mo = wochenStart(Date.now()) - 7 * DAY;
-    for(let i = 0; i < 5; i++) DAYS[dayKey(mo + i * DAY + 12 * 3600e3)] = { n:10, r:8 };
+    for(let i = 0; i < 5; i++) DAYS[dayKey(mo + i * DAY + 12 * 3600e3)] = { n:40, r:30, v:2 };
     persist();
   });
   await pg.reload();

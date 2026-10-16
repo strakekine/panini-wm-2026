@@ -205,7 +205,7 @@
       <div><div class="lbl">Welche Wörter</div>
         <div class="seg" data-opt="mode"><button data-v="due">HEUTE FÄLLIG</button><button data-v="all">ALLE</button><button data-v="err">MEINE FEHLER</button></div></div>
       <div><div class="lbl">Wie viele</div>
-        <div class="seg" data-opt="count"><button data-v="10">10</button><button data-v="20">20</button><button data-v="0">ALLE</button></div></div>
+        <div class="seg" data-opt="count"><button data-v="20">20</button><button data-v="40">40</button><button data-v="0">ALLE</button></div></div>
       <div><div class="lbl">Antworten</div>
         <div class="seg" data-opt="input"><button data-v="type">⌨︎ TIPPEN</button><button data-v="voice">🎤 SPRECHEN</button></div></div>
     </div>
@@ -689,19 +689,24 @@ function lessonStats(cards, P, now, dir = "mix"){
    Prozent — jede neue Lektion würde Prozent drücken, ohne dass etwas verlernt wurde.
    Prozent nur je Lektion, die bleibt gleich groß.
    Wochenziel statt Serie: Eine Serie fällt nach einem Krankheitstag auf null, ein
-   Wochenziel verzeiht das und beginnt jeden Montag neu. Ein Lerntag zählt ab 10 Antworten
+   Wochenziel verzeiht das und beginnt jeden Montag neu. Ein Lerntag zählt erst ab DAY_MIN Antworten
    (erste Versuche, "Nur lernen" zählt nicht) — eine einzige Antwort soll keinen Tag machen. */
-/* Seit es Sterne gibt (Fassung r), muss ein Lerntag auch ehrlich sein: 10 Antworten, davon
-   mindestens 5 richtig — zehnmal „Weiß nicht“ ist kein Lerntag. Alte Tage ohne Zählung der
-   richtigen (r fehlt) gelten weiter nach der alten Regel. */
-const DAY_MIN = 10, DAY_RIGHT = 5, WEEK_GOAL = 5;
+/* Lerntag (Fassung s, vom Vater: 10 war zu schnell): 40 erste Antworten, davon mindestens 20
+   richtig — zehnmal „Weiß nicht“ ist kein Lerntag. Tage, die schon unter einer früheren Regel
+   angefangen wurden, behalten sie (geschafft bleibt geschafft): ohne r galt „10 Antworten“,
+   mit r aber ohne v galt „10, davon 5 richtig“. Neue Tage bekommen v:2. */
+const DAY_MIN = 40, DAY_RIGHT = 20, WEEK_GOAL = 5;
 const pct = st => Math.floor(100 * st.sicher / Math.max(1, st.n));   /* abrunden: 100 % nur, wenn alles sicher */
 function dayKey(t){ const d = new Date(t); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
-const dayDone = e => !!e && e.n >= DAY_MIN && (e.r == null || e.r >= DAY_RIGHT);
+const dayDone = e => !e ? false
+  : e.v >= 2 ? e.n >= DAY_MIN && e.r >= DAY_RIGHT
+  : e.n >= 10 && (e.r == null || e.r >= 5);
 /* Eine Antwort in die Tageszählung: n = erste Antworten, r = davon richtig */
 function countDay(e, ok){
   const n = e ? e.n : 0, r = e ? (e.r == null ? e.n : e.r) : 0;
-  return { n:n + 1, r:r + (ok ? 1 : 0) };
+  const out = { n:n + 1, r:r + (ok ? 1 : 0) };
+  if(!e || e.v >= 2) out.v = 2;   /* ein heute schon angefangener Tag behält seine Regel */
+  return out;
 }
 /* Woche Montag bis Sonntag: je Tag {label, done, today, future}, dazu die Zahl der Lerntage */
 function weekStatus(days, now){
@@ -719,6 +724,7 @@ function pruneDays(days, now){
   for(const k in days) if(k >= min && days[k] && days[k].n > 0){
     out[k] = { n:days[k].n|0 };
     if(days[k].r != null) out[k].r = Math.min(days[k].r|0, out[k].n);
+    if(days[k].v >= 2 && out[k].r != null) out[k].v = 2;
   }
   return out;
 }
@@ -764,7 +770,7 @@ function needBackup(dirty, snooze, now){
 /* Fassung — bei JEDER Änderung hochzählen. Steht unten im Startbild und als erste Zeile der
    Mitschrift; am iPhone lief einmal noch die alte Datei aus dem Zwischenspeicher, und die
    Mitschrift sah aus wie ein neuer Fehler. */
-const FASSUNG = "15.10.2026 r";
+const FASSUNG = "16.10.2026 s";
 const KEY = "vokabeln_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
@@ -780,7 +786,7 @@ function sanitize(s){
     sel: Array.isArray(s.sel) ? s.sel.filter(x => lids.includes(x)) : [],
     dir: ["fd", "df", "mix"].includes(s.dir) ? s.dir : "fd",
     mode: ["due", "all", "err"].includes(s.mode) ? s.mode : "due",
-    count: [0, 10, 20].includes(+s.count) ? +s.count : 10,
+    count: [0, 20, 40].includes(+s.count) ? +s.count : 40,   /* 10 war dem Vater zu schnell (Fassung s) */
     input: s.input === "voice" ? "voice" : "type",
   };
 }
@@ -833,6 +839,12 @@ function pcBox(st, dir){
                               : RICHTUNG[dir === "fd" ? "df" : "fd"] + " " + pct(st.per[dir === "fd" ? "df" : "fd"]) + " %";
   return '<span class="pc"><b>'+(v === 100 ? "✓ " : "")+v+' %</b>'+bar(g)+'<small>'+klein+'</small></span>';
 }
+/* Wie weit ist der heutige Lerntag? Bei 40 Antworten will man sehen, was noch fehlt. */
+function heuteText(e){
+  if(dayDone(e)) return '<br><span style="color:var(--good)">✓ Heute ist ein Lerntag.</span>';
+  if(!e || !(e.v >= 2)) return "";
+  return '<br>Heute: <b>'+e.n+'</b> von '+DAY_MIN+' Antworten, <b>'+e.r+'</b> von '+DAY_RIGHT+' richtig.';
+}
 function renderHome(){
   const now = Date.now();
   const dirty = +lsGet("_dirty") || null, exp = lsGet("_exp");
@@ -856,6 +868,7 @@ function renderHome(){
       '</div><div class="goal'+(left <= 0 ? " ok" : "")+'">'+
       (left <= 0 ? '<b>🎉 Wochenziel geschafft!</b> '+wk.count+' Lerntage.'
                  : '<b>'+wk.count+' von '+WEEK_GOAL+'</b> Lerntagen. Ein Lerntag = '+DAY_MIN+' Antworten an einem Tag, davon '+DAY_RIGHT+' richtig.')+
+      heuteText(DAYS[dayKey(now)])+
       '</div></div>';
     const st = sterneStand(STARS);
     $("starBox").innerHTML = '<div class="sterne"><div><b>⭐ '+st+'</b> '+(st === 1 ? "Stern" : "Sterne")+

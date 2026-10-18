@@ -167,9 +167,14 @@ wie der Reiter („Koeppchen U13 1“, Pokal ohne I/II „Koeppchen U13“ — v
 und U11 1 beide „Koeppchen I“), Dauer Seniors 2 h,
 U9/U11 1:30, sonst 1:45. **Welche Spiele zu einem Reiter gehören, steht nur in
 `tools/fussball.mjs`** (`reiter`, `mit`, `eigeneSpiele`) — App und Kalender lesen dasselbe.
-**Am iPhone noch nicht geprüft**, ob `webcal://` aus der Home-Bildschirm-App die Kalender-App
-öffnet und ob Pages nach den Commits der Action neu baut (sonst blieben die Abos auf dem Stand
-des letzten eigenen Pushs).
+**Am iPhone geprüft (18.10.2026):** Das Abo zieht Commits der Action nach (2:1 gegen Beggen kam
+im Kalender an), Pages baut also auch nach Action-Commits neu.
+**GitHub lässt Zeitpläne aus (18.10.2026):** Statt alle 15 min lief der FLF-Abruf nur um 14:37 und
+18:09 (Ortszeit), der Live-Start um 18:23 gar nicht. Die FLF trug das 2:1 zwischen 18:10 und 19:30
+ein; erst ein Handstart (`gh api -X POST …/actions/workflows/fussball.yml/dispatches -f ref=main`)
+brachte es in App und Kalender. Möglich, dass es an den vielen Änderungen der Workflow-Dateien an
+dem Tag lag — am nächsten Wochenende nachsehen. Dem Nutzer vorgeschlagen, noch offen: die
+Live-Wache fragt nach Abpfiff eine Stunde lang alle 15 min selbst die FLF ab.
 
 **Klasse wechselt während der Saison** (Phase 1 → 2): gesucht wird nach dem Verein, die Klassen
 ergeben sich aus den Spielen. Die zuletzt begonnene Ligaklasse ist die aktuelle, die anderen

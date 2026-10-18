@@ -70,8 +70,9 @@ Die Action committet `data/fussball.json` nur bei inhaltlicher Änderung. Die Ap
 `data/fussball.json` relativ, letzter Stand in localStorage (`fussball_v1_data`) für offline.
 Achtung beim lokalen Arbeiten: Die Action committet auf `main` — vor dem Push `git pull --rebase`.
 Unten in der App steht „Gemacht von Laurent R.“ mit dem Vereinslogo (vom Nutzer so gewünscht,
-kein Fußball-Emoji). Darüber „App teilen“ (vom Nutzer): `navigator.share` mit fester
-Pages-Adresse und kurzer Home-Bildschirm-Anleitung, ohne Teilen-Leiste in die Zwischenablage.
+kein Fußball-Emoji). Darüber „App teilen“ (vom Nutzer): `navigator.share` mit seinem
+Einladungstext (`TEILEN_TEXT`, Link darin). **Nur `text`, kein `url`** — mit `url` ließ iMessage
+den Text weg (am iPhone gemeldet), WhatsApp nicht. Ohne Teilen-Leiste in die Zwischenablage.
 
 **Live-Ticker (offen, Stand 18.10.2026):** Vom Nutzer gewünscht für Seniors 1. Ob die FLF den Stand
 während des Spiels einträgt, wird am 18.10. getestet (Spiel 1002091 gegen Beggen). Zweite Quelle

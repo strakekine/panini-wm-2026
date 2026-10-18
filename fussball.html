@@ -240,16 +240,33 @@ const TZ = "Europe/Luxembourg";
 const KALENDER = "https://strakekine.github.io/panini-wm-2026/kalender/";
 // Immer die öffentliche Adresse teilen, auch wenn die App vom Home-Bildschirm oder lokal läuft.
 const APP_URL = "https://strakekine.github.io/panini-wm-2026/fussball.html";
-const TEILEN_TEXT = "⚽ FC Koeppchen – Spiele, Ergebnisse und Tabellen aller Mannschaften, immer aktuell.\n" +
-  "Auf den Home-Bildschirm: Link in Safari öffnen → Teilen-Symbol → „Zum Home-Bildschirm“.";
+// Text vom Nutzer (so verschickt er ihn auch selbst). Der Link steht IM Text und wird nicht
+// zusätzlich als `url` übergeben: Mit `url` zeigt iMessage nur die Link-Vorschau und lässt den
+// Text weg (am iPhone gemeldet; WhatsApp nahm beides).
+const TEILEN_TEXT = `FC Koeppchen – die App
 
-// Teilen-Leiste des iPhones; ohne sie (Desktop-Browser) Text + Link in die Zwischenablage.
+Alle Spiele, Ergebnisse und Tabellen unserer Mannschaften (Seniors, U15, U13, U11, U9) auf einen Blick, direkt von der FLF und automatisch aktuell:
+
+👉 ${APP_URL}
+
+So kommt sie auf den Home-Bildschirm (iPhone):
+1. Den Link in Safari öffnen.
+2. Unten auf das Teilen-Symbol tippen (Quadrat mit Pfeil nach oben).
+3. „Zum Home-Bildschirm“ wählen und auf „Hinzufügen“ tippen.
+
+Jetzt ist die App mit dem Koeppchen-Logo auf dem Home-Bildschirm.
+
+Android: Link in Chrome öffnen → oben rechts ⋮ → „Zum Startbildschirm hinzufügen“.
+
+Tipp: Oben die Mannschaft wählen. Mit dem Knopf „📅 … im Kalender abonnieren“ kommen alle Spiele in den eigenen Kalender und bleiben dort von selbst aktuell.`;
+
+// Teilen-Leiste des iPhones; ohne sie (Desktop-Browser) in die Zwischenablage.
 async function appTeilen(b) {
   if (navigator.share) {
-    try { await navigator.share({ title: "FC Koeppchen", text: TEILEN_TEXT, url: APP_URL }); } catch (e) {}
+    try { await navigator.share({ text: TEILEN_TEXT }); } catch (e) {}
     return;
   }
-  try { await navigator.clipboard.writeText(TEILEN_TEXT + "\n" + APP_URL); b.textContent = "Link kopiert ✓"; }
+  try { await navigator.clipboard.writeText(TEILEN_TEXT); b.textContent = "Text kopiert ✓"; }
   catch (e) { prompt("Link zum Kopieren:", APP_URL); }
 }
 let D = null, ST = { team: null };

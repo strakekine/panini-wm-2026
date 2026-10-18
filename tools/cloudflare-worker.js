@@ -8,7 +8,7 @@
 //
 // Aufruf: GET /?slug=<FuPa-Spiel-Slug>. Nur Koeppchen-Spiele (kein offener Vermittler für
 // beliebige Seiten). Je Spiel höchstens eine FuPa-Abfrage alle 20 s, egal wie viele zuschauen.
-// Zurück kommen nur die Felder, die die App braucht.
+// Zurück kommen nur die Felder, die die App braucht — Tore und Karten als Ereignislisten.
 
 const API = "https://api.fupa.net/v1/matches/";
 const MERKEN_MS = 20e3;
@@ -18,8 +18,19 @@ const CORS = {
 };
 const gemerkt = new Map(); // slug → { t, body } (je Worker-Instanz)
 
-export function kuerzen(f) {
+// Tore oder Karten aus FuPas `highlights` (type goal | card, subtype z. B. goal_headed,
+// penalty_foul, card_red). Gleiches Format für beide, nach Minute sortiert.
+function ereignisse(f, typ) {
   const heim = f.homeTeam?.slug;
+  return (f.highlights || []).filter(x => x.type === typ).map(x => ({
+    min: x.minute, plus: x.additionalMinute || 0,
+    heim: x.team?.teamSlug === heim,
+    name: [x.primaryRole?.firstName, x.primaryRole?.lastName].filter(Boolean).join(" ") || null,
+    art: x.subtype || "",
+  })).sort((a, b) => a.min - b.min || a.plus - b.plus);
+}
+
+export function kuerzen(f) {
   return {
     slug: f.slug,
     hs: f.homeGoal ?? null,
@@ -29,12 +40,8 @@ export function kuerzen(f) {
     running: !!f.live?.running,
     minute: f.live?.minute ?? null,
     minuteAt: f.live?.lastTimestamp || null,
-    tore: (f.highlights || []).filter(x => x.type === "goal").map(x => ({
-      min: x.minute, plus: x.additionalMinute || 0,
-      heim: x.team?.teamSlug === heim,
-      name: [x.primaryRole?.firstName, x.primaryRole?.lastName].filter(Boolean).join(" ") || null,
-      art: x.subtype || "",
-    })).sort((a, b) => a.min - b.min || a.plus - b.plus),
+    tore: ereignisse(f, "goal"),
+    karten: ereignisse(f, "card"),
     ticker: f.tickerAuthor?.name || null,
   };
 }

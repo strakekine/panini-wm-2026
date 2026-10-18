@@ -110,7 +110,11 @@ Grenzen, dem Nutzer gesagt: leer ohne Tickerer, GitHub startet geplante Läufe o
 fragt `WORKER_URL?slug=<FuPa-Slug aus live.json>` alle 20 s, der Worker fragt FuPa höchstens
 alle 20 s je Spiel (egal wie viele zuschauen), schickt CORS `*`, nur Koeppchen-Slugs. `mitWorker()`
 legt seinen Stand über `live.json`; welches Spiel es ist, kommt weiter aus `live.json` (GitHub-
-Lauf). Worker weg → GitHub-Stand. Torart im Kasten (`torArt`, vom Nutzer gewünscht): Elfmeter, Eigentor,
+Lauf). Worker weg → GitHub-Stand. Karten im Kasten (`kartenArt`, `ereignisListe`, vom Nutzer gewünscht): FuPa führt sie in
+`highlights` als `type: "card"` (gesehen: `card_red` gegen Mersch 11.10.); ob Gelb dort kommt, ist
+offen. Seit Fassung h reicht der Worker `karten` mit durch — **neu einfügen nötig** (der alte gibt
+nur `tore`; `mitWorker` übernimmt nur Felder, die er schickt, live.json füllt dann die Karten).
+Torart im Kasten (`torArt`, vom Nutzer gewünscht): Elfmeter, Eigentor,
 Freistoß, Kopfball aus FuPas `subtype` nach Wortteilen (gesehen: goal_headed, goal_shoot,
 penalty_foul; Eigentor/Freistoß-Namen geraten). `kuerzen()` im Worker und `liveAus()` im Lauf sind zwei Kopien
 derselben Umrechnung, der Test prüft, dass sie gleich rechnen. `WORKER_URL` leer = nur GitHub. Eingerichtet vom Nutzer am 18.10.2026:

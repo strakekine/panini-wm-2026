@@ -16,7 +16,7 @@ const src = fs.readFileSync(path.join(hier, "..", "fussball.html"), "utf8");
 const i = src.indexOf("==== Logik"), j = src.indexOf("==== Oberfläche");
 if (i < 0 || j < 0) throw new Error("Abschnittsmarken Logik/Oberfläche nicht gefunden");
 const M = new Function(src.slice(src.lastIndexOf("//", i), src.lastIndexOf("//", j)) + `
-  return { torArt, mitWorker, liveAnzeige, liveZeit, imLiveFenster, REGELN, klasseVon, zonen, ausgang, aufteilen, anzeige, sicht, nachSpieltag, roem };`)();
+  return { kartenArt, ereignisListe, torArt, mitWorker, liveAnzeige, liveZeit, imLiveFenster, REGELN, klasseVon, zonen, ausgang, aufteilen, anzeige, sicht, nachSpieltag, roem };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text) { n++; if (!bed) { fehler++; console.log("✗ " + text); } }
@@ -241,13 +241,17 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(M.liveAnzeige({ ...Lv, flfId: spFlf.match.id }, M.sicht(DF, 44831, t0), t0) === null, "FLF hat Ergebnis → Kasten weg");
   // Worker und GitHub-Lauf müssen dasselbe aus FuPa machen (zwei Kopien derselben Umrechnung).
   const Wk = kuerzen({ ...fupa, homeGoal: 2 });
-  for (const k of ["hs", "as", "section", "period", "running", "minute", "minuteAt", "tore", "ticker"])
+  for (const k of ["hs", "as", "section", "period", "running", "minute", "minuteAt", "tore", "karten", "ticker"])
     ok(JSON.stringify(Wk[k]) === JSON.stringify(liveAus({ ...fupa, homeGoal: 2 }, flf)[k]), "Worker = GitHub-Lauf: " + k);
   ok(M.mitWorker(Lv, Wk).hs === 2 && M.mitWorker(Lv, Wk).h === Lv.h, "Worker-Stand gilt, Namen bleiben aus live.json");
   ok(M.mitWorker(Lv, { ...Wk, slug: "anderes-spiel" }).hs === 1, "Worker zu anderem Spiel wird ignoriert");
   ok(M.mitWorker(Lv, null) === Lv, "ohne Worker gilt GitHub");
   gleich(["penalty_foul", "goal_headed", "goal_shoot", "own_goal", "free_kick", ""].map(M.torArt),
     ["Elfmeter", "Kopfball", "", "Eigentor", "Freistoß", ""], "Torart: Elfmeter, Kopfball, Eigentor, Freistoß");
+  gleich(["card_red", "card_yellow_red", "card_yellow"].map(a => M.kartenArt(a).text), ["Rot", "Gelb-Rot", "Gelb"], "Kartenarten");
+  gleich(Lv.karten.map(k => [k.min, k.heim]), [[30, false]], "Karte aus FuPa übernommen, Gast erkannt");
+  gleich(M.ereignisListe(Lv).map(e => e.typ + e.min), ["tor12", "karte30"], "Tore und Karten nach Minute");
+  ok(M.ereignisListe({ tore: Lv.tore }).length === 1, "alte live.json ohne Karten geht");
   ok(M.imLiveFenster(vS, t0) && !M.imLiveFenster(vS, Date.parse("2026-10-19T12:00:00+02:00")), "Abfrage jede Minute nur im Fenster");
 }
 

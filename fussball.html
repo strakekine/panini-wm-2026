@@ -268,11 +268,28 @@ function torArt(art) {
   return "";
 }
 
+// Karten aus FuPas `subtype` (gesehen: card_red). Gelb-Rot vor Rot prüfen, der Name enthält beides.
+// Ob FuPa Gelbe Karten überhaupt in `highlights` führt, ist offen (bisher nur Rot gesehen).
+function kartenArt(art) {
+  const a = String(art || "").toLowerCase();
+  if (a.includes("yellow") && a.includes("red")) return { zeichen: "🟨🟥", text: "Gelb-Rot" };
+  if (a.includes("red")) return { zeichen: "🟥", text: "Rot" };
+  if (a.includes("yellow")) return { zeichen: "🟨", text: "Gelb" };
+  return { zeichen: "🃏", text: "Karte" };
+}
+
+// Tore und Karten in einer Liste, nach Minute (bei gleicher Minute Tor zuerst).
+function ereignisListe(lv) {
+  const tore = (lv.tore || []).map(t => ({ ...t, typ: "tor" }));
+  const karten = (lv.karten || []).map(k => ({ ...k, typ: "karte" }));
+  return [...tore, ...karten].sort((x, y) => x.min - y.min || x.plus - y.plus || (x.typ === "tor" ? -1 : 1));
+}
+
 // Liegt bei diesem Reiter gerade ein Spiel im Live-Fenster? Dann fragt die App jede Minute nach.
 // Stand vom Cloudflare-Worker (tools/cloudflare-worker.js, ~20 s alt) über den von GitHub legen
 // (data/live.json, bis zu 7 min alt). Vom Worker kommt nur der Stand; welches Spiel, Anstoß und
 // Mannschaftsnamen bleiben aus live.json. Passt der Slug nicht (anderes Spiel), gilt GitHub.
-const WORKER_FELDER = ["hs", "as", "section", "period", "running", "minute", "minuteAt", "tore", "ticker"];
+const WORKER_FELDER = ["hs", "as", "section", "period", "running", "minute", "minuteAt", "tore", "karten", "ticker"];
 function mitWorker(L, W) {
   if (!L || !W || W.slug !== L.slug) return L;
   const neu = { ...L };
@@ -302,7 +319,7 @@ function nachSpieltag(spiele) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "18.10.2026 g";
+const FASSUNG = "18.10.2026 h";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -438,9 +455,15 @@ function render() {
   const lv = liveAnzeige(mitWorker(L, W), v, now);
   LIVE_POLL = !!lv || imLiveFenster(v, now);
   if (lv) {
-    const tore = lv.tore.map(t => {
-      const art = torArt(t.art);
-      return `<li>⚽ ${t.min}${t.plus ? "+" + t.plus : ""}. ${esc(t.name || "Tor")}${art ? ` · <b>${art}</b>` : ""} <span class="muted">(${esc(anzeige(t.heim ? lv.h : lv.a))})</span></li>`;
+    const tore = ereignisListe(lv).map(e => {
+      const min = `${e.min}${e.plus ? "+" + e.plus : ""}.`;
+      const wer = `<span class="muted">(${esc(anzeige(e.heim ? lv.h : lv.a))})</span>`;
+      if (e.typ === "karte") {
+        const k = kartenArt(e.art);
+        return `<li>${k.zeichen} ${min} ${esc(e.name || "")} · <b>${k.text}</b> ${wer}</li>`;
+      }
+      const art = torArt(e.art);
+      return `<li>⚽ ${min} ${esc(e.name || "Tor")}${art ? ` · <b>${art}</b>` : ""} ${wer}</li>`;
     }).join("");
     h += `<section class="card live"><div class="chead"><h2>${lv.laeuft ? `<span class="punkt"></span>Live` : "Endstand laut FuPa"}</h2>
       <div class="hint">${esc(wann(lv.anstoss))}</div></div><div class="cbody">

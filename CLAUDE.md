@@ -29,7 +29,7 @@ Sieben voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
 - **`pine/`** — TradingView Pine-Script-Indikatoren. Eigener Kontext, eigene Regeln:
   siehe **`pine/CLAUDE.md`**, bevor dort etwas geändert wird.
 - **`fussball.html`** — „FC Koeppchen“: Tabelle, Ergebnisse und nächste Spiele der Jugend
-  (U13, U15, U11, U9) und der Seniors, automatisch von der FLF (GitHub Action). Details unten. Details unten.
+  (U13, U15, U11, U9) und der Seniors, automatisch von der FLF (GitHub Action). Details unten.
 
 Der Repo-Name passt damit nur noch zum ersten Punkt. Nicht wundern und nichts danach
 sortieren: was hier liegt, steht in dieser Liste.
@@ -65,12 +65,23 @@ Stunde später). Ein „Neu laden“, das die Action startet, ginge nur mit eine
 öffentlichen Datei — abgelehnt; live ginge nur über einen eigenen Vermittler (Cloudflare Worker),
 dem Nutzer als zu viel Aufwand vorgeschlagen. Einen „Neu laden“-Knopf gibt es darum nicht mehr
 (hätte nur die Datei neu gelesen; das passiert beim Öffnen und bei `visibilitychange` ohnehin).
-Unten in der App steht „Gemacht von Laurent R.“ mit dem Vereinslogo (vom Nutzer so gewünscht,
-kein Fußball-Emoji).
-committet `data/fussball.json` nur bei inhaltlicher Änderung. Die App liest von
+Die Action committet `data/fussball.json` nur bei inhaltlicher Änderung. Die App liest von
 `raw.githubusercontent.com` (CORS `*`, 5 min Cache, wartet nicht auf GitHub Pages), Rückfall
 `data/fussball.json` relativ, letzter Stand in localStorage (`fussball_v1_data`) für offline.
 Achtung beim lokalen Arbeiten: Die Action committet auf `main` — vor dem Push `git pull --rebase`.
+Unten in der App steht „Gemacht von Laurent R.“ mit dem Vereinslogo (vom Nutzer so gewünscht,
+kein Fußball-Emoji).
+
+**Live-Ticker (offen, Stand 18.10.2026):** Vom Nutzer gewünscht für Seniors 1. Ob die FLF den Stand
+während des Spiels einträgt, wird am 18.10. getestet (Spiel 1002091 gegen Beggen). Zweite Quelle
+**FuPa** (`www.fupa.net`, `api.fupa.net` in der Umgebung freigegeben; `*.fupa.net` griff nicht):
+Verein https://www.fupa.net/club/fc-koeppchen, dort nur Seniors (m1, mr1, mr2) und Damen, keine
+Jugend. `GET https://api.fupa.net/v1/matches/<slug>` ohne Anmeldung, liefert `homeGoal`,
+`awayGoal`, `section` (PRE/POST/…), `flags` ["ticker"], `tickerType` "live", `tickerAuthor`.
+Keine CORS-Freigabe → nur über die Action. Spiel-Slugs stehen im `window.REDUX_DATA` der Seite
+`/team/fc-koeppchen-m1-2026-27/matches`. FuPa-Ticker füllt jemand am Platz — leer, wenn keiner
+tickert. Noch nichts gebaut; Vorschlag: Action alle 5 min nur während Seniors-1-Spielen,
+`data/live.json`, LIVE-Kasten in der App.
 
 Schnittstelle, ausprobiert (Introspektion ist aus, Felder über Fehlermeldungen gefunden):
 - `MatchCriteria`: `clubId, seasonId, matchTypeId (ALL|CC|CUP|FM|PLO), ageCategoryId, divisionId,

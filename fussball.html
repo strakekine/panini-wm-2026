@@ -88,6 +88,7 @@
   .kalhilfe code{display:block;word-break:break-all;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 9px;margin:6px 0;font-size:12px;color:var(--text)}
   .kopie{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-family:inherit;font-weight:700;font-size:13px;color:var(--text);cursor:pointer}
   footer{font-size:12px;color:var(--muted);text-align:center;line-height:1.6}
+  .teilen{margin-top:16px;background:var(--accent);color:#fff;border:0;border-radius:10px;padding:11px 18px;font-family:inherit;font-weight:700;font-size:14.5px;cursor:pointer}
   footer .von{margin-top:14px;font-size:12.5px;color:var(--text);display:flex;align-items:center;justify-content:center;gap:7px}
   footer .von img{width:30px;height:30px;border-radius:50%;background:#fff}
   footer a{color:var(--accentT)}
@@ -237,6 +238,20 @@ const QUELLEN = [
 const TZ = "Europe/Luxembourg";
 // Kalender liegen auf GitHub Pages (text/calendar), nicht auf raw.githubusercontent (text/plain).
 const KALENDER = "https://strakekine.github.io/panini-wm-2026/kalender/";
+// Immer die öffentliche Adresse teilen, auch wenn die App vom Home-Bildschirm oder lokal läuft.
+const APP_URL = "https://strakekine.github.io/panini-wm-2026/fussball.html";
+const TEILEN_TEXT = "⚽ FC Koeppchen – Spiele, Ergebnisse und Tabellen aller Mannschaften, immer aktuell.\n" +
+  "Auf den Home-Bildschirm: Link in Safari öffnen → Teilen-Symbol → „Zum Home-Bildschirm“.";
+
+// Teilen-Leiste des iPhones; ohne sie (Desktop-Browser) Text + Link in die Zwischenablage.
+async function appTeilen(b) {
+  if (navigator.share) {
+    try { await navigator.share({ title: "FC Koeppchen", text: TEILEN_TEXT, url: APP_URL }); } catch (e) {}
+    return;
+  }
+  try { await navigator.clipboard.writeText(TEILEN_TEXT + "\n" + APP_URL); b.textContent = "Link kopiert ✓"; }
+  catch (e) { prompt("Link zum Kopieren:", APP_URL); }
+}
 let D = null, ST = { team: null };
 // Logo nur einmal eingebettet (im Home-Icon), Kopf und Fußzeile nehmen es von dort.
 const LOGO = document.querySelector('link[rel="apple-touch-icon"]').href;
@@ -371,6 +386,7 @@ function render() {
   const stand = new Date(D.stand).toLocaleString("de-DE", { timeZone: TZ, weekday: "short", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" });
   h += `<footer>Daten von <a href="https://extranet.flf.lu/match" target="_blank" rel="noopener">extranet.flf.lu</a>, zuletzt geändert ${esc(stand)}<br>
     Am Wochenende alle 15 Minuten aktualisiert, unter der Woche abends um 20 Uhr.
+    <br><button class="teilen" id="teilen">↗︎ App teilen</button>
     <div class="von">Gemacht von Laurent R. <img alt="" src="${LOGO}"></div></footer>`;
   main.innerHTML = h;
 }
@@ -403,6 +419,7 @@ document.addEventListener("click", e => {
   const b = e.target.closest("button");
   if (!b) return;
   if (b.dataset.t) { ST.team = +b.dataset.t; persist(); render(); window.scrollTo(0, 0); }
+  else if (b.id === "teilen") appTeilen(b);
   else if (b.dataset.copy) {
     const fertig = () => { b.textContent = "Kopiert ✓"; };
     navigator.clipboard?.writeText(b.dataset.copy).then(fertig, () => {});

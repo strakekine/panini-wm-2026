@@ -79,9 +79,14 @@ iPhone läuft nach einem Push oft noch die alte Datei (Zwischenspeicher), erst F
 **Live-Ticker Seniors 1 (gebaut 18.10.2026, vom Nutzer gewünscht).** Test am 18.10. gegen Beggen:
 **die FLF trägt während des Spiels nichts ein** (alle Felder leer), **FuPa liefert live** Stand,
 Minute, Halbzeit und Torschützen, sobald jemand am Platz tickert (bei Koeppchen: Paul Krier).
-`tools/fussball-live.mjs` + `.github/workflows/fussball-live.yml` (alle 5 min): sofort fertig,
-wenn kein Spiel des Reiters „Seniors 1“ im Fenster 15 min vor bis 150 min nach Anstoß liegt
-(aus `data/fussball.json`). Sonst FuPa-Teamslug aus https://www.fupa.net/club/fc-koeppchen
+`tools/fussball-live.mjs --wache` + `.github/workflows/fussball-live.yml`: **startet nur 3× am
+Tag** (11:23, 14:23, 17:23 Winterzeit). Liegt in den nächsten 200 min ein Anstoß des Reiters
+„Seniors 1“ (aus `data/fussball.json`), bleibt der Lauf an, wartet bis 15 min vorher, fragt dann
+alle 2 min und committet selbst, bis 150 min nach Anstoß (oder Abpfiff + 2 Abfragen). 200 + 150
+min < 6 h Laufzeitgrenze. Statt 288 Läufen alle 5 min — vom Nutzer so gewollt; ein Zeitplan, der
+sich selbst umstellt, geht nicht (GITHUB_TOKEN darf keine Workflow-Dateien ändern). Anstöße der
+Seniors 2025–27: 14:00 bis 20:00, meist So 16:00; ein Anstoß vor 11:30 oder nach 21 Uhr fiele
+durch. Ohne `--wache` fragt das Skript einmal ab (für Hand-Tests). Sonst FuPa-Teamslug aus https://www.fupa.net/club/fc-koeppchen
 (`fc-koeppchen-m1-<2026-27>`), Spiel per gleichem Anstoß aus `window.REDUX_DATA` von
 `/team/<slug>/matches` (Slug wird in `live.json` gemerkt), dann
 `GET https://api.fupa.net/v1/matches/<slug>` (ohne Anmeldung, keine CORS-Freigabe): `homeGoal`,

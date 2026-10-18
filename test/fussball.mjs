@@ -8,7 +8,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { aufbereiten, spiel, reiter, ics, eigeneSpiele, CLUB } from "../tools/fussball.mjs";
-import { liveAus, gleich as liveGleich, spielJetzt } from "../tools/fussball-live.mjs";
+import { liveAus, gleich as liveGleich, spielJetzt, naechstesSpiel } from "../tools/fussball-live.mjs";
 
 const hier = path.dirname(fileURLToPath(import.meta.url));
 const src = fs.readFileSync(path.join(hier, "..", "fussball.html"), "utf8");
@@ -211,6 +211,11 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   const t0 = Date.parse("2026-10-18T17:30:03+02:00");
   ok(spielJetzt(DS, Date.parse("2026-10-18T15:50:00+02:00")) && !spielJetzt(DS, Date.parse("2026-10-18T15:40:00+02:00")), "Zeitfenster ab 15 min vor Anstoß");
   ok(!spielJetzt(DS, Date.parse("2026-10-18T18:35:00+02:00")), "… bis 150 min danach");
+  // --wache: Starts um 11:23/14:23/17:23 — 16:00-Anstoß gehört dem Lauf um 14:23, nicht 11:23.
+  ok(!naechstesSpiel(DS, Date.parse("2026-10-18T11:23:00+02:00")), "11:23-Lauf wartet nicht auf 16:00");
+  ok(naechstesSpiel(DS, Date.parse("2026-10-18T14:23:00+02:00")), "14:23-Lauf übernimmt 16:00");
+  ok(naechstesSpiel(DS, Date.parse("2026-10-18T16:40:00+02:00")), "verspäteter Start mitten im Spiel steigt noch ein");
+  ok(!naechstesSpiel(DS, Date.parse("2026-10-18T18:31:00+02:00")), "nach dem Fenster nichts mehr");
   const vS = M.sicht(DS, 44831, t0);
   const a = M.liveAnzeige(Lv, vS, t0 + 7 * 60e3);
   ok(a && a.laeuft && a.zeit === "78'", "LIVE-Kasten, Minute zählt weiter (71 + 7)");

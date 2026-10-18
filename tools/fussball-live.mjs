@@ -1,11 +1,17 @@
 // Live-Stand der Seniors 1 von FuPa → data/live.json für fussball.html.
-// Läuft als GitHub Action alle 5 min (.github/workflows/fussball-live.yml), lokal:
-//   NODE_USE_ENV_PROXY=1 node tools/fussball-live.mjs
 // Die FLF trägt während des Spiels nichts ein (am 18.10.2026 geprüft), FuPa hat den Stand,
-// sobald jemand am Platz tickert. Ohne Spiel im Zeitfenster ist das Skript sofort fertig.
-// FuPa hat keine offizielle Schnittstelle: nur während eines Spiels abfragen, nicht öfter.
+// sobald jemand am Platz tickert. FuPa hat keine offizielle Schnittstelle: nur während eines
+// Spiels abfragen.
+//
+//   node tools/fussball-live.mjs           einmal abfragen (falls gerade ein Spiel läuft)
+//   node tools/fussball-live.mjs --wache   so läuft es in der Action (fussball-live.yml, 3× am
+//       Tag): liegt in den nächsten Stunden ein Anstoß, bis 15 min davor warten, dann alle 2 min
+//       abfragen und jede Änderung sofort committen, bis 150 min nach Anstoß. Sonst sofort fertig.
+//       Ein GitHub-Lauf darf höchstens 6 h dauern — darum nur Anstöße bis WACHE_MAX voraus.
+// Lokal in der Cloud-Umgebung: NODE_USE_ENV_PROXY=1 davor.
 
 import { writeFileSync, readFileSync, existsSync } from "node:fs";
+import { execSync } from "node:child_process";
 import { eigeneSpiele } from "./fussball.mjs";
 
 const DATEN = new URL("../data/fussball.json", import.meta.url);
@@ -14,6 +20,8 @@ const CLUB_SEITE = "https://www.fupa.net/club/fc-koeppchen";
 const API = "https://api.fupa.net/v1/matches/";
 export const REITER = "Seniors 1";           // nur dort tickert jemand (FuPa führt keine Jugend)
 export const VOR_MIN = 15, NACH_MIN = 150;   // Zeitfenster um den Anstoß
+export const TAKT_S = 120;                   // Abfrage-Abstand während des Spiels
+export const WACHE_MAX_MIN = 200;            // so weit voraus darf ein Anstoß liegen (200 + 150 < 6 h)
 
 // Das Spiel der Mannschaft, das gerade im Zeitfenster liegt, oder null.
 export function spielJetzt(D, now) {
@@ -22,6 +30,17 @@ export function spielJetzt(D, now) {
   return eigeneSpiele(D, t).find(sp => {
     const a = Date.parse(sp.d);
     return now >= a - VOR_MIN * 60e3 && now <= a + NACH_MIN * 60e3;
+  }) || null;
+}
+
+// Für --wache: das nächste Spiel, dessen Fenster noch nicht vorbei ist und dessen Anstoß
+// höchstens WACHE_MAX_MIN voraus liegt (spätere übernimmt der nächste Lauf).
+export function naechstesSpiel(D, now) {
+  const t = D.teams.find(t => t.reiter === REITER);
+  if (!t) return null;
+  return eigeneSpiele(D, t).find(sp => {
+    const a = Date.parse(sp.d);
+    return now <= a + NACH_MIN * 60e3 && a - now <= WACHE_MAX_MIN * 60e3;
   }) || null;
 }
 
@@ -84,24 +103,66 @@ async function fupaSpiele(slug) {
   return aus;
 }
 
-async function main() {
-  const D = JSON.parse(readFileSync(DATEN, "utf8"));
-  const sp = spielJetzt(D, Date.now());
-  if (!sp) { console.log("kein Spiel im Zeitfenster"); return; }
+// Eine Abfrage; true, wenn live.json neu geschrieben wurde.
+async function einmal(D, sp) {
   const alt = existsSync(OUT) ? JSON.parse(readFileSync(OUT, "utf8")) : null;
 
   let slug = alt?.flfId === sp.id ? alt.slug : null;
   if (!slug) {
     const spiele = await fupaSpiele(await teamSlug(D.saison.id));
     slug = spiele.find(x => Date.parse(x.kickoff) === Date.parse(sp.d))?.slug;
-    if (!slug) { console.log("Spiel bei FuPa nicht gefunden:", sp.d); return; }
+    if (!slug) { console.log("Spiel bei FuPa nicht gefunden:", sp.d); return false; }
   }
   const r = await fetch(API + slug);
   if (!r.ok) throw new Error("FuPa HTTP " + r.status);
   const neu = liveAus(await r.json(), sp);
-  if (gleich(alt, neu)) { console.log("unverändert", neu.hs, ":", neu.as, neu.period); return; }
+  if (gleich(alt, neu)) { console.log("unverändert", neu.hs, ":", neu.as, neu.period); return false; }
   writeFileSync(OUT, JSON.stringify(neu, null, 1) + "\n");
   console.log("geschrieben:", neu.hs, ":", neu.as, neu.section, neu.period, neu.minute + "'");
+  return true;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main().catch(e => { console.error(e); process.exit(1); });
+// Commit + Push aus der Action heraus; die Daten-Action kann dazwischen committet haben.
+function commit() {
+  const sh = c => execSync(c, { stdio: "inherit" });
+  sh("git add data/live.json");
+  try { execSync("git diff --cached --quiet"); return; } catch (e) {}
+  sh('git -c user.name=fussball-live -c user.email=41898282+github-actions[bot]@users.noreply.github.com commit -q -m "Fußball: Live-Stand"');
+  for (let i = 1; ; i++) {
+    try { sh("git pull -q --rebase origin main && git push -q origin HEAD:main"); return; }
+    catch (e) { if (i >= 3) throw e; }
+  }
+}
+
+const schlafen = ms => new Promise(r => setTimeout(r, Math.max(0, ms)));
+
+async function wache() {
+  const D = JSON.parse(readFileSync(DATEN, "utf8"));
+  const sp = naechstesSpiel(D, Date.now());
+  if (!sp) { console.log("kein Spiel in den nächsten", WACHE_MAX_MIN, "min"); return; }
+  const a = Date.parse(sp.d), ende = a + NACH_MIN * 60e3;
+  console.log("Spiel", sp.h.n, "–", sp.a.n, sp.d, "· warte bis", new Date(a - VOR_MIN * 60e3).toISOString());
+  await schlafen(a - VOR_MIN * 60e3 - Date.now());
+  let nachAbpfiff = 0;
+  while (Date.now() <= ende) {
+    try { if (await einmal(D, sp)) commit(); }
+    catch (e) { console.error("Abfrage fehlgeschlagen:", e.message); }   // nächster Takt versucht es wieder
+    // Nach Abpfiff noch zwei Abfragen (Korrekturen des Tickerers), dann Schluss.
+    try {
+      const L = JSON.parse(readFileSync(OUT, "utf8"));
+      if (L.flfId === sp.id && L.section === "POST" && ++nachAbpfiff > 2) break;
+    } catch (e) {}
+    await schlafen(TAKT_S * 1e3);
+  }
+  console.log("fertig");
+}
+
+async function main() {
+  const D = JSON.parse(readFileSync(DATEN, "utf8"));
+  const sp = spielJetzt(D, Date.now());
+  if (!sp) { console.log("kein Spiel im Zeitfenster"); return; }
+  await einmal(D, sp);
+}
+
+if (import.meta.url === `file://${process.argv[1]}`)
+  (process.argv.includes("--wache") ? wache() : main()).catch(e => { console.error(e); process.exit(1); });

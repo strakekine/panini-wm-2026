@@ -6,12 +6,12 @@
  "h": "FC Koeppchen Wormeldange",
  "a": "Avenir Beggen",
  "hs": 2,
- "as": 0,
+ "as": 1,
  "section": "LIVE",
  "period": "secondHalf",
  "running": true,
- "minute": 83,
- "minuteAt": "2026-10-18T17:41:51+02:00",
+ "minute": 89,
+ "minuteAt": "2026-10-18T17:48:02+02:00",
  "tore": [
   {
    "min": 12,
@@ -26,6 +26,13 @@
    "heim": true,
    "name": "Théo Fournier",
    "art": "goal_shoot"
+  },
+  {
+   "min": 88,
+   "plus": 0,
+   "heim": false,
+   "name": "Robin Moreira",
+   "art": "penalty_foul"
   }
  ],
  "ticker": "Paul Krier"

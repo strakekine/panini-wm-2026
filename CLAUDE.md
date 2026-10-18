@@ -1,6 +1,6 @@
 # panini-wm-2026
 
-Sechs voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
+Sieben voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
 
 - **`panini*.html`** — Sticker-Tracker für die Panini WM 2026 (Emil, Leo, generisch).
   Reine Einzeldatei-Webapps, kein Build, kein Framework.
@@ -28,9 +28,46 @@ Sechs voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
   Lektionen kommen aus eingescannten PDFs, die Claude abtippt. Einzeldatei. Details unten.
 - **`pine/`** — TradingView Pine-Script-Indikatoren. Eigener Kontext, eigene Regeln:
   siehe **`pine/CLAUDE.md`**, bevor dort etwas geändert wird.
+- **`fussball.html`** — *geplant, noch nicht gebaut.* Ergebnisse, Tabelle und Spielplan der
+  U13 Minimes des FC Koeppchen Wormeldange, automatisch von der FLF. Auftrag unten.
 
 Der Repo-Name passt damit nur noch zum ersten Punkt. Nicht wundern und nichts danach
 sortieren: was hier liegt, steht in dieser Liste.
+
+## Fußball (`fussball.html`) — Auftrag, noch nicht begonnen (Stand 18.10.2026)
+
+Nutzer: Laurent; seine Kinder spielen bei den **U13 Minimes des FC Koeppchen Wormeldange**
+(Luxemburg). Der Verein hat **zwei U13-Mannschaften**, beide gehören in die App (Umschalter
+oben, Vorgabe je Gerät in localStorage). Heute müssen die Kinder auf
+https://extranet.flf.lu/match jedes Mal neu suchen. Die App soll ohne Suchen zeigen: aktuelle
+Klasse, Tabelle, vorherige Spiele mit Ergebnissen (auch die der Gegner untereinander), nächste
+Spiele. Einzeldatei, Deutsch, Du-Form, iPhone-Home-Bildschirm, iPhone-Regeln der Pizza-App.
+
+**Klasse wechselt während der Saison:** Phase 1 war „U13 Minimes Cl4 S2 Phase 1“ (5 Spiele,
+vorbei); die Mannschaft steigt auf, die neue Klasse wird ausgelost. Darum **nicht auf einen
+festen Klassennamen zielen**, sondern nach Verein/Mannschaft suchen und die aktuelle Klasse aus
+den Spielen ableiten; abgeschlossene Phasen bleiben als Rückblick. Ersatzplan, falls die Seite
+keine Vereinssuche hat: App erkennt das Ende der Klasse und fragt nach dem neuen Namen. Ob es
+für U13 Minimes eine offizielle Tabelle gibt, ist unbekannt — sonst aus Ergebnissen rechnen
+und das kennzeichnen.
+
+**Geplante Architektur (abgesprochen):** GitHub Action mit Zeitplan (etwa alle 2 h, dazu
+`workflow_dispatch`) ruft die FLF-Seite ab und schreibt `data/fussball.json`, committet nur
+bei Änderung; die App liest nur diese Datei und zeigt „Stand: …“. Grund: Der Browser darf die
+FLF-Seite vermutlich nicht direkt abfragen (CORS). Erlaubt sie CORS doch, beide Wege mit
+Begründung vorlegen.
+
+**Netz:** extranet.flf.lu ist in der Cloud-Umgebung freigegeben (Network access → Allowed
+domains; vorher 403 am Proxy). Der Nutzer arbeitet daran auch von der Arbeit aus in der Cloud.
+Erster Schritt jeder Sitzung hierzu:
+`curl -sI https://extranet.flf.lu/match`. Klappt das nicht, auf die Freigabe hinweisen statt
+etwas zu erfinden.
+
+**Vorgehen:** 1. Seite untersuchen (Formular, Requests, evtl. JSON-API dahinter, notfalls
+Playwright-Mitschnitt) und dem Nutzer berichten, **bevor** gebaut wird. 2. Abrufskript (Node,
+möglichst ohne Abhängigkeiten) + `.github/workflows/fussball.yml`. 3. `fussball.html` mit
+Koeppchen hervorgehoben, offline mit letztem Stand. 4. Test unter `test/`, dieser Abschnitt
+wird dann zu „Stand und Regeln“. Änderungen nach Absprache direkt auf `main`.
 
 ## Teigplaner (`pizza.html`) — Stand und Regeln
 

@@ -59,8 +59,12 @@ fünf (Seniors hätten sonst die halbe Saison dort).
 **Quelle:** Hinter https://extranet.flf.lu/match steckt `https://extranet.flf.lu/api/graphql`
 (Angular-App), antwortet **ohne Anmeldung**, schickt aber **keine CORS-Freigabe** — der Browser
 kann sie nicht direkt fragen. Darum: `tools/fussball.mjs` (Node, keine Abhängigkeiten) holt die
-Daten, `.github/workflows/fussball.yml` lässt es Sa/So stündlich 8–21 Uhr und Mo–Fr einmal um 20 Uhr
-laufen (vom Nutzer so gewünscht; Cron in UTC, im Sommer eine Stunde später),
+Daten, `.github/workflows/fussball.yml` lässt es Sa/So 9–19 Uhr alle 15 min (8 und 19–21 Uhr
+stündlich) und Mo–Fr einmal um 20 Uhr laufen (vom Nutzer so gewünscht; Cron in UTC, im Sommer eine
+Stunde später). Ein „Neu laden“, das die Action startet, ginge nur mit einem GitHub-Schlüssel in der
+öffentlichen Datei — abgelehnt; live ginge nur über einen eigenen Vermittler (Cloudflare Worker),
+dem Nutzer als zu viel Aufwand vorgeschlagen. Der Knopf liest nur die gespeicherte Datei neu.
+Unten in der App steht „Gemacht von Laurent“ (vom Nutzer gewünscht).
 committet `data/fussball.json` nur bei inhaltlicher Änderung. Die App liest von
 `raw.githubusercontent.com` (CORS `*`, 5 min Cache, wartet nicht auf GitHub Pages), Rückfall
 `data/fussball.json` relativ, letzter Stand in localStorage (`fussball_v1_data`) für offline.

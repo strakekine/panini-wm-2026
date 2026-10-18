@@ -5,8 +5,11 @@ name: Fussball-Daten
 on:
   schedule:
     # Zeiten in UTC (GitHub kennt keine Zeitzone). Luxemburg ist UTC+1, im Sommer UTC+2.
-    # Samstag und Sonntag (Spieltage) stündlich von 8 bis 21 Uhr Winterzeit.
-    - cron: "17 7-20 * * 0,6"
+    # Samstag und Sonntag (Spieltage): 9–19 Uhr Winterzeit alle 15 Minuten, morgens um 8 und
+    # abends bis 21 Uhr stündlich. GitHub startet geplante Läufe oft verspätet, in der Praxis
+    # also eher alle 15–30 Minuten. Öffentliches Repo: Actions-Minuten kosten nichts.
+    - cron: "2,17,32,47 8-17 * * 0,6"
+    - cron: "17 7,18,19,20 * * 0,6"
     # Montag bis Freitag einmal abends: 20 Uhr Winterzeit, 21 Uhr Sommerzeit — lieber
     # etwas später als vor 20 Uhr, falls unter der Woche ein Ergebnis nachgetragen wird.
     - cron: "17 19 * * 1-5"

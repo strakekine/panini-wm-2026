@@ -64,7 +64,8 @@ stündlich) und Mo–Fr einmal um 20 Uhr laufen (vom Nutzer so gewünscht; Cron 
 Stunde später). Ein „Neu laden“, das die Action startet, ginge nur mit einem GitHub-Schlüssel in der
 öffentlichen Datei — abgelehnt; live ginge nur über einen eigenen Vermittler (Cloudflare Worker),
 dem Nutzer als zu viel Aufwand vorgeschlagen. Der Knopf liest nur die gespeicherte Datei neu.
-Unten in der App steht „Gemacht von Laurent“ (vom Nutzer gewünscht).
+Unten in der App steht „Gemacht von Laurent R.“ mit dem Vereinslogo (vom Nutzer so gewünscht,
+kein Fußball-Emoji).
 committet `data/fussball.json` nur bei inhaltlicher Änderung. Die App liest von
 `raw.githubusercontent.com` (CORS `*`, 5 min Cache, wartet nicht auf GitHub Pages), Rückfall
 `data/fussball.json` relativ, letzter Stand in localStorage (`fussball_v1_data`) für offline.

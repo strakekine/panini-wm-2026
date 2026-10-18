@@ -55,6 +55,9 @@ false). Die App zeigt dort nur Termine und blendet Ergebnisse auch dann aus, wen
 Schnittstelle eins liefern sollte. Freundschaftsspiele (FM) liegen landesweit in einer Klasse
 „Amicaux 1/2“ — davon nur die eigenen, keine fremden abrufen. „Nächste Spiele“ zeigt höchstens
 fünf (Seniors hätten sonst die halbe Saison dort).
+**Heute-Spieltag-Kasten** (vom Nutzer, 18.10.2026): an jedem Reiter oben „Heute Spieltag! ⚽ Anstoß HH:MM“
+mit Gegner und Ort (`spieltagHeute`, Tag in Luxemburger Zeit), ab Anstoß „Spiel läuft“; weg, sobald
+die FLF ein Ergebnis hat oder 3 h nach Anstoß. Steht der LIVE-Kasten da, entfällt er.
 
 **Quelle:** Hinter https://extranet.flf.lu/match steckt `https://extranet.flf.lu/api/graphql`
 (Angular-App), antwortet **ohne Anmeldung**, schickt aber **keine CORS-Freigabe** — der Browser

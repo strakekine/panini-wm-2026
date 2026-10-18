@@ -47,6 +47,11 @@
   h2{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1px;margin:0;flex:1}
   .hint{font-size:12px;color:var(--muted);text-align:right}
   .cbody{padding:10px 12px}
+  .heute{border:2px solid var(--accent)}
+  .heute .chead{background:#e6f6f2}
+  .heute .wann{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;text-align:center;line-height:1.1}
+  .heute .wo{text-align:center;font-size:13px;color:var(--muted);margin-top:4px}
+  .heute .zusatz{text-align:center;font-size:13px;margin-top:8px}
   .live{border:2px solid var(--bad)}
   .live .chead{background:#fff4f5}
   .live .punkt{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--bad);margin-right:6px;vertical-align:1px;animation:puls 1.6s infinite}
@@ -290,6 +295,18 @@ function ereignisListe(lv) {
   return [...tore, ...karten].sort((x, y) => x.min - y.min || x.plus - y.plus || (x.typ === "tor" ? -1 : 1));
 }
 
+// „Heute Spieltag“ (vom Nutzer gewünscht, für alle Reiter): das erste eigene Spiel heute (Tag in
+// Luxemburg), solange es kein Ergebnis hat — längstens 3 h nach Anstoß. `begonnen` ab Anstoß.
+const tagLux = ms => new Date(ms).toLocaleDateString("sv-SE", { timeZone: "Europe/Luxembourg" });
+function spieltagHeute(v, now) {
+  if (!v) return null;
+  const sp = [...v.kommend, ...v.gespielt]
+    .filter(s => tagLux(Date.parse(s.d)) === tagLux(now))
+    .filter(s => !(s.gespielt && s.hs != null) && now <= Date.parse(s.d) + 3 * 3600e3)
+    .sort((a, b) => a.d.localeCompare(b.d))[0];
+  return sp ? { sp, begonnen: now >= Date.parse(sp.d) } : null;
+}
+
 // Liegt bei diesem Reiter gerade ein Spiel im Live-Fenster? Dann fragt die App jede Minute nach.
 // Stand vom Cloudflare-Worker (tools/cloudflare-worker.js, ~20 s alt) über den von GitHub legen
 // (data/live.json, bis zu 7 min alt). Vom Worker kommt nur der Stand; welches Spiel, Anstoß und
@@ -349,7 +366,7 @@ function nachSpieltag(spiele) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "18.10.2026 j";
+const FASSUNG = "18.10.2026 k";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -490,6 +507,25 @@ function render() {
   LIVE_SP = liveSpiel(v, now);
   const lv = liveAnzeige(mitWorker(liveBasis(L, LIVE_SP), W), v, now);
   LIVE_POLL = !!lv || imLiveFenster(v, now);
+  // Spieltag-Kasten, solange (noch) kein LIVE-Kasten da ist.
+  const heute = !lv && spieltagHeute(v, now);
+  if (heute) {
+    const sp = heute.sp, zeit = wann(sp.d).split(" · ")[1];
+    const live = v.team.reiter === LIVE_REITER;
+    const titel = heute.begonnen ? "Spiel läuft" : "Heute Spieltag! ⚽";
+    const oben = heute.begonnen ? (zeit ? "seit " + zeit : "heute") : (zeit ? "Anstoß " + zeit : "Uhrzeit noch offen");
+    const unten = heute.begonnen
+      ? (live ? "Der Liveticker erscheint hier, sobald bei FuPa getickert wird." : "Das Ergebnis erscheint, sobald es eingetragen ist.")
+      : (live ? "Liveticker startet mit dem Anpfiff." : "");
+    h += `<section class="card heute"><div class="chead"><h2>${titel}</h2>${sp.typ === "CUP" ? `<span class="pill">Pokal</span>` : ""}</div><div class="cbody">
+      <div class="wann">${esc(oben)}</div>
+      <div class="m" style="border:0"><div class="t h${v.ids.has(sp.h.id) ? " wir" : ""}">${umbruch(anzeige(sp.h.n))}</div>
+      <div class="sc offen">–</div><div class="t${v.ids.has(sp.a.id) ? " wir" : ""}">${umbruch(anzeige(sp.a.n))}</div></div>
+      ${sp.ort ? `<div class="wo">📍 ${esc(sp.ort)}</div>` : ""}
+      ${unten ? `<div class="zusatz">${esc(unten)}</div>` : ""}
+      </div></section>`;
+  }
+
   if (lv) {
     const tore = ereignisListe(lv).map(e => {
       const min = `${e.min}${e.plus ? "+" + e.plus : ""}.`;

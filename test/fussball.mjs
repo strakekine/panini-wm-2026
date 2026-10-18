@@ -16,7 +16,7 @@ const src = fs.readFileSync(path.join(hier, "..", "fussball.html"), "utf8");
 const i = src.indexOf("==== Logik"), j = src.indexOf("==== Oberfläche");
 if (i < 0 || j < 0) throw new Error("Abschnittsmarken Logik/Oberfläche nicht gefunden");
 const M = new Function(src.slice(src.lastIndexOf("//", i), src.lastIndexOf("//", j)) + `
-  return { liveSpiel, liveBasis, kartenArt, ereignisListe, torArt, mitWorker, liveAnzeige, liveZeit, imLiveFenster, REGELN, klasseVon, zonen, ausgang, aufteilen, anzeige, sicht, nachSpieltag, roem };`)();
+  return { spieltagHeute, liveSpiel, liveBasis, kartenArt, ereignisListe, torArt, mitWorker, liveAnzeige, liveZeit, imLiveFenster, REGELN, klasseVon, zonen, ausgang, aufteilen, anzeige, sicht, nachSpieltag, roem };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text) { n++; if (!bed) { fehler++; console.log("✗ " + text); } }
@@ -261,6 +261,15 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(mw.hs === 2 && mw.slug === Wk.slug && /fupa\.net\/match\//.test(mw.url), "Worker füllt das Gerüst samt Slug");
   ok(M.mitWorker(b0, { ...Wk, fuer: 999 }).hs === undefined, "Worker-Antwort für ein anderes Spiel zählt nicht");
   ok(M.liveAnzeige(mw, vS, t0) && M.liveAnzeige(b0, vS, t0) === null, "Kasten erst mit Worker-Daten");
+  // „Heute Spieltag“
+  const morgens = Date.parse("2026-10-18T09:00:00+02:00");
+  const hm = M.spieltagHeute(M.sicht(DS, 44831, morgens), morgens);
+  ok(hm && hm.sp.id === flf.id && !hm.begonnen, "morgens: Heute Spieltag, noch nicht begonnen");
+  const hl = M.spieltagHeute(M.sicht(DS, 44831, t0), t0);
+  ok(hl && hl.begonnen, "nach Anstoß: Spiel läuft");
+  ok(M.spieltagHeute(M.sicht(DS, 44831, Date.parse("2026-10-17T20:00:00+02:00")), Date.parse("2026-10-17T20:00:00+02:00")) === null, "am Vortag kein Spieltag-Kasten");
+  ok(M.spieltagHeute(M.sicht(DS, 44831, Date.parse("2026-10-18T19:30:00+02:00")), Date.parse("2026-10-18T19:30:00+02:00")) === null, "3 h nach Anstoß weg");
+  ok(M.spieltagHeute(M.sicht(DF, 44831, t0), t0) === null, "mit FLF-Ergebnis weg");
   gleich(["penalty_foul", "goal_headed", "goal_shoot", "goal_own_goal", "goal_free_kick", "penalty_shootout",
           "goal_scrounger", "goal_distance_shoot", ""].map(M.torArt),
     ["Elfmeter", "Kopfball", "", "Eigentor", "Freistoß", "Elfmeterschießen", "Abstauber", "Fernschuss", ""],

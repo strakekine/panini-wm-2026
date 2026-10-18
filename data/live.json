@@ -5,13 +5,13 @@
  "anstoss": "2026-10-18T16:00:00+02:00",
  "h": "FC Koeppchen Wormeldange",
  "a": "Avenir Beggen",
- "hs": 1,
+ "hs": 2,
  "as": 0,
  "section": "LIVE",
  "period": "secondHalf",
  "running": true,
- "minute": 71,
- "minuteAt": "2026-10-18T17:30:34+02:00",
+ "minute": 83,
+ "minuteAt": "2026-10-18T17:41:51+02:00",
  "tore": [
   {
    "min": 12,
@@ -19,6 +19,13 @@
    "heim": true,
    "name": "Pedro Neves Costa",
    "art": "goal_headed"
+  },
+  {
+   "min": 78,
+   "plus": 0,
+   "heim": true,
+   "name": "Théo Fournier",
+   "art": "goal_shoot"
   }
  ],
  "ticker": "Paul Krier"

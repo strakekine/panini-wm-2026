@@ -30,11 +30,10 @@ const DIV6 = { id: 19233, name: "U13 Minimes Cl6 S5 Phase 1", showResult: true, 
 const CUP = { id: 19615, name: "Coupe U13 Minimes - 1/32 de Finale", showResult: true, showRanking: false };
 let mid = 1;
 function roh(div, typ, d, h, a, hs, as, extra = {}) {
-  return { match: { id: mid++, gameday: extra.tag ?? 1, matchDate: d, isPlayed: hs != null, isForfait: false,
+  return { ak: extra.ak ?? 0, match: { id: mid++, gameday: extra.tag ?? 1, matchDate: d, isPlayed: hs != null, isForfait: false,
                     homeScore: hs, awayScore: as, finalHomeScore: extra.fh ?? (hs ?? null), finalAwayScore: extra.fa ?? (as ?? null),
                     finalScoreComment: null },
-           division: div, matchType: { id: typ }, homeTeam: h, awayTeam: a, sportField: { name: "Am Ga" },
-           homeAgeCategory: { name: "U13 Minimes" }, awayAgeCategory: { name: "U13 Minimes" } };
+           division: div, matchType: { id: typ }, homeTeam: h, awayTeam: a, sportField: { name: "Am Ga" } };
 }
 const s1 = roh(DIV4, "CC", "2026-09-19T14:30:00+02:00", G(1), K1, 2, 2, { tag: 1 });
 const s2 = roh(DIV4, "CC", "2026-10-17T14:30:00+02:00", K1, G(2), 9, 0, { tag: 5 });
@@ -42,22 +41,28 @@ const s3 = roh(DIV4, "CC", "2026-09-19T15:00:00+02:00", G(3), G(4), 5, 2, { tag:
 const s4 = roh(DIV6, "CC", "2026-09-26T14:00:00+02:00", G(5), K2, 9, 5, { tag: 2 });
 const s5 = roh(CUP, "CUP", "2026-10-24T14:00:00+02:00", KP, G(6), null, null);
 // Korrigiertes Endergebnis (z. B. Forfait am grünen Tisch) gilt vor dem gespielten.
+// U15-Pokal: eigene Altersklasse (ak 1), darf bei der U13 nicht auftauchen.
+const P15 = team(45400, "FC Koeppchen Wormeldange", CLUB);
+const CUP15 = { id: 19599, name: "Coupe U15 Scolaires - 1/32 de Finale", showResult: true, showRanking: false };
+const s8 = roh(CUP15, "CUP", "2026-10-25T10:00:00+02:00", P15, G(9), null, null, { ak: 1 });
 const s6 = roh(DIV6, "CC", "2026-10-03T16:00:00+02:00", K2, G(7), 3, 5, { tag: 3, fh: 0, fa: 3 });
 
 const rank = (pl, t, p) => ({ ranking: { rank: pl, teamId: t.id, totalPlays: 5, totalWins: 0, totalDraws: 0, totalLosses: 0,
                                          totalOwnGoals: 10, totalAgainstGoals: 5, totalPoints: p }, team: { id: t.id, name: t.name } });
 const D = aufbereiten({
   saison: { id: "20262027", name: "Saison 2026-2027" },
-  vereinsSpiele: [s1, s2, s4, s5, s6],
+  vereinsSpiele: [s1, s2, s4, s5, s6, s8],
   klassen: {
     19189: { spiele: [s2, s1, s3], tabelle: [rank(2, K1, 11), rank(1, G(1), 11), rank(3, G(2), 8)] },
     19233: { spiele: [s4, s6], tabelle: [rank(5, K2, 0), rank(1, G(5), 12)] },
     19615: { spiele: [s5], tabelle: null },
+    19599: { spiele: [s8], tabelle: null },
   },
 });
 
 /* --- Aufbereitung --- */
-gleich(D.teams.map(t => t.id), [45398, 45396, 45397], "drei Vereinsmannschaften erkannt");
+gleich(D.teams.map(t => t.id), [45398, 45396, 45397, 45400], "Vereinsmannschaften erkannt, nach Altersklasse sortiert");
+gleich(D.teams.map(t => t.alter), ["U13 Minimes", "U13 Minimes", "U13 Minimes", "U15 Scolaires"], "Altersklasse je Mannschaft");
 gleich(D.teams.find(t => t.id === 45396).klassen, [19189], "Koeppchen I: Klasse IV");
 gleich(D.klassen[19189].spiele.map(s => s.d.slice(0, 16)), ["2026-09-19T14:30", "2026-09-19T15:00", "2026-10-17T14:30"],
   "Spiele der Klasse nach Datum, auch die ohne Koeppchen");
@@ -69,26 +74,27 @@ const sp5 = spiel(s5);
 ok(!sp5.gespielt && sp5.hs == null, "offenes Spiel ohne Ergebnis");
 
 /* --- Auf-/Abstiegsregeln (Rundschreiben Phase 1 2026-2027) --- */
-gleich(M.klasseVon("U13 Minimes Cl4 S2 Phase 1"), { nr: 4, phase: 1 }, "Klasse und Phase aus dem Namen");
+gleich(M.klasseVon("U13 Minimes Cl4 S2 Phase 1"), { nr: 4, phase: 1, kat: "U13" }, "Klasse, Phase und Altersklasse aus dem Namen");
 gleich(M.zonen("20262027", "U13 Minimes Cl4 S2 Phase 1"), { auf: [1, 2], ab: [5, 6] }, "Klasse IV: 1./2. hoch, 5./6. runter");
 gleich(M.zonen("20262027", "U13 Minimes Cl1 S1 Phase 1").auf, [], "Klasse I: niemand steigt auf");
 ok(M.zonen("20262027", "U13 Minimes Cl6 S5 Phase 1") === null, "letzte Klasse: keine Regel");
 ok(M.zonen("20262027", "U13 Minimes Cl4 S2 Phase 2") === null, "Phase 2: (noch) keine Regel");
 ok(M.zonen("20272028", "U13 Minimes Cl4 S2 Phase 1") === null, "andere Saison: keine Regel");
 ok(M.zonen("20262027", "Coupe U13 Minimes - 1/32 de Finale") === null, "Pokal: keine Regel");
+ok(M.zonen("20262027", "U15 Scolaires Cl4 S2 Phase 1") === null, "U15: kein Rundschreiben, keine Regel");
 gleich([M.roem(3), M.roem(5)], ["III", "V"], "römische Klassen");
 
 /* --- Sicht eines Reiters --- */
 const { tabs, verein } = M.aufteilen(D);
 gleich(tabs.map(t => t.id), [45396, 45397], "Reiter nur für Mannschaften mit Liga");
-gleich(verein.map(t => t.id), [45398], "Pokalmannschaft ohne I/II zählt zum Verein");
+gleich(verein.map(t => t.id), [45398, 45400], "Pokalmannschaften ohne I/II zählen zum Verein");
 ok(M.anzeige("FC Koeppchen Wormeldange II") === "Koeppchen II", "eigener Name gekürzt");
 ok(M.anzeige("US Sandweiler") === "US Sandweiler", "Gegner unverändert");
-gleich(D.teams.map(t => M.reiter(t, D.verein.n)), ["U13", "U13 1", "U13 2"], "Reiter-Beschriftung U13 1 / U13 2");
+gleich(D.teams.map(t => M.reiter(t, D.verein.n)), ["U13", "U13 1", "U13 2", "U15"], "Reiter-Beschriftung U13 1 / U13 2 / U15");
 
 const jetzt = Date.parse("2026-10-18T10:00:00+02:00");
 const v1 = M.sicht(D, 45396, jetzt);
-gleich(v1.kommend.map(s => s.typ), ["CUP"], "Koeppchen I sieht das Pokalspiel als nächstes");
+gleich(v1.kommend.map(s => s.klasse), ["Coupe U13 Minimes - 1/32 de Finale"], "Koeppchen I sieht den U13-Pokal, nicht den der U15");
 gleich(v1.gespielt.map(s => s.tag), [5, 1], "eigene Ergebnisse, neueste zuerst, ohne fremde Spiele");
 ok(v1.status && v1.status.was.art === "up" && /Klasse III/.test(v1.status.was.txt), "Platz 2 in Klasse IV → Aufstieg in Klasse III");
 ok(v1.status.neuFehlt, "neue Klasse noch nicht eingetragen");

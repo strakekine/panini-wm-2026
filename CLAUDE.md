@@ -28,8 +28,8 @@ Sieben voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
   Lektionen kommen aus eingescannten PDFs, die Claude abtippt. Einzeldatei. Details unten.
 - **`pine/`** — TradingView Pine-Script-Indikatoren. Eigener Kontext, eigene Regeln:
   siehe **`pine/CLAUDE.md`**, bevor dort etwas geändert wird.
-- **`fussball.html`** — „FC Koeppchen“: Tabelle, Ergebnisse und nächste Spiele der beiden
-  U13-Minimes-Mannschaften, automatisch von der FLF (GitHub Action, am Wochenende stündlich). Details unten.
+- **`fussball.html`** — „FC Koeppchen“: Tabelle, Ergebnisse und nächste Spiele der Jugend
+  (U13, U15, U11, U9) und der Seniors, automatisch von der FLF (GitHub Action). Details unten. Details unten.
 
 Der Repo-Name passt damit nur noch zum ersten Punkt. Nicht wundern und nichts danach
 sortieren: was hier liegt, steht in dieser Liste.
@@ -42,6 +42,19 @@ Nutzer: Laurent; seine Kinder spielen bei den **U13 Minimes des FC Koeppchen Wor
 gewünscht, darum hell und nicht dunkel wie die anderen Apps. Zeigt ohne Suchen: nächste Spiele,
 Tabelle, eigene Ergebnisse, alle Spiele der Klasse, frühere Phasen aufklappbar. Einzeldatei,
 iPhone-Regeln der Pizza-App.
+
+**Mannschaften** (vom Nutzer, 18.10.2026): Reiter in dieser Reihenfolge **U13 1, U13 2, U15,
+U11 1, U11 2, U9 1, U9 2, Seniors** — U13 zuerst, das ist die der Kinder. Beschriftung arabisch
+(„U13 1“, nicht „Mannschaft I“). Reihenfolge und Auswahl stehen in `AGES` in
+`tools/fussball.mjs` (ageCategoryId: U13 4, U15 11, U11 7, U9 5, Seniors 1). Bewusst nicht dabei:
+Réserves (eigene Kategorie 9999), U7 (zwei Bambini-Teams gemeldet, aber noch kein Spiel — bei
+keinem Verein; letzte Saison ab Mitte Dezember), Mädchen/Dames (spielen als ENT
+Wormeldange/Munsbach/Hostert). Weitere Mannschaften: Eintrag in `AGES`, sonst nichts.
+**U9 und U11: die FLF veröffentlicht weder Ergebnisse noch Tabelle** (`showResult`/`showRanking`
+false). Die App zeigt dort nur Termine und blendet Ergebnisse auch dann aus, wenn die
+Schnittstelle eins liefern sollte. Freundschaftsspiele (FM) liegen landesweit in einer Klasse
+„Amicaux 1/2“ — davon nur die eigenen, keine fremden abrufen. „Nächste Spiele“ zeigt höchstens
+fünf (Seniors hätten sonst die halbe Saison dort).
 
 **Quelle:** Hinter https://extranet.flf.lu/match steckt `https://extranet.flf.lu/api/graphql`
 (Angular-App), antwortet **ohne Anmeldung**, schickt aber **keine CORS-Freigabe** — der Browser
@@ -59,8 +72,9 @@ Schnittstelle, ausprobiert (Introspektion ist aus, Felder über Fehlermeldungen 
   `rankings` braucht sie nicht.
 - Verein: `clubId` 1003703 („Wormeldange FC Koeppchen“), U13 Minimes = `ageCategoryId` 4.
   Saison aus `defaultValues.currentSeasonId` — wechselt im Juli von selbst.
-- Teams: I = 45396, II = 45397, im Pokal tritt der Verein als 45398 ohne I/II an. Mannschaften ohne
-  Ligaspiel bekommen keinen Reiter, ihre Spiele erscheinen bei jedem Reiter (`aufteilen()`).
+- Teams (U13): I = 45396, II = 45397, im Pokal tritt der Verein als 45398 ohne I/II an. Mannschaften
+  ohne Ligaspiel bekommen keinen Reiter, ihre Spiele erscheinen bei jedem Reiter **derselben
+  Altersklasse** (`aufteilen()`, `ak`) — sonst stünde der U15-Pokal bei der U13.
 - `finalHomeScore` vor `homeScore` (Endergebnis, z. B. nach Forfait). Uhrzeit 00:00 = noch nicht
   festgelegt, wird nicht angezeigt.
 - Die Seite hat beim Ausprobieren einmal die Verbindung gekappt: Abfragen mit 1 s Pause, Wiederholung.
@@ -73,7 +87,9 @@ Abschluss (Platz, Auf-/Abstieg) und „neue Klasse noch nicht eingetragen“.
 **Auf-/Abstieg** (`REGELN`, Rundschreiben der FLF „Après la Phase 1 2026-2027“, vom Nutzer als
 Bild): Kl. I 5./6. runter; II und III 1. hoch, 5./6. runter; IV 1./2. hoch, 5./6. runter; V 1.
 jeder Serie und bester Zweiter hoch. Letzte Klasse (U13: VI) hängt laut FLF von den Anmeldungen
-ab — dort wird **nichts markiert**, statt etwas zu behaupten. Regeln gelten je Saison + Phase;
+ab — dort wird **nichts markiert**, statt etwas zu behaupten. Das Rundschreiben gilt nur für die
+**U13**; U15 und Seniors werden nicht markiert, bis eins für sie da ist. Regeln gelten je Saison +
+Altersklasse + Phase;
 für Phase 2 gibt es noch keine, ohne Regel keine Markierung. Neues Rundschreiben → neuer Eintrag.
 Stand 18.10.2026: Phase 1 beendet, Koeppchen I Zweiter in Kl. IV → Kl. III; Koeppchen II
 Fünfter in Kl. VI. Nächstes Spiel Pokal 1/32 am 24.10. gegen AS Hosingen.

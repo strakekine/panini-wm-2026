@@ -9,13 +9,21 @@ import { writeFileSync, readFileSync, existsSync } from "node:fs";
 
 export const API = "https://extranet.flf.lu/api/graphql";
 export const CLUB = 1003703;          // Wormeldange FC Koeppchen
-export const AGE = 4;                 // U13 Minimes
+// Altersklassen in der Reihenfolge der Reiter (vom Nutzer so festgelegt). id = ageCategoryId
+// der FLF. Seniors ist nur die erste Mannschaft; die Réserves sind eine eigene Kategorie
+// („Seniors (R)“, 9999) und bewusst nicht dabei. U7 hat noch keine Spiele (Stand 18.10.2026).
+export const AGES = [
+  { id: 4,  kat: "U13", n: "U13 Minimes" },
+  { id: 11, kat: "U15", n: "U15 Scolaires" },
+  { id: 7,  kat: "U11", n: "U11 Poussins" },
+  { id: 5,  kat: "U9",  n: "U9 Pupilles" },
+  { id: 1,  kat: "Seniors", n: "Seniors" },
+];
 const OUT = new URL("../data/fussball.json", import.meta.url);
 
 const M_FIELDS = `match{ id gameday matchDate isPlayed isForfait homeScore awayScore finalHomeScore finalAwayScore finalScoreComment }
   division{ id name showResult showRanking } matchType{ id }
   homeTeam{ id name clubId1 clubId2 clubId3 clubId4 } awayTeam{ id name clubId1 clubId2 clubId3 clubId4 }
-  homeAgeCategory{ name } awayAgeCategory{ name }
   sportField{ name }`;
 
 const Q_DEFAULTS = `{ defaultValues{ currentSeasonId } seasons{ id name startDate endDate } }`;
@@ -77,14 +85,13 @@ export function tabelle(rankings) {
 }
 
 // Vereinsspiele + je Klasse alle Spiele und Tabelle → das, was die App liest.
+// vereinsSpiele tragen `ak` = Index in AGES (aus welcher Abfrage sie kommen).
 export function aufbereiten({ saison, vereinsSpiele, klassen }) {
   const teams = new Map();
   for (const m of vereinsSpiele)
-    for (const [t, alter] of [[m.homeTeam, m.homeAgeCategory], [m.awayTeam, m.awayAgeCategory]])
-      // kat = „U13“ aus „U13 Minimes“: Beschriftung der Reiter, auch wenn später weitere
-      // Altersklassen dazukommen.
+    for (const t of [m.homeTeam, m.awayTeam])
       if (istVerein(t) && !teams.has(t.id))
-        teams.set(t.id, { id: t.id, n: t.name, kat: (alter?.name || "").split(" ")[0], klassen: [] });
+        teams.set(t.id, { id: t.id, n: t.name, ak: m.ak, kat: AGES[m.ak].kat, alter: AGES[m.ak].n, klassen: [] });
 
   const div = {};
   for (const m of vereinsSpiele) {
@@ -106,7 +113,7 @@ export function aufbereiten({ saison, vereinsSpiele, klassen }) {
     stand: new Date().toISOString(),
     saison: { id: saison.id, n: saison.name },
     verein: { id: CLUB, n: "FC Koeppchen Wormeldange" },
-    teams: [...teams.values()].sort((a, b) => a.n.localeCompare(b.n)),
+    teams: [...teams.values()].sort((a, b) => a.ak - b.ak || a.n.localeCompare(b.n)),
     klassen: div,
   };
 }
@@ -118,11 +125,19 @@ async function main() {
   // Ohne Zeitraum antwortet die Schnittstelle mit INTERNAL_SERVER_ERROR.
   const zeit = { seasonId: saison.id, startDate: day(saison.startDate), endDate: day(saison.endDate) };
 
-  const { matches: vereinsSpiele } = await gq(Q_MATCHES, { c: { ...zeit, clubId: CLUB, ageCategoryId: AGE, matchTypeId: "ALL" } });
+  const vereinsSpiele = [];
+  for (const [ak, a] of AGES.entries()) {
+    const { matches } = await gq(Q_MATCHES, { c: { ...zeit, clubId: CLUB, ageCategoryId: a.id, matchTypeId: "ALL" } });
+    for (const m of matches) if (!vereinsSpiele.some(x => x.match.id === m.match.id)) vereinsSpiele.push({ ...m, ak });
+    await pause(1000);
+  }
   const klassen = {};
   for (const id of new Set(vereinsSpiele.map(m => m.division.id))) {
     const m0 = vereinsSpiele.find(m => m.division.id === id);
     const typ = m0.matchType?.id || "ALL";
+    // Freundschaftsspiele liegen landesweit in einer einzigen „Klasse“ (Amicaux 1, 2) —
+    // davon nur die eigenen, nicht hunderte fremde.
+    if (typ === "FM") { klassen[id] = { spiele: vereinsSpiele.filter(m => m.division.id === id), tabelle: null }; continue; }
     await pause(1000);
     const { matches } = await gq(Q_MATCHES, { c: { ...zeit, divisionId: id, matchTypeId: typ } });
     let tab = null;

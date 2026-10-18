@@ -31,8 +31,9 @@
   .top img{width:42px;height:42px;border-radius:50%;background:#fff;flex:none}
   h1{font-family:'Bebas Neue',sans-serif;letter-spacing:1.5px;margin:0;font-size:28px;color:#fff;line-height:1.05}
   .sub{color:#b9bfbc;font-size:12.5px;margin-top:1px}
-  .seg{display:flex;background:#222;border:1px solid #333;border-radius:10px;overflow:hidden;margin-top:9px}
-  .seg button{flex:1;background:transparent;color:#b9bfbc;border:0;padding:9px 10px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:.3px}
+  /* Reiter im Raster: acht passen in zwei Reihen à vier, auch auf dem kleinen iPhone. */
+  .seg{display:grid;grid-template-columns:repeat(auto-fit,minmax(74px,1fr));gap:1px;background:#333;border:1px solid #333;border-radius:10px;overflow:hidden;margin-top:9px}
+  .seg button{background:#222;white-space:nowrap;color:#b9bfbc;border:0;padding:9px 10px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:.3px}
   .seg button.on{background:#fff;color:#111}
   main{max-width:720px;margin:0 auto;padding:4px 12px 60px}
 
@@ -104,8 +105,10 @@
 // V: 1. jeder Serie und der beste 2. hoch. Die letzte Klasse (bei U13 Klasse VI) hängt von
 // den Anmeldungen ab — dort wird nichts markiert, statt etwas zu behaupten.
 // Für Phase 2 gibt es noch keine Regeln: neue Phase → neue Zeilen hier.
+// Gilt nur für die U13: Für die anderen Altersklassen liegt kein Rundschreiben vor, dort wird
+// nichts markiert. Schlüssel: Saison, Altersklasse, Phase.
 const REGELN = {
-  "20262027 Phase 1": {
+  "20262027 U13 Phase 1": {
     1: { auf: [], ab: [5, 6] },
     2: { auf: [1], ab: [5, 6] },
     3: { auf: [1], ab: [5, 6] },
@@ -115,14 +118,19 @@ const REGELN = {
 };
 
 function klasseVon(name) {
-  const k = /\bCl\s*(\d+)/i.exec(name), p = /Phase\s*(\d+)/i.exec(name);
-  return { nr: k ? +k[1] : null, phase: p ? +p[1] : null };
+  const k = /\bCl\s*(\d+)/i.exec(name), p = /Phase\s*(\d+)/i.exec(name), a = /^(W?U\d+)\b/.exec(name);
+  return { nr: k ? +k[1] : null, phase: p ? +p[1] : null, kat: a ? a[1] : null };
+}
+
+// Regeln der ganzen Phase (alle Klassen) oder null.
+function regelnVon(saisonId, name) {
+  const { kat, phase } = klasseVon(name);
+  return REGELN[`${saisonId} ${kat} Phase ${phase}`] || null;
 }
 
 // → {auf, ab, extra} oder null, wenn für diese Klasse keine Regel bekannt ist.
 function zonen(saisonId, name) {
-  const { nr, phase } = klasseVon(name);
-  const r = REGELN[saisonId + " Phase " + phase];
+  const r = regelnVon(saisonId, name), { nr } = klasseVon(name);
   return (r && nr && r[nr]) || null;
 }
 
@@ -138,7 +146,8 @@ const ROEM = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
 const roem = n => ROEM[n] || String(n);
 
 // Mannschaften mit Ligaspielen bekommen einen Reiter. Vereinsmannschaften ohne Liga
-// (im Pokal tritt der Verein ohne I/II an) erscheinen bei jedem Reiter mit.
+// (im Pokal tritt der Verein ohne I/II an) erscheinen bei jedem Reiter derselben
+// Altersklasse mit (`ak`) — der U15-Pokal gehört nicht zur U13.
 function aufteilen(D) {
   const tabs = D.teams.filter(t => t.klassen.some(id => istLiga(D.klassen[id])));
   const verein = D.teams.filter(t => !tabs.includes(t));
@@ -160,8 +169,8 @@ const umbruch = s => esc(s).replace(/\//g, "/<wbr>");
 
 // Alles, was ein Reiter zeigt — reine Daten, gerendert wird unten.
 function sicht(D, tid, now) {
-  const { verein } = aufteilen(D);
   const team = D.teams.find(t => t.id === tid);
+  const verein = aufteilen(D).verein.filter(t => t.ak === team.ak);
   const ids = new Set([tid, ...verein.map(t => t.id)]);
   const liga = team.klassen.map(id => D.klassen[id]).filter(istLiga);
   const aktuell = liga[liga.length - 1] || null;
@@ -170,7 +179,7 @@ function sicht(D, tid, now) {
     const k = D.klassen[id];
     for (const sp of k.spiele)
       if (ids.has(sp.h.id) || ids.has(sp.a.id))
-        eigene.push({ ...sp, klasse: k.n, typ: k.typ, wir: ids.has(sp.h.id) ? sp.h.id : sp.a.id });
+        eigene.push({ ...sp, klasse: k.n, typ: k.typ, erg: k.ergebnisse, wir: ids.has(sp.h.id) ? sp.h.id : sp.a.id });
   }
   eigene.sort((a, b) => a.d.localeCompare(b.d));
   // Ein Spiel ohne Ergebnis gilt bis 3 h nach Anpfiff als „kommt noch“, danach als
@@ -190,12 +199,14 @@ function sicht(D, tid, now) {
       if (z && zeile && z.auf.includes(zeile.pl)) was = { art: "up", txt: `Platz ${zeile.pl} — Aufstieg in Klasse ${roem(nr - 1)}! 🎉` };
       else if (z && zeile && z.ab.includes(zeile.pl)) was = { art: "down", txt: `Platz ${zeile.pl} — es geht in Klasse ${roem(nr + 1)}.` };
       else if (z && zeile) was = { art: "", txt: `Platz ${zeile.pl} — bleibt in Klasse ${roem(nr)}.` };
-      else if (zeile) was = { art: "", txt: `Platz ${zeile.pl}. Für diese Klasse hängen Auf- und Abstieg von den Anmeldungen ab.` };
+      // Regeln für die Phase da, aber nicht für diese Klasse = letzte Klasse (Rundschreiben).
+      else if (zeile && regelnVon(D.saison.id, aktuell.n)) was = { art: "", txt: `Platz ${zeile.pl}. Für diese Klasse hängen Auf- und Abstieg von den Anmeldungen ab.` };
+      else if (zeile) was = { art: "", txt: `Platz ${zeile.pl}.` };
       const neuFehlt = !kommend.some(sp => sp.typ === "CC");
       status = { fertig, was, neuFehlt };
     }
   }
-  return { team, aktuell, frueher: liga.slice(0, -1).reverse(), kommend, gespielt, status };
+  return { team, ids, aktuell, frueher: liga.slice(0, -1).reverse(), kommend, gespielt, status };
 }
 
 // Spieltage einer Klasse, für „Alle Spiele“.
@@ -241,12 +252,15 @@ function bisDahin(iso, now) {
 function spielZeile(sp, ids, meta) {
   // Gefärbt (Sieg/Unentschieden/Niederlage) wird nur, wo eine eigene Mannschaft spielt.
   const tid = ids && (ids.has(sp.h.id) ? sp.h.id : ids.has(sp.a.id) ? sp.a.id : null);
-  const a = tid != null && ausgang(sp, tid);
-  const sc = sp.gespielt && sp.hs != null ? `${sp.hs} : ${sp.as}` : "";
+  // Bei U9/U11 veröffentlicht die FLF keine Ergebnisse (showResult) — dann zeigen wir auch
+  // keine, selbst wenn die Schnittstelle eins liefern sollte.
+  const ohne = sp.erg === false;
+  const a = !ohne && tid != null && ausgang(sp, tid);
+  const sc = !ohne && sp.gespielt && sp.hs != null ? `${sp.hs} : ${sp.as}` : "";
   const wirH = ids && ids.has(sp.h.id), wirA = ids && ids.has(sp.a.id);
   return `<div class="m">
     <div class="t h${wirH ? " wir" : ""}">${umbruch(anzeige(sp.h.n))}</div>
-    <div class="sc ${sc ? (a || "") : "offen"}">${sc || (sp.gespielt ? "–" : "offen")}</div>
+    <div class="sc ${sc ? (a || "") : "offen"}">${sc || (sp.gespielt ? (ohne ? "gespielt" : "–") : Date.parse(sp.d) < Date.now() ? "–" : "offen")}</div>
     <div class="t${wirA ? " wir" : ""}">${umbruch(anzeige(sp.a.n))}</div>
     ${meta ? `<div class="meta">${meta}</div>` : ""}
   </div>`;
@@ -270,22 +284,23 @@ function tabelleHtml(k, tid) {
 function alleSpieleHtml(k, ids) {
   return nachSpieltag(k.spiele).map(([tag, sp]) =>
     `<div class="tag">${tag ? "Spieltag " + tag : "Spiele"} · ${wann(sp[0].d, false)}</div>` +
-    sp.map(s => spielZeile(s, ids)).join("")).join("");
+    sp.map(s => spielZeile({ ...s, erg: k.ergebnisse }, ids)).join("")).join("");
 }
 
 function render() {
   const main = document.getElementById("main");
   if (!D) return;
-  const { tabs, verein } = aufteilen(D);
+  const { tabs } = aufteilen(D);
   if (!tabs.some(t => t.id === ST.team)) ST.team = tabs[0]?.id ?? null;
   document.getElementById("seg").innerHTML = tabs.map(t =>
     `<button data-t="${t.id}" class="${t.id === ST.team ? "on" : ""}">${esc(reiter(t, D.verein.n))}</button>`).join("");
-  document.getElementById("sub").textContent = "U13 Minimes · " + D.saison.n.replace("Saison ", "");
   if (ST.team == null) { main.innerHTML = `<div class="note">Keine Spiele gefunden.</div>`; return; }
 
   const now = Date.now();
   const v = sicht(D, ST.team, now);
-  const ids = new Set([ST.team, ...verein.map(t => t.id)]);
+  const ids = v.ids, alter = v.team.alter || "";
+  document.getElementById("sub").textContent = (alter ? alter + " · " : "") + D.saison.n.replace("Saison ", "");
+  const art = sp => sp.typ === "CUP" ? "Pokal" : sp.typ === "FM" ? "Freundschaftsspiel" : "";
   let h = "";
 
   if (v.status && v.status.was) {
@@ -295,25 +310,31 @@ function render() {
 
   h += `<section class="card"><div class="chead"><h2>Nächste Spiele</h2></div><div class="cbody">`;
   if (!v.kommend.length) h += `<div class="muted">Noch keine Termine eingetragen.</div>`;
-  v.kommend.forEach((sp, i) => {
-    const pokal = sp.typ === "CUP" ? `<span class="pill">Pokal</span>` : "";
+  // Höchstens fünf — bei den Seniors stünde sonst die halbe Saison hier.
+  const ZEIG = 5;
+  v.kommend.slice(0, ZEIG).forEach((sp, i) => {
+    const pokal = art(sp) ? `<span class="pill">${art(sp)}</span>` : "";
     if (i === 0) {
       h += `<div class="next"><div class="when">${esc(wann(sp.d))} <span class="muted" style="font-family:Barlow;font-size:14px;letter-spacing:0">${bisDahin(sp.d, now)}</span></div>
         ${spielZeile(sp, ids, `${esc(sp.ort || "")}${pokal}<br>${esc(sp.klasse)}`)}</div>`;
     } else h += spielZeile(sp, ids, `${esc(wann(sp.d))}${sp.ort ? " · " + esc(sp.ort) : ""}${pokal}`);
   });
+  if (v.kommend.length > ZEIG)
+    h += `<div class="muted" style="text-align:center;font-size:12.5px;margin-top:8px">+ ${v.kommend.length - ZEIG} weitere unter „Alle Spiele der Klasse“</div>`;
   h += `</div></section>`;
 
-  if (v.aktuell) {
+  if (v.aktuell && !v.aktuell.ergebnisse && !v.aktuell.tabelle) {
+    h += `<div class="note">In der ${esc(v.team.kat)} veröffentlicht die FLF keine Ergebnisse und keine Tabelle — hier stehen darum nur die Termine.</div>`;
+  } else if (v.aktuell) {
     h += `<section class="card"><div class="chead"><h2>Tabelle</h2><div class="hint">${esc(v.aktuell.n)}</div></div>
       <div class="cbody">${tabelleHtml(v.aktuell, ST.team)}</div></section>`;
   }
 
-  h += `<section class="card"><div class="chead"><h2>Unsere Ergebnisse</h2></div><div class="cbody">`;
+  h += `<section class="card"><div class="chead"><h2>${v.aktuell && !v.aktuell.ergebnisse ? "Bisherige Spiele" : "Unsere Ergebnisse"}</h2></div><div class="cbody">`;
   if (!v.gespielt.length) h += `<div class="muted">Noch nichts gespielt.</div>`;
   for (const sp of v.gespielt) {
-    const pokal = sp.typ === "CUP" ? " · Pokal" : "";
-    const fehlt = !sp.gespielt ? " · Ergebnis noch nicht eingetragen" : "";
+    const pokal = art(sp) ? " · " + art(sp) : "";
+    const fehlt = !sp.gespielt && sp.erg !== false ? " · Ergebnis noch nicht eingetragen" : "";
     h += spielZeile(sp, ids, `${esc(wann(sp.d, false))}${pokal}${sp.forfait ? " · Forfait" : ""}${fehlt}`);
   }
   h += `</div></section>`;
@@ -323,7 +344,7 @@ function render() {
       <div class="cbody">${alleSpieleHtml(v.aktuell, ids)}</div></details>`;
   }
   for (const k of v.frueher) {
-    h += `<details class="card"><summary><h2>Früher: ${esc(k.n.replace(/^U13 Minimes\s*/, ""))}</h2></summary>
+    h += `<details class="card"><summary><h2>Früher: ${esc(k.n.replace(alter, "").trim() || k.n)}</h2></summary>
       <div class="cbody">${tabelleHtml(k, ST.team)}<div style="margin-top:10px">${alleSpieleHtml(k, ids)}</div></div></details>`;
   }
 

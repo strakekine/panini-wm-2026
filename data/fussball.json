@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-18T07:54:48.716Z",
+ "stand": "2026-10-18T08:11:30.284Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -10,9 +10,22 @@
  },
  "teams": [
   {
-   "id": 45398,
+   "id": 44831,
    "n": "FC Koeppchen Wormeldange",
    "ak": 0,
+   "kat": "Seniors",
+   "alter": "Seniors",
+   "klassen": [
+    19555,
+    18888,
+    19529,
+    19531
+   ]
+  },
+  {
+   "id": 45398,
+   "n": "FC Koeppchen Wormeldange",
+   "ak": 1,
    "kat": "U13",
    "alter": "U13 Minimes",
    "klassen": [
@@ -22,7 +35,7 @@
   {
    "id": 45396,
    "n": "FC Koeppchen Wormeldange I",
-   "ak": 0,
+   "ak": 1,
    "kat": "U13",
    "alter": "U13 Minimes",
    "klassen": [
@@ -32,7 +45,7 @@
   {
    "id": 45397,
    "n": "FC Koeppchen Wormeldange II",
-   "ak": 0,
+   "ak": 1,
    "kat": "U13",
    "alter": "U13 Minimes",
    "klassen": [
@@ -42,7 +55,7 @@
   {
    "id": 45399,
    "n": "FC Koeppchen Wormeldange",
-   "ak": 1,
+   "ak": 2,
    "kat": "U15",
    "alter": "U15 Scolaires",
    "klassen": [
@@ -53,7 +66,7 @@
   {
    "id": 45400,
    "n": "FC Koeppchen Wormeldange",
-   "ak": 1,
+   "ak": 2,
    "kat": "U15",
    "alter": "U15 Scolaires",
    "klassen": [
@@ -63,7 +76,7 @@
   {
    "id": 45395,
    "n": "FC Koeppchen Wormeldange I",
-   "ak": 2,
+   "ak": 3,
    "kat": "U11",
    "alter": "U11 Poussins",
    "klassen": [
@@ -74,7 +87,7 @@
   {
    "id": 45394,
    "n": "FC Koeppchen Wormeldange II",
-   "ak": 2,
+   "ak": 3,
    "kat": "U11",
    "alter": "U11 Poussins",
    "klassen": [
@@ -84,7 +97,7 @@
   {
    "id": 45392,
    "n": "FC Koeppchen Wormeldange I",
-   "ak": 3,
+   "ak": 4,
    "kat": "U9",
    "alter": "U9 Pupilles",
    "klassen": [
@@ -95,24 +108,11 @@
   {
    "id": 45393,
    "n": "FC Koeppchen Wormeldange II",
-   "ak": 3,
+   "ak": 4,
    "kat": "U9",
    "alter": "U9 Pupilles",
    "klassen": [
     19451
-   ]
-  },
-  {
-   "id": 44831,
-   "n": "FC Koeppchen Wormeldange",
-   "ak": 4,
-   "kat": "Seniors",
-   "alter": "Seniors",
-   "klassen": [
-    19555,
-    18888,
-    19529,
-    19531
    ]
   }
  ],

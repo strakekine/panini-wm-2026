@@ -43,8 +43,8 @@ gewünscht, darum hell und nicht dunkel wie die anderen Apps. Zeigt ohne Suchen:
 Tabelle, eigene Ergebnisse, alle Spiele der Klasse, frühere Phasen aufklappbar. Einzeldatei,
 iPhone-Regeln der Pizza-App.
 
-**Mannschaften** (vom Nutzer, 18.10.2026): Reiter in dieser Reihenfolge **U13 1, U13 2, U15,
-U11 1, U11 2, U9 1, U9 2, Seniors** — U13 zuerst, das ist die der Kinder. Beschriftung arabisch
+**Mannschaften** (vom Nutzer, 18.10.2026): Reiter in dieser Reihenfolge **Seniors, U13 1, U13 2,
+U15, U11 1, U11 2, U9 1, U9 2**. Beim ersten Öffnen ist trotzdem U13 1 gewählt (die der Kinder). Beschriftung arabisch
 („U13 1“, nicht „Mannschaft I“). Reihenfolge und Auswahl stehen in `AGES` in
 `tools/fussball.mjs` (ageCategoryId: U13 4, U15 11, U11 7, U9 5, Seniors 1). Bewusst nicht dabei:
 Réserves (eigene Kategorie 9999), U7 (zwei Bambini-Teams gemeldet, aber noch kein Spiel — bei
@@ -63,7 +63,8 @@ Daten, `.github/workflows/fussball.yml` lässt es Sa/So 9–19 Uhr alle 15 min (
 stündlich) und Mo–Fr einmal um 20 Uhr laufen (vom Nutzer so gewünscht; Cron in UTC, im Sommer eine
 Stunde später). Ein „Neu laden“, das die Action startet, ginge nur mit einem GitHub-Schlüssel in der
 öffentlichen Datei — abgelehnt; live ginge nur über einen eigenen Vermittler (Cloudflare Worker),
-dem Nutzer als zu viel Aufwand vorgeschlagen. Der Knopf liest nur die gespeicherte Datei neu.
+dem Nutzer als zu viel Aufwand vorgeschlagen. Einen „Neu laden“-Knopf gibt es darum nicht mehr
+(hätte nur die Datei neu gelesen; das passiert beim Öffnen und bei `visibilitychange` ohnehin).
 Unten in der App steht „Gemacht von Laurent R.“ mit dem Vereinslogo (vom Nutzer so gewünscht,
 kein Fußball-Emoji).
 committet `data/fussball.json` nur bei inhaltlicher Änderung. Die App liest von

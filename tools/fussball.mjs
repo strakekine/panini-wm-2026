@@ -13,11 +13,11 @@ export const CLUB = 1003703;          // Wormeldange FC Koeppchen
 // der FLF. Seniors ist nur die erste Mannschaft; die Réserves sind eine eigene Kategorie
 // („Seniors (R)“, 9999) und bewusst nicht dabei. U7 hat noch keine Spiele (Stand 18.10.2026).
 export const AGES = [
+  { id: 1,  kat: "Seniors", n: "Seniors" },
   { id: 4,  kat: "U13", n: "U13 Minimes" },
   { id: 11, kat: "U15", n: "U15 Scolaires" },
   { id: 7,  kat: "U11", n: "U11 Poussins" },
   { id: 5,  kat: "U9",  n: "U9 Pupilles" },
-  { id: 1,  kat: "Seniors", n: "Seniors" },
 ];
 const OUT = new URL("../data/fussball.json", import.meta.url);
 

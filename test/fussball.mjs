@@ -30,7 +30,7 @@ const DIV6 = { id: 19233, name: "U13 Minimes Cl6 S5 Phase 1", showResult: true, 
 const CUP = { id: 19615, name: "Coupe U13 Minimes - 1/32 de Finale", showResult: true, showRanking: false };
 let mid = 1;
 function roh(div, typ, d, h, a, hs, as, extra = {}) {
-  return { ak: extra.ak ?? 0, match: { id: mid++, gameday: extra.tag ?? 1, matchDate: d, isPlayed: hs != null, isForfait: false,
+  return { ak: extra.ak ?? 1, match: { id: mid++, gameday: extra.tag ?? 1, matchDate: d, isPlayed: hs != null, isForfait: false,
                     homeScore: hs, awayScore: as, finalHomeScore: extra.fh ?? (hs ?? null), finalAwayScore: extra.fa ?? (as ?? null),
                     finalScoreComment: null },
            division: div, matchType: { id: typ }, homeTeam: h, awayTeam: a, sportField: { name: "Am Ga" } };
@@ -41,10 +41,10 @@ const s3 = roh(DIV4, "CC", "2026-09-19T15:00:00+02:00", G(3), G(4), 5, 2, { tag:
 const s4 = roh(DIV6, "CC", "2026-09-26T14:00:00+02:00", G(5), K2, 9, 5, { tag: 2 });
 const s5 = roh(CUP, "CUP", "2026-10-24T14:00:00+02:00", KP, G(6), null, null);
 // Korrigiertes Endergebnis (z. B. Forfait am grünen Tisch) gilt vor dem gespielten.
-// U15-Pokal: eigene Altersklasse (ak 1), darf bei der U13 nicht auftauchen.
+// U15-Pokal: eigene Altersklasse (ak 2), darf bei der U13 nicht auftauchen.
 const P15 = team(45400, "FC Koeppchen Wormeldange", CLUB);
 const CUP15 = { id: 19599, name: "Coupe U15 Scolaires - 1/32 de Finale", showResult: true, showRanking: false };
-const s8 = roh(CUP15, "CUP", "2026-10-25T10:00:00+02:00", P15, G(9), null, null, { ak: 1 });
+const s8 = roh(CUP15, "CUP", "2026-10-25T10:00:00+02:00", P15, G(9), null, null, { ak: 2 });
 const s6 = roh(DIV6, "CC", "2026-10-03T16:00:00+02:00", K2, G(7), 3, 5, { tag: 3, fh: 0, fa: 3 });
 
 const rank = (pl, t, p) => ({ ranking: { rank: pl, teamId: t.id, totalPlays: 5, totalWins: 0, totalDraws: 0, totalLosses: 0,

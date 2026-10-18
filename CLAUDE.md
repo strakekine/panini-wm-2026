@@ -76,16 +76,25 @@ den Text weg (am iPhone gemeldet), WhatsApp nicht. Ohne Teilen-Leiste in die Zwi
 **Fassung:** `FASSUNG` steht ganz unten — bei jeder Änderung an `fussball.html` hochzählen; am
 iPhone läuft nach einem Push oft noch die alte Datei (Zwischenspeicher), erst Fassung prüfen lassen.
 
-**Live-Ticker (offen, Stand 18.10.2026):** Vom Nutzer gewünscht für Seniors 1. Ob die FLF den Stand
-während des Spiels einträgt, wird am 18.10. getestet (Spiel 1002091 gegen Beggen). Zweite Quelle
-**FuPa** (`www.fupa.net`, `api.fupa.net` in der Umgebung freigegeben; `*.fupa.net` griff nicht):
-Verein https://www.fupa.net/club/fc-koeppchen, dort nur Seniors (m1, mr1, mr2) und Damen, keine
-Jugend. `GET https://api.fupa.net/v1/matches/<slug>` ohne Anmeldung, liefert `homeGoal`,
-`awayGoal`, `section` (PRE/POST/…), `flags` ["ticker"], `tickerType` "live", `tickerAuthor`.
-Keine CORS-Freigabe → nur über die Action. Spiel-Slugs stehen im `window.REDUX_DATA` der Seite
-`/team/fc-koeppchen-m1-2026-27/matches`. FuPa-Ticker füllt jemand am Platz — leer, wenn keiner
-tickert. Noch nichts gebaut; Vorschlag: Action alle 5 min nur während Seniors-1-Spielen,
-`data/live.json`, LIVE-Kasten in der App.
+**Live-Ticker Seniors 1 (gebaut 18.10.2026, vom Nutzer gewünscht).** Test am 18.10. gegen Beggen:
+**die FLF trägt während des Spiels nichts ein** (alle Felder leer), **FuPa liefert live** Stand,
+Minute, Halbzeit und Torschützen, sobald jemand am Platz tickert (bei Koeppchen: Paul Krier).
+`tools/fussball-live.mjs` + `.github/workflows/fussball-live.yml` (alle 5 min): sofort fertig,
+wenn kein Spiel des Reiters „Seniors 1“ im Fenster 15 min vor bis 150 min nach Anstoß liegt
+(aus `data/fussball.json`). Sonst FuPa-Teamslug aus https://www.fupa.net/club/fc-koeppchen
+(`fc-koeppchen-m1-<2026-27>`), Spiel per gleichem Anstoß aus `window.REDUX_DATA` von
+`/team/<slug>/matches` (Slug wird in `live.json` gemerkt), dann
+`GET https://api.fupa.net/v1/matches/<slug>` (ohne Anmeldung, keine CORS-Freigabe): `homeGoal`,
+`awayGoal`, `section` PRE/LIVE/POST, `live.{minute, period started|halftime|secondHalf, running,
+lastTimestamp}`, `highlights[type=goal]` mit `primaryRole` und `team.teamSlug`. Geschrieben wird
+`data/live.json` **nur bei inhaltlicher Änderung** (`gleich()` ignoriert `minute`/`minuteAt`) —
+die App zählt die Minute selbst weiter (`liveZeit`, gedeckelt „45+“/„90+“), sonst gäbe es einen
+Commit je 5 min. App: LIVE-Kasten oben im Reiter (`liveAnzeige`), nur bei LIVE/POST, weg sobald
+die FLF ein Ergebnis hat oder 4 h nach Anstoß; holt `live.json` jede Minute, solange ein Spiel
+im Fenster ist, und baut dann nur die Minute neu (`#liveZeit`), damit Aufgeklapptes offen bleibt.
+Grenzen, dem Nutzer gesagt: leer ohne Tickerer, GitHub startet geplante Läufe oft verspätet
+(real 5–20 min Verzögerung). FuPa (`www.fupa.net`, `api.fupa.net`) ist in der Umgebung
+freigegeben; `*.fupa.net` griff nicht. FuPa führt nur Seniors (m1, mr1, mr2) und Damen.
 
 Schnittstelle, ausprobiert (Introspektion ist aus, Felder über Fehlermeldungen gefunden):
 - `MatchCriteria`: `clubId, seasonId, matchTypeId (ALL|CC|CUP|FM|PLO), ageCategoryId, divisionId,

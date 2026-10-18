@@ -8,13 +8,14 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { aufbereiten, spiel, reiter, ics, eigeneSpiele, CLUB } from "../tools/fussball.mjs";
+import { liveAus, gleich as liveGleich, spielJetzt } from "../tools/fussball-live.mjs";
 
 const hier = path.dirname(fileURLToPath(import.meta.url));
 const src = fs.readFileSync(path.join(hier, "..", "fussball.html"), "utf8");
 const i = src.indexOf("==== Logik"), j = src.indexOf("==== Oberfläche");
 if (i < 0 || j < 0) throw new Error("Abschnittsmarken Logik/Oberfläche nicht gefunden");
 const M = new Function(src.slice(src.lastIndexOf("//", i), src.lastIndexOf("//", j)) + `
-  return { REGELN, klasseVon, zonen, ausgang, aufteilen, anzeige, sicht, nachSpieltag, roem };`)();
+  return { liveAnzeige, liveZeit, imLiveFenster, REGELN, klasseVon, zonen, ausgang, aufteilen, anzeige, sicht, nachSpieltag, roem };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text) { n++; if (!bed) { fehler++; console.log("✗ " + text); } }
@@ -182,6 +183,49 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   const D9 = aufbereiten({ saison: { id: "20262027", name: "Saison 2026-2027" }, vereinsSpiele: [s1, s9],
     klassen: { 19189: { spiele: [s1, s9], tabelle: [] } } });
   ok(ics(D9, D9.teams.find(t => t.id === 45396)).includes("DTSTART;VALUE=DATE:20261107\r\nDTEND;VALUE=DATE:20261108"), "Uhrzeit offen → ganztägig");
+}
+
+/* --- Live (FuPa) — Felder wie am 18.10.2026 gegen Beggen live abgefragt --- */
+{
+  const SEN = team(44831, "FC Koeppchen Wormeldange", CLUB), BEG = team(46000, "Avenir Beggen", 500100);
+  const PH = { id: 18888, name: "Promotion d'Honneur", showResult: true, showRanking: true };
+  const sp = roh(PH, "CC", "2026-10-18T16:00:00+02:00", SEN, BEG, null, null, { ak: 0, tag: 8 });
+  const DS = aufbereiten({ saison: { id: "20262027", name: "Saison 2026-2027" }, vereinsSpiele: [sp],
+    klassen: { 18888: { spiele: [sp], tabelle: [] } } });
+  ok(DS.teams[0].reiter === "Seniors 1", "Seniors-Reiter für den Live-Test");
+  const fupa = {
+    slug: "fc-koeppchen-m1-fc-avenir-beggen-m1-261018", homeGoal: 1, awayGoal: 0, section: "LIVE",
+    homeTeam: { slug: "fc-koeppchen-m1-2026-27" }, tickerAuthor: { name: "Paul Krier" },
+    live: { minute: 71, period: "secondHalf", running: true, lastTimestamp: "2026-10-18T17:30:03+02:00" },
+    highlights: [{ minute: 12, additionalMinute: 0, type: "goal", subtype: "goal_headed",
+      team: { teamSlug: "fc-koeppchen-m1-2026-27" }, primaryRole: { firstName: "Pedro", lastName: "Neves Costa" } },
+      { minute: 30, type: "card", team: { teamSlug: "x" } }],
+  };
+  const flf = DS.klassen[18888].spiele[0];
+  const Lv = liveAus(fupa, flf);
+  gleich([Lv.hs, Lv.as, Lv.minute, Lv.ticker], [1, 0, 71, "Paul Krier"], "FuPa → Stand, Minute, Tickerer");
+  gleich(Lv.tore, [{ min: 12, plus: 0, heim: true, name: "Pedro Neves Costa", art: "goal_headed" }], "nur Tore, Heim erkannt");
+  ok(liveGleich(Lv, { ...Lv, minute: 75, minuteAt: "2026-10-18T17:35:00+02:00" }), "nur Minute anders → kein Commit");
+  ok(!liveGleich(Lv, { ...Lv, hs: 2 }), "Tor → Commit");
+
+  const t0 = Date.parse("2026-10-18T17:30:03+02:00");
+  ok(spielJetzt(DS, Date.parse("2026-10-18T15:50:00+02:00")) && !spielJetzt(DS, Date.parse("2026-10-18T15:40:00+02:00")), "Zeitfenster ab 15 min vor Anstoß");
+  ok(!spielJetzt(DS, Date.parse("2026-10-18T18:35:00+02:00")), "… bis 150 min danach");
+  const vS = M.sicht(DS, 44831, t0);
+  const a = M.liveAnzeige(Lv, vS, t0 + 7 * 60e3);
+  ok(a && a.laeuft && a.zeit === "78'", "LIVE-Kasten, Minute zählt weiter (71 + 7)");
+  ok(M.liveZeit(Lv, t0 + 40 * 60e3) === "90+", "nach 90 nur noch 90+");
+  ok(M.liveZeit({ ...Lv, minute: 44, period: "started" }, t0 + 5 * 60e3) === "45+", "1. Halbzeit endet bei 45+");
+  ok(M.liveZeit({ ...Lv, period: "halftime", running: false }, t0) === "Halbzeit", "Halbzeit");
+  ok(M.liveAnzeige({ ...Lv, section: "POST" }, vS, t0).zeit === "Abpfiff", "nach Abpfiff: Endstand laut FuPa");
+  ok(M.liveAnzeige({ ...Lv, section: "PRE" }, vS, t0) === null, "vor Anpfiff kein Kasten");
+  ok(M.liveAnzeige(Lv, M.sicht(D, 45396, t0), t0) === null, "kein Kasten bei U13 1");
+  ok(M.liveAnzeige(Lv, vS, Date.parse("2026-10-18T20:30:00+02:00")) === null, "spätestens 4 h nach Anstoß weg");
+  const spFlf = roh(PH, "CC", "2026-10-18T16:00:00+02:00", SEN, BEG, 2, 1, { ak: 0, tag: 8 });
+  const DF = aufbereiten({ saison: { id: "20262027", name: "Saison 2026-2027" }, vereinsSpiele: [spFlf],
+    klassen: { 18888: { spiele: [spFlf], tabelle: [] } } });
+  ok(M.liveAnzeige({ ...Lv, flfId: spFlf.match.id }, M.sicht(DF, 44831, t0), t0) === null, "FLF hat Ergebnis → Kasten weg");
+  ok(M.imLiveFenster(vS, t0) && !M.imLiveFenster(vS, Date.parse("2026-10-19T12:00:00+02:00")), "Abfrage jede Minute nur im Fenster");
 }
 
 console.log(fehler ? `${fehler} von ${n} Prüfungen fehlgeschlagen` : `alle ${n} Prüfungen grün`);

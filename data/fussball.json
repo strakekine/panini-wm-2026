@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-18T16:10:15.799Z",
+ "stand": "2026-10-18T17:33:14.514Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -214,6 +214,18 @@
    "tabelle": [
     {
      "pl": 1,
+     "id": 45070,
+     "n": "FC Mamer 32",
+     "sp": 9,
+     "s": 5,
+     "u": 4,
+     "nl": 0,
+     "t": 15,
+     "g": 8,
+     "pkt": 19
+    },
+    {
+     "pl": 2,
      "id": 44892,
      "n": "FC Lorentzweiler",
      "sp": 8,
@@ -225,7 +237,7 @@
      "pkt": 18
     },
     {
-     "pl": 2,
+     "pl": 3,
      "id": 45113,
      "n": "CS Fola Esch-Alzette",
      "sp": 8,
@@ -235,18 +247,6 @@
      "t": 15,
      "g": 5,
      "pkt": 17
-    },
-    {
-     "pl": 3,
-     "id": 45070,
-     "n": "FC Mamer 32",
-     "sp": 8,
-     "s": 4,
-     "u": 4,
-     "nl": 0,
-     "t": 13,
-     "g": 7,
-     "pkt": 16
     },
     {
      "pl": 4,
@@ -336,12 +336,12 @@
      "pl": 11,
      "id": 45208,
      "n": "FC Luxembourg City",
-     "sp": 8,
+     "sp": 9,
      "s": 2,
      "u": 3,
-     "nl": 3,
-     "t": 12,
-     "g": 14,
+     "nl": 4,
+     "t": 13,
+     "g": 16,
      "pkt": 9
     },
     {
@@ -1588,9 +1588,9 @@
       "id": 44914,
       "n": "Avenir Beggen"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 2,
+     "as": 1,
+     "gespielt": true,
      "forfait": false,
      "ort": "Am Ga (Wormeldange, synth.)"
     },
@@ -1624,9 +1624,9 @@
       "id": 45113,
       "n": "CS Fola Esch-Alzette"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 2,
+     "as": 2,
+     "gespielt": true,
      "forfait": false,
      "ort": "Stade Jos Philippart (Rodange)"
     },
@@ -1660,9 +1660,9 @@
       "id": 45002,
       "n": "SC Bettembourg"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 0,
+     "as": 3,
+     "gespielt": true,
      "forfait": false,
      "ort": "Stade Schintgespesch (Mersch)"
     },

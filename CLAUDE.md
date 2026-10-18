@@ -80,10 +80,13 @@ iPhone läuft nach einem Push oft noch die alte Datei (Zwischenspeicher), erst F
 **die FLF trägt während des Spiels nichts ein** (alle Felder leer), **FuPa liefert live** Stand,
 Minute, Halbzeit und Torschützen, sobald jemand am Platz tickert (bei Koeppchen: Paul Krier).
 `tools/fussball-live.mjs --wache` + `.github/workflows/fussball-live.yml`: **startet nur 4× am
-Tag** (11:23, 14:23, 17:23, 19:23 Winterzeit; der letzte für Abendspiele bis ~22:40). Liegt in den nächsten 200 min ein Anstoß des Reiters
+Tag** (11:23, 14:23, 17:23, 19:23 Winterzeit; der letzte für Abendspiele bis ~22:40). Liegt in den nächsten 170 min ein Anstoß des Reiters
 „Seniors 1“ (aus `data/fussball.json`), bleibt der Lauf an, wartet bis 15 min vorher, fragt dann
-alle 2 min und committet selbst, bis 150 min nach Anstoß (oder Abpfiff + 2 Abfragen). 200 + 150
-min < 6 h Laufzeitgrenze. Statt 288 Läufen alle 5 min — vom Nutzer so gewollt; ein Zeitplan, der
+alle 2 min und committet selbst, bis 180 min nach Anstoß (oder Abpfiff + 2 Abfragen). 170 + 180
+min < 6 h Laufzeitgrenze. 180 statt 150, weil Pokal mit Verlängerung und Elfmeterschießen 155–165
+min ab Anpfiff dauert (vom Nutzer gefragt); ein Start steigt auch in ein laufendes Spiel ein.
+`liveZeit` kennt Verlängerung/Elfmeter nur über Wortteile im FuPa-`period` (gesehen bisher nur
+started/halftime/secondHalf) — beim ersten echten Pokalspiel mit Verlängerung nachsehen. Statt 288 Läufen alle 5 min — vom Nutzer so gewollt; ein Zeitplan, der
 sich selbst umstellt, geht nicht (GITHUB_TOKEN darf keine Workflow-Dateien ändern). Anstöße der
 Seniors 2025–27: 14:00 bis 20:00, meist So 16:00; ein Anstoß vor 11:30 oder nach ~22:40 fiele
 durch. Ohne `--wache` fragt das Skript einmal ab (für Hand-Tests). **Push in jedem Takt**

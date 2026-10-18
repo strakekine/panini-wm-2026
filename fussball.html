@@ -229,7 +229,7 @@ function sicht(D, tid, now) {
 // Kasten nur, wenn das Live-Spiel zu diesem Reiter gehört, FuPa es als laufend oder beendet
 // führt und die FLF noch kein Ergebnis hat — danach steht es normal bei den Ergebnissen.
 // Höchstens 4 h nach Anstoß, falls die Action einmal hängen bleibt.
-const LIVE_FENSTER = { vor: 15 * 60e3, nach: 150 * 60e3 };
+const LIVE_FENSTER = { vor: 15 * 60e3, nach: 180 * 60e3 };   // wie tools/fussball-live.mjs
 function liveAnzeige(L, v, now) {
   if (!L || !v) return null;
   const sp = [...v.kommend, ...v.gespielt].find(s => s.id === L.flfId);
@@ -239,18 +239,22 @@ function liveAnzeige(L, v, now) {
   return { ...L, zeit: liveZeit(L, now), laeuft: L.section === "LIVE" };
 }
 
-// Minute aus dem letzten Abruf weitergezählt; über 45/90 hinaus „45+“/„90+“ (Nachspielzeit
+// Minute aus dem letzten Abruf weitergezählt; über 45/90/105/120 hinaus „45+“ usw. (Nachspielzeit
 // kennt nur der Tickerer, und das Weiterzählen soll nicht bei 97' stehen, wenn die Action hängt).
+// Gesehen hat FuPa bisher „started“, „halftime“, „secondHalf“; für Verlängerung und
+// Elfmeterschießen kennen wir die Namen noch nicht — darum nach Wortteilen statt genau.
 function liveZeit(L, now) {
   if (L.section === "POST") return "Abpfiff";
-  if (L.period === "halftime") return "Halbzeit";
+  const p = String(L.period || "").toLowerCase();
+  if (/penal|shoot/.test(p)) return "Elfmeterschießen";
+  if (p.includes("halftime") || p.includes("break") || p.includes("pause")) return p === "halftime" ? "Halbzeit" : "Pause";
   if (L.minute == null) return "läuft";
   let m = L.minute;
   if (L.running && L.minuteAt) m += Math.max(0, Math.floor((now - Date.parse(L.minuteAt)) / 60e3));
-  const erste = L.period === "started" || L.period === "firstHalf";
-  if (erste && m > 45) return "45+";
-  if (m > 90) return "90+";
-  return m + "'";
+  const verl = /overtime|extra/.test(p) || L.minute > 90;
+  const deckel = p === "started" || p === "firsthalf" ? 45 : !verl ? 90 : L.minute <= 105 && !/second/.test(p) ? 105 : 120;
+  const txt = m > deckel ? deckel + "+" : m + "'";
+  return verl ? "Verlängerung " + txt : txt;
 }
 
 // Liegt bei diesem Reiter gerade ein Spiel im Live-Fenster? Dann fragt die App jede Minute nach.
@@ -276,7 +280,7 @@ function nachSpieltag(spiele) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "18.10.2026 c";
+const FASSUNG = "18.10.2026 d";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action

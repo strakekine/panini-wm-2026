@@ -210,12 +210,13 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
 
   const t0 = Date.parse("2026-10-18T17:30:03+02:00");
   ok(spielJetzt(DS, Date.parse("2026-10-18T15:50:00+02:00")) && !spielJetzt(DS, Date.parse("2026-10-18T15:40:00+02:00")), "Zeitfenster ab 15 min vor Anstoß");
-  ok(!spielJetzt(DS, Date.parse("2026-10-18T18:35:00+02:00")), "… bis 150 min danach");
+  ok(!spielJetzt(DS, Date.parse("2026-10-18T19:05:00+02:00")), "… bis 180 min danach");
   // --wache: Starts um 11:23/14:23/17:23 — 16:00-Anstoß gehört dem Lauf um 14:23, nicht 11:23.
   ok(!naechstesSpiel(DS, Date.parse("2026-10-18T11:23:00+02:00")), "11:23-Lauf wartet nicht auf 16:00");
   ok(naechstesSpiel(DS, Date.parse("2026-10-18T14:23:00+02:00")), "14:23-Lauf übernimmt 16:00");
   ok(naechstesSpiel(DS, Date.parse("2026-10-18T16:40:00+02:00")), "verspäteter Start mitten im Spiel steigt noch ein");
-  ok(!naechstesSpiel(DS, Date.parse("2026-10-18T18:31:00+02:00")), "nach dem Fenster nichts mehr");
+  ok(naechstesSpiel(DS, Date.parse("2026-10-18T18:45:00+02:00")), "180 min: Verlängerung + Elfmeter noch drin");
+  ok(!naechstesSpiel(DS, Date.parse("2026-10-18T19:01:00+02:00")), "nach dem Fenster nichts mehr");
   const fs = [{ slug: "a", kickoff: "2026-10-18T16:00:00+02:00" }, { slug: "b", kickoff: "2026-10-25T16:00:00+02:00" }];
   ok(passendesSpiel(fs, "2026-10-18T16:00:00+02:00").slug === "a", "FuPa-Spiel bei gleicher Anstoßzeit");
   ok(passendesSpiel(fs, "2026-10-18T16:30:00+02:00").slug === "a", "Verlegung um 30 min wird noch gefunden");
@@ -226,6 +227,9 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(M.liveZeit(Lv, t0 + 40 * 60e3) === "90+", "nach 90 nur noch 90+");
   ok(M.liveZeit({ ...Lv, minute: 44, period: "started" }, t0 + 5 * 60e3) === "45+", "1. Halbzeit endet bei 45+");
   ok(M.liveZeit({ ...Lv, period: "halftime", running: false }, t0) === "Halbzeit", "Halbzeit");
+  ok(M.liveZeit({ ...Lv, minute: 98, period: "firstHalfOvertime" }, t0) === "Verlängerung 98'", "Verlängerung");
+  ok(M.liveZeit({ ...Lv, minute: 118, period: "secondHalfOvertime" }, t0 + 9 * 60e3) === "Verlängerung 120+", "Verlängerung gedeckelt bei 120");
+  ok(M.liveZeit({ ...Lv, period: "penalty", running: false }, t0) === "Elfmeterschießen", "Elfmeterschießen");
   ok(M.liveAnzeige({ ...Lv, section: "POST" }, vS, t0).zeit === "Abpfiff", "nach Abpfiff: Endstand laut FuPa");
   ok(M.liveAnzeige({ ...Lv, section: "PRE" }, vS, t0) === null, "vor Anpfiff kein Kasten");
   ok(M.liveAnzeige(Lv, M.sicht(D, 45396, t0), t0) === null, "kein Kasten bei U13 1");

@@ -6,7 +6,7 @@
 //   node tools/fussball-live.mjs           einmal abfragen (falls gerade ein Spiel läuft)
 //   node tools/fussball-live.mjs --wache   so läuft es in der Action (fussball-live.yml, 3× am
 //       Tag): liegt in den nächsten Stunden ein Anstoß, bis 15 min davor warten, dann alle 2 min
-//       abfragen und jede Änderung sofort committen, bis 150 min nach Anstoß. Sonst sofort fertig.
+//       abfragen und jede Änderung sofort committen, bis 180 min nach Anstoß. Sonst sofort fertig.
 //       Ein GitHub-Lauf darf höchstens 6 h dauern — darum nur Anstöße bis WACHE_MAX voraus.
 // Lokal in der Cloud-Umgebung: NODE_USE_ENV_PROXY=1 davor.
 
@@ -19,9 +19,12 @@ const OUT = new URL("../data/live.json", import.meta.url);
 const CLUB_SEITE = "https://www.fupa.net/club/fc-koeppchen";
 const API = "https://api.fupa.net/v1/matches/";
 export const REITER = "Seniors 1";           // nur dort tickert jemand (FuPa führt keine Jugend)
-export const VOR_MIN = 15, NACH_MIN = 150;   // Zeitfenster um den Anstoß
+// Zeitfenster um den Anstoß. 180 statt 150 min: Pokal mit Verlängerung und Elfmeterschießen
+// dauert 155–165 min ab Anpfiff (vom Nutzer gefragt). Normale Spiele enden früher, weil der Lauf
+// nach zweimal „POST“ aufhört.
+export const VOR_MIN = 15, NACH_MIN = 180;
 export const TAKT_S = 120;                   // Abfrage-Abstand während des Spiels
-export const WACHE_MAX_MIN = 200;            // so weit voraus darf ein Anstoß liegen (200 + 150 < 6 h)
+export const WACHE_MAX_MIN = 170;            // so weit voraus darf ein Anstoß liegen (170 + 180 < 6 h)
 
 // Das Spiel der Mannschaft, das gerade im Zeitfenster liegt, oder null.
 export function spielJetzt(D, now) {

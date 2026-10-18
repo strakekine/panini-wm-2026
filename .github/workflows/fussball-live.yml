@@ -1,9 +1,10 @@
 # Live-Stand der Seniors 1 von FuPa nach data/live.json (gelesen von fussball.html).
-# Startet nur 4× am Tag. Liegt in den nächsten gut 3 Stunden ein Anstoß der Seniors 1, bleibt
+# Startet nur 4× am Tag. Liegt in den nächsten knapp 3 Stunden ein Anstoß der Seniors 1, bleibt
 # der Lauf an: wartet bis 15 min vor Anstoß, fragt dann alle 2 min FuPa und committet jede
 # Änderung selbst (tools/fussball-live.mjs --wache). Sonst ist er nach Sekunden fertig.
 # Seniors stoßen 2025-27 zwischen 14 und 20 Uhr an; jeder Start deckt Anstöße bis 200 min
-# voraus ab (+150 min Spiel < 6 h, das Limit eines GitHub-Laufs). Der vierte Start (19:23) ist
+# voraus ab, inzwischen 170 (+180 min Spiel samt Verlängerung/Elfmeter < 6 h, das Limit eines
+# GitHub-Laufs). Ein Start steigt auch in ein laufendes Spiel ein, Lücken kosten nur Minuten. Der vierte Start (19:23) ist
 # für Abendspiele bis etwa 22:40 (vom Nutzer gefragt: „und wenn mal um 21 Uhr was startet?“).
 name: Fussball-Live
 

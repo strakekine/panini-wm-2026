@@ -246,8 +246,10 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(M.mitWorker(Lv, Wk).hs === 2 && M.mitWorker(Lv, Wk).h === Lv.h, "Worker-Stand gilt, Namen bleiben aus live.json");
   ok(M.mitWorker(Lv, { ...Wk, slug: "anderes-spiel" }).hs === 1, "Worker zu anderem Spiel wird ignoriert");
   ok(M.mitWorker(Lv, null) === Lv, "ohne Worker gilt GitHub");
-  gleich(["penalty_foul", "goal_headed", "goal_shoot", "own_goal", "free_kick", ""].map(M.torArt),
-    ["Elfmeter", "Kopfball", "", "Eigentor", "Freistoß", ""], "Torart: Elfmeter, Kopfball, Eigentor, Freistoß");
+  gleich(["penalty_foul", "goal_headed", "goal_shoot", "goal_own_goal", "goal_free_kick", "penalty_shootout",
+          "goal_scrounger", "goal_distance_shoot", ""].map(M.torArt),
+    ["Elfmeter", "Kopfball", "", "Eigentor", "Freistoß", "Elfmeterschießen", "Abstauber", "Fernschuss", ""],
+    "Torart mit den echten FuPa-Namen aus 11 Spielen");
   gleich(["card_red", "card_yellow_red", "card_yellow"].map(a => M.kartenArt(a).text), ["Rot", "Gelb-Rot", "Gelb"], "Kartenarten");
   gleich(Lv.karten.map(k => [k.min, k.heim]), [[30, false]], "Karte aus FuPa übernommen, Gast erkannt");
   gleich(M.ereignisListe(Lv).map(e => e.typ + e.min), ["tor12", "karte30"], "Tore und Karten nach Minute");

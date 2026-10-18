@@ -114,9 +114,11 @@ Lauf). Worker weg → GitHub-Stand. Karten im Kasten (`kartenArt`, `ereignisList
 `highlights` als `type: "card"` (gesehen: `card_red` gegen Mersch 11.10.); ob Gelb dort kommt, ist
 offen. Seit Fassung h reicht der Worker `karten` mit durch — **neu einfügen nötig** (der alte gibt
 nur `tore`; `mitWorker` übernimmt nur Felder, die er schickt, live.json füllt dann die Karten).
-Torart im Kasten (`torArt`, vom Nutzer gewünscht): Elfmeter, Eigentor,
-Freistoß, Kopfball aus FuPas `subtype` nach Wortteilen (gesehen: goal_headed, goal_shoot,
-penalty_foul; Eigentor/Freistoß-Namen geraten). `kuerzen()` im Worker und `liveAus()` im Lauf sind zwei Kopien
+Torart im Kasten (`torArt`, vom Nutzer gewünscht) aus FuPas `subtype`; echte Namen am 18.10.
+aus 11 Koeppchen-Spielen gesammelt: goal_shoot 34× (kein Zusatz), goal_headed 6× Kopfball,
+penalty_foul 5× Elfmeter, goal_scrounger 3× Abstauber, goal_free_kick Freistoß, goal_own_goal
+Eigentor, penalty_shootout Elfmeterschießen, goal_distance_shoot Fernschuss. Karten: nur
+card_red 1× — Gelb führt FuPa in `highlights` offenbar nicht. `kuerzen()` im Worker und `liveAus()` im Lauf sind zwei Kopien
 derselben Umrechnung, der Test prüft, dass sie gleich rechnen. `WORKER_URL` leer = nur GitHub. Eingerichtet vom Nutzer am 18.10.2026:
 `https://koeppchen-live.rjtp6r9s9h.workers.dev/` (Cloudflare-Konto des Nutzers). Die Domain ist in der Umgebung freigegeben;
 am 18.10. geprüft: liefert 2:1 POST mit drei Toren, CORS `*`, fremder Slug → 400.

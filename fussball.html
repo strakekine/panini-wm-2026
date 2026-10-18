@@ -257,19 +257,24 @@ function liveZeit(L, now) {
   return verl ? "Verlängerung " + txt : txt;
 }
 
-// Art des Tors aus FuPas `subtype` (gesehen: goal_headed, goal_shoot, penalty_foul). Nach
-// Wortteilen, weil wir nicht alle Namen kennen; ein normaler Schuss bekommt keinen Zusatz.
+// Art des Tors aus FuPas `subtype`. Am 18.10.2026 in 11 Koeppchen-Spielen gesehen: goal_shoot
+// (34×, normaler Schuss, kein Zusatz), goal_headed, penalty_foul, goal_scrounger, goal_free_kick,
+// goal_own_goal, penalty_shootout, goal_distance_shoot. Nach Wortteilen, falls FuPa mehr kennt;
+// Elfmeterschießen vor Elfmeter prüfen (beide enthalten „penalty“).
 function torArt(art) {
   const a = String(art || "").toLowerCase();
   if (a.includes("own")) return "Eigentor";
+  if (a.includes("shootout")) return "Elfmeterschießen";
   if (a.includes("penalty")) return "Elfmeter";
   if (a.includes("free")) return "Freistoß";
   if (a.includes("head")) return "Kopfball";
+  if (a.includes("scrounger")) return "Abstauber";
+  if (a.includes("distance")) return "Fernschuss";
   return "";
 }
 
 // Karten aus FuPas `subtype` (gesehen: card_red). Gelb-Rot vor Rot prüfen, der Name enthält beides.
-// Ob FuPa Gelbe Karten überhaupt in `highlights` führt, ist offen (bisher nur Rot gesehen).
+// In 11 Spielen kam nur card_red vor — FuPa führt in `highlights` wohl nur Platzverweise.
 function kartenArt(art) {
   const a = String(art || "").toLowerCase();
   if (a.includes("yellow") && a.includes("red")) return { zeichen: "🟨🟥", text: "Gelb-Rot" };
@@ -319,7 +324,7 @@ function nachSpieltag(spiele) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "18.10.2026 h";
+const FASSUNG = "18.10.2026 i";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action

@@ -28,46 +28,63 @@ Sieben voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
   Lektionen kommen aus eingescannten PDFs, die Claude abtippt. Einzeldatei. Details unten.
 - **`pine/`** — TradingView Pine-Script-Indikatoren. Eigener Kontext, eigene Regeln:
   siehe **`pine/CLAUDE.md`**, bevor dort etwas geändert wird.
-- **`fussball.html`** — *geplant, noch nicht gebaut.* Ergebnisse, Tabelle und Spielplan der
-  U13 Minimes des FC Koeppchen Wormeldange, automatisch von der FLF. Auftrag unten.
+- **`fussball.html`** — „FC Koeppchen“: Tabelle, Ergebnisse und nächste Spiele der beiden
+  U13-Minimes-Mannschaften, alle 2 h automatisch von der FLF (GitHub Action). Details unten.
 
 Der Repo-Name passt damit nur noch zum ersten Punkt. Nicht wundern und nichts danach
 sortieren: was hier liegt, steht in dieser Liste.
 
-## Fußball (`fussball.html`) — Auftrag, noch nicht begonnen (Stand 18.10.2026)
+## Fußball (`fussball.html`) — Stand und Regeln
 
 Nutzer: Laurent; seine Kinder spielen bei den **U13 Minimes des FC Koeppchen Wormeldange**
-(Luxemburg). Der Verein hat **zwei U13-Mannschaften**, beide gehören in die App (Umschalter
-oben, Vorgabe je Gerät in localStorage). Heute müssen die Kinder auf
-https://extranet.flf.lu/match jedes Mal neu suchen. Die App soll ohne Suchen zeigen: aktuelle
-Klasse, Tabelle, vorherige Spiele mit Ergebnissen (auch die der Gegner untereinander), nächste
-Spiele. Einzeldatei, Deutsch, Du-Form, iPhone-Home-Bildschirm, iPhone-Regeln der Pizza-App.
+(Luxemburg). App-Name „FC Koeppchen“, Logo vom Nutzer (eingebettet als PNG, 180 px, 32 Farben).
+**Vereinsfarben**: weiss, schwarz, ein bisschen Grün (Türkis aus dem Logo) — vom Nutzer so
+gewünscht, darum hell und nicht dunkel wie die anderen Apps. Zeigt ohne Suchen: nächste Spiele,
+Tabelle, eigene Ergebnisse, alle Spiele der Klasse, frühere Phasen aufklappbar. Einzeldatei,
+iPhone-Regeln der Pizza-App.
 
-**Klasse wechselt während der Saison:** Phase 1 war „U13 Minimes Cl4 S2 Phase 1“ (5 Spiele,
-vorbei); die Mannschaft steigt auf, die neue Klasse wird ausgelost. Darum **nicht auf einen
-festen Klassennamen zielen**, sondern nach Verein/Mannschaft suchen und die aktuelle Klasse aus
-den Spielen ableiten; abgeschlossene Phasen bleiben als Rückblick. Ersatzplan, falls die Seite
-keine Vereinssuche hat: App erkennt das Ende der Klasse und fragt nach dem neuen Namen. Ob es
-für U13 Minimes eine offizielle Tabelle gibt, ist unbekannt — sonst aus Ergebnissen rechnen
-und das kennzeichnen.
+**Quelle:** Hinter https://extranet.flf.lu/match steckt `https://extranet.flf.lu/api/graphql`
+(Angular-App), antwortet **ohne Anmeldung**, schickt aber **keine CORS-Freigabe** — der Browser
+kann sie nicht direkt fragen. Darum: `tools/fussball.mjs` (Node, keine Abhängigkeiten) holt die
+Daten, `.github/workflows/fussball.yml` lässt es alle 2 h laufen (samstags 13–21 Uhr stündlich),
+committet `data/fussball.json` nur bei inhaltlicher Änderung. Die App liest von
+`raw.githubusercontent.com` (CORS `*`, 5 min Cache, wartet nicht auf GitHub Pages), Rückfall
+`data/fussball.json` relativ, letzter Stand in localStorage (`fussball_v1_data`) für offline.
+Achtung beim lokalen Arbeiten: Die Action committet auf `main` — vor dem Push `git pull --rebase`.
 
-**Geplante Architektur (abgesprochen):** GitHub Action mit Zeitplan (etwa alle 2 h, dazu
-`workflow_dispatch`) ruft die FLF-Seite ab und schreibt `data/fussball.json`, committet nur
-bei Änderung; die App liest nur diese Datei und zeigt „Stand: …“. Grund: Der Browser darf die
-FLF-Seite vermutlich nicht direkt abfragen (CORS). Erlaubt sie CORS doch, beide Wege mit
-Begründung vorlegen.
+Schnittstelle, ausprobiert (Introspektion ist aus, Felder über Fehlermeldungen gefunden):
+- `MatchCriteria`: `clubId, seasonId, matchTypeId (ALL|CC|CUP|FM|PLO), ageCategoryId, divisionId,
+  teamId, startDate, endDate`. **`matches` ohne `startDate`/`endDate` → INTERNAL_SERVER_ERROR.**
+  `rankings` braucht sie nicht.
+- Verein: `clubId` 1003703 („Wormeldange FC Koeppchen“), U13 Minimes = `ageCategoryId` 4.
+  Saison aus `defaultValues.currentSeasonId` — wechselt im Juli von selbst.
+- Teams: I = 45396, II = 45397, im Pokal tritt der Verein als 45398 ohne I/II an. Mannschaften ohne
+  Ligaspiel bekommen keinen Reiter, ihre Spiele erscheinen bei jedem Reiter (`aufteilen()`).
+- `finalHomeScore` vor `homeScore` (Endergebnis, z. B. nach Forfait). Uhrzeit 00:00 = noch nicht
+  festgelegt, wird nicht angezeigt.
+- Die Seite hat beim Ausprobieren einmal die Verbindung gekappt: Abfragen mit 1 s Pause, Wiederholung.
 
-**Netz:** extranet.flf.lu ist in der Cloud-Umgebung freigegeben (Network access → Allowed
-domains; vorher 403 am Proxy). Der Nutzer arbeitet daran auch von der Arbeit aus in der Cloud.
-Erster Schritt jeder Sitzung hierzu:
-`curl -sI https://extranet.flf.lu/match`. Klappt das nicht, auf die Freigabe hinweisen statt
-etwas zu erfinden.
+**Klasse wechselt während der Saison** (Phase 1 → 2): gesucht wird nach dem Verein, die Klassen
+ergeben sich aus den Spielen. Die zuletzt begonnene Ligaklasse ist die aktuelle, die anderen
+„früher“. Ist die aktuelle fertig gespielt und noch kein neues Ligaspiel da, steht oben der
+Abschluss (Platz, Auf-/Abstieg) und „neue Klasse noch nicht eingetragen“.
 
-**Vorgehen:** 1. Seite untersuchen (Formular, Requests, evtl. JSON-API dahinter, notfalls
-Playwright-Mitschnitt) und dem Nutzer berichten, **bevor** gebaut wird. 2. Abrufskript (Node,
-möglichst ohne Abhängigkeiten) + `.github/workflows/fussball.yml`. 3. `fussball.html` mit
-Koeppchen hervorgehoben, offline mit letztem Stand. 4. Test unter `test/`, dieser Abschnitt
-wird dann zu „Stand und Regeln“. Änderungen nach Absprache direkt auf `main`.
+**Auf-/Abstieg** (`REGELN`, Rundschreiben der FLF „Après la Phase 1 2026-2027“, vom Nutzer als
+Bild): Kl. I 5./6. runter; II und III 1. hoch, 5./6. runter; IV 1./2. hoch, 5./6. runter; V 1.
+jeder Serie und bester Zweiter hoch. Letzte Klasse (U13: VI) hängt laut FLF von den Anmeldungen
+ab — dort wird **nichts markiert**, statt etwas zu behaupten. Regeln gelten je Saison + Phase;
+für Phase 2 gibt es noch keine, ohne Regel keine Markierung. Neues Rundschreiben → neuer Eintrag.
+Stand 18.10.2026: Phase 1 beendet, Koeppchen I Zweiter in Kl. IV → Kl. III; Koeppchen II
+Fünfter in Kl. VI. Nächstes Spiel Pokal 1/32 am 24.10. gegen AS Hosingen.
+
+**Testen:** `node test/fussball.mjs` — Aufbereitung aus nachgebauten Rohdaten, Regeln, Reiter,
+Abschlusshinweis, 3-h-Grenze für Spiele ohne Ergebnis, Klassenwechsel. Schneidet `Logik`…
+`Oberfläche` aus der HTML. Läuft auch vor jedem Abruf in der Action. Gegenprobe gemacht.
+Abruf live: `NODE_USE_ENV_PROXY=1 node tools/fussball.mjs` (in der Cloud-Umgebung braucht Node
+den Proxy ausdrücklich).
+
+**Offen:** Scheduled Actions schaltet GitHub nach 60 Tagen ohne Aktivität im Repo ab — in der
+Winterpause möglich. Dann im Actions-Tab wieder einschalten. Am iPhone noch nicht ausprobiert.
 
 ## Teigplaner (`pizza.html`) — Stand und Regeln
 

@@ -1,0 +1,1228 @@
+{
+ "stand": "2026-10-18T07:35:54.555Z",
+ "saison": {
+  "id": "20262027",
+  "n": "Saison 2026-2027"
+ },
+ "verein": {
+  "id": 1003703,
+  "n": "FC Koeppchen Wormeldange"
+ },
+ "teams": [
+  {
+   "id": 45398,
+   "n": "FC Koeppchen Wormeldange",
+   "klassen": [
+    19615
+   ]
+  },
+  {
+   "id": 45396,
+   "n": "FC Koeppchen Wormeldange I",
+   "klassen": [
+    19189
+   ]
+  },
+  {
+   "id": 45397,
+   "n": "FC Koeppchen Wormeldange II",
+   "klassen": [
+    19233
+   ]
+  }
+ ],
+ "klassen": {
+  "19189": {
+   "id": 19189,
+   "n": "U13 Minimes Cl4 S2 Phase 1",
+   "typ": "CC",
+   "ergebnisse": true,
+   "tabelle": [
+    {
+     "pl": 1,
+     "id": 46353,
+     "n": "ENT Biwer/Berbourg/UMW I",
+     "sp": 5,
+     "s": 3,
+     "u": 2,
+     "nl": 0,
+     "t": 26,
+     "g": 7,
+     "pkt": 11
+    },
+    {
+     "pl": 2,
+     "id": 45396,
+     "n": "FC Koeppchen Wormeldange I",
+     "sp": 5,
+     "s": 3,
+     "u": 2,
+     "nl": 0,
+     "t": 27,
+     "g": 9,
+     "pkt": 11
+    },
+    {
+     "pl": 3,
+     "id": 45146,
+     "n": "US Sandweiler",
+     "sp": 5,
+     "s": 2,
+     "u": 2,
+     "nl": 1,
+     "t": 17,
+     "g": 12,
+     "pkt": 8
+    },
+    {
+     "pl": 4,
+     "id": 46244,
+     "n": "ENT Mensdorf/Canach/Munsbach I",
+     "sp": 5,
+     "s": 2,
+     "u": 0,
+     "nl": 3,
+     "t": 20,
+     "g": 16,
+     "pkt": 6
+    },
+    {
+     "pl": 5,
+     "id": 46201,
+     "n": "US Moutfort-Medingen",
+     "sp": 5,
+     "s": 2,
+     "u": 0,
+     "nl": 3,
+     "t": 17,
+     "g": 22,
+     "pkt": 6
+    },
+    {
+     "pl": 6,
+     "id": 46169,
+     "n": "Alisontia Steinsel II",
+     "sp": 5,
+     "s": 0,
+     "u": 0,
+     "nl": 5,
+     "t": 4,
+     "g": 45,
+     "pkt": 0
+    }
+   ],
+   "spiele": [
+    {
+     "id": 6509012,
+     "d": "2026-09-19T00:00:01+02:00",
+     "tag": 1,
+     "h": {
+      "id": 45146,
+      "n": "US Sandweiler"
+     },
+     "a": {
+      "id": 46169,
+      "n": "Alisontia Steinsel II"
+     },
+     "hs": 3,
+     "as": 0,
+     "gespielt": true,
+     "forfait": true,
+     "bem": "FF",
+     "ort": "Terrain 2 (Sandweiler, synth.)"
+    },
+    {
+     "id": 6509013,
+     "d": "2026-09-19T14:30:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 46353,
+      "n": "ENT Biwer/Berbourg/UMW I"
+     },
+     "a": {
+      "id": 45396,
+      "n": "FC Koeppchen Wormeldange I"
+     },
+     "hs": 2,
+     "as": 2,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Terrain 2 (Berbourg, synth.)"
+    },
+    {
+     "id": 6509011,
+     "d": "2026-09-19T15:00:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 46201,
+      "n": "US Moutfort-Medingen"
+     },
+     "a": {
+      "id": 46244,
+      "n": "ENT Mensdorf/Canach/Munsbach I"
+     },
+     "hs": 5,
+     "as": 2,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Terrain Am Brill (Moutfort, synth.)"
+    },
+    {
+     "id": 6509021,
+     "d": "2026-09-26T14:30:00+02:00",
+     "tag": 2,
+     "h": {
+      "id": 46201,
+      "n": "US Moutfort-Medingen"
+     },
+     "a": {
+      "id": 46353,
+      "n": "ENT Biwer/Berbourg/UMW I"
+     },
+     "hs": 1,
+     "as": 3,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Terrain Am Brill (Moutfort, synth.)"
+    },
+    {
+     "id": 6509023,
+     "d": "2026-09-26T15:30:00+02:00",
+     "tag": 2,
+     "h": {
+      "id": 46169,
+      "n": "Alisontia Steinsel II"
+     },
+     "a": {
+      "id": 46244,
+      "n": "ENT Mensdorf/Canach/Munsbach I"
+     },
+     "hs": 0,
+     "as": 10,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Stade Henri Bausch (Steinsel, synth.)"
+    },
+    {
+     "id": 6509022,
+     "d": "2026-09-26T15:30:00+02:00",
+     "tag": 2,
+     "h": {
+      "id": 45396,
+      "n": "FC Koeppchen Wormeldange I"
+     },
+     "a": {
+      "id": 45146,
+      "n": "US Sandweiler"
+     },
+     "hs": 4,
+     "as": 4,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Am Ga (Wormeldange, synth.)"
+    },
+    {
+     "id": 6509031,
+     "d": "2026-10-03T14:30:00+02:00",
+     "tag": 3,
+     "h": {
+      "id": 46169,
+      "n": "Alisontia Steinsel II"
+     },
+     "a": {
+      "id": 46201,
+      "n": "US Moutfort-Medingen"
+     },
+     "hs": 3,
+     "as": 9,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Stade Henri Bausch (Steinsel, synth.)"
+    },
+    {
+     "id": 6509033,
+     "d": "2026-10-03T14:30:00+02:00",
+     "tag": 3,
+     "h": {
+      "id": 45146,
+      "n": "US Sandweiler"
+     },
+     "a": {
+      "id": 46353,
+      "n": "ENT Biwer/Berbourg/UMW I"
+     },
+     "hs": 2,
+     "as": 2,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Terrain 2 (Sandweiler, synth.)"
+    },
+    {
+     "id": 6509032,
+     "d": "2026-10-03T16:30:00+02:00",
+     "tag": 3,
+     "h": {
+      "id": 46244,
+      "n": "ENT Mensdorf/Canach/Munsbach I"
+     },
+     "a": {
+      "id": 45396,
+      "n": "FC Koeppchen Wormeldange I"
+     },
+     "hs": 2,
+     "as": 5,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Terrain 2 (Mensdorf, synth.)"
+    },
+    {
+     "id": 6509042,
+     "d": "2026-10-10T14:30:00+02:00",
+     "tag": 4,
+     "h": {
+      "id": 46353,
+      "n": "ENT Biwer/Berbourg/UMW I"
+     },
+     "a": {
+      "id": 46244,
+      "n": "ENT Mensdorf/Canach/Munsbach I"
+     },
+     "hs": 3,
+     "as": 2,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Terrain 2 (Berbourg, synth.)"
+    },
+    {
+     "id": 6509043,
+     "d": "2026-10-10T14:30:00+02:00",
+     "tag": 4,
+     "h": {
+      "id": 45396,
+      "n": "FC Koeppchen Wormeldange I"
+     },
+     "a": {
+      "id": 46169,
+      "n": "Alisontia Steinsel II"
+     },
+     "hs": 7,
+     "as": 1,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Am Ga (Wormeldange, synth.)"
+    },
+    {
+     "id": 6509041,
+     "d": "2026-10-10T16:00:00+02:00",
+     "tag": 4,
+     "h": {
+      "id": 46201,
+      "n": "US Moutfort-Medingen"
+     },
+     "a": {
+      "id": 45146,
+      "n": "US Sandweiler"
+     },
+     "hs": 2,
+     "as": 5,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Terrain Am Brill (Moutfort, synth.)"
+    },
+    {
+     "id": 6509052,
+     "d": "2026-10-17T14:30:00+02:00",
+     "tag": 5,
+     "h": {
+      "id": 46169,
+      "n": "Alisontia Steinsel II"
+     },
+     "a": {
+      "id": 46353,
+      "n": "ENT Biwer/Berbourg/UMW I"
+     },
+     "hs": 0,
+     "as": 16,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Stade Henri Bausch (Steinsel, synth.)"
+    },
+    {
+     "id": 6509051,
+     "d": "2026-10-17T14:30:00+02:00",
+     "tag": 5,
+     "h": {
+      "id": 45396,
+      "n": "FC Koeppchen Wormeldange I"
+     },
+     "a": {
+      "id": 46201,
+      "n": "US Moutfort-Medingen"
+     },
+     "hs": 9,
+     "as": 0,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Am Ga (Wormeldange, synth.)"
+    },
+    {
+     "id": 6509053,
+     "d": "2026-10-17T17:30:00+02:00",
+     "tag": 5,
+     "h": {
+      "id": 46244,
+      "n": "ENT Mensdorf/Canach/Munsbach I"
+     },
+     "a": {
+      "id": 45146,
+      "n": "US Sandweiler"
+     },
+     "hs": 4,
+     "as": 3,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Terrain 2 (Mensdorf, synth.)"
+    }
+   ],
+   "start": "2026-09-19T14:30:00+02:00"
+  },
+  "19233": {
+   "id": 19233,
+   "n": "U13 Minimes Cl6 S5 Phase 1",
+   "typ": "CC",
+   "ergebnisse": true,
+   "tabelle": [
+    {
+     "pl": 1,
+     "id": 45896,
+     "n": "US Hostert II",
+     "sp": 4,
+     "s": 4,
+     "u": 0,
+     "nl": 0,
+     "t": 48,
+     "g": 4,
+     "pkt": 12
+    },
+    {
+     "pl": 2,
+     "id": 44737,
+     "n": "Jeunesse Junglinster III",
+     "sp": 4,
+     "s": 3,
+     "u": 0,
+     "nl": 1,
+     "t": 17,
+     "g": 12,
+     "pkt": 9
+    },
+    {
+     "pl": 3,
+     "id": 46193,
+     "n": "CS Grevenmacher II",
+     "sp": 4,
+     "s": 2,
+     "u": 0,
+     "nl": 2,
+     "t": 14,
+     "g": 17,
+     "pkt": 6
+    },
+    {
+     "pl": 4,
+     "id": 45929,
+     "n": "ENT Munsbach/Canach/Mensdorf II",
+     "sp": 4,
+     "s": 1,
+     "u": 0,
+     "nl": 3,
+     "t": 15,
+     "g": 43,
+     "pkt": 3
+    },
+    {
+     "pl": 5,
+     "id": 45397,
+     "n": "FC Koeppchen Wormeldange II",
+     "sp": 4,
+     "s": 0,
+     "u": 0,
+     "nl": 4,
+     "t": 14,
+     "g": 32,
+     "pkt": 0
+    }
+   ],
+   "spiele": [
+    {
+     "id": 6520011,
+     "d": "2026-09-19T00:00:01+02:00",
+     "tag": 1,
+     "h": {
+      "id": 45896,
+      "n": "US Hostert II"
+     },
+     "a": {
+      "id": 46193,
+      "n": "CS Grevenmacher II"
+     },
+     "hs": 3,
+     "as": 0,
+     "gespielt": true,
+     "forfait": true,
+     "bem": "FF",
+     "ort": "Terrain Carrière (Senningerberg, synth.)"
+    },
+    {
+     "id": 6520013,
+     "d": "2026-09-19T14:00:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 44737,
+      "n": "Jeunesse Junglinster III"
+     },
+     "a": {
+      "id": 45929,
+      "n": "ENT Munsbach/Canach/Mensdorf II"
+     },
+     "hs": 4,
+     "as": 2,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Terrain 2 (Junglinster, synth.)"
+    },
+    {
+     "id": 6520022,
+     "d": "2026-09-26T14:00:00+02:00",
+     "tag": 2,
+     "h": {
+      "id": 45929,
+      "n": "ENT Munsbach/Canach/Mensdorf II"
+     },
+     "a": {
+      "id": 45397,
+      "n": "FC Koeppchen Wormeldange II"
+     },
+     "hs": 9,
+     "as": 5,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Terrain Munsbach (synth.)"
+    },
+    {
+     "id": 6520021,
+     "d": "2026-09-26T17:30:00+02:00",
+     "tag": 2,
+     "h": {
+      "id": 45896,
+      "n": "US Hostert II"
+     },
+     "a": {
+      "id": 44737,
+      "n": "Jeunesse Junglinster III"
+     },
+     "hs": 6,
+     "as": 1,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Terrain Carrière (Senningerberg, synth.)"
+    },
+    {
+     "id": 6520032,
+     "d": "2026-10-03T15:30:00+02:00",
+     "tag": 3,
+     "h": {
+      "id": 46193,
+      "n": "CS Grevenmacher II"
+     },
+     "a": {
+      "id": 45929,
+      "n": "ENT Munsbach/Canach/Mensdorf II"
+     },
+     "hs": 5,
+     "as": 4,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Terrain 2 (Grevenmacher, synth.)"
+    },
+    {
+     "id": 6520033,
+     "d": "2026-10-03T16:00:00+02:00",
+     "tag": 3,
+     "h": {
+      "id": 45397,
+      "n": "FC Koeppchen Wormeldange II"
+     },
+     "a": {
+      "id": 44737,
+      "n": "Jeunesse Junglinster III"
+     },
+     "hs": 3,
+     "as": 5,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Am Ga (Wormeldange, synth.)"
+    },
+    {
+     "id": 6520041,
+     "d": "2026-10-10T11:00:00+02:00",
+     "tag": 4,
+     "h": {
+      "id": 45896,
+      "n": "US Hostert II"
+     },
+     "a": {
+      "id": 45397,
+      "n": "FC Koeppchen Wormeldange II"
+     },
+     "hs": 10,
+     "as": 3,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Terrain Carrière (Senningerberg, synth.)"
+    },
+    {
+     "id": 6520042,
+     "d": "2026-10-10T14:30:00+02:00",
+     "tag": 4,
+     "h": {
+      "id": 44737,
+      "n": "Jeunesse Junglinster III"
+     },
+     "a": {
+      "id": 46193,
+      "n": "CS Grevenmacher II"
+     },
+     "hs": 7,
+     "as": 1,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Terrain 2 (Junglinster, synth.)"
+    },
+    {
+     "id": 6520051,
+     "d": "2026-10-17T14:00:00+02:00",
+     "tag": 5,
+     "h": {
+      "id": 45929,
+      "n": "ENT Munsbach/Canach/Mensdorf II"
+     },
+     "a": {
+      "id": 45896,
+      "n": "US Hostert II"
+     },
+     "hs": 0,
+     "as": 29,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Terrain Munsbach (synth.)"
+    },
+    {
+     "id": 6520053,
+     "d": "2026-10-17T15:30:00+02:00",
+     "tag": 5,
+     "h": {
+      "id": 46193,
+      "n": "CS Grevenmacher II"
+     },
+     "a": {
+      "id": 45397,
+      "n": "FC Koeppchen Wormeldange II"
+     },
+     "hs": 8,
+     "as": 3,
+     "gespielt": true,
+     "forfait": false,
+     "ort": "Terrain 2 (Grevenmacher, synth.)"
+    }
+   ],
+   "start": "2026-09-26T14:00:00+02:00"
+  },
+  "19615": {
+   "id": 19615,
+   "n": "Coupe U13 Minimes - 1/32 de Finale",
+   "typ": "CUP",
+   "ergebnisse": true,
+   "tabelle": null,
+   "spiele": [
+    {
+     "id": 13834,
+     "d": "2026-10-24T13:30:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 46505,
+      "n": "Green-Boys 77 Harlange-Tarchamps"
+     },
+     "a": {
+      "id": 45248,
+      "n": "U.N. Käerjeng 97"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Stade Am Duerf (Harlange, synth.)"
+    },
+    {
+     "id": 13853,
+     "d": "2026-10-24T14:00:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 46443,
+      "n": "F91 Dudelange"
+     },
+     "a": {
+      "id": 45857,
+      "n": "ENT Progrès/Luna"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Stade Aloyse Meyer (Dudelange, synth.)"
+    },
+    {
+     "id": 13850,
+     "d": "2026-10-24T14:00:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 45776,
+      "n": "FC Blo-Wäiss Izeg"
+     },
+     "a": {
+      "id": 44968,
+      "n": "Alliance Äischdall Hobscheid-Eischen"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain 2 (Itzig, synth.)"
+    },
+    {
+     "id": 13833,
+     "d": "2026-10-24T14:00:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 45398,
+      "n": "FC Koeppchen Wormeldange"
+     },
+     "a": {
+      "id": 45580,
+      "n": "AS Hosingen"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Am Ga (Wormeldange, synth.)"
+    },
+    {
+     "id": 13856,
+     "d": "2026-10-24T14:00:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 44939,
+      "n": "FC Mondercange"
+     },
+     "a": {
+      "id": 45796,
+      "n": "Sporting Mertzig"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain 2 (Mondercange, synth.)"
+    },
+    {
+     "id": 13860,
+     "d": "2026-10-24T14:00:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 45913,
+      "n": "FC Wiltz 71"
+     },
+     "a": {
+      "id": 46132,
+      "n": "ENT Heiderscheid/Feulen/Grevels"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain 3 (Weidingen, synth.)"
+    },
+    {
+     "id": 13863,
+     "d": "2026-10-24T14:00:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 45745,
+      "n": "Tricolore Gasperich"
+     },
+     "a": {
+      "id": 46023,
+      "n": "Union Remich/Bous"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Stade Emile Bintner (Luxembourg, synth.)"
+    },
+    {
+     "id": 13838,
+     "d": "2026-10-24T14:30:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 46245,
+      "n": "ENT Mensdorf/Canach/Munsbach"
+     },
+     "a": {
+      "id": 45272,
+      "n": "Racing FC Union Luxembourg"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain 2 (Mensdorf, synth.)"
+    },
+    {
+     "id": 13843,
+     "d": "2026-10-24T14:30:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 46333,
+      "n": "SC Bettembourg"
+     },
+     "a": {
+      "id": 46191,
+      "n": "CS Grevenmacher"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Stade Municipal (Bettembourg, synth.)"
+    },
+    {
+     "id": 13854,
+     "d": "2026-10-24T14:30:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 45692,
+      "n": "Una Strassen"
+     },
+     "a": {
+      "id": 45196,
+      "n": "CS Oberkorn"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain 2 (Strassen, synth.)"
+    },
+    {
+     "id": 13844,
+     "d": "2026-10-24T14:30:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 45540,
+      "n": "Union 05 Kayl-Tétange"
+     },
+     "a": {
+      "id": 45422,
+      "n": "CS Fola Esch-Alzette"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Stade Emile Müller (Kayl)"
+    },
+    {
+     "id": 13851,
+     "d": "2026-10-24T15:00:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 45525,
+      "n": "Daring Echternach"
+     },
+     "a": {
+      "id": 44740,
+      "n": "Jeunesse Junglinster"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain Breil (Echternach)"
+    },
+    {
+     "id": 13861,
+     "d": "2026-10-24T15:00:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 46595,
+      "n": "ENT Jeunesse Stengefort/Käerch"
+     },
+     "a": {
+      "id": 46404,
+      "n": "AS Red Black Luxembourg"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain 2 (Koerich, synth.)"
+    },
+    {
+     "id": 13859,
+     "d": "2026-10-24T15:00:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 44771,
+      "n": "ENT Rambrouch/Perlé"
+     },
+     "a": {
+      "id": 45496,
+      "n": "ENT Mondorf/Schengen"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain synth. Centre Scolaire Koetschette"
+    },
+    {
+     "id": 13857,
+     "d": "2026-10-24T15:00:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 45927,
+      "n": "FC Les Aiglons Dalheim"
+     },
+     "a": {
+      "id": 46478,
+      "n": "Young Boys Diekirch"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain Kierlingerstrooss (Dalheim)"
+    },
+    {
+     "id": 13858,
+     "d": "2026-10-24T15:00:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 46065,
+      "n": "FC Rodange 91"
+     },
+     "a": {
+      "id": 44764,
+      "n": "CS Sanem"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain 2 (Rodange, synth.)"
+    },
+    {
+     "id": 13862,
+     "d": "2026-10-24T15:00:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 46531,
+      "n": "Jeunesse Useldange"
+     },
+     "a": {
+      "id": 45138,
+      "n": "US Esch-Alzette"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Stade Rue de la Gare (Useldange)"
+    },
+    {
+     "id": 13839,
+     "d": "2026-10-24T15:00:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 44704,
+      "n": "US Berdorf-Consdorf 01"
+     },
+     "a": {
+      "id": 45458,
+      "n": "FC Mamer 32"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain Maartbësch (Berdorf)"
+    },
+    {
+     "id": 13837,
+     "d": "2026-10-24T15:00:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 45145,
+      "n": "US Sandweiler"
+     },
+     "a": {
+      "id": 45895,
+      "n": "US Hostert"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain 2 (Sandweiler, synth.)"
+    },
+    {
+     "id": 13852,
+     "d": "2026-10-24T15:30:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 46170,
+      "n": "Alisontia Steinsel"
+     },
+     "a": {
+      "id": 45558,
+      "n": "FC 72 Erpeldange"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Stade Henri Bausch (Steinsel, synth.)"
+    },
+    {
+     "id": 13840,
+     "d": "2026-10-24T15:30:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 45985,
+      "n": "Atert Bissen"
+     },
+     "a": {
+      "id": 46383,
+      "n": "Olympia Christnach-Waldbillig"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Stade Klengbousbierg 2 (Bissen, synth.)"
+    },
+    {
+     "id": 13846,
+     "d": "2026-10-24T15:30:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 46214,
+      "n": "FC Lorentzweiler"
+     },
+     "a": {
+      "id": 45175,
+      "n": "ENT Jeunesse Atertdaul"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain 2 (Lorentzweiler, synth.)"
+    },
+    {
+     "id": 13864,
+     "d": "2026-10-24T15:30:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 45603,
+      "n": "Marisca Mersch"
+     },
+     "a": {
+      "id": 46120,
+      "n": "ENT Colmarberg/Schieren"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain 2 (Mersch, synth.)"
+    },
+    {
+     "id": 13842,
+     "d": "2026-10-24T15:30:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 45350,
+      "n": "Sporting Bertrange"
+     },
+     "a": {
+      "id": 45280,
+      "n": "FC Ehlerange"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Plaine des Jeux André Wolff (Bertrange, synth.)"
+    },
+    {
+     "id": 13855,
+     "d": "2026-10-24T16:30:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 46114,
+      "n": "AS Rupensia Lusitanos Larochette"
+     },
+     "a": {
+      "id": 45666,
+      "n": "Blo-Wäiss Medernach"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain Op Birkelt (Larochette, synth.)"
+    },
+    {
+     "id": 13847,
+     "d": "2026-10-24T16:30:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 45670,
+      "n": "AS Wincrange"
+     },
+     "a": {
+      "id": 46573,
+      "n": "Etzella Ettelbruck"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain synth. (Wincrange)"
+    },
+    {
+     "id": 13836,
+     "d": "2026-10-24T16:30:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 46154,
+      "n": "FC Bastendorf 47"
+     },
+     "a": {
+      "id": 45646,
+      "n": "FC Differdange 03"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Heiligen Wiese (Bastendorf, synth)"
+    },
+    {
+     "id": 13849,
+     "d": "2026-10-24T16:30:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 45940,
+      "n": "FC Brouch"
+     },
+     "a": {
+      "id": 44862,
+      "n": "FC Schifflange 95"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Stade Feidt Frères (Brouch, synth.)"
+    },
+    {
+     "id": 13845,
+     "d": "2026-10-24T16:30:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 46300,
+      "n": "FC Kehlen"
+     },
+     "a": {
+      "id": 45516,
+      "n": "Red Star Merl-Belair"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain 2 (Kehlen, synth.)"
+    },
+    {
+     "id": 13835,
+     "d": "2026-10-24T16:30:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 45373,
+      "n": "Résidence Walferdange"
+     },
+     "a": {
+      "id": 45825,
+      "n": "Union Titus Pétange"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain 2 (Walferdange, synth.)"
+    },
+    {
+     "id": 13848,
+     "d": "2026-10-24T16:30:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 46203,
+      "n": "US Moutfort-Medingen"
+     },
+     "a": {
+      "id": 46547,
+      "n": "FC The Belval Belvaux"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain Am Brill (Moutfort, synth.)"
+    },
+    {
+     "id": 13841,
+     "d": "2026-10-24T17:00:00+02:00",
+     "tag": 1,
+     "h": {
+      "id": 45964,
+      "n": "Swift Hesperange"
+     },
+     "a": {
+      "id": 45723,
+      "n": "US Rumelange"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain synthétique (Hesperange, synth.)"
+    }
+   ],
+   "start": "2026-10-24T14:00:00+02:00"
+  }
+ }
+}

@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-18T07:35:54.555Z",
+ "stand": "2026-10-18T07:46:40.583Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -12,6 +12,7 @@
   {
    "id": 45398,
    "n": "FC Koeppchen Wormeldange",
+   "kat": "U13",
    "klassen": [
     19615
    ]
@@ -19,6 +20,7 @@
   {
    "id": 45396,
    "n": "FC Koeppchen Wormeldange I",
+   "kat": "U13",
    "klassen": [
     19189
    ]
@@ -26,6 +28,7 @@
   {
    "id": 45397,
    "n": "FC Koeppchen Wormeldange II",
+   "kat": "U13",
    "klassen": [
     19233
    ]

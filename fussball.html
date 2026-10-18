@@ -145,9 +145,11 @@ function aufteilen(D) {
   return { tabs, verein };
 }
 
-function kurz(teamName, vereinName) {
-  const r = teamName.replace(vereinName, "").trim();
-  return r || teamName;
+// Reiter: „U13 1“, „U13 2“ (vom Nutzer so gewünscht, arabisch statt I/II).
+const ARAB = { I: 1, II: 2, III: 3, IV: 4, V: 5 };
+function reiter(t, vereinName) {
+  const r = t.n.replace(vereinName, "").trim();
+  return [t.kat, ARAB[r] ?? r].filter(Boolean).join(" ") || t.n;
 }
 
 // In Zeilen und Tabelle: „FC Koeppchen Wormeldange I“ → „Koeppchen I“, sonst bricht
@@ -277,7 +279,7 @@ function render() {
   const { tabs, verein } = aufteilen(D);
   if (!tabs.some(t => t.id === ST.team)) ST.team = tabs[0]?.id ?? null;
   document.getElementById("seg").innerHTML = tabs.map(t =>
-    `<button data-t="${t.id}" class="${t.id === ST.team ? "on" : ""}">Mannschaft ${esc(kurz(t.n, D.verein.n))}</button>`).join("");
+    `<button data-t="${t.id}" class="${t.id === ST.team ? "on" : ""}">${esc(reiter(t, D.verein.n))}</button>`).join("");
   document.getElementById("sub").textContent = "U13 Minimes · " + D.saison.n.replace("Saison ", "");
   if (ST.team == null) { main.innerHTML = `<div class="note">Keine Spiele gefunden.</div>`; return; }
 

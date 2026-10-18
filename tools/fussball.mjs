@@ -15,6 +15,7 @@ const OUT = new URL("../data/fussball.json", import.meta.url);
 const M_FIELDS = `match{ id gameday matchDate isPlayed isForfait homeScore awayScore finalHomeScore finalAwayScore finalScoreComment }
   division{ id name showResult showRanking } matchType{ id }
   homeTeam{ id name clubId1 clubId2 clubId3 clubId4 } awayTeam{ id name clubId1 clubId2 clubId3 clubId4 }
+  homeAgeCategory{ name } awayAgeCategory{ name }
   sportField{ name }`;
 
 const Q_DEFAULTS = `{ defaultValues{ currentSeasonId } seasons{ id name startDate endDate } }`;
@@ -79,8 +80,11 @@ export function tabelle(rankings) {
 export function aufbereiten({ saison, vereinsSpiele, klassen }) {
   const teams = new Map();
   for (const m of vereinsSpiele)
-    for (const t of [m.homeTeam, m.awayTeam])
-      if (istVerein(t) && !teams.has(t.id)) teams.set(t.id, { id: t.id, n: t.name, klassen: [] });
+    for (const [t, alter] of [[m.homeTeam, m.homeAgeCategory], [m.awayTeam, m.awayAgeCategory]])
+      // kat = „U13“ aus „U13 Minimes“: Beschriftung der Reiter, auch wenn später weitere
+      // Altersklassen dazukommen.
+      if (istVerein(t) && !teams.has(t.id))
+        teams.set(t.id, { id: t.id, n: t.name, kat: (alter?.name || "").split(" ")[0], klassen: [] });
 
   const div = {};
   for (const m of vereinsSpiele) {

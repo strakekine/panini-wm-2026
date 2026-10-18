@@ -14,7 +14,7 @@ const src = fs.readFileSync(path.join(hier, "..", "fussball.html"), "utf8");
 const i = src.indexOf("==== Logik"), j = src.indexOf("==== Oberfläche");
 if (i < 0 || j < 0) throw new Error("Abschnittsmarken Logik/Oberfläche nicht gefunden");
 const M = new Function(src.slice(src.lastIndexOf("//", i), src.lastIndexOf("//", j)) + `
-  return { REGELN, klasseVon, zonen, ausgang, aufteilen, kurz, anzeige, sicht, nachSpieltag, roem };`)();
+  return { REGELN, klasseVon, zonen, ausgang, aufteilen, reiter, anzeige, sicht, nachSpieltag, roem };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text) { n++; if (!bed) { fehler++; console.log("✗ " + text); } }
@@ -33,7 +33,8 @@ function roh(div, typ, d, h, a, hs, as, extra = {}) {
   return { match: { id: mid++, gameday: extra.tag ?? 1, matchDate: d, isPlayed: hs != null, isForfait: false,
                     homeScore: hs, awayScore: as, finalHomeScore: extra.fh ?? (hs ?? null), finalAwayScore: extra.fa ?? (as ?? null),
                     finalScoreComment: null },
-           division: div, matchType: { id: typ }, homeTeam: h, awayTeam: a, sportField: { name: "Am Ga" } };
+           division: div, matchType: { id: typ }, homeTeam: h, awayTeam: a, sportField: { name: "Am Ga" },
+           homeAgeCategory: { name: "U13 Minimes" }, awayAgeCategory: { name: "U13 Minimes" } };
 }
 const s1 = roh(DIV4, "CC", "2026-09-19T14:30:00+02:00", G(1), K1, 2, 2, { tag: 1 });
 const s2 = roh(DIV4, "CC", "2026-10-17T14:30:00+02:00", K1, G(2), 9, 0, { tag: 5 });
@@ -83,7 +84,7 @@ gleich(tabs.map(t => t.id), [45396, 45397], "Reiter nur für Mannschaften mit Li
 gleich(verein.map(t => t.id), [45398], "Pokalmannschaft ohne I/II zählt zum Verein");
 ok(M.anzeige("FC Koeppchen Wormeldange II") === "Koeppchen II", "eigener Name gekürzt");
 ok(M.anzeige("US Sandweiler") === "US Sandweiler", "Gegner unverändert");
-ok(M.kurz("FC Koeppchen Wormeldange II", D.verein.n) === "II", "Reiter-Beschriftung");
+gleich(D.teams.map(t => M.reiter(t, D.verein.n)), ["U13", "U13 1", "U13 2"], "Reiter-Beschriftung U13 1 / U13 2");
 
 const jetzt = Date.parse("2026-10-18T10:00:00+02:00");
 const v1 = M.sicht(D, 45396, jetzt);

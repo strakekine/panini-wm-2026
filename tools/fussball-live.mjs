@@ -16,7 +16,6 @@ import { eigeneSpiele } from "./fussball.mjs";
 
 const DATEN = new URL("../data/fussball.json", import.meta.url);
 const OUT = new URL("../data/live.json", import.meta.url);
-const CLUB_SEITE = "https://www.fupa.net/club/fc-koeppchen";
 const API = "https://api.fupa.net/v1/matches/";
 export const REITER = "Seniors 1";           // nur dort tickert jemand (FuPa führt keine Jugend)
 // Zeitfenster um den Anstoß. 180 statt 150 min: Pokal mit Verlängerung und Elfmeterschießen
@@ -101,28 +100,17 @@ export function gleich(alt, neu) {
   return !!alt && ohne(alt) === ohne(neu);
 }
 
-// Saison „20262027“ → FuPa-Teamslug „fc-koeppchen-m1-2026-27“, aus der Vereinsseite.
-async function teamSlug(saisonId) {
-  const html = await (await fetch(CLUB_SEITE)).text();
-  const s = saisonId.slice(0, 4) + "-" + saisonId.slice(6, 8);
-  const m = html.match(new RegExp(`/team/(fc-koeppchen-m1-${s})\\b`));
-  if (!m) throw new Error("FuPa-Team für " + s + " nicht gefunden");
-  return m[1];
-}
-
-// Alle Spiele mit Anstoß aus dem eingebetteten Zustand der Spielplan-Seite.
-async function fupaSpiele(slug) {
-  const html = await (await fetch(`https://www.fupa.net/team/${slug}/matches`)).text();
-  const m = html.match(/window\.REDUX_DATA\s*=\s*(\{.*?\})\s*(?:;|<\/script>)/s);
-  if (!m) throw new Error("REDUX_DATA nicht gefunden");
+// Spiele der Seniors 1 über die Schnittstelle (`flavor=current`, Rückfall `past`). Früher über
+// die Webseite (Vereinsseite + REDUX_DATA); die Schnittstelle ist einfacher und dieselbe, die der
+// Worker nimmt. Saison „20262027“ → Teamslug „fc-koeppchen-m1-2026-27“.
+export async function fupaSpiele(saisonId) {
+  const team = "fc-koeppchen-m1-" + saisonId.slice(0, 4) + "-" + saisonId.slice(6, 8);
   const aus = [];
-  (function lauf(o) {
-    if (Array.isArray(o)) o.forEach(lauf);
-    else if (o && typeof o === "object") {
-      if (o.kickoff && o.slug && o.homeTeam) aus.push(o);
-      Object.values(o).forEach(lauf);
-    }
-  })(JSON.parse(m[1]));
+  for (const flavor of ["current", "past"]) {
+    const r = await fetch(`${API.replace("matches/", "")}teams/${team}/matches?flavor=${flavor}`);
+    if (r.ok) { const j = await r.json(); if (Array.isArray(j)) aus.push(...j); }
+  }
+  if (!aus.length) throw new Error("FuPa-Spiele für " + team + " nicht gefunden");
   return aus;
 }
 
@@ -132,7 +120,7 @@ async function einmal(D, sp) {
 
   let slug = alt?.flfId === sp.id ? alt.slug : null;
   if (!slug) {
-    const spiele = await fupaSpiele(await teamSlug(D.saison.id));
+    const spiele = await fupaSpiele(D.saison.id);
     slug = passendesSpiel(spiele, sp.d)?.slug;
     // Nicht gemerkt: der nächste Takt (2 min) sucht von vorn.
     if (!slug) { console.log("Spiel bei FuPa (noch) nicht gefunden:", sp.d); return false; }

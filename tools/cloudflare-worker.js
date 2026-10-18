@@ -32,31 +32,28 @@ export function passendesSpiel(fupaSpiele, anstoss) {
     .sort((x, y) => Math.abs(Date.parse(x.kickoff) - a) - Math.abs(Date.parse(y.kickoff) - a))[0] || null;
 }
 
-// Saison aus dem Anstoß (ab Juli neue Saison) → „fc-koeppchen-m1-2026-27“, aus der Vereinsseite.
+// Saison aus dem Anstoß (ab Juli neue Saison) → „2026-27“ für den Teamslug „fc-koeppchen-m1-2026-27“.
 export function saisonVon(anstoss) {
   const [j, m] = tagLux(Date.parse(anstoss)).split("-").map(Number);
   const y = m >= 7 ? j : j - 1;
   return y + "-" + String((y + 1) % 100).padStart(2, "0");
 }
 
+// Spielliste der Mannschaft über die Schnittstelle (`flavor=current`: die Spiele um jetzt herum,
+// `past` als Rückfall). Erst lief das über die Webseite — die gab dem Worker bei Cloudflare aber
+// nicht dasselbe wie einem normalen Abruf (18.10.2026: „spiel nicht gefunden“).
 async function slugZu(anstoss) {
   const g = gefunden.get(anstoss);
   if (g && Date.now() - g.t < 6 * 3600e3) return g.slug;
-  const club = await (await fetch("https://www.fupa.net/club/fc-koeppchen")).text();
-  const team = club.match(new RegExp(`/team/(fc-koeppchen-m1-${saisonVon(anstoss)})\\b`))?.[1];
-  if (!team) return null;
-  const html = await (await fetch(`https://www.fupa.net/team/${team}/matches`)).text();
-  const m = html.match(/window\.REDUX_DATA\s*=\s*(\{.*?\})\s*(?:;|<\/script>)/s);
-  if (!m) return null;
-  const spiele = [];
-  (function lauf(o) {
-    if (Array.isArray(o)) o.forEach(lauf);
-    else if (o && typeof o === "object") {
-      if (o.kickoff && o.slug && o.homeTeam) spiele.push(o);
-      Object.values(o).forEach(lauf);
-    }
-  })(JSON.parse(m[1]));
-  const slug = passendesSpiel(spiele, anstoss)?.slug || null;
+  const team = "fc-koeppchen-m1-" + saisonVon(anstoss);
+  let slug = null;
+  for (const flavor of ["current", "past"]) {
+    const r = await fetch(`https://api.fupa.net/v1/teams/${team}/matches?flavor=${flavor}`, { headers: { accept: "application/json" } });
+    if (!r.ok) continue;
+    const spiele = await r.json();
+    slug = Array.isArray(spiele) ? passendesSpiel(spiele, anstoss)?.slug || null : null;
+    if (slug) break;
+  }
   if (slug) gefunden.set(anstoss, { t: Date.now(), slug });
   return slug;
 }

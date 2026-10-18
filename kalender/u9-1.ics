@@ -12,7 +12,7 @@ UID:flf-9029762@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20260919T120000Z
 DTEND:20260919T133000Z
-SUMMARY:⚽ Koeppchen I – US Sandweiler I (Freundschaftsspiel)
+SUMMARY:⚽ Koeppchen U9 1 – US Sandweiler I (Freundschaftsspiel)
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:Amicaux 2\, Spieltag 19
 END:VEVENT
@@ -21,7 +21,7 @@ UID:flf-6716013@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20260926T120000Z
 DTEND:20260926T133000Z
-SUMMARY:⚽ Koeppchen I – ENT Canach/Mensdorf I
+SUMMARY:⚽ Koeppchen U9 1 – ENT Canach/Mensdorf I
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:U9 Pupilles S6 Tour 1\, Spieltag 1
 END:VEVENT
@@ -30,7 +30,7 @@ UID:flf-6716023@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261003T090000Z
 DTEND:20261003T103000Z
-SUMMARY:⚽ Jeunesse Junglinster I – Koeppchen I
+SUMMARY:⚽ Jeunesse Junglinster I – Koeppchen U9 1
 LOCATION:Terrain 2 (Junglinster\, synth.)
 DESCRIPTION:U9 Pupilles S6 Tour 1\, Spieltag 2
 END:VEVENT
@@ -39,7 +39,7 @@ UID:flf-6716032@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261010T090000Z
 DTEND:20261010T103000Z
-SUMMARY:⚽ Koeppchen I – CS Grevenmacher I
+SUMMARY:⚽ Koeppchen U9 1 – CS Grevenmacher I
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:U9 Pupilles S6 Tour 1\, Spieltag 3
 END:VEVENT
@@ -48,7 +48,7 @@ UID:flf-6716042@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261017T090000Z
 DTEND:20261017T103000Z
-SUMMARY:⚽ FC Munsbach I – Koeppchen I
+SUMMARY:⚽ FC Munsbach I – Koeppchen U9 1
 LOCATION:Terrain Munsbach (synth.)
 DESCRIPTION:U9 Pupilles S6 Tour 1\, Spieltag 4
 END:VEVENT
@@ -57,7 +57,7 @@ UID:flf-6716055@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261024T093000Z
 DTEND:20261024T110000Z
-SUMMARY:⚽ Koeppchen I – Union Mertert-Wasserbillig I
+SUMMARY:⚽ Koeppchen U9 1 – Union Mertert-Wasserbillig I
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:U9 Pupilles S6 Tour 1\, Spieltag 5
 END:VEVENT
@@ -66,7 +66,7 @@ UID:flf-6716063@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261113T230001Z
 DTEND:20261114T003001Z
-SUMMARY:⚽ ENT Biwer/Berbourg I – Koeppchen I
+SUMMARY:⚽ ENT Biwer/Berbourg I – Koeppchen U9 1
 LOCATION:Terrain 2 (Berbourg\, synth.)
 DESCRIPTION:U9 Pupilles S6 Tour 1\, Spieltag 6
 END:VEVENT
@@ -75,7 +75,7 @@ UID:flf-6716075@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261120T230001Z
 DTEND:20261121T003001Z
-SUMMARY:⚽ Victoria Rosport I – Koeppchen I
+SUMMARY:⚽ Victoria Rosport I – Koeppchen U9 1
 LOCATION:Terrain Ralingen (synth.)
 DESCRIPTION:U9 Pupilles S6 Tour 1\, Spieltag 7
 END:VEVENT
@@ -84,7 +84,7 @@ UID:flf-6716085@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261127T230001Z
 DTEND:20261128T003001Z
-SUMMARY:⚽ Koeppchen I – US Moutfort-Medingen I
+SUMMARY:⚽ Koeppchen U9 1 – US Moutfort-Medingen I
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:U9 Pupilles S6 Tour 1\, Spieltag 8
 END:VEVENT

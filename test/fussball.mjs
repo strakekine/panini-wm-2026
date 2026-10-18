@@ -154,7 +154,8 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   gleich((k.match(/BEGIN:VEVENT/g) || []).length, eigeneSpiele(D, t1).length, "ein Termin je eigenem Spiel samt Pokal");
   ok(k.includes("UID:flf-" + s5.match.id + "@fc-koeppchen"), "UID = FLF-Spiel-ID");
   ok(k.includes("DTSTART:20261024T120000Z") && k.includes("DTEND:20261024T134500Z"), "Pokal 14:00 Ortszeit = 12:00 UTC, 1:45 h");
-  ok(k.includes("SUMMARY:⚽ Koeppchen I – Gegner 2 9:0"), "Ergebnis im Titel");
+  ok(k.includes("SUMMARY:⚽ Koeppchen U13 1 – Gegner 2 9:0"), "Ergebnis im Titel, Mannschaft wie der Reiter");
+  ok(k.includes("SUMMARY:⚽ Koeppchen U13 – Gegner 6 (Pokal)"), "Pokal ohne I/II: Koeppchen U13");
   ok(k.includes("(Pokal)"), "Pokal gekennzeichnet");
   ok(k.split("\r\n").every(z => Buffer.byteLength(z, "utf8") <= 75), "Zeilen höchstens 75 Byte");
   ok(ics(D, t1) === k, "gleicher Stand → gleiche Datei (kein Commit bei jedem Lauf)");

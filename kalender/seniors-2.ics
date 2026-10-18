@@ -12,7 +12,8 @@ UID:flf-9029227@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20260803T174500Z
 DTEND:20260803T194500Z
-SUMMARY:⚽ Victoria Rosport – Koeppchen I 2:1 (Freundschaftsspiel)
+SUMMARY:⚽ Victoria Rosport – Koeppchen Seniors 2 2:1 (Freundschaftsspie
+ l)
 LOCATION:Terrain Ralingen (synth.)
 DESCRIPTION:Amicaux 2\, Spieltag 3
 END:VEVENT
@@ -21,7 +22,8 @@ UID:flf-9029413@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20260814T180000Z
 DTEND:20260814T200000Z
-SUMMARY:⚽ Jeunesse Junglinster – Koeppchen I (Freundschaftsspiel)
+SUMMARY:⚽ Jeunesse Junglinster – Koeppchen Seniors 2 (Freundschaftsspie
+ l)
 LOCATION:Terrain 2 (Junglinster\, synth.)
 DESCRIPTION:Amicaux 2\, Spieltag 14
 END:VEVENT
@@ -30,7 +32,7 @@ UID:flf-1011013@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20260914T180000Z
 DTEND:20260914T200000Z
-SUMMARY:⚽ U.N. Käerjeng 97 I – Koeppchen I 5:2
+SUMMARY:⚽ U.N. Käerjeng 97 I – Koeppchen Seniors 2 5:2
 LOCATION:Terrain Jos Bloes (Bascharage\, synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 1
 END:VEVENT
@@ -39,7 +41,7 @@ UID:flf-13477@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20260921T180000Z
 DTEND:20260921T200000Z
-SUMMARY:⚽ Koeppchen I – Etzella Ettelbruck 9:2 (Pokal)
+SUMMARY:⚽ Koeppchen Seniors 2 – Etzella Ettelbruck 9:2 (Pokal)
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:Coupe des Seniors Réserves - 1/32 de Finale\, Spieltag 1
 END:VEVENT
@@ -48,7 +50,7 @@ UID:flf-1011025@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20260928T180000Z
 DTEND:20260928T200000Z
-SUMMARY:⚽ Koeppchen I – US Rumelange 5:2
+SUMMARY:⚽ Koeppchen Seniors 2 – US Rumelange 5:2
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 2
 END:VEVENT
@@ -57,7 +59,7 @@ UID:flf-1011032@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261005T180000Z
 DTEND:20261005T200000Z
-SUMMARY:⚽ Atert Bissen I – Koeppchen I 6:3
+SUMMARY:⚽ Atert Bissen I – Koeppchen Seniors 2 6:3
 LOCATION:Stade Klengbousbierg 2 (Bissen\, synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 3
 END:VEVENT
@@ -66,7 +68,7 @@ UID:flf-1011046@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261012T180000Z
 DTEND:20261012T200000Z
-SUMMARY:⚽ Koeppchen I – F91 Dudelange 2:1
+SUMMARY:⚽ Koeppchen Seniors 2 – F91 Dudelange 2:1
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 4
 END:VEVENT
@@ -75,7 +77,7 @@ UID:flf-1011051@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261019T180000Z
 DTEND:20261019T200000Z
-SUMMARY:⚽ Koeppchen I – Union Titus Pétange I
+SUMMARY:⚽ Koeppchen Seniors 2 – Union Titus Pétange I
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 5
 END:VEVENT
@@ -84,7 +86,7 @@ UID:flf-1011066@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261026T183000Z
 DTEND:20261026T203000Z
-SUMMARY:⚽ Victoria Rosport – Koeppchen I
+SUMMARY:⚽ Victoria Rosport – Koeppchen Seniors 2
 LOCATION:Terrain Ralingen (synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 6
 END:VEVENT
@@ -93,7 +95,7 @@ UID:flf-1011072@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261102T190000Z
 DTEND:20261102T210000Z
-SUMMARY:⚽ Koeppchen I – FC Lorentzweiler
+SUMMARY:⚽ Koeppchen Seniors 2 – FC Lorentzweiler
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 7
 END:VEVENT
@@ -102,7 +104,7 @@ UID:flf-13501@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261109T190000Z
 DTEND:20261109T210000Z
-SUMMARY:⚽ Atert Bissen I – Koeppchen I (Pokal)
+SUMMARY:⚽ Atert Bissen I – Koeppchen Seniors 2 (Pokal)
 LOCATION:Stade Klengbousbierg 2 (Bissen\, synth.)
 DESCRIPTION:Coupe des Seniors Réserves - 1/16 de Finale\, Spieltag 1
 END:VEVENT
@@ -111,7 +113,7 @@ UID:flf-1011085@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261123T190000Z
 DTEND:20261123T210000Z
-SUMMARY:⚽ Résidence Walferdange I – Koeppchen I
+SUMMARY:⚽ Résidence Walferdange I – Koeppchen Seniors 2
 LOCATION:Terrain 2 (Walferdange\, synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 8
 END:VEVENT
@@ -120,7 +122,7 @@ UID:flf-1011093@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261130T190000Z
 DTEND:20261130T210000Z
-SUMMARY:⚽ Koeppchen I – FC Differdange 03
+SUMMARY:⚽ Koeppchen Seniors 2 – FC Differdange 03
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 9
 END:VEVENT
@@ -129,7 +131,7 @@ UID:flf-1011104@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261207T190000Z
 DTEND:20261207T210000Z
-SUMMARY:⚽ Racing FC Union Luxembourg – Koeppchen I
+SUMMARY:⚽ Racing FC Union Luxembourg – Koeppchen Seniors 2
 LOCATION:Terrain Hollerich (synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 10
 END:VEVENT
@@ -138,7 +140,7 @@ UID:flf-1011114@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20270222T190000Z
 DTEND:20270222T210000Z
-SUMMARY:⚽ Koeppchen I – Una Strassen I
+SUMMARY:⚽ Koeppchen Seniors 2 – Una Strassen I
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 11
 END:VEVENT
@@ -147,7 +149,7 @@ UID:flf-1011123@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20270226T190000Z
 DTEND:20270226T210000Z
-SUMMARY:⚽ US Rumelange – Koeppchen I
+SUMMARY:⚽ US Rumelange – Koeppchen Seniors 2
 LOCATION:Terrain 2 (Rumelange\, synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 12
 END:VEVENT
@@ -156,7 +158,7 @@ UID:flf-1011132@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20270308T190000Z
 DTEND:20270308T210000Z
-SUMMARY:⚽ Koeppchen I – Atert Bissen I
+SUMMARY:⚽ Koeppchen Seniors 2 – Atert Bissen I
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 13
 END:VEVENT
@@ -165,7 +167,7 @@ UID:flf-1011146@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20270315T190000Z
 DTEND:20270315T210000Z
-SUMMARY:⚽ F91 Dudelange – Koeppchen I
+SUMMARY:⚽ F91 Dudelange – Koeppchen Seniors 2
 LOCATION:Stade Aloyse Meyer (Dudelange\, synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 14
 END:VEVENT
@@ -174,7 +176,7 @@ UID:flf-1011156@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20270322T190000Z
 DTEND:20270322T210000Z
-SUMMARY:⚽ Union Titus Pétange I – Koeppchen I
+SUMMARY:⚽ Union Titus Pétange I – Koeppchen Seniors 2
 LOCATION:Terrain 2 (Pétange\, synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 15
 END:VEVENT
@@ -183,7 +185,7 @@ UID:flf-1011164@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20270329T180000Z
 DTEND:20270329T200000Z
-SUMMARY:⚽ Koeppchen I – Victoria Rosport
+SUMMARY:⚽ Koeppchen Seniors 2 – Victoria Rosport
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 16
 END:VEVENT
@@ -192,7 +194,7 @@ UID:flf-1011175@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20270412T180000Z
 DTEND:20270412T200000Z
-SUMMARY:⚽ FC Lorentzweiler – Koeppchen I
+SUMMARY:⚽ FC Lorentzweiler – Koeppchen Seniors 2
 LOCATION:Terrain 2 (Lorentzweiler\, synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 17
 END:VEVENT
@@ -201,7 +203,7 @@ UID:flf-1011186@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20270419T180000Z
 DTEND:20270419T200000Z
-SUMMARY:⚽ Koeppchen I – Résidence Walferdange I
+SUMMARY:⚽ Koeppchen Seniors 2 – Résidence Walferdange I
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 18
 END:VEVENT
@@ -210,7 +212,7 @@ UID:flf-1011195@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20270427T180000Z
 DTEND:20270427T200000Z
-SUMMARY:⚽ FC Differdange 03 – Koeppchen I
+SUMMARY:⚽ FC Differdange 03 – Koeppchen Seniors 2
 LOCATION:Stade Thillenberg 1 (Differdange)
 DESCRIPTION:Réserves Classe 1\, Spieltag 19
 END:VEVENT
@@ -219,7 +221,7 @@ UID:flf-1011204@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20270503T180000Z
 DTEND:20270503T200000Z
-SUMMARY:⚽ Koeppchen I – Racing FC Union Luxembourg
+SUMMARY:⚽ Koeppchen Seniors 2 – Racing FC Union Luxembourg
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 20
 END:VEVENT
@@ -228,7 +230,7 @@ UID:flf-1011214@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20270510T180000Z
 DTEND:20270510T200000Z
-SUMMARY:⚽ Una Strassen I – Koeppchen I
+SUMMARY:⚽ Una Strassen I – Koeppchen Seniors 2
 LOCATION:Terrain 2 (Strassen\, synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 21
 END:VEVENT
@@ -237,7 +239,7 @@ UID:flf-1011223@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20270517T180000Z
 DTEND:20270517T200000Z
-SUMMARY:⚽ Koeppchen I – U.N. Käerjeng 97 I
+SUMMARY:⚽ Koeppchen Seniors 2 – U.N. Käerjeng 97 I
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 22
 END:VEVENT

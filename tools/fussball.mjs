@@ -131,7 +131,11 @@ function falten(z) {
 }
 
 export function ics(D, t) {
-  const kurz = n => n.replace(VEREIN, "Koeppchen");
+  // Eigene Mannschaft wie der Reiter („Koeppchen U13 1“), nicht wie bei der FLF („… I“) — sonst
+  // sind U13 1 und U11 1 im Kalender nicht zu unterscheiden (vom Nutzer gemeldet). Pokal ohne
+  // I/II: „Koeppchen U13“.
+  const unsere = new Map(D.teams.filter(o => o.id === t.id || (t.mit || []).includes(o.id)).map(o => [o.id, "Koeppchen " + reiter(o)]));
+  const name = s => unsere.get(s.id) || s.n;
   const dauerMin = t.kat === "Seniors" ? 120 : t.kat === "U9" || t.kat === "U11" ? 90 : 105;
   const z = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//FC Koeppchen//fussball.html//DE", "CALSCALE:GREGORIAN",
              "METHOD:PUBLISH", `X-WR-CALNAME:${icsText("FC Koeppchen " + t.reiter)}`, "X-WR-TIMEZONE:Europe/Luxembourg",
@@ -148,7 +152,7 @@ export function ics(D, t) {
     } else {
       z.push(`DTSTART:${utc(sp.d)}`, `DTEND:${utc(new Date(Date.parse(sp.d) + dauerMin * 60e3).toISOString())}`);
     }
-    z.push(`SUMMARY:${icsText(`⚽ ${kurz(sp.h.n)} – ${kurz(sp.a.n)}${erg}${art}`)}`);
+    z.push(`SUMMARY:${icsText(`⚽ ${name(sp.h)} – ${name(sp.a)}${erg}${art}`)}`);
     if (sp.ort) z.push(`LOCATION:${icsText(sp.ort)}`);
     z.push(`DESCRIPTION:${icsText(sp.klasse + (sp.tag ? `, Spieltag ${sp.tag}` : ""))}`, "END:VEVENT");
   }

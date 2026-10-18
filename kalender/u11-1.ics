@@ -12,7 +12,8 @@ UID:flf-9029752@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20260920T073000Z
 DTEND:20260920T090000Z
-SUMMARY:⚽ Koeppchen I – ENT Mondorf/Schengen I 8:7 (Freundschaftsspiel)
+SUMMARY:⚽ Koeppchen U11 1 – ENT Mondorf/Schengen I 8:7 (Freundschaftssp
+ iel)
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:Amicaux 2\, Spieltag 20
 END:VEVENT
@@ -21,7 +22,7 @@ UID:flf-6685011@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20260927T083000Z
 DTEND:20260927T100000Z
-SUMMARY:⚽ ENT Biwer/Berbourg I – Koeppchen I
+SUMMARY:⚽ ENT Biwer/Berbourg I – Koeppchen U11 1
 LOCATION:Terrain 2 (Berbourg\, synth.)
 DESCRIPTION:U11 Poussins S5 Tour 1\, Spieltag 1
 END:VEVENT
@@ -30,7 +31,7 @@ UID:flf-6685034@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261011T083000Z
 DTEND:20261011T100000Z
-SUMMARY:⚽ Koeppchen I – Daring Echternach I
+SUMMARY:⚽ Koeppchen U11 1 – Daring Echternach I
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:U11 Poussins S5 Tour 1\, Spieltag 3
 END:VEVENT
@@ -39,7 +40,7 @@ UID:flf-6685045@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261018T070000Z
 DTEND:20261018T083000Z
-SUMMARY:⚽ Jeunesse Junglinster I – Koeppchen I
+SUMMARY:⚽ Jeunesse Junglinster I – Koeppchen U11 1
 LOCATION:Terrain 2 (Junglinster\, synth.)
 DESCRIPTION:U11 Poussins S5 Tour 1\, Spieltag 4
 END:VEVENT
@@ -48,7 +49,7 @@ UID:flf-6685053@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261025T093000Z
 DTEND:20261025T110000Z
-SUMMARY:⚽ Koeppchen I – ENT Canach/Mensdorf I
+SUMMARY:⚽ Koeppchen U11 1 – ENT Canach/Mensdorf I
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:U11 Poussins S5 Tour 1\, Spieltag 5
 END:VEVENT
@@ -57,7 +58,7 @@ UID:flf-6685062@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261114T230001Z
 DTEND:20261115T003001Z
-SUMMARY:⚽ Union Mertert-Wasserbillig – Koeppchen I
+SUMMARY:⚽ Union Mertert-Wasserbillig – Koeppchen U11 1
 LOCATION:Terrain au Parc (Mertert\, synth.)
 DESCRIPTION:U11 Poussins S5 Tour 1\, Spieltag 6
 END:VEVENT
@@ -66,7 +67,7 @@ UID:flf-6685072@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261121T230001Z
 DTEND:20261122T003001Z
-SUMMARY:⚽ Koeppchen I – FC Munsbach I
+SUMMARY:⚽ Koeppchen U11 1 – FC Munsbach I
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:U11 Poussins S5 Tour 1\, Spieltag 7
 END:VEVENT
@@ -75,7 +76,7 @@ UID:flf-6685085@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261128T230001Z
 DTEND:20261129T003001Z
-SUMMARY:⚽ CS Grevenmacher I – Koeppchen I
+SUMMARY:⚽ CS Grevenmacher I – Koeppchen U11 1
 LOCATION:Terrain 2 (Grevenmacher\, synth.)
 DESCRIPTION:U11 Poussins S5 Tour 1\, Spieltag 8
 END:VEVENT

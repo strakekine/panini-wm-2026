@@ -90,7 +90,9 @@ mitwandern): Der Abruf schreibt je Reiter `kalender/<reiter>.ics` (z. B. `u13-1.
 verlinkt `webcal://strakekine.github.io/panini-wm-2026/kalender/…` — **GitHub Pages** (liefert
 `text/calendar`), nicht raw.githubusercontent. Darunter „Klappt nicht?“ mit der https-Adresse zum
 Kopieren (Einstellungen → Kalender → Accounts → Andere → Kalenderabo). UID = FLF-Spiel-ID,
-`DTSTAMP` fest (sonst neuer Commit bei jedem Lauf), Uhrzeit 00:00 → ganztägig, Dauer Seniors 2 h,
+`DTSTAMP` fest (sonst neuer Commit bei jedem Lauf), Uhrzeit 00:00 → ganztägig, eigene Mannschaft im Titel
+wie der Reiter („Koeppchen U13 1“, Pokal ohne I/II „Koeppchen U13“ — vom Nutzer, sonst waren U13 1
+und U11 1 beide „Koeppchen I“), Dauer Seniors 2 h,
 U9/U11 1:30, sonst 1:45. **Welche Spiele zu einem Reiter gehören, steht nur in
 `tools/fussball.mjs`** (`reiter`, `mit`, `eigeneSpiele`) — App und Kalender lesen dasselbe.
 **Am iPhone noch nicht geprüft**, ob `webcal://` aus der Home-Bildschirm-App die Kalender-App

@@ -12,7 +12,7 @@ UID:flf-6509013@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20260919T123000Z
 DTEND:20260919T141500Z
-SUMMARY:⚽ ENT Biwer/Berbourg/UMW I – Koeppchen I 2:2
+SUMMARY:⚽ ENT Biwer/Berbourg/UMW I – Koeppchen U13 1 2:2
 LOCATION:Terrain 2 (Berbourg\, synth.)
 DESCRIPTION:U13 Minimes Cl4 S2 Phase 1\, Spieltag 1
 END:VEVENT
@@ -21,7 +21,7 @@ UID:flf-6509022@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20260926T133000Z
 DTEND:20260926T151500Z
-SUMMARY:⚽ Koeppchen I – US Sandweiler 4:4
+SUMMARY:⚽ Koeppchen U13 1 – US Sandweiler 4:4
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:U13 Minimes Cl4 S2 Phase 1\, Spieltag 2
 END:VEVENT
@@ -30,7 +30,7 @@ UID:flf-6509032@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261003T143000Z
 DTEND:20261003T161500Z
-SUMMARY:⚽ ENT Mensdorf/Canach/Munsbach I – Koeppchen I 2:5
+SUMMARY:⚽ ENT Mensdorf/Canach/Munsbach I – Koeppchen U13 1 2:5
 LOCATION:Terrain 2 (Mensdorf\, synth.)
 DESCRIPTION:U13 Minimes Cl4 S2 Phase 1\, Spieltag 3
 END:VEVENT
@@ -39,7 +39,7 @@ UID:flf-6509043@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261010T123000Z
 DTEND:20261010T141500Z
-SUMMARY:⚽ Koeppchen I – Alisontia Steinsel II 7:1
+SUMMARY:⚽ Koeppchen U13 1 – Alisontia Steinsel II 7:1
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:U13 Minimes Cl4 S2 Phase 1\, Spieltag 4
 END:VEVENT
@@ -48,7 +48,7 @@ UID:flf-6509051@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261017T123000Z
 DTEND:20261017T141500Z
-SUMMARY:⚽ Koeppchen I – US Moutfort-Medingen 9:0
+SUMMARY:⚽ Koeppchen U13 1 – US Moutfort-Medingen 9:0
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:U13 Minimes Cl4 S2 Phase 1\, Spieltag 5
 END:VEVENT
@@ -57,7 +57,7 @@ UID:flf-13833@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261024T120000Z
 DTEND:20261024T134500Z
-SUMMARY:⚽ Koeppchen – AS Hosingen (Pokal)
+SUMMARY:⚽ Koeppchen U13 – AS Hosingen (Pokal)
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:Coupe U13 Minimes - 1/32 de Finale\, Spieltag 1
 END:VEVENT

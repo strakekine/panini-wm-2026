@@ -12,7 +12,7 @@ UID:flf-6520022@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20260926T120000Z
 DTEND:20260926T134500Z
-SUMMARY:⚽ ENT Munsbach/Canach/Mensdorf II – Koeppchen II 9:5
+SUMMARY:⚽ ENT Munsbach/Canach/Mensdorf II – Koeppchen U13 2 9:5
 LOCATION:Terrain Munsbach (synth.)
 DESCRIPTION:U13 Minimes Cl6 S5 Phase 1\, Spieltag 2
 END:VEVENT
@@ -21,7 +21,7 @@ UID:flf-6520033@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261003T140000Z
 DTEND:20261003T154500Z
-SUMMARY:⚽ Koeppchen II – Jeunesse Junglinster III 3:5
+SUMMARY:⚽ Koeppchen U13 2 – Jeunesse Junglinster III 3:5
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:U13 Minimes Cl6 S5 Phase 1\, Spieltag 3
 END:VEVENT
@@ -30,7 +30,7 @@ UID:flf-6520041@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261010T090000Z
 DTEND:20261010T104500Z
-SUMMARY:⚽ US Hostert II – Koeppchen II 10:3
+SUMMARY:⚽ US Hostert II – Koeppchen U13 2 10:3
 LOCATION:Terrain Carrière (Senningerberg\, synth.)
 DESCRIPTION:U13 Minimes Cl6 S5 Phase 1\, Spieltag 4
 END:VEVENT
@@ -39,7 +39,7 @@ UID:flf-6520053@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261017T133000Z
 DTEND:20261017T151500Z
-SUMMARY:⚽ CS Grevenmacher II – Koeppchen II 8:3
+SUMMARY:⚽ CS Grevenmacher II – Koeppchen U13 2 8:3
 LOCATION:Terrain 2 (Grevenmacher\, synth.)
 DESCRIPTION:U13 Minimes Cl6 S5 Phase 1\, Spieltag 5
 END:VEVENT
@@ -48,7 +48,7 @@ UID:flf-13833@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261024T120000Z
 DTEND:20261024T134500Z
-SUMMARY:⚽ Koeppchen – AS Hosingen (Pokal)
+SUMMARY:⚽ Koeppchen U13 – AS Hosingen (Pokal)
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:Coupe U13 Minimes - 1/32 de Finale\, Spieltag 1
 END:VEVENT

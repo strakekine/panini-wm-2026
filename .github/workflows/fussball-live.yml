@@ -1,0 +1,47 @@
+# Live-Stand der Seniors 1 von FuPa nach data/live.json (gelesen von fussball.html).
+# Läuft alle 5 Minuten, ist aber nach Sekunden fertig, wenn kein Spiel im Zeitfenster liegt
+# (15 min vor bis 150 min nach Anstoß, aus data/fussball.json). Committet nur bei Änderung
+# (Tor, Halbzeit, Abpfiff), die Minute zählt die App selbst weiter.
+name: Fussball-Live
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write   # für das Wach-halten unten
+
+concurrency:
+  group: fussball-live
+  cancel-in-progress: false
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node tools/fussball-live.mjs
+      - name: Commit, falls sich etwas geändert hat
+        run: |
+          git add data/live.json 2>/dev/null || exit 0
+          if git diff --cached --quiet; then echo "keine Änderung"; exit 0; fi
+          git config user.name "fussball-live"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Fußball: Live-Stand"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            sleep $((i * 5))
+          done
+          exit 1
+      # Wie bei Fussball-Daten: Zeitplan nach 60 Tagen ohne Commit sonst abgeschaltet.
+      - name: Zeitplan wach halten
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/fussball-live.yml/enable"

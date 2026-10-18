@@ -291,7 +291,7 @@ function nachSpieltag(spiele) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "18.10.2026 e";
+const FASSUNG = "18.10.2026 f";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -335,7 +335,7 @@ async function appTeilen(b) {
 }
 let D = null, ST = { team: null }, L = null;
 // Adresse des Cloudflare-Workers; leer = nur GitHub (langsamer, aber ohne eigenes Konto).
-const WORKER_URL = "";
+const WORKER_URL = "https://koeppchen-live.rjtp6r9s9h.workers.dev/";
 let W = null;
 async function holenWorker() {
   if (!WORKER_URL || !L || !L.slug) return null;

@@ -4,9 +4,12 @@ name: Fussball-Daten
 
 on:
   schedule:
-    # Zeiten in UTC. Alle zwei Stunden, dazu samstags nachmittags stündlich (Spieltag).
-    - cron: "17 */2 * * *"
-    - cron: "47 11-19 * * 6"
+    # Zeiten in UTC (GitHub kennt keine Zeitzone). Luxemburg ist UTC+1, im Sommer UTC+2.
+    # Samstag und Sonntag (Spieltage) stündlich von 8 bis 21 Uhr Winterzeit.
+    - cron: "17 7-20 * * 0,6"
+    # Montag bis Freitag einmal abends: 20 Uhr Winterzeit, 21 Uhr Sommerzeit — lieber
+    # etwas später als vor 20 Uhr, falls unter der Woche ein Ergebnis nachgetragen wird.
+    - cron: "17 19 * * 1-5"
   workflow_dispatch:
 
 permissions:

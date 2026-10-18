@@ -29,7 +29,7 @@ Sieben voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
 - **`pine/`** — TradingView Pine-Script-Indikatoren. Eigener Kontext, eigene Regeln:
   siehe **`pine/CLAUDE.md`**, bevor dort etwas geändert wird.
 - **`fussball.html`** — „FC Koeppchen“: Tabelle, Ergebnisse und nächste Spiele der beiden
-  U13-Minimes-Mannschaften, alle 2 h automatisch von der FLF (GitHub Action). Details unten.
+  U13-Minimes-Mannschaften, automatisch von der FLF (GitHub Action, am Wochenende stündlich). Details unten.
 
 Der Repo-Name passt damit nur noch zum ersten Punkt. Nicht wundern und nichts danach
 sortieren: was hier liegt, steht in dieser Liste.
@@ -46,7 +46,8 @@ iPhone-Regeln der Pizza-App.
 **Quelle:** Hinter https://extranet.flf.lu/match steckt `https://extranet.flf.lu/api/graphql`
 (Angular-App), antwortet **ohne Anmeldung**, schickt aber **keine CORS-Freigabe** — der Browser
 kann sie nicht direkt fragen. Darum: `tools/fussball.mjs` (Node, keine Abhängigkeiten) holt die
-Daten, `.github/workflows/fussball.yml` lässt es alle 2 h laufen (samstags 13–21 Uhr stündlich),
+Daten, `.github/workflows/fussball.yml` lässt es Sa/So stündlich 8–21 Uhr und Mo–Fr einmal um 20 Uhr
+laufen (vom Nutzer so gewünscht; Cron in UTC, im Sommer eine Stunde später),
 committet `data/fussball.json` nur bei inhaltlicher Änderung. Die App liest von
 `raw.githubusercontent.com` (CORS `*`, 5 min Cache, wartet nicht auf GitHub Pages), Rückfall
 `data/fussball.json` relativ, letzter Stand in localStorage (`fussball_v1_data`) für offline.

@@ -327,7 +327,7 @@ function render() {
 
   const stand = new Date(D.stand).toLocaleString("de-DE", { timeZone: TZ, weekday: "short", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" });
   h += `<footer>Daten von <a href="https://extranet.flf.lu/match" target="_blank" rel="noopener">extranet.flf.lu</a>, abgerufen ${esc(stand)}<br>
-    Wird alle zwei Stunden von selbst aktualisiert.<br><br><button class="btn" id="reload">Neu laden</button></footer>`;
+    Am Wochenende stündlich aktualisiert, unter der Woche abends um 20 Uhr.<br><br><button class="btn" id="reload">Neu laden</button></footer>`;
   main.innerHTML = h;
 }
 

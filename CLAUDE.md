@@ -86,7 +86,10 @@ alle 2 min und committet selbst, bis 150 min nach Anstoß (oder Abpfiff + 2 Abfr
 min < 6 h Laufzeitgrenze. Statt 288 Läufen alle 5 min — vom Nutzer so gewollt; ein Zeitplan, der
 sich selbst umstellt, geht nicht (GITHUB_TOKEN darf keine Workflow-Dateien ändern). Anstöße der
 Seniors 2025–27: 14:00 bis 20:00, meist So 16:00; ein Anstoß vor 11:30 oder nach ~22:40 fiele
-durch. Ohne `--wache` fragt das Skript einmal ab (für Hand-Tests). Sonst FuPa-Teamslug aus https://www.fupa.net/club/fc-koeppchen
+durch. Ohne `--wache` fragt das Skript einmal ab (für Hand-Tests). **Push in jedem Takt**
+(`sync()`): Am 18.10. ging der Abpfiff verloren — Rebase ohne Git-Namen scheiterte (Name hing nur
+per `-c` am Commit), danach hielt der Lauf die lokale Datei für gespeichert. Jetzt `git config`
+einmal, und jeder Takt schiebt nach, was noch nicht oben ist. Sonst FuPa-Teamslug aus https://www.fupa.net/club/fc-koeppchen
 (`fc-koeppchen-m1-<2026-27>`), Spiel per gleichem Anstoß aus `window.REDUX_DATA` von
 `/team/<slug>/matches` (Slug wird in `live.json` gemerkt), dann
 `GET https://api.fupa.net/v1/matches/<slug>` (ohne Anmeldung, keine CORS-Freigabe): `homeGoal`,

@@ -135,16 +135,24 @@ async function einmal(D, sp) {
   return true;
 }
 
-// Commit + Push aus der Action heraus; die Daten-Action kann dazwischen committet haben.
-function commit() {
+// Commit + Push aus der Action heraus, in JEDEM Takt aufgerufen: committet eine Änderung und
+// schiebt alles nach, was noch nicht oben ist. Am 18.10.2026 scheiterte ein Push (Name fehlte
+// beim Rebase, weil er nur per `-c` am Commit hing), danach hielt der Lauf den Abpfiff für
+// gespeichert — so ein Fehler heilt sich jetzt beim nächsten Takt.
+let identitaet = false;
+export function sync() {
   const sh = c => execSync(c, { stdio: "inherit" });
-  sh("git add data/live.json");
-  try { execSync("git diff --cached --quiet"); return; } catch (e) {}
-  sh('git -c user.name=fussball-live -c user.email=41898282+github-actions[bot]@users.noreply.github.com commit -q -m "Fußball: Live-Stand"');
-  for (let i = 1; ; i++) {
-    try { sh("git pull -q --rebase origin main && git push -q origin HEAD:main"); return; }
-    catch (e) { if (i >= 3) throw e; }
+  if (!identitaet) {
+    sh("git config user.name fussball-live");
+    sh("git config user.email 41898282+github-actions[bot]@users.noreply.github.com");
+    identitaet = true;
   }
+  sh("git add data/live.json");
+  try { execSync("git diff --cached --quiet"); } catch (e) { sh('git commit -q -m "Fußball: Live-Stand"'); }
+  sh("git fetch -q origin main");
+  if (execSync("git rev-list --count origin/main..HEAD").toString().trim() === "0") return;
+  try { sh("git pull -q --rebase origin main && git push -q origin HEAD:main"); }
+  catch (e) { try { execSync("git rebase --abort", { stdio: "ignore" }); } catch (e2) {} throw e; }
 }
 
 const schlafen = ms => new Promise(r => setTimeout(r, Math.max(0, ms)));
@@ -158,8 +166,8 @@ async function wache() {
   await schlafen(a - VOR_MIN * 60e3 - Date.now());
   let nachAbpfiff = 0;
   while (Date.now() <= ende) {
-    try { if (await einmal(D, sp)) commit(); }
-    catch (e) { console.error("Abfrage fehlgeschlagen:", e.message); }   // nächster Takt versucht es wieder
+    try { await einmal(D, sp); } catch (e) { console.error("Abfrage fehlgeschlagen:", e.message); }
+    try { sync(); } catch (e) { console.error("Push fehlgeschlagen, nächster Takt versucht es wieder:", e.message); }
     // Nach Abpfiff noch zwei Abfragen (Korrekturen des Tickerers), dann Schluss.
     try {
       const L = JSON.parse(readFileSync(OUT, "utf8"));

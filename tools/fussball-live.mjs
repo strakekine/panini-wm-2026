@@ -33,6 +33,18 @@ export function spielJetzt(D, now) {
   }) || null;
 }
 
+// FuPa-Spiel zum FLF-Anstoß: genau gleiche Zeit, sonst das nächste am selben Tag (Luxemburg)
+// mit höchstens 3 h Abstand — eine Verlegung trägt oft nur eine der beiden Seiten nach.
+const tagLux = ms => new Date(ms).toLocaleDateString("sv-SE", { timeZone: "Europe/Luxembourg" });
+export function passendesSpiel(fupaSpiele, anstoss) {
+  const a = Date.parse(anstoss);
+  const genau = fupaSpiele.find(x => Date.parse(x.kickoff) === a);
+  if (genau) return genau;
+  return fupaSpiele
+    .filter(x => tagLux(Date.parse(x.kickoff)) === tagLux(a) && Math.abs(Date.parse(x.kickoff) - a) <= 3 * 3600e3)
+    .sort((x, y) => Math.abs(Date.parse(x.kickoff) - a) - Math.abs(Date.parse(y.kickoff) - a))[0] || null;
+}
+
 // Für --wache: das nächste Spiel, dessen Fenster noch nicht vorbei ist und dessen Anstoß
 // höchstens WACHE_MAX_MIN voraus liegt (spätere übernimmt der nächste Lauf).
 export function naechstesSpiel(D, now) {
@@ -110,8 +122,9 @@ async function einmal(D, sp) {
   let slug = alt?.flfId === sp.id ? alt.slug : null;
   if (!slug) {
     const spiele = await fupaSpiele(await teamSlug(D.saison.id));
-    slug = spiele.find(x => Date.parse(x.kickoff) === Date.parse(sp.d))?.slug;
-    if (!slug) { console.log("Spiel bei FuPa nicht gefunden:", sp.d); return false; }
+    slug = passendesSpiel(spiele, sp.d)?.slug;
+    // Nicht gemerkt: der nächste Takt (2 min) sucht von vorn.
+    if (!slug) { console.log("Spiel bei FuPa (noch) nicht gefunden:", sp.d); return false; }
   }
   const r = await fetch(API + slug);
   if (!r.ok) throw new Error("FuPa HTTP " + r.status);

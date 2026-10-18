@@ -8,7 +8,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { aufbereiten, spiel, reiter, ics, eigeneSpiele, CLUB } from "../tools/fussball.mjs";
-import { liveAus, gleich as liveGleich, spielJetzt, naechstesSpiel } from "../tools/fussball-live.mjs";
+import { liveAus, gleich as liveGleich, spielJetzt, naechstesSpiel, passendesSpiel } from "../tools/fussball-live.mjs";
 
 const hier = path.dirname(fileURLToPath(import.meta.url));
 const src = fs.readFileSync(path.join(hier, "..", "fussball.html"), "utf8");
@@ -216,6 +216,10 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(naechstesSpiel(DS, Date.parse("2026-10-18T14:23:00+02:00")), "14:23-Lauf übernimmt 16:00");
   ok(naechstesSpiel(DS, Date.parse("2026-10-18T16:40:00+02:00")), "verspäteter Start mitten im Spiel steigt noch ein");
   ok(!naechstesSpiel(DS, Date.parse("2026-10-18T18:31:00+02:00")), "nach dem Fenster nichts mehr");
+  const fs = [{ slug: "a", kickoff: "2026-10-18T16:00:00+02:00" }, { slug: "b", kickoff: "2026-10-25T16:00:00+02:00" }];
+  ok(passendesSpiel(fs, "2026-10-18T16:00:00+02:00").slug === "a", "FuPa-Spiel bei gleicher Anstoßzeit");
+  ok(passendesSpiel(fs, "2026-10-18T16:30:00+02:00").slug === "a", "Verlegung um 30 min wird noch gefunden");
+  ok(passendesSpiel(fs, "2026-10-19T16:00:00+02:00") === null, "anderer Tag: nicht dasselbe Spiel");
   const vS = M.sicht(DS, 44831, t0);
   const a = M.liveAnzeige(Lv, vS, t0 + 7 * 60e3);
   ok(a && a.laeuft && a.zeit === "78'", "LIVE-Kasten, Minute zählt weiter (71 + 7)");

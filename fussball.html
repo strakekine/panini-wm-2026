@@ -257,6 +257,17 @@ function liveZeit(L, now) {
   return verl ? "Verlängerung " + txt : txt;
 }
 
+// Art des Tors aus FuPas `subtype` (gesehen: goal_headed, goal_shoot, penalty_foul). Nach
+// Wortteilen, weil wir nicht alle Namen kennen; ein normaler Schuss bekommt keinen Zusatz.
+function torArt(art) {
+  const a = String(art || "").toLowerCase();
+  if (a.includes("own")) return "Eigentor";
+  if (a.includes("penalty")) return "Elfmeter";
+  if (a.includes("free")) return "Freistoß";
+  if (a.includes("head")) return "Kopfball";
+  return "";
+}
+
 // Liegt bei diesem Reiter gerade ein Spiel im Live-Fenster? Dann fragt die App jede Minute nach.
 // Stand vom Cloudflare-Worker (tools/cloudflare-worker.js, ~20 s alt) über den von GitHub legen
 // (data/live.json, bis zu 7 min alt). Vom Worker kommt nur der Stand; welches Spiel, Anstoß und
@@ -291,7 +302,7 @@ function nachSpieltag(spiele) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "18.10.2026 f";
+const FASSUNG = "18.10.2026 g";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -427,7 +438,10 @@ function render() {
   const lv = liveAnzeige(mitWorker(L, W), v, now);
   LIVE_POLL = !!lv || imLiveFenster(v, now);
   if (lv) {
-    const tore = lv.tore.map(t => `<li>⚽ ${t.min}${t.plus ? "+" + t.plus : ""}. ${esc(t.name || "Tor")} <span class="muted">(${esc(anzeige(t.heim ? lv.h : lv.a))})</span></li>`).join("");
+    const tore = lv.tore.map(t => {
+      const art = torArt(t.art);
+      return `<li>⚽ ${t.min}${t.plus ? "+" + t.plus : ""}. ${esc(t.name || "Tor")}${art ? ` · <b>${art}</b>` : ""} <span class="muted">(${esc(anzeige(t.heim ? lv.h : lv.a))})</span></li>`;
+    }).join("");
     h += `<section class="card live"><div class="chead"><h2>${lv.laeuft ? `<span class="punkt"></span>Live` : "Endstand laut FuPa"}</h2>
       <div class="hint">${esc(wann(lv.anstoss))}</div></div><div class="cbody">
       <div class="m" style="border:0"><div class="t h wir">${umbruch(anzeige(lv.h))}</div>

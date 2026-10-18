@@ -110,7 +110,9 @@ Grenzen, dem Nutzer gesagt: leer ohne Tickerer, GitHub startet geplante Läufe o
 fragt `WORKER_URL?slug=<FuPa-Slug aus live.json>` alle 20 s, der Worker fragt FuPa höchstens
 alle 20 s je Spiel (egal wie viele zuschauen), schickt CORS `*`, nur Koeppchen-Slugs. `mitWorker()`
 legt seinen Stand über `live.json`; welches Spiel es ist, kommt weiter aus `live.json` (GitHub-
-Lauf). Worker weg → GitHub-Stand. `kuerzen()` im Worker und `liveAus()` im Lauf sind zwei Kopien
+Lauf). Worker weg → GitHub-Stand. Torart im Kasten (`torArt`, vom Nutzer gewünscht): Elfmeter, Eigentor,
+Freistoß, Kopfball aus FuPas `subtype` nach Wortteilen (gesehen: goal_headed, goal_shoot,
+penalty_foul; Eigentor/Freistoß-Namen geraten). `kuerzen()` im Worker und `liveAus()` im Lauf sind zwei Kopien
 derselben Umrechnung, der Test prüft, dass sie gleich rechnen. `WORKER_URL` leer = nur GitHub. Eingerichtet vom Nutzer am 18.10.2026:
 `https://koeppchen-live.rjtp6r9s9h.workers.dev/` (Cloudflare-Konto des Nutzers). Die Domain ist in der Umgebung freigegeben;
 am 18.10. geprüft: liefert 2:1 POST mit drei Toren, CORS `*`, fremder Slug → 400.

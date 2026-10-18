@@ -103,8 +103,18 @@ die App zählt die Minute selbst weiter (`liveZeit`, gedeckelt „45+“/„90+�
 Commit je 5 min. App: LIVE-Kasten oben im Reiter (`liveAnzeige`), nur bei LIVE/POST, weg sobald
 die FLF ein Ergebnis hat oder 4 h nach Anstoß; holt `live.json` jede Minute, solange ein Spiel
 im Fenster ist, und baut dann nur die Minute neu (`#liveZeit`), damit Aufgeklapptes offen bleibt.
-Grenzen, dem Nutzer gesagt: leer ohne Tickerer, GitHub startet geplante Läufe oft verspätet
-(real 5–20 min Verzögerung). FuPa (`www.fupa.net`, `api.fupa.net`) ist in der Umgebung
+Grenzen, dem Nutzer gesagt: leer ohne Tickerer, GitHub startet geplante Läufe oft verspätet.
+**raw.githubusercontent hält Dateien bis 5 min** (`max-age=300`, am 18.10. geprüft: `?t=` hilft
+**nicht**, zweiter Abruf mit anderem `t` war ein Cache-HIT) — über GitHub also 2–7 min Verzögerung.
+**Schneller Weg: Cloudflare Worker** (`tools/cloudflare-worker.js`, vom Nutzer gewünscht): App
+fragt `WORKER_URL?slug=<FuPa-Slug aus live.json>` alle 20 s, der Worker fragt FuPa höchstens
+alle 20 s je Spiel (egal wie viele zuschauen), schickt CORS `*`, nur Koeppchen-Slugs. `mitWorker()`
+legt seinen Stand über `live.json`; welches Spiel es ist, kommt weiter aus `live.json` (GitHub-
+Lauf). Worker weg → GitHub-Stand. `kuerzen()` im Worker und `liveAus()` im Lauf sind zwei Kopien
+derselben Umrechnung, der Test prüft, dass sie gleich rechnen. `WORKER_URL` leer = nur GitHub.
+Last: Seiten kommen über GitHubs CDN; GitHub begrenzt unangemeldete Abrufe je IP — viele Handys
+hinter einer Adresse (Sportplatz-WLAN, Mobilfunk-NAT) könnten anstoßen, nicht geprüft; Rückfall
+ist die Pages-Kopie. FuPa (`www.fupa.net`, `api.fupa.net`) ist in der Umgebung
 freigegeben; `*.fupa.net` griff nicht. FuPa führt nur Seniors (m1, mr1, mr2) und Damen.
 
 Schnittstelle, ausprobiert (Introspektion ist aus, Felder über Fehlermeldungen gefunden):

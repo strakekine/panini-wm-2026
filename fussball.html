@@ -258,6 +258,17 @@ function liveZeit(L, now) {
 }
 
 // Liegt bei diesem Reiter gerade ein Spiel im Live-Fenster? Dann fragt die App jede Minute nach.
+// Stand vom Cloudflare-Worker (tools/cloudflare-worker.js, ~20 s alt) über den von GitHub legen
+// (data/live.json, bis zu 7 min alt). Vom Worker kommt nur der Stand; welches Spiel, Anstoß und
+// Mannschaftsnamen bleiben aus live.json. Passt der Slug nicht (anderes Spiel), gilt GitHub.
+const WORKER_FELDER = ["hs", "as", "section", "period", "running", "minute", "minuteAt", "tore", "ticker"];
+function mitWorker(L, W) {
+  if (!L || !W || W.slug !== L.slug) return L;
+  const neu = { ...L };
+  for (const k of WORKER_FELDER) if (k in W) neu[k] = W[k];
+  return neu;
+}
+
 function imLiveFenster(v, now) {
   return [...v.kommend, ...v.gespielt].some(sp => {
     const a = Date.parse(sp.d);
@@ -280,7 +291,7 @@ function nachSpieltag(spiele) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "18.10.2026 d";
+const FASSUNG = "18.10.2026 e";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -323,6 +334,17 @@ async function appTeilen(b) {
   catch (e) { prompt("Link zum Kopieren:", APP_URL); }
 }
 let D = null, ST = { team: null }, L = null;
+// Adresse des Cloudflare-Workers; leer = nur GitHub (langsamer, aber ohne eigenes Konto).
+const WORKER_URL = "";
+let W = null;
+async function holenWorker() {
+  if (!WORKER_URL || !L || !L.slug) return null;
+  try {
+    const r = await fetch(WORKER_URL + "?slug=" + encodeURIComponent(L.slug), { cache: "no-store" });
+    if (r.ok) return await r.json();
+  } catch (e) {}
+  return null;   // Worker weg → es bleibt beim Stand von GitHub
+}
 const QUELLEN_LIVE = [
   "https://raw.githubusercontent.com/strakekine/panini-wm-2026/main/data/live.json",
   "data/live.json",
@@ -402,7 +424,7 @@ function render() {
   const art = sp => sp.typ === "CUP" ? "Pokal" : sp.typ === "FM" ? "Freundschaftsspiel" : "";
   let h = "";
 
-  const lv = liveAnzeige(L, v, now);
+  const lv = liveAnzeige(mitWorker(L, W), v, now);
   LIVE_POLL = !!lv || imLiveFenster(v, now);
   if (lv) {
     const tore = lv.tore.map(t => `<li>⚽ ${t.min}${t.plus ? "+" + t.plus : ""}. ${esc(t.name || "Tor")} <span class="muted">(${esc(anzeige(t.heim ? lv.h : lv.a))})</span></li>`).join("");
@@ -412,7 +434,7 @@ function render() {
       <div class="stand">${lv.hs ?? "–"} : ${lv.as ?? "–"}</div><div class="t">${umbruch(anzeige(lv.a))}</div></div>
       <div class="zeit" id="liveZeit">${esc(lv.zeit)}</div>
       ${tore ? `<ul class="tore">${tore}</ul>` : ""}
-      <div class="quelle">Liveticker von <a href="${esc(lv.url)}" target="_blank" rel="noopener">FuPa</a>${lv.ticker ? " (" + esc(lv.ticker) + ")" : ""} · bis zu 15 min Verzögerung · offiziell zählt die FLF</div>
+      <div class="quelle">Liveticker von <a href="${esc(lv.url)}" target="_blank" rel="noopener">FuPa</a>${lv.ticker ? " (" + esc(lv.ticker) + ")" : ""} · ${WORKER_URL && W ? "fast live" : "bis zu 7 min Verzögerung"} · offiziell zählt die FLF</div>
       </div></section>`;
   }
 
@@ -506,6 +528,7 @@ async function holenLive() {
 async function aktualisieren() {
   const [d, l] = await Promise.all([holen(), holenLive()]);
   if (l) L = l;
+  if (L && Date.now() < Date.parse(L.anstoss) + 4 * 3600e3) W = (await holenWorker()) || W;
   if (d) {
     D = d;
     try { localStorage.setItem(KEY + "_data", JSON.stringify(d)); } catch (e) {}
@@ -533,14 +556,19 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) aktu
 // Während eines Spiels jede Minute den Live-Stand holen (nur, wenn die App sichtbar ist).
 // Neu gebaut wird nur, wenn sich der Stand geändert hat; sonst nur die Minute, damit nichts
 // Aufgeklapptes (z. B. „Klappt nicht?“) jede Minute wieder zuklappt.
+// Mit Worker alle 20 s (so lange merkt er sich den Stand), sonst jede Minute.
 let LIVE_POLL = false;
 setInterval(async () => {
   if (!LIVE_POLL || document.hidden || !D) return;
-  const l = await holenLive();
-  if (l && JSON.stringify(l) !== JSON.stringify(L)) { L = l; render(); return; }
+  const vorher = JSON.stringify(mitWorker(L, W));
+  const [l, w] = await Promise.all([holenLive(), holenWorker()]);
+  if (l) L = l;
+  if (w) W = w;
+  const jetzt = mitWorker(L, W);
+  if (JSON.stringify(jetzt) !== vorher) { render(); return; }
   const el = document.getElementById("liveZeit");
-  if (el && L) el.textContent = liveZeit(L, Date.now());
-}, 60e3);
+  if (el && jetzt) el.textContent = liveZeit(jetzt, Date.now());
+}, WORKER_URL ? 20e3 : 60e3);
 
 document.getElementById("logo").src = LOGO;
 load();

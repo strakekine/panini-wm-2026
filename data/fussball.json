@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-18T09:24:32.362Z",
+ "stand": "2026-10-18T16:10:15.799Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -1606,9 +1606,9 @@
       "id": 45070,
       "n": "FC Mamer 32"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 1,
+     "as": 2,
+     "gespielt": true,
      "forfait": false,
      "ort": "Luxembourg-Cents"
     },

@@ -84,8 +84,14 @@ Abschlusshinweis, 3-h-Grenze für Spiele ohne Ergebnis, Klassenwechsel. Schneide
 Abruf live: `NODE_USE_ENV_PROXY=1 node tools/fussball.mjs` (in der Cloud-Umgebung braucht Node
 den Proxy ausdrücklich).
 
-**Offen:** Scheduled Actions schaltet GitHub nach 60 Tagen ohne Aktivität im Repo ab — in der
-Winterpause möglich. Dann im Actions-Tab wieder einschalten. Am iPhone noch nicht ausprobiert.
+**Wach halten:** GitHub schaltet Zeitpläne nach 60 Tagen ohne Repo-Aktivität ab; Abrufe ohne
+Commit zählen nicht (Winterpause). Darum schaltet sich die Action am Ende jedes Laufs per
+`gh api -X PUT …/workflows/fussball.yml/enable` selbst wieder ein (`actions: write`), ohne
+Leer-Commits. Dass das die Frist zurücksetzt, ist übernommen (keepalive-workflow), nicht über
+60 Tage selbst geprüft. Fällt sie trotzdem aus: Actions-Tab → „Fussball-Daten“ → Enable.
+`stand` in der JSON ist der Zeitpunkt der letzten **Änderung** (geschrieben wird nur bei
+Änderung), die App sagt darum „zuletzt geändert“, nicht „abgerufen“.
+Am iPhone noch nicht ausprobiert.
 
 ## Teigplaner (`pizza.html`) — Stand und Regeln
 

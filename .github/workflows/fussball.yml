@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: write
+  actions: write   # für das Wach-halten unten
 
 concurrency:
   group: fussball
@@ -42,3 +43,12 @@ jobs:
             sleep $((i * 10))
           done
           exit 1
+      # GitHub schaltet Zeitpläne nach 60 Tagen ohne Repo-Aktivität ab, und Abfragen allein
+      # zählt nicht — in der Winterpause ändert sich bei der FLF nichts, also kein Commit.
+      # Selbst wieder einschalten setzt die Frist zurück (wie gautamkrishnar/keepalive-workflow),
+      # ohne Leer-Commits.
+      - name: Zeitplan wach halten
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/fussball.yml/enable"

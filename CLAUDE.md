@@ -85,6 +85,18 @@ Schnittstelle, ausprobiert (Introspektion ist aus, Felder über Fehlermeldungen 
   festgelegt, wird nicht angezeigt.
 - Die Seite hat beim Ausprobieren einmal die Verbindung gekappt: Abfragen mit 1 s Pause, Wiederholung.
 
+**Kalender-Abo** (vom Nutzer gewünscht; Abo statt Export, weil verschobene Spiele sonst nicht
+mitwandern): Der Abruf schreibt je Reiter `kalender/<reiter>.ics` (z. B. `u13-1.ics`), die App
+verlinkt `webcal://strakekine.github.io/panini-wm-2026/kalender/…` — **GitHub Pages** (liefert
+`text/calendar`), nicht raw.githubusercontent. Darunter „Klappt nicht?“ mit der https-Adresse zum
+Kopieren (Einstellungen → Kalender → Accounts → Andere → Kalenderabo). UID = FLF-Spiel-ID,
+`DTSTAMP` fest (sonst neuer Commit bei jedem Lauf), Uhrzeit 00:00 → ganztägig, Dauer Seniors 2 h,
+U9/U11 1:30, sonst 1:45. **Welche Spiele zu einem Reiter gehören, steht nur in
+`tools/fussball.mjs`** (`reiter`, `mit`, `eigeneSpiele`) — App und Kalender lesen dasselbe.
+**Am iPhone noch nicht geprüft**, ob `webcal://` aus der Home-Bildschirm-App die Kalender-App
+öffnet und ob Pages nach den Commits der Action neu baut (sonst blieben die Abos auf dem Stand
+des letzten eigenen Pushs).
+
 **Klasse wechselt während der Saison** (Phase 1 → 2): gesucht wird nach dem Verein, die Klassen
 ergeben sich aus den Spielen. Die zuletzt begonnene Ligaklasse ist die aktuelle, die anderen
 „früher“. Ist die aktuelle fertig gespielt und noch kein neues Ligaspiel da, steht oben der

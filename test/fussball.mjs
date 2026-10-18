@@ -7,14 +7,14 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { aufbereiten, spiel, CLUB } from "../tools/fussball.mjs";
+import { aufbereiten, spiel, reiter, ics, eigeneSpiele, CLUB } from "../tools/fussball.mjs";
 
 const hier = path.dirname(fileURLToPath(import.meta.url));
 const src = fs.readFileSync(path.join(hier, "..", "fussball.html"), "utf8");
 const i = src.indexOf("==== Logik"), j = src.indexOf("==== Oberfläche");
 if (i < 0 || j < 0) throw new Error("Abschnittsmarken Logik/Oberfläche nicht gefunden");
 const M = new Function(src.slice(src.lastIndexOf("//", i), src.lastIndexOf("//", j)) + `
-  return { REGELN, klasseVon, zonen, ausgang, aufteilen, reiter, anzeige, sicht, nachSpieltag, roem };`)();
+  return { REGELN, klasseVon, zonen, ausgang, aufteilen, anzeige, sicht, nachSpieltag, roem };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text) { n++; if (!bed) { fehler++; console.log("✗ " + text); } }
@@ -91,9 +91,11 @@ gleich(tabs.map(t => t.id), [45396, 45397], "Reiter nur für Mannschaften mit Li
 gleich(verein.map(t => t.id), [45398, 45400], "Pokalmannschaften ohne I/II zählen zum Verein");
 ok(M.anzeige("FC Koeppchen Wormeldange II") === "Koeppchen II", "eigener Name gekürzt");
 ok(M.anzeige("US Sandweiler") === "US Sandweiler", "Gegner unverändert");
-gleich(D.teams.map(t => M.reiter(t, D.verein.n)), ["U13", "U13 1", "U13 2", "U15"], "Reiter-Beschriftung U13 1 / U13 2 / U15");
+gleich(D.teams.map(t => reiter(t)), ["U13", "U13 1", "U13 2", "U15"], "Reiter-Beschriftung U13 1 / U13 2 / U15");
+gleich(D.teams.map(t => t.reiter || null), [null, "U13 1", "U13 2", null], "Reiter nur für Mannschaften mit Liga");
+gleich(D.teams.find(t => t.id === 45396).mit, [45398], "U13-Pokal hängt an U13 1, nicht der U15-Pokal");
 gleich([{ n: "FC Koeppchen Wormeldange", kat: "Seniors", ohne: 1 }, { n: "FC Koeppchen Wormeldange I", kat: "Seniors", plus: 1 },
-        { n: "FC Koeppchen Wormeldange II", kat: "Seniors", plus: 1 }].map(t => M.reiter(t, D.verein.n)),
+        { n: "FC Koeppchen Wormeldange II", kat: "Seniors", plus: 1 }].map(t => reiter(t)),
   ["Seniors 1", "Seniors 2", "Seniors 3"], "Seniors 1, Réserves als Seniors 2 und 3");
 
 const jetzt = Date.parse("2026-10-18T10:00:00+02:00");
@@ -142,6 +144,26 @@ ok(v4.status === null, "laufende Phase: kein Abschlusshinweis");
 }
 
 gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [[1, 2], [5, 1]], "Spieltage gruppiert");
+
+/* --- Kalender --- */
+{
+  const t1 = D.teams.find(t => t.id === 45396);
+  ok(t1.datei === "u13-1.ics", "Dateiname aus dem Reiter");
+  const k = ics(D, t1);
+  ok(k.startsWith("BEGIN:VCALENDAR\r\n") && k.endsWith("END:VCALENDAR\r\n"), "Kalender mit CRLF");
+  gleich((k.match(/BEGIN:VEVENT/g) || []).length, eigeneSpiele(D, t1).length, "ein Termin je eigenem Spiel samt Pokal");
+  ok(k.includes("UID:flf-" + s5.match.id + "@fc-koeppchen"), "UID = FLF-Spiel-ID");
+  ok(k.includes("DTSTART:20261024T120000Z") && k.includes("DTEND:20261024T134500Z"), "Pokal 14:00 Ortszeit = 12:00 UTC, 1:45 h");
+  ok(k.includes("SUMMARY:⚽ Koeppchen I – Gegner 2 9:0"), "Ergebnis im Titel");
+  ok(k.includes("(Pokal)"), "Pokal gekennzeichnet");
+  ok(k.split("\r\n").every(z => Buffer.byteLength(z, "utf8") <= 75), "Zeilen höchstens 75 Byte");
+  ok(ics(D, t1) === k, "gleicher Stand → gleiche Datei (kein Commit bei jedem Lauf)");
+  // Uhrzeit offen (00:00 Ortszeit) → ganztägig.
+  const s9 = roh(DIV4, "CC", "2026-11-07T00:00:00+01:00", K1, G(13), null, null, { tag: 6 });
+  const D9 = aufbereiten({ saison: { id: "20262027", name: "Saison 2026-2027" }, vereinsSpiele: [s1, s9],
+    klassen: { 19189: { spiele: [s1, s9], tabelle: [] } } });
+  ok(ics(D9, D9.teams.find(t => t.id === 45396)).includes("DTSTART;VALUE=DATE:20261107\r\nDTEND;VALUE=DATE:20261108"), "Uhrzeit offen → ganztägig");
+}
 
 console.log(fehler ? `${fehler} von ${n} Prüfungen fehlgeschlagen` : `alle ${n} Prüfungen grün`);
 process.exit(fehler ? 1 : 0);

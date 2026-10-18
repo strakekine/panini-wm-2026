@@ -1,5 +1,6 @@
 # Holt Spiele und Tabellen der U13 Minimes des FC Koeppchen von der FLF
-# und legt sie als data/fussball.json ab (gelesen von fussball.html).
+# und legt sie als data/fussball.json ab (gelesen von fussball.html), dazu je Mannschaft
+# ein Kalender-Abo unter kalender/*.ics.
 name: Fussball-Daten
 
 on:
@@ -36,7 +37,7 @@ jobs:
       - run: node tools/fussball.mjs
       - name: Commit, falls sich etwas geändert hat
         run: |
-          git add data/fussball.json
+          git add data/fussball.json kalender
           if git diff --cached --quiet; then echo "keine Änderung"; exit 0; fi
           git config user.name "fussball-abruf"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

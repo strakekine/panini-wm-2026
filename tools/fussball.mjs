@@ -5,7 +5,7 @@
 // Gesucht wird nach dem Verein, nicht nach einer Klasse: Steigt eine Mannschaft auf,
 // erscheint die neue Klasse mit ihrem ersten Spiel von selbst.
 
-import { writeFileSync, readFileSync, existsSync } from "node:fs";
+import { writeFileSync, readFileSync, existsSync, mkdirSync, readdirSync, unlinkSync } from "node:fs";
 
 export const API = "https://extranet.flf.lu/api/graphql";
 export const CLUB = 1003703;          // Wormeldange FC Koeppchen
@@ -22,6 +22,8 @@ export const AGES = [
   { id: 9999, kat: "Seniors", n: "Seniors Réserves", plus: 1 },
 ];
 const OUT = new URL("../data/fussball.json", import.meta.url);
+const KAL = new URL("../kalender/", import.meta.url);
+export const VEREIN = "FC Koeppchen Wormeldange";
 
 const M_FIELDS = `match{ id gameday matchDate isPlayed isForfait homeScore awayScore finalHomeScore finalAwayScore finalScoreComment }
   division{ id name showResult showRanking } matchType{ id }
@@ -86,6 +88,74 @@ export function tabelle(rankings) {
     .sort((a, b) => a.pl - b.pl);
 }
 
+// Reiter: „U13 1“, „U13 2“ (vom Nutzer so gewünscht, arabisch statt I/II). Réserves I/II
+// heißen „Seniors 2/3“ (`plus`), die erste Mannschaft ohne I/II „Seniors 1“ (`ohne`).
+const ARAB = { I: 1, II: 2, III: 3, IV: 4, V: 5 };
+export function reiter(t) {
+  const r = t.n.replace(VEREIN, "").trim();
+  const nr = ARAB[r] ? ARAB[r] + (t.plus || 0) : r || t.ohne;
+  return [t.kat, nr].filter(Boolean).join(" ") || t.n;
+}
+
+// Alle Spiele einer Reiter-Mannschaft (eigene + angehängte Pokalmannschaften), nach Datum.
+export function eigeneSpiele(D, t) {
+  const ids = new Set([t.id, ...(t.mit || [])]);
+  const aus = [];
+  for (const id of new Set(D.teams.filter(o => ids.has(o.id)).flatMap(o => o.klassen))) {
+    const k = D.klassen[id];
+    for (const sp of k.spiele)
+      if (ids.has(sp.h.id) || ids.has(sp.a.id)) aus.push({ ...sp, klasse: k.n, typ: k.typ, erg: k.ergebnisse });
+  }
+  return aus.sort((a, b) => a.d.localeCompare(b.d));
+}
+
+// ---- Kalender-Abo (iCalendar, RFC 5545) ----
+// Je Reiter eine Datei kalender/<reiter>.ics, abonniert über webcal:// auf GitHub Pages.
+// UID = FLF-Spiel-ID: verschiebt die FLF ein Spiel, wandert der Termin im Kalender mit.
+// DTSTAMP fest, sonst änderte sich die Datei bei jedem Lauf und die Action committete immer.
+const icsText = s => String(s).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+const utc = iso => new Date(iso).toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
+const ortsZeit = iso => new Date(iso).toLocaleString("sv-SE", { timeZone: "Europe/Luxembourg" }); // "2026-10-24 14:00:00"
+// Zeilen über 75 Byte falten (Pflicht laut RFC, iOS ist da gnädig, andere nicht).
+function falten(z) {
+  const b = Buffer.from(z, "utf8");
+  if (b.length <= 75) return z;
+  const teile = []; let rest = z, erste = true;
+  while (Buffer.byteLength(rest, "utf8") > (erste ? 75 : 74)) {
+    let n = erste ? 75 : 74, s = "";
+    for (const ch of rest) { if (Buffer.byteLength(s + ch, "utf8") > n) break; s += ch; }
+    teile.push((erste ? "" : " ") + s); rest = rest.slice(s.length); erste = false;
+  }
+  teile.push(" " + rest);
+  return teile.join("\r\n");
+}
+
+export function ics(D, t) {
+  const kurz = n => n.replace(VEREIN, "Koeppchen");
+  const dauerMin = t.kat === "Seniors" ? 120 : t.kat === "U9" || t.kat === "U11" ? 90 : 105;
+  const z = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//FC Koeppchen//fussball.html//DE", "CALSCALE:GREGORIAN",
+             "METHOD:PUBLISH", `X-WR-CALNAME:${icsText("FC Koeppchen " + t.reiter)}`, "X-WR-TIMEZONE:Europe/Luxembourg",
+             "REFRESH-INTERVAL;VALUE=DURATION:PT3H", "X-PUBLISHED-TTL:PT3H"];
+  for (const sp of eigeneSpiele(D, t)) {
+    const art = sp.typ === "CUP" ? " (Pokal)" : sp.typ === "FM" ? " (Freundschaftsspiel)" : "";
+    const erg = sp.erg && sp.gespielt && sp.hs != null ? ` ${sp.hs}:${sp.as}` : "";
+    z.push("BEGIN:VEVENT", `UID:flf-${sp.id}@fc-koeppchen`, "DTSTAMP:20260701T000000Z");
+    // 00:00 heißt bei der FLF „Uhrzeit noch offen“ → ganztägig.
+    if (ortsZeit(sp.d).endsWith(" 00:00:00")) {
+      const tag = ortsZeit(sp.d).slice(0, 10).replace(/-/g, "");
+      const n = new Date(Date.UTC(+tag.slice(0, 4), +tag.slice(4, 6) - 1, +tag.slice(6) + 1)).toISOString().slice(0, 10).replace(/-/g, "");
+      z.push(`DTSTART;VALUE=DATE:${tag}`, `DTEND;VALUE=DATE:${n}`);
+    } else {
+      z.push(`DTSTART:${utc(sp.d)}`, `DTEND:${utc(new Date(Date.parse(sp.d) + dauerMin * 60e3).toISOString())}`);
+    }
+    z.push(`SUMMARY:${icsText(`⚽ ${kurz(sp.h.n)} – ${kurz(sp.a.n)}${erg}${art}`)}`);
+    if (sp.ort) z.push(`LOCATION:${icsText(sp.ort)}`);
+    z.push(`DESCRIPTION:${icsText(sp.klasse + (sp.tag ? `, Spieltag ${sp.tag}` : ""))}`, "END:VEVENT");
+  }
+  z.push("END:VCALENDAR");
+  return z.map(falten).join("\r\n") + "\r\n";
+}
+
 // Vereinsspiele + je Klasse alle Spiele und Tabelle → das, was die App liest.
 // vereinsSpiele tragen `ak` = Index in AGES (aus welcher Abfrage sie kommen).
 export function aufbereiten({ saison, vereinsSpiele, klassen }) {
@@ -112,10 +182,23 @@ export function aufbereiten({ saison, vereinsSpiele, klassen }) {
   }
   for (const t of teams.values()) t.klassen.sort((a, b) => div[a].start.localeCompare(div[b].start));
 
+  // Mannschaften mit Ligaspielen bekommen einen Reiter (und einen Kalender). Pokalmannschaften
+  // ohne Liga hängen sich an (`mit`): ohne I/II an alle derselben Altersklasse (U13-Pokal), mit
+  // I/II nur an die gleichnamige (Réserves-Pokal). Steht hier, damit App und Kalender dieselbe
+  // Regel haben.
+  const alle = [...teams.values()];
+  const liga = t => t.klassen.some(id => div[id].typ === "CC");
+  const zusatz = t => t.n.replace(VEREIN, "").trim();
+  for (const t of alle.filter(liga)) {
+    t.reiter = reiter(t);
+    t.datei = t.reiter.toLowerCase().replace(/\s+/g, "-") + ".ics";
+    t.mit = alle.filter(o => !liga(o) && o.ak === t.ak && (!zusatz(o) || zusatz(o) === zusatz(t))).map(o => o.id);
+  }
+
   return {
     stand: new Date().toISOString(),
     saison: { id: saison.id, n: saison.name },
-    verein: { id: CLUB, n: "FC Koeppchen Wormeldange" },
+    verein: { id: CLUB, n: VEREIN },
     teams: [...teams.values()].sort((a, b) => a.ak - b.ak || a.n.localeCompare(b.n)),
     klassen: div,
   };
@@ -165,4 +248,20 @@ async function main() {
   console.log("geschrieben:", neu.teams.map(t => t.n).join(", "), "·", Object.keys(neu.klassen).length, "Klassen");
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main().catch(e => { console.error(e); process.exit(1); });
+// Kalender werden immer neu geschrieben (aus dem aktuellen Stand); unveränderte Dateien
+// sind Byte für Byte gleich, git sieht dann keine Änderung.
+function kalender() {
+  const D = JSON.parse(readFileSync(OUT, "utf8"));
+  mkdirSync(KAL, { recursive: true });
+  const soll = new Set();
+  for (const t of D.teams.filter(t => t.datei)) {
+    writeFileSync(new URL(t.datei, KAL), ics(D, t));
+    soll.add(t.datei);
+  }
+  // Mannschaft weg (neue Saison) → Datei weg; ein bestehendes Abo zeigt dann nichts mehr.
+  for (const f of readdirSync(KAL)) if (f.endsWith(".ics") && !soll.has(f)) unlinkSync(new URL(f, KAL));
+  console.log("Kalender:", [...soll].join(", "));
+}
+
+if (import.meta.url === `file://${process.argv[1]}`)
+  main().then(kalender).catch(e => { console.error(e); process.exit(1); });

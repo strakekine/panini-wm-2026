@@ -112,8 +112,8 @@ alle 20 s je Spiel (egal wie viele zuschauen), schickt CORS `*`, nur Koeppchen-S
 legt seinen Stand über `live.json`; welches Spiel es ist, kommt weiter aus `live.json` (GitHub-
 Lauf). Worker weg → GitHub-Stand. `kuerzen()` im Worker und `liveAus()` im Lauf sind zwei Kopien
 derselben Umrechnung, der Test prüft, dass sie gleich rechnen. `WORKER_URL` leer = nur GitHub. Eingerichtet vom Nutzer am 18.10.2026:
-`https://koeppchen-live.rjtp6r9s9h.workers.dev/` (Cloudflare-Konto des Nutzers; `workers.dev` ist in
-der Cloud-Umgebung gesperrt, Prüfen geht nur über den Nutzer oder eine Action).
+`https://koeppchen-live.rjtp6r9s9h.workers.dev/` (Cloudflare-Konto des Nutzers). Die Domain ist in der Umgebung freigegeben;
+am 18.10. geprüft: liefert 2:1 POST mit drei Toren, CORS `*`, fremder Slug → 400.
 Last: Seiten kommen über GitHubs CDN; GitHub begrenzt unangemeldete Abrufe je IP — viele Handys
 hinter einer Adresse (Sportplatz-WLAN, Mobilfunk-NAT) könnten anstoßen, nicht geprüft; Rückfall
 ist die Pages-Kopie. FuPa (`www.fupa.net`, `api.fupa.net`) ist in der Umgebung

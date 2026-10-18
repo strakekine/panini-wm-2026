@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-18T18:40:59.438Z",
+ "stand": "2026-10-18T20:41:20.963Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -322,18 +322,30 @@
     },
     {
      "pl": 10,
-     "id": 44694,
-     "n": "US Feulen",
-     "sp": 8,
+     "id": 45031,
+     "n": "Jeunesse Canach",
+     "sp": 9,
      "s": 3,
-     "u": 1,
+     "u": 2,
      "nl": 4,
-     "t": 17,
-     "g": 16,
-     "pkt": 10
+     "t": 18,
+     "g": 22,
+     "pkt": 11
     },
     {
      "pl": 11,
+     "id": 44694,
+     "n": "US Feulen",
+     "sp": 9,
+     "s": 3,
+     "u": 1,
+     "nl": 5,
+     "t": 18,
+     "g": 20,
+     "pkt": 10
+    },
+    {
+     "pl": 12,
      "id": 44914,
      "n": "Avenir Beggen",
      "sp": 9,
@@ -345,7 +357,7 @@
      "pkt": 9
     },
     {
-     "pl": 12,
+     "pl": 13,
      "id": 45208,
      "n": "FC Luxembourg City",
      "sp": 9,
@@ -357,7 +369,7 @@
      "pkt": 9
     },
     {
-     "pl": 13,
+     "pl": 14,
      "id": 44991,
      "n": "FC Mondercange",
      "sp": 9,
@@ -367,18 +379,6 @@
      "t": 12,
      "g": 19,
      "pkt": 9
-    },
-    {
-     "pl": 14,
-     "id": 45031,
-     "n": "Jeunesse Canach",
-     "sp": 8,
-     "s": 2,
-     "u": 2,
-     "nl": 4,
-     "t": 14,
-     "g": 21,
-     "pkt": 8
     },
     {
      "pl": 15,
@@ -1696,9 +1696,9 @@
       "id": 45031,
       "n": "Jeunesse Canach"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 1,
+     "as": 4,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain In Bertzent (Niederfeulen, synth.)"
     },

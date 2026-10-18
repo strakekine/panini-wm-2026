@@ -295,11 +295,36 @@ function ereignisListe(lv) {
 // (data/live.json, bis zu 7 min alt). Vom Worker kommt nur der Stand; welches Spiel, Anstoß und
 // Mannschaftsnamen bleiben aus live.json. Passt der Slug nicht (anderes Spiel), gilt GitHub.
 const WORKER_FELDER = ["hs", "as", "section", "period", "running", "minute", "minuteAt", "tore", "karten", "ticker"];
+// Passt W zu L? Über den FuPa-Slug, oder — wenn der GitHub-Lauf noch keinen geliefert hat — über
+// das FLF-Spiel, für das die App den Worker per Anstoßzeit gefragt hat (`W.fuer`).
 function mitWorker(L, W) {
-  if (!L || !W || W.slug !== L.slug) return L;
+  if (!L || !W) return L;
+  if (L.slug ? W.slug !== L.slug : W.fuer !== L.flfId) return L;
   const neu = { ...L };
   for (const k of WORKER_FELDER) if (k in W) neu[k] = W[k];
+  if (!L.slug && W.slug) { neu.slug = W.slug; neu.url = "https://www.fupa.net/match/" + W.slug; }
   return neu;
+}
+
+// Live gibt es nur für diesen Reiter (FuPa tickert nur dort; der Worker sucht nur dessen Spiele).
+const LIVE_REITER = "Seniors 1";
+
+// Das Spiel dieses Reiters, das gerade im Live-Fenster liegt, oder null.
+function liveSpiel(v, now) {
+  if (!v || v.team.reiter !== LIVE_REITER) return null;
+  return [...v.kommend, ...v.gespielt].find(sp => {
+    const a = Date.parse(sp.d);
+    return now >= a - LIVE_FENSTER.vor && now <= a + LIVE_FENSTER.nach;
+  }) || null;
+}
+
+// Grundlage für den Kasten: live.json, wenn sie dieses Spiel meint — sonst ein leeres Gerüst aus
+// dem FLF-Spielplan, das der Worker füllt. So braucht der Kasten den GitHub-Lauf nicht.
+function liveBasis(L, sp) {
+  if (!sp) return L;
+  if (L && L.flfId === sp.id) return L;
+  return { flfId: sp.id, slug: null, url: null, anstoss: sp.d, h: sp.h.n, a: sp.a.n,
+           section: "", tore: [], karten: [] };
 }
 
 function imLiveFenster(v, now) {
@@ -324,7 +349,7 @@ function nachSpieltag(spiele) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "18.10.2026 i";
+const FASSUNG = "18.10.2026 j";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -370,11 +395,16 @@ let D = null, ST = { team: null }, L = null;
 // Adresse des Cloudflare-Workers; leer = nur GitHub (langsamer, aber ohne eigenes Konto).
 const WORKER_URL = "https://koeppchen-live.rjtp6r9s9h.workers.dev/";
 let W = null;
+// Mit Slug, wenn live.json schon einen fürs laufende Spiel hat, sonst mit der Anstoßzeit aus dem
+// FLF-Spielplan (der Worker sucht dann selbst bei FuPa).
+let LIVE_SP = null;
 async function holenWorker() {
-  if (!WORKER_URL || !L || !L.slug) return null;
+  if (!WORKER_URL || !LIVE_SP) return null;
+  const sp = LIVE_SP, b = liveBasis(L, sp);
+  const q = b.slug ? "?slug=" + encodeURIComponent(b.slug) : "?anstoss=" + encodeURIComponent(sp.d);
   try {
-    const r = await fetch(WORKER_URL + "?slug=" + encodeURIComponent(L.slug), { cache: "no-store" });
-    if (r.ok) return await r.json();
+    const r = await fetch(WORKER_URL + q, { cache: "no-store" });
+    if (r.ok) return { ...(await r.json()), fuer: sp.id };
   } catch (e) {}
   return null;   // Worker weg → es bleibt beim Stand von GitHub
 }
@@ -457,7 +487,8 @@ function render() {
   const art = sp => sp.typ === "CUP" ? "Pokal" : sp.typ === "FM" ? "Freundschaftsspiel" : "";
   let h = "";
 
-  const lv = liveAnzeige(mitWorker(L, W), v, now);
+  LIVE_SP = liveSpiel(v, now);
+  const lv = liveAnzeige(mitWorker(liveBasis(L, LIVE_SP), W), v, now);
   LIVE_POLL = !!lv || imLiveFenster(v, now);
   if (lv) {
     const tore = ereignisListe(lv).map(e => {
@@ -570,7 +601,6 @@ async function holenLive() {
 async function aktualisieren() {
   const [d, l] = await Promise.all([holen(), holenLive()]);
   if (l) L = l;
-  if (L && Date.now() < Date.parse(L.anstoss) + 4 * 3600e3) W = (await holenWorker()) || W;
   if (d) {
     D = d;
     try { localStorage.setItem(KEY + "_data", JSON.stringify(d)); } catch (e) {}
@@ -578,13 +608,18 @@ async function aktualisieren() {
     document.getElementById("main").innerHTML = `<div class="note down">Keine Verbindung und noch kein gespeicherter Stand.</div>`;
     return;
   }
-  render();
+  render();   // setzt LIVE_SP für den Reiter, der gerade offen ist
+  if (LIVE_SP) { const w = await holenWorker(); if (w) { W = w; render(); } }
 }
 
 document.addEventListener("click", e => {
   const b = e.target.closest("button");
   if (!b) return;
-  if (b.dataset.t) { ST.team = +b.dataset.t; persist(); render(); window.scrollTo(0, 0); }
+  if (b.dataset.t) {
+    ST.team = +b.dataset.t; persist(); render(); window.scrollTo(0, 0);
+    // Live-Reiter gewählt: Worker sofort fragen, nicht erst beim nächsten 20-s-Takt.
+    if (LIVE_SP) holenWorker().then(w => { if (w) { W = w; render(); } });
+  }
   else if (b.id === "teilen") appTeilen(b);
   else if (b.dataset.copy) {
     const fertig = () => { b.textContent = "Kopiert ✓"; };
@@ -602,11 +637,11 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) aktu
 let LIVE_POLL = false;
 setInterval(async () => {
   if (!LIVE_POLL || document.hidden || !D) return;
-  const vorher = JSON.stringify(mitWorker(L, W));
+  const vorher = JSON.stringify(mitWorker(liveBasis(L, LIVE_SP), W));
   const [l, w] = await Promise.all([holenLive(), holenWorker()]);
   if (l) L = l;
   if (w) W = w;
-  const jetzt = mitWorker(L, W);
+  const jetzt = mitWorker(liveBasis(L, LIVE_SP), W);
   if (JSON.stringify(jetzt) !== vorher) { render(); return; }
   const el = document.getElementById("liveZeit");
   if (el && jetzt) el.textContent = liveZeit(jetzt, Date.now());

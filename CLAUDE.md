@@ -107,7 +107,13 @@ Grenzen, dem Nutzer gesagt: leer ohne Tickerer, GitHub startet geplante Läufe o
 **raw.githubusercontent hält Dateien bis 5 min** (`max-age=300`, am 18.10. geprüft: `?t=` hilft
 **nicht**, zweiter Abruf mit anderem `t` war ein Cache-HIT) — über GitHub also 2–7 min Verzögerung.
 **Schneller Weg: Cloudflare Worker** (`tools/cloudflare-worker.js`, vom Nutzer gewünscht): App
-fragt `WORKER_URL?slug=<FuPa-Slug aus live.json>` alle 20 s, der Worker fragt FuPa höchstens
+fragt `WORKER_URL?slug=<FuPa-Slug aus live.json>` alle 20 s — **oder, wenn live.json fürs laufende
+Spiel noch nichts hat, `?anstoss=<FLF-Anstoß>`**: Dann sucht der Worker selbst (Vereinsseite →
+Teamseite → `passendesSpiel`, dritte Kopie, Test prüft; Saison aus dem Datum, ab Juli neu; nur
+±36 h um jetzt; Fund 6 h gemerkt). `liveSpiel()` nimmt das Spiel aus dem FLF-Spielplan, nur für
+Reiter „Seniors 1“; `liveBasis()` baut daraus ein Gerüst, `mitWorker()` füllt es (`W.fuer` =
+FLF-Spiel-ID). Damit hängt der Kasten nicht mehr am pünktlichen Start des GitHub-Laufs (vom
+Nutzer gefragt); der Lauf bleibt Rückfall. Der Worker fragt FuPa der Worker fragt FuPa höchstens
 alle 20 s je Spiel (egal wie viele zuschauen), schickt CORS `*`, nur Koeppchen-Slugs. `mitWorker()`
 legt seinen Stand über `live.json`; welches Spiel es ist, kommt weiter aus `live.json` (GitHub-
 Lauf). Worker weg → GitHub-Stand. Karten im Kasten (`kartenArt`, `ereignisListe`, vom Nutzer gewünscht): FuPa führt sie in

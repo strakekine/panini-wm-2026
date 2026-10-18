@@ -9,14 +9,14 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { aufbereiten, spiel, reiter, ics, eigeneSpiele, CLUB } from "../tools/fussball.mjs";
 import { liveAus, gleich as liveGleich, spielJetzt, naechstesSpiel, passendesSpiel } from "../tools/fussball-live.mjs";
-import { kuerzen } from "../tools/cloudflare-worker.js";
+import { kuerzen, passendesSpiel as wPassend, saisonVon } from "../tools/cloudflare-worker.js";
 
 const hier = path.dirname(fileURLToPath(import.meta.url));
 const src = fs.readFileSync(path.join(hier, "..", "fussball.html"), "utf8");
 const i = src.indexOf("==== Logik"), j = src.indexOf("==== Oberfläche");
 if (i < 0 || j < 0) throw new Error("Abschnittsmarken Logik/Oberfläche nicht gefunden");
 const M = new Function(src.slice(src.lastIndexOf("//", i), src.lastIndexOf("//", j)) + `
-  return { kartenArt, ereignisListe, torArt, mitWorker, liveAnzeige, liveZeit, imLiveFenster, REGELN, klasseVon, zonen, ausgang, aufteilen, anzeige, sicht, nachSpieltag, roem };`)();
+  return { liveSpiel, liveBasis, kartenArt, ereignisListe, torArt, mitWorker, liveAnzeige, liveZeit, imLiveFenster, REGELN, klasseVon, zonen, ausgang, aufteilen, anzeige, sicht, nachSpieltag, roem };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text) { n++; if (!bed) { fehler++; console.log("✗ " + text); } }
@@ -222,6 +222,10 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(passendesSpiel(fs, "2026-10-18T16:00:00+02:00").slug === "a", "FuPa-Spiel bei gleicher Anstoßzeit");
   ok(passendesSpiel(fs, "2026-10-18T16:30:00+02:00").slug === "a", "Verlegung um 30 min wird noch gefunden");
   ok(passendesSpiel(fs, "2026-10-19T16:00:00+02:00") === null, "anderer Tag: nicht dasselbe Spiel");
+  for (const z of ["2026-10-18T16:00:00+02:00", "2026-10-18T16:30:00+02:00", "2026-10-19T16:00:00+02:00"])
+    ok(wPassend(fs, z)?.slug === passendesSpiel(fs, z)?.slug, "Worker sucht wie der GitHub-Lauf: " + z);
+  gleich([saisonVon("2026-10-18T16:00:00+02:00"), saisonVon("2027-03-07T16:00:00+01:00"), saisonVon("2027-07-01T12:00:00+02:00")],
+    ["2026-27", "2026-27", "2027-28"], "Saison aus dem Anstoß (neue ab Juli)");
   const vS = M.sicht(DS, 44831, t0);
   const a = M.liveAnzeige(Lv, vS, t0 + 7 * 60e3);
   ok(a && a.laeuft && a.zeit === "78'", "LIVE-Kasten, Minute zählt weiter (71 + 7)");
@@ -246,6 +250,17 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(M.mitWorker(Lv, Wk).hs === 2 && M.mitWorker(Lv, Wk).h === Lv.h, "Worker-Stand gilt, Namen bleiben aus live.json");
   ok(M.mitWorker(Lv, { ...Wk, slug: "anderes-spiel" }).hs === 1, "Worker zu anderem Spiel wird ignoriert");
   ok(M.mitWorker(Lv, null) === Lv, "ohne Worker gilt GitHub");
+  // Ohne GitHub-Lauf: Gerüst aus dem FLF-Spielplan, Worker per Anstoßzeit gefragt.
+  const spS = M.liveSpiel(vS, t0);
+  ok(spS && spS.id === flf.id, "laufendes Spiel der Seniors 1 aus dem Spielplan");
+  ok(M.liveSpiel(M.sicht(D, 45396, t0), t0) === null, "kein Live für U13");
+  const b0 = M.liveBasis(null, spS);
+  ok(b0.slug === null && b0.flfId === flf.id && b0.h === flf.h.n, "Gerüst ohne live.json");
+  ok(M.liveBasis({ ...Lv, flfId: 1 }, spS).slug === null, "live.json vom letzten Spiel gilt nicht");
+  const mw = M.mitWorker(b0, { ...Wk, fuer: flf.id });
+  ok(mw.hs === 2 && mw.slug === Wk.slug && /fupa\.net\/match\//.test(mw.url), "Worker füllt das Gerüst samt Slug");
+  ok(M.mitWorker(b0, { ...Wk, fuer: 999 }).hs === undefined, "Worker-Antwort für ein anderes Spiel zählt nicht");
+  ok(M.liveAnzeige(mw, vS, t0) && M.liveAnzeige(b0, vS, t0) === null, "Kasten erst mit Worker-Daten");
   gleich(["penalty_foul", "goal_headed", "goal_shoot", "goal_own_goal", "goal_free_kick", "penalty_shootout",
           "goal_scrounger", "goal_distance_shoot", ""].map(M.torArt),
     ["Elfmeter", "Kopfball", "", "Eigentor", "Freistoß", "Elfmeterschießen", "Abstauber", "Fernschuss", ""],

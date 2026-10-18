@@ -92,6 +92,9 @@ gleich(verein.map(t => t.id), [45398, 45400], "Pokalmannschaften ohne I/II zähl
 ok(M.anzeige("FC Koeppchen Wormeldange II") === "Koeppchen II", "eigener Name gekürzt");
 ok(M.anzeige("US Sandweiler") === "US Sandweiler", "Gegner unverändert");
 gleich(D.teams.map(t => M.reiter(t, D.verein.n)), ["U13", "U13 1", "U13 2", "U15"], "Reiter-Beschriftung U13 1 / U13 2 / U15");
+gleich([{ n: "FC Koeppchen Wormeldange", kat: "Seniors", ohne: 1 }, { n: "FC Koeppchen Wormeldange I", kat: "Seniors", plus: 1 },
+        { n: "FC Koeppchen Wormeldange II", kat: "Seniors", plus: 1 }].map(t => M.reiter(t, D.verein.n)),
+  ["Seniors 1", "Seniors 2", "Seniors 3"], "Seniors 1, Réserves als Seniors 2 und 3");
 
 const jetzt = Date.parse("2026-10-18T10:00:00+02:00");
 const v1 = M.sicht(D, 45396, jetzt);
@@ -121,6 +124,22 @@ const v4 = M.sicht(D2, 45396, jetzt);
 ok(v4.aktuell.id === 20001, "neue Klasse ist die aktuelle");
 gleich(v4.frueher.map(k => k.id), [19189], "alte Klasse unter „früher“");
 ok(v4.status === null, "laufende Phase: kein Abschlusshinweis");
+
+// Réserves-Pokal: Pokalmannschaften mit I/II gehören nur zur gleichnamigen Ligamannschaft.
+{
+  const R1 = team(45403, "FC Koeppchen Wormeldange I", CLUB), R2 = team(45404, "FC Koeppchen Wormeldange II", CLUB);
+  const RP1 = team(45405, "FC Koeppchen Wormeldange I", CLUB);
+  const L1 = { id: 18918, name: "Réserves Classe 1", showResult: true, showRanking: true };
+  const L3 = { id: 18936, name: "Réserves Classe 3 Série 2", showResult: true, showRanking: true };
+  const RC = { id: 19511, name: "Coupe des Seniors Réserves - 1/32 de Finale", showResult: true, showRanking: false };
+  const r1 = roh(L1, "CC", "2026-11-01T15:00:00+01:00", R1, G(10), null, null, { ak: 5 });
+  const r2 = roh(L3, "CC", "2026-11-01T15:00:00+01:00", R2, G(11), null, null, { ak: 5 });
+  const r3 = roh(RC, "CUP", "2026-11-09T20:00:00+01:00", G(12), RP1, null, null, { ak: 5 });
+  const DR = aufbereiten({ saison: { id: "20262027", name: "Saison 2026-2027" }, vereinsSpiele: [r1, r2, r3],
+    klassen: { 18918: { spiele: [r1], tabelle: [] }, 18936: { spiele: [r2], tabelle: [] }, 19511: { spiele: [r3], tabelle: null } } });
+  ok(M.sicht(DR, 45403, jetzt).kommend.some(sp => sp.typ === "CUP"), "Réserves I sieht ihren Pokal");
+  ok(!M.sicht(DR, 45404, jetzt).kommend.some(sp => sp.typ === "CUP"), "Réserves II sieht den Pokal der Réserves I nicht");
+}
 
 gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [[1, 2], [5, 1]], "Spieltage gruppiert");
 

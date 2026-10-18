@@ -43,11 +43,11 @@ gewünscht, darum hell und nicht dunkel wie die anderen Apps. Zeigt ohne Suchen:
 Tabelle, eigene Ergebnisse, alle Spiele der Klasse, frühere Phasen aufklappbar. Einzeldatei,
 iPhone-Regeln der Pizza-App.
 
-**Mannschaften** (vom Nutzer, 18.10.2026): Reiter in dieser Reihenfolge **Seniors, U13 1, U13 2,
-U15, U11 1, U11 2, U9 1, U9 2**. Beim ersten Öffnen ist trotzdem U13 1 gewählt (die der Kinder). Beschriftung arabisch
+**Mannschaften** (vom Nutzer, 18.10.2026): Reiter in dieser Reihenfolge **Seniors 1, U13 1, U13 2,
+U15, U11 1, U11 2, U9 1, U9 2, Seniors 2, Seniors 3** (Seniors 2/3 = Réserves I/II). Beim ersten Öffnen ist trotzdem U13 1 gewählt (die der Kinder). Beschriftung arabisch
 („U13 1“, nicht „Mannschaft I“). Reihenfolge und Auswahl stehen in `AGES` in
-`tools/fussball.mjs` (ageCategoryId: U13 4, U15 11, U11 7, U9 5, Seniors 1). Bewusst nicht dabei:
-Réserves (eigene Kategorie 9999), U7 (zwei Bambini-Teams gemeldet, aber noch kein Spiel — bei
+`tools/fussball.mjs` (ageCategoryId: U13 4, U15 11, U11 7, U9 5, Seniors 1). Réserves sind bei der FLF eine
+eigene Kategorie (9999, „Seniors (R)“). Bewusst nicht dabei: U7 (zwei Bambini-Teams gemeldet, aber noch kein Spiel — bei
 keinem Verein; letzte Saison ab Mitte Dezember), Mädchen/Dames (spielen als ENT
 Wormeldange/Munsbach/Hostert). Weitere Mannschaften: Eintrag in `AGES`, sonst nichts.
 **U9 und U11: die FLF veröffentlicht weder Ergebnisse noch Tabelle** (`showResult`/`showRanking`

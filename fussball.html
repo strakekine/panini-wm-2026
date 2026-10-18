@@ -158,11 +158,13 @@ function aufteilen(D) {
   return { tabs, verein };
 }
 
-// Reiter: „U13 1“, „U13 2“ (vom Nutzer so gewünscht, arabisch statt I/II).
+// Reiter: „U13 1“, „U13 2“ (vom Nutzer so gewünscht, arabisch statt I/II). Réserves I/II
+// heißen „Seniors 2/3“ (`plus`), die erste Mannschaft ohne I/II „Seniors 1“ (`ohne`).
 const ARAB = { I: 1, II: 2, III: 3, IV: 4, V: 5 };
 function reiter(t, vereinName) {
   const r = t.n.replace(vereinName, "").trim();
-  return [t.kat, ARAB[r] ?? r].filter(Boolean).join(" ") || t.n;
+  const nr = ARAB[r] ? ARAB[r] + (t.plus || 0) : r || t.ohne;
+  return [t.kat, nr].filter(Boolean).join(" ") || t.n;
 }
 
 // In Zeilen und Tabelle: „FC Koeppchen Wormeldange I“ → „Koeppchen I“, sonst bricht
@@ -174,7 +176,10 @@ const umbruch = s => esc(s).replace(/\//g, "/<wbr>");
 // Alles, was ein Reiter zeigt — reine Daten, gerendert wird unten.
 function sicht(D, tid, now) {
   const team = D.teams.find(t => t.id === tid);
-  const verein = aufteilen(D).verein.filter(t => t.ak === team.ak);
+  // Pokalmannschaft ohne I/II gehört zu allen derselben Altersklasse; mit I/II (Réserves-Pokal)
+  // nur zur gleichnamigen — sonst stünde der Pokal der Réserves I bei den Réserves II.
+  const zusatz = t => t.n.replace(D.verein.n, "").trim();
+  const verein = aufteilen(D).verein.filter(t => t.ak === team.ak && (!zusatz(t) || zusatz(t) === zusatz(team)));
   const ids = new Set([tid, ...verein.map(t => t.id)]);
   const liga = team.klassen.map(id => D.klassen[id]).filter(istLiga);
   const aktuell = liga[liga.length - 1] || null;

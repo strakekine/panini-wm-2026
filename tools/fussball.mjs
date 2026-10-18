@@ -10,14 +10,16 @@ import { writeFileSync, readFileSync, existsSync } from "node:fs";
 export const API = "https://extranet.flf.lu/api/graphql";
 export const CLUB = 1003703;          // Wormeldange FC Koeppchen
 // Altersklassen in der Reihenfolge der Reiter (vom Nutzer so festgelegt). id = ageCategoryId
-// der FLF. Seniors ist nur die erste Mannschaft; die Réserves sind eine eigene Kategorie
-// („Seniors (R)“, 9999) und bewusst nicht dabei. U7 hat noch keine Spiele (Stand 18.10.2026).
+// der FLF. Die Réserves sind bei der FLF eine eigene Kategorie („Seniors (R)“, 9999) und stehen
+// am Ende als „Seniors 2“ (Réserves I) und „Seniors 3“ (Réserves II): `plus` verschiebt die
+// Nummer, `ohne` ist die Nummer einer Mannschaft ohne I/II. U7 hat noch keine Spiele (18.10.2026).
 export const AGES = [
-  { id: 1,  kat: "Seniors", n: "Seniors" },
+  { id: 1,  kat: "Seniors", n: "Seniors", ohne: 1 },
   { id: 4,  kat: "U13", n: "U13 Minimes" },
   { id: 11, kat: "U15", n: "U15 Scolaires" },
   { id: 7,  kat: "U11", n: "U11 Poussins" },
   { id: 5,  kat: "U9",  n: "U9 Pupilles" },
+  { id: 9999, kat: "Seniors", n: "Seniors Réserves", plus: 1 },
 ];
 const OUT = new URL("../data/fussball.json", import.meta.url);
 
@@ -91,7 +93,8 @@ export function aufbereiten({ saison, vereinsSpiele, klassen }) {
   for (const m of vereinsSpiele)
     for (const t of [m.homeTeam, m.awayTeam])
       if (istVerein(t) && !teams.has(t.id))
-        teams.set(t.id, { id: t.id, n: t.name, ak: m.ak, kat: AGES[m.ak].kat, alter: AGES[m.ak].n, klassen: [] });
+        teams.set(t.id, { id: t.id, n: t.name, ak: m.ak, kat: AGES[m.ak].kat, alter: AGES[m.ak].n,
+                          plus: AGES[m.ak].plus, ohne: AGES[m.ak].ohne, klassen: [] });
 
   const div = {};
   for (const m of vereinsSpiele) {

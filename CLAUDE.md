@@ -87,8 +87,8 @@ Abschluss (Platz, Auf-/Abstieg) und „neue Klasse noch nicht eingetragen“.
 **Auf-/Abstieg** (`REGELN`, Rundschreiben der FLF „Après la Phase 1 2026-2027“, vom Nutzer als
 Bild): Kl. I 5./6. runter; II und III 1. hoch, 5./6. runter; IV 1./2. hoch, 5./6. runter; V 1.
 jeder Serie und bester Zweiter hoch. Letzte Klasse (U13: VI) hängt laut FLF von den Anmeldungen
-ab — dort wird **nichts markiert**, statt etwas zu behaupten. Das Rundschreiben gilt nur für die
-**U13**; U15 und Seniors werden nicht markiert, bis eins für sie da ist. Regeln gelten je Saison +
+ab — dort wird **nichts markiert**, statt etwas zu behaupten. Das Rundschreiben gilt für **U13 und
+U15** (für die U15 derselbe Wortlaut, vom Nutzer als Text); Seniors und U9/U11 werden nicht markiert. Regeln gelten je Saison +
 Altersklasse + Phase;
 für Phase 2 gibt es noch keine, ohne Regel keine Markierung. Neues Rundschreiben → neuer Eintrag.
 Stand 18.10.2026: Phase 1 beendet, Koeppchen I Zweiter in Kl. IV → Kl. III; Koeppchen II

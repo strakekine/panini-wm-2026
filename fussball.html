@@ -105,16 +105,19 @@
 // V: 1. jeder Serie und der beste 2. hoch. Die letzte Klasse (bei U13 Klasse VI) hängt von
 // den Anmeldungen ab — dort wird nichts markiert, statt etwas zu behaupten.
 // Für Phase 2 gibt es noch keine Regeln: neue Phase → neue Zeilen hier.
-// Gilt nur für die U13: Für die anderen Altersklassen liegt kein Rundschreiben vor, dort wird
-// nichts markiert. Schlüssel: Saison, Altersklasse, Phase.
+// Gilt für U13 und U15 (U15: derselbe Wortlaut, vom Nutzer als Text nachgereicht). Für die
+// anderen Altersklassen liegt kein Rundschreiben vor, dort wird nichts markiert.
+// Schlüssel: Saison, Altersklasse, Phase.
+const PHASE1_2026 = {
+  1: { auf: [], ab: [5, 6] },
+  2: { auf: [1], ab: [5, 6] },
+  3: { auf: [1], ab: [5, 6] },
+  4: { auf: [1, 2], ab: [5, 6] },
+  5: { auf: [1], ab: [], extra: "dazu der beste Zweite aller Serien" },
+};
 const REGELN = {
-  "20262027 U13 Phase 1": {
-    1: { auf: [], ab: [5, 6] },
-    2: { auf: [1], ab: [5, 6] },
-    3: { auf: [1], ab: [5, 6] },
-    4: { auf: [1, 2], ab: [5, 6] },
-    5: { auf: [1], ab: [], extra: "dazu der beste Zweite aller Serien" },
-  },
+  "20262027 U13 Phase 1": PHASE1_2026,
+  "20262027 U15 Phase 1": PHASE1_2026,
 };
 
 function klasseVon(name) {

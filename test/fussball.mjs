@@ -81,7 +81,8 @@ ok(M.zonen("20262027", "U13 Minimes Cl6 S5 Phase 1") === null, "letzte Klasse: k
 ok(M.zonen("20262027", "U13 Minimes Cl4 S2 Phase 2") === null, "Phase 2: (noch) keine Regel");
 ok(M.zonen("20272028", "U13 Minimes Cl4 S2 Phase 1") === null, "andere Saison: keine Regel");
 ok(M.zonen("20262027", "Coupe U13 Minimes - 1/32 de Finale") === null, "Pokal: keine Regel");
-ok(M.zonen("20262027", "U15 Scolaires Cl4 S2 Phase 1") === null, "U15: kein Rundschreiben, keine Regel");
+gleich(M.zonen("20262027", "U15 Scolaires Cl4 S2 Phase 1"), { auf: [1, 2], ab: [5, 6] }, "U15: dieselben Regeln wie U13");
+ok(M.zonen("20262027", "U11 Poussins S5 Tour 1") === null, "U11: keine Regel");
 gleich([M.roem(3), M.roem(5)], ["III", "V"], "römische Klassen");
 
 /* --- Sicht eines Reiters --- */

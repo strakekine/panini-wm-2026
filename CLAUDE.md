@@ -73,6 +73,8 @@ Unten in der App steht „Gemacht von Laurent R.“ mit dem Vereinslogo (vom Nut
 kein Fußball-Emoji). Darüber „App teilen“ (vom Nutzer): `navigator.share` mit seinem
 Einladungstext (`TEILEN_TEXT`, Link darin). **Nur `text`, kein `url`** — mit `url` ließ iMessage
 den Text weg (am iPhone gemeldet), WhatsApp nicht. Ohne Teilen-Leiste in die Zwischenablage.
+**Fassung:** `FASSUNG` steht ganz unten — bei jeder Änderung an `fussball.html` hochzählen; am
+iPhone läuft nach einem Push oft noch die alte Datei (Zwischenspeicher), erst Fassung prüfen lassen.
 
 **Live-Ticker (offen, Stand 18.10.2026):** Vom Nutzer gewünscht für Seniors 1. Ob die FLF den Stand
 während des Spiels einträgt, wird am 18.10. getestet (Spiel 1002091 gegen Beggen). Zweite Quelle

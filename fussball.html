@@ -228,6 +228,9 @@ function nachSpieltag(spiele) {
 
 // ==== Oberfläche ====
 
+// Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
+// die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
+const FASSUNG = "18.10.2026 b";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -404,7 +407,8 @@ function render() {
   h += `<footer>Daten von <a href="https://extranet.flf.lu/match" target="_blank" rel="noopener">extranet.flf.lu</a>, zuletzt geändert ${esc(stand)}<br>
     Am Wochenende alle 15 Minuten aktualisiert, unter der Woche abends um 20 Uhr.
     <br><button class="teilen" id="teilen">↗︎ App teilen</button>
-    <div class="von">Gemacht von Laurent R. <img alt="" src="${LOGO}"></div></footer>`;
+    <div class="von">Gemacht von Laurent R. <img alt="" src="${LOGO}"></div>
+    <div style="margin-top:6px;font-size:11px">Fassung ${FASSUNG}</div></footer>`;
   main.innerHTML = h;
 }
 

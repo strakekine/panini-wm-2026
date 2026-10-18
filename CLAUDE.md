@@ -89,6 +89,11 @@ Schnittstelle, ausprobiert (Introspektion ist aus, Felder über Fehlermeldungen 
   `rankings` braucht sie nicht.
 - Verein: `clubId` 1003703 („Wormeldange FC Koeppchen“), U13 Minimes = `ageCategoryId` 4.
   Saison aus `defaultValues.currentSeasonId` — wechselt im Juli von selbst.
+- **Eine Mannschaft = Altersklasse + Name, nicht die FLF-Nummer** (`ids`): Zur Phase 3 nach der
+  Winterpause hat die FLF 2025-26 neue Nummern vergeben (U13 41766 → 43705, U15 41773 → 43706);
+  Phase 1 → 2 blieb gleich. Ohne das gäbe es ab Februar zwei Reiter „U13 1“. `id` = erste Nummer
+  (die gemerkte Auswahl bleibt gültig). Pokalteams mit gleichem Namen (U15, Réserves) fallen
+  dadurch direkt in ihre Ligamannschaft.
 - Teams (U13): I = 45396, II = 45397, im Pokal tritt der Verein als 45398 ohne I/II an. Mannschaften
   ohne Ligaspiel bekommen keinen Reiter, ihre Spiele erscheinen bei jedem Reiter **derselben
   Altersklasse** (`aufteilen()`, `ak`) — sonst stünde der U15-Pokal bei der U13.

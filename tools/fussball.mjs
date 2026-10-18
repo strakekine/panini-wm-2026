@@ -98,10 +98,12 @@ export function reiter(t) {
 }
 
 // Alle Spiele einer Reiter-Mannschaft (eigene + angehängte Pokalmannschaften), nach Datum.
+export const nummern = t => t.ids || [t.id];
 export function eigeneSpiele(D, t) {
-  const ids = new Set([t.id, ...(t.mit || [])]);
+  const wir = D.teams.filter(o => o.id === t.id || (t.mit || []).includes(o.id));
+  const ids = new Set(wir.flatMap(nummern));
   const aus = [];
-  for (const id of new Set(D.teams.filter(o => ids.has(o.id)).flatMap(o => o.klassen))) {
+  for (const id of new Set(wir.flatMap(o => o.klassen))) {
     const k = D.klassen[id];
     for (const sp of k.spiele)
       if (ids.has(sp.h.id) || ids.has(sp.a.id)) aus.push({ ...sp, klasse: k.n, typ: k.typ, erg: k.ergebnisse });
@@ -134,7 +136,8 @@ export function ics(D, t) {
   // Eigene Mannschaft wie der Reiter („Koeppchen U13 1“), nicht wie bei der FLF („… I“) — sonst
   // sind U13 1 und U11 1 im Kalender nicht zu unterscheiden (vom Nutzer gemeldet). Pokal ohne
   // I/II: „Koeppchen U13“.
-  const unsere = new Map(D.teams.filter(o => o.id === t.id || (t.mit || []).includes(o.id)).map(o => [o.id, "Koeppchen " + reiter(o)]));
+  const unsere = new Map(D.teams.filter(o => o.id === t.id || (t.mit || []).includes(o.id))
+    .flatMap(o => nummern(o).map(id => [id, "Koeppchen " + reiter(o)])));
   const name = s => unsere.get(s.id) || s.n;
   const dauerMin = t.kat === "Seniors" ? 120 : t.kat === "U9" || t.kat === "U11" ? 90 : 105;
   const z = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//FC Koeppchen//fussball.html//DE", "CALSCALE:GREGORIAN",
@@ -162,13 +165,23 @@ export function ics(D, t) {
 
 // Vereinsspiele + je Klasse alle Spiele und Tabelle → das, was die App liest.
 // vereinsSpiele tragen `ak` = Index in AGES (aus welcher Abfrage sie kommen).
+// Eine Mannschaft ist Altersklasse + Name, nicht die FLF-Nummer: Zur Phase 3 nach der
+// Winterpause vergibt die FLF neue Nummern (2025-26: U13 41766 → 43705, U15 41773 → 43706),
+// sonst gäbe es ab Februar zwei Reiter „U13 1“. `id` ist die erste Nummer (bleibt, damit die
+// gemerkte Auswahl gilt), `ids` alle.
 export function aufbereiten({ saison, vereinsSpiele, klassen }) {
-  const teams = new Map();
-  for (const m of vereinsSpiele)
-    for (const t of [m.homeTeam, m.awayTeam])
-      if (istVerein(t) && !teams.has(t.id))
-        teams.set(t.id, { id: t.id, n: t.name, ak: m.ak, kat: AGES[m.ak].kat, alter: AGES[m.ak].n,
-                          plus: AGES[m.ak].plus, ohne: AGES[m.ak].ohne, klassen: [] });
+  const teams = new Map(), nachId = new Map();
+  const wer = (t, ak) => ak + "|" + t.name;
+  for (const m of [...vereinsSpiele].sort((a, b) => a.match.matchDate.localeCompare(b.match.matchDate)))
+    for (const t of [m.homeTeam, m.awayTeam]) {
+      if (!istVerein(t) || nachId.has(t.id)) continue;
+      const k = wer(t, m.ak);
+      if (!teams.has(k))
+        teams.set(k, { id: t.id, ids: [], n: t.name, ak: m.ak, kat: AGES[m.ak].kat, alter: AGES[m.ak].n,
+                       plus: AGES[m.ak].plus, ohne: AGES[m.ak].ohne, klassen: [] });
+      teams.get(k).ids.push(t.id);
+      nachId.set(t.id, teams.get(k));
+    }
 
   const div = {};
   for (const m of vereinsSpiele) {
@@ -177,7 +190,7 @@ export function aufbereiten({ saison, vereinsSpiele, klassen }) {
                     tabelle: null, spiele: [], start: m.match.matchDate };
     if (m.match.matchDate < div[k.id].start) div[k.id].start = m.match.matchDate;
     for (const t of [m.homeTeam, m.awayTeam])
-      if (istVerein(t) && !teams.get(t.id).klassen.includes(k.id)) teams.get(t.id).klassen.push(k.id);
+      if (istVerein(t) && !nachId.get(t.id).klassen.includes(k.id)) nachId.get(t.id).klassen.push(k.id);
   }
   for (const [id, k] of Object.entries(klassen)) {
     if (!div[id]) continue;

@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-18T08:27:01.379Z",
+ "stand": "2026-10-18T09:24:32.362Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -11,6 +11,9 @@
  "teams": [
   {
    "id": 44831,
+   "ids": [
+    44831
+   ],
    "n": "FC Koeppchen Wormeldange",
    "ak": 0,
    "kat": "Seniors",
@@ -28,6 +31,9 @@
   },
   {
    "id": 45398,
+   "ids": [
+    45398
+   ],
    "n": "FC Koeppchen Wormeldange",
    "ak": 1,
    "kat": "U13",
@@ -38,6 +44,9 @@
   },
   {
    "id": 45396,
+   "ids": [
+    45396
+   ],
    "n": "FC Koeppchen Wormeldange I",
    "ak": 1,
    "kat": "U13",
@@ -53,6 +62,9 @@
   },
   {
    "id": 45397,
+   "ids": [
+    45397
+   ],
    "n": "FC Koeppchen Wormeldange II",
    "ak": 1,
    "kat": "U13",
@@ -68,32 +80,28 @@
   },
   {
    "id": 45399,
+   "ids": [
+    45399,
+    45400
+   ],
    "n": "FC Koeppchen Wormeldange",
    "ak": 2,
    "kat": "U15",
    "alter": "U15 Scolaires",
    "klassen": [
     19563,
-    19115
+    19115,
+    19599
    ],
    "reiter": "U15",
    "datei": "u15.ics",
-   "mit": [
-    45400
-   ]
-  },
-  {
-   "id": 45400,
-   "n": "FC Koeppchen Wormeldange",
-   "ak": 2,
-   "kat": "U15",
-   "alter": "U15 Scolaires",
-   "klassen": [
-    19599
-   ]
+   "mit": []
   },
   {
    "id": 45395,
+   "ids": [
+    45395
+   ],
    "n": "FC Koeppchen Wormeldange I",
    "ak": 3,
    "kat": "U11",
@@ -108,6 +116,9 @@
   },
   {
    "id": 45394,
+   "ids": [
+    45394
+   ],
    "n": "FC Koeppchen Wormeldange II",
    "ak": 3,
    "kat": "U11",
@@ -121,6 +132,9 @@
   },
   {
    "id": 45392,
+   "ids": [
+    45392
+   ],
    "n": "FC Koeppchen Wormeldange I",
    "ak": 4,
    "kat": "U9",
@@ -135,6 +149,9 @@
   },
   {
    "id": 45393,
+   "ids": [
+    45393
+   ],
    "n": "FC Koeppchen Wormeldange II",
    "ak": 4,
    "kat": "U9",
@@ -148,6 +165,10 @@
   },
   {
    "id": 45403,
+   "ids": [
+    45403,
+    45405
+   ],
    "n": "FC Koeppchen Wormeldange I",
    "ak": 5,
    "kat": "Seniors",
@@ -155,28 +176,20 @@
    "plus": 1,
    "klassen": [
     19563,
-    18918
+    18918,
+    19511,
+    19513
    ],
    "reiter": "Seniors 2",
    "datei": "seniors-2.ics",
-   "mit": [
-    45405
-   ]
-  },
-  {
-   "id": 45405,
-   "n": "FC Koeppchen Wormeldange I",
-   "ak": 5,
-   "kat": "Seniors",
-   "alter": "Seniors Réserves",
-   "plus": 1,
-   "klassen": [
-    19511,
-    19513
-   ]
+   "mit": []
   },
   {
    "id": 45404,
+   "ids": [
+    45404,
+    45406
+   ],
    "n": "FC Koeppchen Wormeldange II",
    "ak": 5,
    "kat": "Seniors",
@@ -184,24 +197,12 @@
    "plus": 1,
    "klassen": [
     19563,
+    19509,
     18936
    ],
    "reiter": "Seniors 3",
    "datei": "seniors-3.ics",
-   "mit": [
-    45406
-   ]
-  },
-  {
-   "id": 45406,
-   "n": "FC Koeppchen Wormeldange II",
-   "ak": 5,
-   "kat": "Seniors",
-   "alter": "Seniors Réserves",
-   "plus": 1,
-   "klassen": [
-    19509
-   ]
+   "mit": []
   }
  ],
  "klassen": {

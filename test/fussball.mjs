@@ -143,6 +143,24 @@ ok(v4.status === null, "laufende Phase: kein Abschlusshinweis");
   ok(!M.sicht(DR, 45404, jetzt).kommend.some(sp => sp.typ === "CUP"), "Réserves II sieht den Pokal der Réserves I nicht");
 }
 
+// Phase 3 nach der Winterpause: neue FLF-Nummer, gleicher Name (2025-26 echt so passiert).
+{
+  const K1neu = team(49999, "FC Koeppchen Wormeldange I", CLUB);
+  const DIV3b = { id: 20500, name: "U13 Minimes Cl3 S1 Phase 3", showResult: true, showRanking: true };
+  const p3 = roh(DIV3b, "CC", "2027-02-27T14:00:00+01:00", K1neu, G(14), 3, 1, { tag: 1 });
+  const p3b = roh(DIV3b, "CC", "2027-03-06T14:00:00+01:00", G(15), K1neu, null, null, { tag: 2 });
+  const DP = aufbereiten({ saison: { id: "20262027", name: "Saison 2026-2027" }, vereinsSpiele: [p3, s1, s2, p3b],
+    klassen: { 19189: { spiele: [s1, s2], tabelle: [rank(2, K1, 11)] },
+               20500: { spiele: [p3, p3b], tabelle: [rank(1, K1neu, 3), rank(2, G(14), 0)] } } });
+  const t1 = DP.teams.filter(t => t.reiter === "U13 1");
+  ok(t1.length === 1, "neue FLF-Nummer in Phase 3: weiterhin ein Reiter U13 1");
+  gleich(t1[0].ids, [45396, 49999], "beide Nummern an derselben Mannschaft, erste bleibt id");
+  const vp = M.sicht(DP, 45396, Date.parse("2027-03-01T12:00:00+01:00"));
+  ok(vp.aktuell.id === 20500 && vp.frueher[0].id === 19189, "Phase 3 aktuell, Phase 1 früher");
+  ok(vp.eigen.has(49999) && vp.kommend.length === 1 && vp.gespielt[0].hs === 3, "Spiele unter der neuen Nummer zählen als eigene");
+  ok(eigeneSpiele(DP, t1[0]).length === 4, "Kalender enthält beide Phasen");
+}
+
 gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [[1, 2], [5, 1]], "Spieltage gruppiert");
 
 /* --- Kalender --- */

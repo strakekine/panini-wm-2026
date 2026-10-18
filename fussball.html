@@ -173,7 +173,10 @@ const umbruch = s => esc(s).replace(/\//g, "/<wbr>");
 function sicht(D, tid, now) {
   const team = D.teams.find(t => t.id === tid);
   const verein = D.teams.filter(t => (team.mit || []).includes(t.id));
-  const ids = new Set([tid, ...verein.map(t => t.id)]);
+  // Alle FLF-Nummern: die Mannschaft kann je Phase eine andere haben (tools/fussball.mjs).
+  const nr = t => t.ids || [t.id];
+  const eigen = new Set(nr(team));
+  const ids = new Set([...eigen, ...verein.flatMap(nr)]);
   const liga = team.klassen.map(id => D.klassen[id]).filter(istLiga);
   const aktuell = liga[liga.length - 1] || null;
   const eigene = [];
@@ -194,7 +197,7 @@ function sicht(D, tid, now) {
   if (aktuell) {
     const fertig = aktuell.spiele.length > 0 && aktuell.spiele.every(sp => sp.gespielt);
     const z = zonen(D.saison.id, aktuell.n);
-    const zeile = aktuell.tabelle && aktuell.tabelle.find(r => r.id === tid);
+    const zeile = aktuell.tabelle && aktuell.tabelle.find(r => eigen.has(r.id));
     if (fertig) {
       const { nr } = klasseVon(aktuell.n);
       let was = "";
@@ -208,7 +211,7 @@ function sicht(D, tid, now) {
       status = { fertig, was, neuFehlt };
     }
   }
-  return { team, ids, aktuell, frueher: liga.slice(0, -1).reverse(), kommend, gespielt, status };
+  return { team, ids, eigen, aktuell, frueher: liga.slice(0, -1).reverse(), kommend, gespielt, status };
 }
 
 // Spieltage einer Klasse, für „Alle Spiele“.
@@ -272,11 +275,11 @@ function spielZeile(sp, ids, meta) {
   </div>`;
 }
 
-function tabelleHtml(k, tid) {
+function tabelleHtml(k, eigen) {
   if (!k.tabelle || !k.tabelle.length) return `<div class="muted">Für diese Klasse veröffentlicht die FLF keine Tabelle.</div>`;
   const z = zonen(D.saison.id, k.n);
   const rows = k.tabelle.map(r => {
-    const cls = [r.id === tid ? "wir" : "", z && z.auf.includes(r.pl) ? "auf" : "", z && z.ab.includes(r.pl) ? "ab" : ""].join(" ");
+    const cls = [eigen.has(r.id) ? "wir" : "", z && z.auf.includes(r.pl) ? "auf" : "", z && z.ab.includes(r.pl) ? "ab" : ""].join(" ");
     return `<tr class="${cls}"><td class="pl">${r.pl}</td><td class="tm">${umbruch(anzeige(r.n))}</td><td>${r.sp}</td>
       <td class="wide">${r.s}</td><td class="wide">${r.u}</td><td class="wide">${r.nl}</td>
       <td>${r.t}:${r.g}</td><td class="narrow">${r.t - r.g > 0 ? "+" : ""}${r.t - r.g}</td><td class="pk">${r.pkt}</td></tr>`;
@@ -344,7 +347,7 @@ function render() {
     h += `<div class="note">In der ${esc(v.team.kat)} veröffentlicht die FLF keine Ergebnisse und keine Tabelle — hier stehen darum nur die Termine.</div>`;
   } else if (v.aktuell) {
     h += `<section class="card"><div class="chead"><h2>Tabelle</h2><div class="hint">${esc(v.aktuell.n)}</div></div>
-      <div class="cbody">${tabelleHtml(v.aktuell, ST.team)}</div></section>`;
+      <div class="cbody">${tabelleHtml(v.aktuell, v.eigen)}</div></section>`;
   }
 
   h += `<section class="card"><div class="chead"><h2>${v.aktuell && !v.aktuell.ergebnisse ? "Bisherige Spiele" : "Unsere Ergebnisse"}</h2></div><div class="cbody">`;
@@ -362,7 +365,7 @@ function render() {
   }
   for (const k of v.frueher) {
     h += `<details class="card"><summary><h2>Früher: ${esc(k.n.replace(alter, "").trim() || k.n)}</h2></summary>
-      <div class="cbody">${tabelleHtml(k, ST.team)}<div style="margin-top:10px">${alleSpieleHtml(k, ids)}</div></div></details>`;
+      <div class="cbody">${tabelleHtml(k, v.eigen)}<div style="margin-top:10px">${alleSpieleHtml(k, ids)}</div></div></details>`;
   }
 
   const stand = new Date(D.stand).toLocaleString("de-DE", { timeZone: TZ, weekday: "short", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" });

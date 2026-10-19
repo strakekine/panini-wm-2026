@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-18T20:41:20.963Z",
+ "stand": "2026-10-19T06:14:43.486Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -7304,6 +7304,18 @@
     },
     {
      "pl": 4,
+     "id": 45708,
+     "n": "Alisontia Steinsel",
+     "sp": 5,
+     "s": 3,
+     "u": 0,
+     "nl": 2,
+     "t": 16,
+     "g": 8,
+     "pkt": 9
+    },
+    {
+     "pl": 5,
      "id": 46587,
      "n": "Olympia Christnach-Waldbillig I",
      "sp": 5,
@@ -7315,7 +7327,7 @@
      "pkt": 9
     },
     {
-     "pl": 5,
+     "pl": 6,
      "id": 45607,
      "n": "FC Munsbach",
      "sp": 5,
@@ -7325,18 +7337,6 @@
      "t": 14,
      "g": 19,
      "pkt": 7
-    },
-    {
-     "pl": 6,
-     "id": 45708,
-     "n": "Alisontia Steinsel",
-     "sp": 4,
-     "s": 2,
-     "u": 0,
-     "nl": 2,
-     "t": 13,
-     "g": 8,
-     "pkt": 6
     },
     {
      "pl": 7,
@@ -7402,12 +7402,12 @@
      "pl": 12,
      "id": 44559,
      "n": "AS Rupensia Lusitanos Larochette",
-     "sp": 4,
+     "sp": 5,
      "s": 0,
      "u": 0,
-     "nl": 4,
+     "nl": 5,
      "t": 4,
-     "g": 34,
+     "g": 37,
      "pkt": 0
     }
    ],
@@ -17707,6 +17707,4922 @@
     }
    ],
    "start": "2026-10-24T14:00:00+02:00"
+  }
+ },
+ "bgl": {
+  "n": "BGL Ligue",
+  "spiele": [
+   {
+    "id": 1001013,
+    "d": "2026-08-01T18:00:00+02:00",
+    "tag": 1,
+    "h": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "a": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "hs": 1,
+    "as": 1,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Am Pëtz (Weidingen)"
+   },
+   {
+    "id": 1001018,
+    "d": "2026-08-01T19:00:00+02:00",
+    "tag": 1,
+    "h": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "a": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "hs": 2,
+    "as": 1,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Jos Haupert (Niederkorn)"
+   },
+   {
+    "id": 1001012,
+    "d": "2026-08-02T16:00:00+02:00",
+    "tag": 1,
+    "h": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "a": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "hs": 5,
+    "as": 1,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Achille Hammerel (Luxembourg)"
+   },
+   {
+    "id": 1001011,
+    "d": "2026-08-02T16:00:00+02:00",
+    "tag": 1,
+    "h": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "a": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "hs": 3,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Prince Henri (Walferdange)"
+   },
+   {
+    "id": 1001015,
+    "d": "2026-08-02T16:00:00+02:00",
+    "tag": 1,
+    "h": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "a": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "hs": 3,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade John Grün (Mondorf)"
+   },
+   {
+    "id": 1001014,
+    "d": "2026-08-02T16:00:00+02:00",
+    "tag": 1,
+    "h": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "a": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "hs": 1,
+    "as": 0,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Municipal (Rumelange)"
+   },
+   {
+    "id": 1001017,
+    "d": "2026-08-04T20:00:00+02:00",
+    "tag": 1,
+    "h": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "a": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "hs": 2,
+    "as": 0,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Klengbousbierg (Bissen)"
+   },
+   {
+    "id": 1001016,
+    "d": "2026-08-04T20:00:00+02:00",
+    "tag": 1,
+    "h": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "a": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "hs": 4,
+    "as": 0,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade An de Millewisen (Strassen)"
+   },
+   {
+    "id": 1001027,
+    "d": "2026-08-09T16:00:00+02:00",
+    "tag": 2,
+    "h": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "a": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "hs": 0,
+    "as": 1,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade An Der Trell (Erpeldange)"
+   },
+   {
+    "id": 1001023,
+    "d": "2026-08-09T16:00:00+02:00",
+    "tag": 2,
+    "h": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "a": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "hs": 0,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Jos Nosbaum (Dudelange)"
+   },
+   {
+    "id": 1001025,
+    "d": "2026-08-09T16:00:00+02:00",
+    "tag": 2,
+    "h": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "a": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "hs": 2,
+    "as": 0,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Municipal de la Ville de Differdange"
+   },
+   {
+    "id": 1001021,
+    "d": "2026-08-09T16:00:00+02:00",
+    "tag": 2,
+    "h": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "a": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "hs": 0,
+    "as": 1,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Prince Henri (Walferdange)"
+   },
+   {
+    "id": 1001028,
+    "d": "2026-08-09T16:00:00+02:00",
+    "tag": 2,
+    "h": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "a": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "hs": 4,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Dribbel (Bascharage)"
+   },
+   {
+    "id": 1001024,
+    "d": "2026-08-09T16:00:00+02:00",
+    "tag": 2,
+    "h": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "a": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "hs": 2,
+    "as": 3,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Party-Rent-Arena (Rosport)"
+   },
+   {
+    "id": 1001026,
+    "d": "2026-08-09T18:00:00+02:00",
+    "tag": 2,
+    "h": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "a": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "hs": 2,
+    "as": 7,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Alphonse Theis (Hesperange)"
+   },
+   {
+    "id": 1001022,
+    "d": "2026-08-09T19:00:00+02:00",
+    "tag": 2,
+    "h": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "a": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "hs": 0,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade de la Frontière (Esch)"
+   },
+   {
+    "id": 1001034,
+    "d": "2026-08-15T19:00:00+02:00",
+    "tag": 3,
+    "h": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "a": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "hs": 1,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Am Pëtz (Weidingen)"
+   },
+   {
+    "id": 1001038,
+    "d": "2026-08-16T16:00:00+02:00",
+    "tag": 3,
+    "h": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "a": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "hs": 0,
+    "as": 4,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Klengbousbierg (Bissen)"
+   },
+   {
+    "id": 1001031,
+    "d": "2026-08-16T16:00:00+02:00",
+    "tag": 3,
+    "h": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "a": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "hs": 1,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Dribbel (Bascharage)"
+   },
+   {
+    "id": 1001037,
+    "d": "2026-08-16T16:00:00+02:00",
+    "tag": 3,
+    "h": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "a": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "hs": 1,
+    "as": 0,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade An de Millewisen (Strassen)"
+   },
+   {
+    "id": 1001032,
+    "d": "2026-08-16T16:00:00+02:00",
+    "tag": 3,
+    "h": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "a": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "hs": 5,
+    "as": 1,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Jos Becker (Hostert, synth.)"
+   },
+   {
+    "id": 1001036,
+    "d": "2026-08-16T16:00:00+02:00",
+    "tag": 3,
+    "h": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "a": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "hs": 1,
+    "as": 0,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade John Grün (Mondorf)"
+   },
+   {
+    "id": 1001035,
+    "d": "2026-08-16T16:00:00+02:00",
+    "tag": 3,
+    "h": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "a": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "hs": 3,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Municipal (Rumelange)"
+   },
+   {
+    "id": 1001033,
+    "d": "2026-08-16T18:00:00+02:00",
+    "tag": 3,
+    "h": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "a": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "hs": 5,
+    "as": 0,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Achille Hammerel (Luxembourg)"
+   },
+   {
+    "id": 1001042,
+    "d": "2026-08-22T19:00:00+02:00",
+    "tag": 4,
+    "h": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "a": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "hs": 0,
+    "as": 1,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Jos Haupert (Niederkorn)"
+   },
+   {
+    "id": 1001043,
+    "d": "2026-08-23T16:00:00+02:00",
+    "tag": 4,
+    "h": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "a": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "hs": 1,
+    "as": 3,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade de la Frontière (Esch)"
+   },
+   {
+    "id": 1001048,
+    "d": "2026-08-23T16:00:00+02:00",
+    "tag": 4,
+    "h": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "a": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "hs": 0,
+    "as": 1,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade du Centre Sportif Deich (Ettelbruck)"
+   },
+   {
+    "id": 1001044,
+    "d": "2026-08-23T16:00:00+02:00",
+    "tag": 4,
+    "h": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "a": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "hs": 3,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Jos Nosbaum (Dudelange)"
+   },
+   {
+    "id": 1001046,
+    "d": "2026-08-23T16:00:00+02:00",
+    "tag": 4,
+    "h": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "a": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "hs": 3,
+    "as": 0,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Municipal de la Ville de Differdange"
+   },
+   {
+    "id": 1001041,
+    "d": "2026-08-23T16:00:00+02:00",
+    "tag": 4,
+    "h": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "a": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "hs": 1,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Prince Henri (Walferdange)"
+   },
+   {
+    "id": 1001047,
+    "d": "2026-08-23T16:00:00+02:00",
+    "tag": 4,
+    "h": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "a": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "hs": 0,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Alphonse Theis (Hesperange)"
+   },
+   {
+    "id": 1001045,
+    "d": "2026-08-23T16:00:00+02:00",
+    "tag": 4,
+    "h": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "a": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "hs": 4,
+    "as": 0,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Party-Rent-Arena (Rosport)"
+   },
+   {
+    "id": 1001051,
+    "d": "2026-08-30T16:00:00+02:00",
+    "tag": 5,
+    "h": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "a": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "hs": 0,
+    "as": 5,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade du Centre Sportif Deich (Ettelbruck)"
+   },
+   {
+    "id": 1001055,
+    "d": "2026-08-30T16:00:00+02:00",
+    "tag": 5,
+    "h": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "a": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "hs": 1,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Am Pëtz (Weidingen)"
+   },
+   {
+    "id": 1001054,
+    "d": "2026-08-30T16:00:00+02:00",
+    "tag": 5,
+    "h": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "a": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "hs": 2,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Achille Hammerel (Luxembourg)"
+   },
+   {
+    "id": 1001052,
+    "d": "2026-08-30T16:00:00+02:00",
+    "tag": 5,
+    "h": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "a": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "hs": 6,
+    "as": 0,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Dribbel (Bascharage)"
+   },
+   {
+    "id": 1001053,
+    "d": "2026-08-30T16:00:00+02:00",
+    "tag": 5,
+    "h": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "a": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "hs": 0,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Jos Becker (Hostert, synth.)"
+   },
+   {
+    "id": 1001057,
+    "d": "2026-08-30T16:00:00+02:00",
+    "tag": 5,
+    "h": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "a": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "hs": 2,
+    "as": 1,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade John Grün (Mondorf)"
+   },
+   {
+    "id": 1001056,
+    "d": "2026-08-30T16:00:00+02:00",
+    "tag": 5,
+    "h": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "a": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "hs": 2,
+    "as": 5,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Municipal (Rumelange)"
+   },
+   {
+    "id": 1001058,
+    "d": "2026-08-30T18:00:00+02:00",
+    "tag": 5,
+    "h": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "a": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "hs": 2,
+    "as": 1,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade An de Millewisen (Strassen)"
+   },
+   {
+    "id": 1001066,
+    "d": "2026-09-05T18:00:00+02:00",
+    "tag": 6,
+    "h": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "a": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "hs": 0,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Party-Rent-Arena (Rosport)"
+   },
+   {
+    "id": 1001062,
+    "d": "2026-09-06T16:00:00+02:00",
+    "tag": 6,
+    "h": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "a": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "hs": 1,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Klengbousbierg (Bissen)"
+   },
+   {
+    "id": 1001065,
+    "d": "2026-09-06T16:00:00+02:00",
+    "tag": 6,
+    "h": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "a": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "hs": 1,
+    "as": 3,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Jos Nosbaum (Dudelange)"
+   },
+   {
+    "id": 1001067,
+    "d": "2026-09-06T16:00:00+02:00",
+    "tag": 6,
+    "h": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "a": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "hs": 4,
+    "as": 1,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Municipal de la Ville de Differdange"
+   },
+   {
+    "id": 1001063,
+    "d": "2026-09-06T16:00:00+02:00",
+    "tag": 6,
+    "h": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "a": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "hs": 3,
+    "as": 0,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Jos Haupert (Niederkorn)"
+   },
+   {
+    "id": 1001061,
+    "d": "2026-09-06T16:00:00+02:00",
+    "tag": 6,
+    "h": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "a": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "hs": 0,
+    "as": 3,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Prince Henri (Walferdange)"
+   },
+   {
+    "id": 1001068,
+    "d": "2026-09-06T16:00:00+02:00",
+    "tag": 6,
+    "h": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "a": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "hs": 0,
+    "as": 3,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Alphonse Theis (Hesperange)"
+   },
+   {
+    "id": 1001064,
+    "d": "2026-09-06T19:00:00+02:00",
+    "tag": 6,
+    "h": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "a": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "hs": 5,
+    "as": 1,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade de la Frontière (Esch)"
+   },
+   {
+    "id": 1001073,
+    "d": "2026-09-11T20:00:00+02:00",
+    "tag": 7,
+    "h": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "a": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "hs": 5,
+    "as": 0,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Dribbel (Bascharage)"
+   },
+   {
+    "id": 1001075,
+    "d": "2026-09-12T16:00:00+02:00",
+    "tag": 7,
+    "h": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "a": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "hs": 5,
+    "as": 1,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Achille Hammerel (Luxembourg)"
+   },
+   {
+    "id": 1001074,
+    "d": "2026-09-12T17:00:00+02:00",
+    "tag": 7,
+    "h": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "a": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "hs": 0,
+    "as": 0,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Jos Becker (Hostert, synth.)"
+   },
+   {
+    "id": 1001072,
+    "d": "2026-09-12T18:00:00+02:00",
+    "tag": 7,
+    "h": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "a": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "hs": 1,
+    "as": 0,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Municipal de la Ville de Differdange"
+   },
+   {
+    "id": 1001076,
+    "d": "2026-09-12T18:00:00+02:00",
+    "tag": 7,
+    "h": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "a": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "hs": 1,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Am Pëtz (Weidingen)"
+   },
+   {
+    "id": 1001071,
+    "d": "2026-09-13T16:00:00+02:00",
+    "tag": 7,
+    "h": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "a": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "hs": 0,
+    "as": 3,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Alphonse Theis (Hesperange)"
+   },
+   {
+    "id": 1001078,
+    "d": "2026-09-13T16:00:00+02:00",
+    "tag": 7,
+    "h": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "a": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "hs": 1,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade John Grün (Mondorf)"
+   },
+   {
+    "id": 1001077,
+    "d": "2026-09-13T16:00:00+02:00",
+    "tag": 7,
+    "h": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "a": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "hs": 0,
+    "as": 6,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Municipal (Rumelange)"
+   },
+   {
+    "id": 1001083,
+    "d": "2026-09-16T20:00:00+02:00",
+    "tag": 8,
+    "h": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "a": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "hs": 4,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Klengbousbierg (Bissen)"
+   },
+   {
+    "id": 1001086,
+    "d": "2026-09-16T20:00:00+02:00",
+    "tag": 8,
+    "h": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "a": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "hs": 2,
+    "as": 4,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Jos Nosbaum (Dudelange)"
+   },
+   {
+    "id": 1001088,
+    "d": "2026-09-16T20:00:00+02:00",
+    "tag": 8,
+    "h": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "a": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "hs": 3,
+    "as": 0,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Municipal de la Ville de Differdange"
+   },
+   {
+    "id": 1001084,
+    "d": "2026-09-16T20:00:00+02:00",
+    "tag": 8,
+    "h": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "a": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "hs": 0,
+    "as": 0,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Jos Haupert (Niederkorn)"
+   },
+   {
+    "id": 1001081,
+    "d": "2026-09-16T20:00:00+02:00",
+    "tag": 8,
+    "h": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "a": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "hs": 2,
+    "as": 1,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Prince Henri (Walferdange)"
+   },
+   {
+    "id": 1001082,
+    "d": "2026-09-16T20:00:00+02:00",
+    "tag": 8,
+    "h": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "a": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "hs": 2,
+    "as": 0,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade An de Millewisen (Strassen)"
+   },
+   {
+    "id": 1001085,
+    "d": "2026-09-16T20:00:00+02:00",
+    "tag": 8,
+    "h": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "a": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "hs": 1,
+    "as": 1,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Jos Becker (Hostert, synth.)"
+   },
+   {
+    "id": 1001087,
+    "d": "2026-09-16T20:00:00+02:00",
+    "tag": 8,
+    "h": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "a": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "hs": 1,
+    "as": 1,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Party-Rent-Arena (Rosport)"
+   },
+   {
+    "id": 1001093,
+    "d": "2026-10-11T16:00:00+02:00",
+    "tag": 9,
+    "h": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "a": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "hs": 1,
+    "as": 3,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade du Centre Sportif Deich (Ettelbruck)"
+   },
+   {
+    "id": 1001091,
+    "d": "2026-10-11T16:00:00+02:00",
+    "tag": 9,
+    "h": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "a": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "hs": 6,
+    "as": 0,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Municipal de la Ville de Differdange"
+   },
+   {
+    "id": 1001097,
+    "d": "2026-10-11T16:00:00+02:00",
+    "tag": 9,
+    "h": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "a": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "hs": 0,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Am Pëtz (Weidingen)"
+   },
+   {
+    "id": 1001096,
+    "d": "2026-10-11T16:00:00+02:00",
+    "tag": 9,
+    "h": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "a": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "hs": 2,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Achille Hammerel (Luxembourg)"
+   },
+   {
+    "id": 1001092,
+    "d": "2026-10-11T16:00:00+02:00",
+    "tag": 9,
+    "h": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "a": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "hs": 0,
+    "as": 3,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Alphonse Theis (Hesperange)"
+   },
+   {
+    "id": 1001094,
+    "d": "2026-10-11T16:00:00+02:00",
+    "tag": 9,
+    "h": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "a": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "hs": 4,
+    "as": 1,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Dribbel (Bascharage)"
+   },
+   {
+    "id": 1001095,
+    "d": "2026-10-11T16:00:00+02:00",
+    "tag": 9,
+    "h": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "a": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "hs": 0,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Jos Becker (Hostert, synth.)"
+   },
+   {
+    "id": 1001098,
+    "d": "2026-10-11T16:00:00+02:00",
+    "tag": 9,
+    "h": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "a": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "hs": 1,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Municipal (Rumelange)"
+   },
+   {
+    "id": 1001105,
+    "d": "2026-10-17T17:30:00+02:00",
+    "tag": 10,
+    "h": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "a": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "hs": 1,
+    "as": 2,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Jos Haupert (Niederkorn)"
+   },
+   {
+    "id": 1001106,
+    "d": "2026-10-18T16:00:00+02:00",
+    "tag": 10,
+    "h": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "a": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "hs": 1,
+    "as": 0,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade de la Frontière (Esch)"
+   },
+   {
+    "id": 1001104,
+    "d": "2026-10-18T16:00:00+02:00",
+    "tag": 10,
+    "h": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "a": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "hs": 5,
+    "as": 1,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Klengbousbierg (Bissen)"
+   },
+   {
+    "id": 1001107,
+    "d": "2026-10-18T16:00:00+02:00",
+    "tag": 10,
+    "h": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "a": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "hs": 5,
+    "as": 0,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Jos Nosbaum (Dudelange)"
+   },
+   {
+    "id": 1001101,
+    "d": "2026-10-18T16:00:00+02:00",
+    "tag": 10,
+    "h": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "a": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "hs": 3,
+    "as": 3,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade Prince Henri (Walferdange)"
+   },
+   {
+    "id": 1001103,
+    "d": "2026-10-18T16:00:00+02:00",
+    "tag": 10,
+    "h": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "a": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "hs": 1,
+    "as": 1,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade An de Millewisen (Strassen)"
+   },
+   {
+    "id": 1001102,
+    "d": "2026-10-18T16:00:00+02:00",
+    "tag": 10,
+    "h": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "a": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "hs": 4,
+    "as": 1,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Stade John Grün (Mondorf)"
+   },
+   {
+    "id": 1001108,
+    "d": "2026-10-18T16:00:00+02:00",
+    "tag": 10,
+    "h": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "a": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "hs": 3,
+    "as": 5,
+    "gespielt": true,
+    "forfait": false,
+    "ort": "Party-Rent-Arena (Rosport)"
+   },
+   {
+    "id": 1001114,
+    "d": "2026-10-24T18:00:00+02:00",
+    "tag": 11,
+    "h": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "a": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade du Centre Sportif Deich (Ettelbruck)"
+   },
+   {
+    "id": 1001112,
+    "d": "2026-10-25T16:00:00+01:00",
+    "tag": 11,
+    "h": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "a": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Municipal de la Ville de Differdange"
+   },
+   {
+    "id": 1001118,
+    "d": "2026-10-25T16:00:00+01:00",
+    "tag": 11,
+    "h": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "a": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Am Pëtz (Weidingen)"
+   },
+   {
+    "id": 1001117,
+    "d": "2026-10-25T16:00:00+01:00",
+    "tag": 11,
+    "h": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "a": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Achille Hammerel (Luxembourg)"
+   },
+   {
+    "id": 1001113,
+    "d": "2026-10-25T16:00:00+01:00",
+    "tag": 11,
+    "h": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "a": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Alphonse Theis (Hesperange)"
+   },
+   {
+    "id": 1001115,
+    "d": "2026-10-25T16:00:00+01:00",
+    "tag": 11,
+    "h": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "a": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Dribbel (Bascharage)"
+   },
+   {
+    "id": 1001116,
+    "d": "2026-10-25T16:00:00+01:00",
+    "tag": 11,
+    "h": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "a": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Becker (Hostert, synth.)"
+   },
+   {
+    "id": 1001111,
+    "d": "2026-10-25T16:00:00+01:00",
+    "tag": 11,
+    "h": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "a": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Party-Rent-Arena (Rosport)"
+   },
+   {
+    "id": 1001127,
+    "d": "2026-10-31T18:00:00+01:00",
+    "tag": 12,
+    "h": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "a": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade de la Frontière (Esch)"
+   },
+   {
+    "id": 1001125,
+    "d": "2026-10-31T18:00:00+01:00",
+    "tag": 12,
+    "h": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "a": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Klengbousbierg (Bissen)"
+   },
+   {
+    "id": 1001128,
+    "d": "2026-10-31T18:00:00+01:00",
+    "tag": 12,
+    "h": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "a": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Nosbaum (Dudelange)"
+   },
+   {
+    "id": 1001126,
+    "d": "2026-10-31T18:00:00+01:00",
+    "tag": 12,
+    "h": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "a": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Haupert (Niederkorn)"
+   },
+   {
+    "id": 1001121,
+    "d": "2026-10-31T18:00:00+01:00",
+    "tag": 12,
+    "h": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "a": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Prince Henri (Walferdange)"
+   },
+   {
+    "id": 1001124,
+    "d": "2026-10-31T18:00:00+01:00",
+    "tag": 12,
+    "h": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "a": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade An de Millewisen (Strassen)"
+   },
+   {
+    "id": 1001123,
+    "d": "2026-10-31T18:00:00+01:00",
+    "tag": 12,
+    "h": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "a": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade John Grün (Mondorf)"
+   },
+   {
+    "id": 1001122,
+    "d": "2026-10-31T18:00:00+01:00",
+    "tag": 12,
+    "h": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "a": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Municipal (Rumelange)"
+   },
+   {
+    "id": 1001135,
+    "d": "2026-11-22T16:00:00+01:00",
+    "tag": 13,
+    "h": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "a": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade du Centre Sportif Deich (Ettelbruck)"
+   },
+   {
+    "id": 1001131,
+    "d": "2026-11-22T16:00:00+01:00",
+    "tag": 13,
+    "h": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "a": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Nosbaum (Dudelange)"
+   },
+   {
+    "id": 1001137,
+    "d": "2026-11-22T16:00:00+01:00",
+    "tag": 13,
+    "h": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "a": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Municipal de la Ville de Differdange"
+   },
+   {
+    "id": 1001132,
+    "d": "2026-11-22T16:00:00+01:00",
+    "tag": 13,
+    "h": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "a": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Achille Hammerel (Luxembourg)"
+   },
+   {
+    "id": 1001136,
+    "d": "2026-11-22T16:00:00+01:00",
+    "tag": 13,
+    "h": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "a": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Alphonse Theis (Hesperange)"
+   },
+   {
+    "id": 1001134,
+    "d": "2026-11-22T16:00:00+01:00",
+    "tag": 13,
+    "h": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "a": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Dribbel (Bascharage)"
+   },
+   {
+    "id": 1001133,
+    "d": "2026-11-22T16:00:00+01:00",
+    "tag": 13,
+    "h": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "a": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Becker (Hostert, synth.)"
+   },
+   {
+    "id": 1001138,
+    "d": "2026-11-22T16:00:00+01:00",
+    "tag": 13,
+    "h": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "a": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Party-Rent-Arena (Rosport)"
+   },
+   {
+    "id": 1001142,
+    "d": "2026-11-28T19:00:00+01:00",
+    "tag": 14,
+    "h": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "a": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Am Pëtz (Weidingen)"
+   },
+   {
+    "id": 1001148,
+    "d": "2026-11-29T16:00:00+01:00",
+    "tag": 14,
+    "h": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "a": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade de la Frontière (Esch)"
+   },
+   {
+    "id": 1001146,
+    "d": "2026-11-29T16:00:00+01:00",
+    "tag": 14,
+    "h": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "a": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Klengbousbierg (Bissen)"
+   },
+   {
+    "id": 1001147,
+    "d": "2026-11-29T16:00:00+01:00",
+    "tag": 14,
+    "h": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "a": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Haupert (Niederkorn)"
+   },
+   {
+    "id": 1001141,
+    "d": "2026-11-29T16:00:00+01:00",
+    "tag": 14,
+    "h": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "a": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Prince Henri (Walferdange)"
+   },
+   {
+    "id": 1001145,
+    "d": "2026-11-29T16:00:00+01:00",
+    "tag": 14,
+    "h": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "a": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade An de Millewisen (Strassen)"
+   },
+   {
+    "id": 1001144,
+    "d": "2026-11-29T16:00:00+01:00",
+    "tag": 14,
+    "h": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "a": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade John Grün (Mondorf)"
+   },
+   {
+    "id": 1001143,
+    "d": "2026-11-29T16:00:00+01:00",
+    "tag": 14,
+    "h": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "a": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Municipal (Rumelange)"
+   },
+   {
+    "id": 1001151,
+    "d": "2026-12-06T16:00:00+01:00",
+    "tag": 15,
+    "h": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "a": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade de la Frontière (Esch)"
+   },
+   {
+    "id": 1001156,
+    "d": "2026-12-06T16:00:00+01:00",
+    "tag": 15,
+    "h": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "a": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade du Centre Sportif Deich (Ettelbruck)"
+   },
+   {
+    "id": 1001152,
+    "d": "2026-12-06T16:00:00+01:00",
+    "tag": 15,
+    "h": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "a": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Nosbaum (Dudelange)"
+   },
+   {
+    "id": 1001154,
+    "d": "2026-12-06T16:00:00+01:00",
+    "tag": 15,
+    "h": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "a": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Municipal de la Ville de Differdange"
+   },
+   {
+    "id": 1001155,
+    "d": "2026-12-06T16:00:00+01:00",
+    "tag": 15,
+    "h": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "a": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Alphonse Theis (Hesperange)"
+   },
+   {
+    "id": 1001157,
+    "d": "2026-12-06T16:00:00+01:00",
+    "tag": 15,
+    "h": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "a": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Dribbel (Bascharage)"
+   },
+   {
+    "id": 1001158,
+    "d": "2026-12-06T16:00:00+01:00",
+    "tag": 15,
+    "h": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "a": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Becker (Hostert, synth.)"
+   },
+   {
+    "id": 1001153,
+    "d": "2026-12-06T16:00:00+01:00",
+    "tag": 15,
+    "h": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "a": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Party-Rent-Arena (Rosport)"
+   },
+   {
+    "id": 1001162,
+    "d": "2027-02-07T16:00:00+01:00",
+    "tag": 16,
+    "h": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "a": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Klengbousbierg (Bissen)"
+   },
+   {
+    "id": 1001166,
+    "d": "2027-02-07T16:00:00+01:00",
+    "tag": 16,
+    "h": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "a": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Am Pëtz (Weidingen)"
+   },
+   {
+    "id": 1001161,
+    "d": "2027-02-07T16:00:00+01:00",
+    "tag": 16,
+    "h": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "a": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Haupert (Niederkorn)"
+   },
+   {
+    "id": 1001167,
+    "d": "2027-02-07T16:00:00+01:00",
+    "tag": 16,
+    "h": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "a": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Achille Hammerel (Luxembourg)"
+   },
+   {
+    "id": 1001163,
+    "d": "2027-02-07T16:00:00+01:00",
+    "tag": 16,
+    "h": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "a": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade An de Millewisen (Strassen)"
+   },
+   {
+    "id": 1001168,
+    "d": "2027-02-07T16:00:00+01:00",
+    "tag": 16,
+    "h": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "a": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Becker (Hostert, synth.)"
+   },
+   {
+    "id": 1001164,
+    "d": "2027-02-07T16:00:00+01:00",
+    "tag": 16,
+    "h": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "a": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade John Grün (Mondorf)"
+   },
+   {
+    "id": 1001165,
+    "d": "2027-02-07T16:00:00+01:00",
+    "tag": 16,
+    "h": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "a": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Municipal (Rumelange)"
+   },
+   {
+    "id": 1001177,
+    "d": "2027-02-14T16:00:00+01:00",
+    "tag": 17,
+    "h": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "a": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade de la Frontière (Esch)"
+   },
+   {
+    "id": 1001172,
+    "d": "2027-02-14T16:00:00+01:00",
+    "tag": 17,
+    "h": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "a": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade du Centre Sportif Deich (Ettelbruck)"
+   },
+   {
+    "id": 1001176,
+    "d": "2027-02-14T16:00:00+01:00",
+    "tag": 17,
+    "h": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "a": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Nosbaum (Dudelange)"
+   },
+   {
+    "id": 1001174,
+    "d": "2027-02-14T16:00:00+01:00",
+    "tag": 17,
+    "h": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "a": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Municipal de la Ville de Differdange"
+   },
+   {
+    "id": 1001178,
+    "d": "2027-02-14T16:00:00+01:00",
+    "tag": 17,
+    "h": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "a": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Haupert (Niederkorn)"
+   },
+   {
+    "id": 1001171,
+    "d": "2027-02-14T16:00:00+01:00",
+    "tag": 17,
+    "h": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "a": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Prince Henri (Walferdange)"
+   },
+   {
+    "id": 1001173,
+    "d": "2027-02-14T16:00:00+01:00",
+    "tag": 17,
+    "h": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "a": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Alphonse Theis (Hesperange)"
+   },
+   {
+    "id": 1001175,
+    "d": "2027-02-14T16:00:00+01:00",
+    "tag": 17,
+    "h": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "a": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Party-Rent-Arena (Rosport)"
+   },
+   {
+    "id": 1001181,
+    "d": "2027-02-21T16:00:00+01:00",
+    "tag": 18,
+    "h": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "a": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Klengbousbierg (Bissen)"
+   },
+   {
+    "id": 1001185,
+    "d": "2027-02-21T16:00:00+01:00",
+    "tag": 18,
+    "h": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "a": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Am Pëtz (Weidingen)"
+   },
+   {
+    "id": 1001186,
+    "d": "2027-02-21T16:00:00+01:00",
+    "tag": 18,
+    "h": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "a": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Achille Hammerel (Luxembourg)"
+   },
+   {
+    "id": 1001188,
+    "d": "2027-02-21T16:00:00+01:00",
+    "tag": 18,
+    "h": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "a": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Dribbel (Bascharage)"
+   },
+   {
+    "id": 1001182,
+    "d": "2027-02-21T16:00:00+01:00",
+    "tag": 18,
+    "h": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "a": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade An de Millewisen (Strassen)"
+   },
+   {
+    "id": 1001187,
+    "d": "2027-02-21T16:00:00+01:00",
+    "tag": 18,
+    "h": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "a": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Becker (Hostert, synth.)"
+   },
+   {
+    "id": 1001183,
+    "d": "2027-02-21T16:00:00+01:00",
+    "tag": 18,
+    "h": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "a": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade John Grün (Mondorf)"
+   },
+   {
+    "id": 1001184,
+    "d": "2027-02-21T16:00:00+01:00",
+    "tag": 18,
+    "h": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "a": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Municipal (Rumelange)"
+   },
+   {
+    "id": 1001196,
+    "d": "2027-02-28T16:00:00+01:00",
+    "tag": 19,
+    "h": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "a": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade de la Frontière (Esch)"
+   },
+   {
+    "id": 1001198,
+    "d": "2027-02-28T16:00:00+01:00",
+    "tag": 19,
+    "h": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "a": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Klengbousbierg (Bissen)"
+   },
+   {
+    "id": 1001195,
+    "d": "2027-02-28T16:00:00+01:00",
+    "tag": 19,
+    "h": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "a": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Nosbaum (Dudelange)"
+   },
+   {
+    "id": 1001193,
+    "d": "2027-02-28T16:00:00+01:00",
+    "tag": 19,
+    "h": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "a": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Municipal de la Ville de Differdange"
+   },
+   {
+    "id": 1001197,
+    "d": "2027-02-28T16:00:00+01:00",
+    "tag": 19,
+    "h": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "a": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Haupert (Niederkorn)"
+   },
+   {
+    "id": 1001191,
+    "d": "2027-02-28T16:00:00+01:00",
+    "tag": 19,
+    "h": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "a": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Prince Henri (Walferdange)"
+   },
+   {
+    "id": 1001192,
+    "d": "2027-02-28T16:00:00+01:00",
+    "tag": 19,
+    "h": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "a": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Alphonse Theis (Hesperange)"
+   },
+   {
+    "id": 1001194,
+    "d": "2027-02-28T16:00:00+01:00",
+    "tag": 19,
+    "h": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "a": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Party-Rent-Arena (Rosport)"
+   },
+   {
+    "id": 1001208,
+    "d": "2027-03-07T16:00:00+01:00",
+    "tag": 20,
+    "h": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "a": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade du Centre Sportif Deich (Ettelbruck)"
+   },
+   {
+    "id": 1001204,
+    "d": "2027-03-07T16:00:00+01:00",
+    "tag": 20,
+    "h": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "a": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Am Pëtz (Weidingen)"
+   },
+   {
+    "id": 1001205,
+    "d": "2027-03-07T16:00:00+01:00",
+    "tag": 20,
+    "h": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "a": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Achille Hammerel (Luxembourg)"
+   },
+   {
+    "id": 1001207,
+    "d": "2027-03-07T16:00:00+01:00",
+    "tag": 20,
+    "h": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "a": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Dribbel (Bascharage)"
+   },
+   {
+    "id": 1001201,
+    "d": "2027-03-07T16:00:00+01:00",
+    "tag": 20,
+    "h": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "a": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade An de Millewisen (Strassen)"
+   },
+   {
+    "id": 1001206,
+    "d": "2027-03-07T16:00:00+01:00",
+    "tag": 20,
+    "h": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "a": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Becker (Hostert, synth.)"
+   },
+   {
+    "id": 1001202,
+    "d": "2027-03-07T16:00:00+01:00",
+    "tag": 20,
+    "h": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "a": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade John Grün (Mondorf)"
+   },
+   {
+    "id": 1001203,
+    "d": "2027-03-07T16:00:00+01:00",
+    "tag": 20,
+    "h": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "a": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Municipal (Rumelange)"
+   },
+   {
+    "id": 1001215,
+    "d": "2027-03-14T16:00:00+01:00",
+    "tag": 21,
+    "h": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "a": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade de la Frontière (Esch)"
+   },
+   {
+    "id": 1001217,
+    "d": "2027-03-14T16:00:00+01:00",
+    "tag": 21,
+    "h": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "a": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Klengbousbierg (Bissen)"
+   },
+   {
+    "id": 1001212,
+    "d": "2027-03-14T16:00:00+01:00",
+    "tag": 21,
+    "h": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "a": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade du Centre Sportif Deich (Ettelbruck)"
+   },
+   {
+    "id": 1001214,
+    "d": "2027-03-14T16:00:00+01:00",
+    "tag": 21,
+    "h": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "a": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Nosbaum (Dudelange)"
+   },
+   {
+    "id": 1001216,
+    "d": "2027-03-14T16:00:00+01:00",
+    "tag": 21,
+    "h": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "a": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Haupert (Niederkorn)"
+   },
+   {
+    "id": 1001211,
+    "d": "2027-03-14T16:00:00+01:00",
+    "tag": 21,
+    "h": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "a": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Prince Henri (Walferdange)"
+   },
+   {
+    "id": 1001218,
+    "d": "2027-03-14T16:00:00+01:00",
+    "tag": 21,
+    "h": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "a": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade An de Millewisen (Strassen)"
+   },
+   {
+    "id": 1001213,
+    "d": "2027-03-14T16:00:00+01:00",
+    "tag": 21,
+    "h": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "a": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Party-Rent-Arena (Rosport)"
+   },
+   {
+    "id": 1001225,
+    "d": "2027-03-21T16:00:00+01:00",
+    "tag": 22,
+    "h": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "a": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade de la Frontière (Esch)"
+   },
+   {
+    "id": 1001227,
+    "d": "2027-03-21T16:00:00+01:00",
+    "tag": 22,
+    "h": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "a": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade du Centre Sportif Deich (Ettelbruck)"
+   },
+   {
+    "id": 1001223,
+    "d": "2027-03-21T16:00:00+01:00",
+    "tag": 22,
+    "h": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "a": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Am Pëtz (Weidingen)"
+   },
+   {
+    "id": 1001224,
+    "d": "2027-03-21T16:00:00+01:00",
+    "tag": 22,
+    "h": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "a": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Achille Hammerel (Luxembourg)"
+   },
+   {
+    "id": 1001228,
+    "d": "2027-03-21T16:00:00+01:00",
+    "tag": 22,
+    "h": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "a": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Alphonse Theis (Hesperange)"
+   },
+   {
+    "id": 1001226,
+    "d": "2027-03-21T16:00:00+01:00",
+    "tag": 22,
+    "h": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "a": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Dribbel (Bascharage)"
+   },
+   {
+    "id": 1001221,
+    "d": "2027-03-21T16:00:00+01:00",
+    "tag": 22,
+    "h": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "a": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade John Grün (Mondorf)"
+   },
+   {
+    "id": 1001222,
+    "d": "2027-03-21T16:00:00+01:00",
+    "tag": 22,
+    "h": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "a": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Municipal (Rumelange)"
+   },
+   {
+    "id": 1001234,
+    "d": "2027-04-04T16:00:00+02:00",
+    "tag": 23,
+    "h": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "a": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade de la Frontière (Esch)"
+   },
+   {
+    "id": 1001236,
+    "d": "2027-04-04T16:00:00+02:00",
+    "tag": 23,
+    "h": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "a": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Klengbousbierg (Bissen)"
+   },
+   {
+    "id": 1001233,
+    "d": "2027-04-04T16:00:00+02:00",
+    "tag": 23,
+    "h": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "a": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Nosbaum (Dudelange)"
+   },
+   {
+    "id": 1001235,
+    "d": "2027-04-04T16:00:00+02:00",
+    "tag": 23,
+    "h": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "a": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Haupert (Niederkorn)"
+   },
+   {
+    "id": 1001231,
+    "d": "2027-04-04T16:00:00+02:00",
+    "tag": 23,
+    "h": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "a": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Prince Henri (Walferdange)"
+   },
+   {
+    "id": 1001237,
+    "d": "2027-04-04T16:00:00+02:00",
+    "tag": 23,
+    "h": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "a": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade An de Millewisen (Strassen)"
+   },
+   {
+    "id": 1001238,
+    "d": "2027-04-04T16:00:00+02:00",
+    "tag": 23,
+    "h": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "a": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade John Grün (Mondorf)"
+   },
+   {
+    "id": 1001232,
+    "d": "2027-04-04T16:00:00+02:00",
+    "tag": 23,
+    "h": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "a": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Party-Rent-Arena (Rosport)"
+   },
+   {
+    "id": 1001246,
+    "d": "2027-04-11T16:00:00+02:00",
+    "tag": 24,
+    "h": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "a": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade du Centre Sportif Deich (Ettelbruck)"
+   },
+   {
+    "id": 1001248,
+    "d": "2027-04-11T16:00:00+02:00",
+    "tag": 24,
+    "h": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "a": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Municipal de la Ville de Differdange"
+   },
+   {
+    "id": 1001242,
+    "d": "2027-04-11T16:00:00+02:00",
+    "tag": 24,
+    "h": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "a": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Am Pëtz (Weidingen)"
+   },
+   {
+    "id": 1001243,
+    "d": "2027-04-11T16:00:00+02:00",
+    "tag": 24,
+    "h": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "a": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Achille Hammerel (Luxembourg)"
+   },
+   {
+    "id": 1001247,
+    "d": "2027-04-11T16:00:00+02:00",
+    "tag": 24,
+    "h": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "a": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Alphonse Theis (Hesperange)"
+   },
+   {
+    "id": 1001245,
+    "d": "2027-04-11T16:00:00+02:00",
+    "tag": 24,
+    "h": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "a": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Dribbel (Bascharage)"
+   },
+   {
+    "id": 1001244,
+    "d": "2027-04-11T16:00:00+02:00",
+    "tag": 24,
+    "h": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "a": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Becker (Hostert, synth.)"
+   },
+   {
+    "id": 1001241,
+    "d": "2027-04-11T16:00:00+02:00",
+    "tag": 24,
+    "h": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "a": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Municipal (Rumelange)"
+   },
+   {
+    "id": 1001253,
+    "d": "2027-04-18T16:00:00+02:00",
+    "tag": 25,
+    "h": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "a": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade de la Frontière (Esch)"
+   },
+   {
+    "id": 1001255,
+    "d": "2027-04-18T16:00:00+02:00",
+    "tag": 25,
+    "h": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "a": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Klengbousbierg (Bissen)"
+   },
+   {
+    "id": 1001252,
+    "d": "2027-04-18T16:00:00+02:00",
+    "tag": 25,
+    "h": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "a": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Nosbaum (Dudelange)"
+   },
+   {
+    "id": 1001254,
+    "d": "2027-04-18T16:00:00+02:00",
+    "tag": 25,
+    "h": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "a": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Haupert (Niederkorn)"
+   },
+   {
+    "id": 1001251,
+    "d": "2027-04-18T16:00:00+02:00",
+    "tag": 25,
+    "h": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "a": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Prince Henri (Walferdange)"
+   },
+   {
+    "id": 1001256,
+    "d": "2027-04-18T16:00:00+02:00",
+    "tag": 25,
+    "h": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "a": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade An de Millewisen (Strassen)"
+   },
+   {
+    "id": 1001257,
+    "d": "2027-04-18T16:00:00+02:00",
+    "tag": 25,
+    "h": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "a": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade John Grün (Mondorf)"
+   },
+   {
+    "id": 1001258,
+    "d": "2027-04-18T16:00:00+02:00",
+    "tag": 25,
+    "h": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "a": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Municipal (Rumelange)"
+   },
+   {
+    "id": 1001265,
+    "d": "2027-04-25T16:00:00+02:00",
+    "tag": 26,
+    "h": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "a": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade du Centre Sportif Deich (Ettelbruck)"
+   },
+   {
+    "id": 1001267,
+    "d": "2027-04-25T16:00:00+02:00",
+    "tag": 26,
+    "h": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "a": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Municipal de la Ville de Differdange"
+   },
+   {
+    "id": 1001261,
+    "d": "2027-04-25T16:00:00+02:00",
+    "tag": 26,
+    "h": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "a": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Am Pëtz (Weidingen)"
+   },
+   {
+    "id": 1001262,
+    "d": "2027-04-25T16:00:00+02:00",
+    "tag": 26,
+    "h": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "a": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Achille Hammerel (Luxembourg)"
+   },
+   {
+    "id": 1001266,
+    "d": "2027-04-25T16:00:00+02:00",
+    "tag": 26,
+    "h": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "a": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Alphonse Theis (Hesperange)"
+   },
+   {
+    "id": 1001264,
+    "d": "2027-04-25T16:00:00+02:00",
+    "tag": 26,
+    "h": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "a": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Dribbel (Bascharage)"
+   },
+   {
+    "id": 1001263,
+    "d": "2027-04-25T16:00:00+02:00",
+    "tag": 26,
+    "h": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "a": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Becker (Hostert, synth.)"
+   },
+   {
+    "id": 1001268,
+    "d": "2027-04-25T16:00:00+02:00",
+    "tag": 26,
+    "h": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "a": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Party-Rent-Arena (Rosport)"
+   },
+   {
+    "id": 1001278,
+    "d": "2027-05-02T16:00:00+02:00",
+    "tag": 27,
+    "h": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "a": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade de la Frontière (Esch)"
+   },
+   {
+    "id": 1001276,
+    "d": "2027-05-02T16:00:00+02:00",
+    "tag": 27,
+    "h": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "a": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Klengbousbierg (Bissen)"
+   },
+   {
+    "id": 1001272,
+    "d": "2027-05-02T16:00:00+02:00",
+    "tag": 27,
+    "h": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "a": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Am Pëtz (Weidingen)"
+   },
+   {
+    "id": 1001277,
+    "d": "2027-05-02T16:00:00+02:00",
+    "tag": 27,
+    "h": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "a": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Haupert (Niederkorn)"
+   },
+   {
+    "id": 1001271,
+    "d": "2027-05-02T16:00:00+02:00",
+    "tag": 27,
+    "h": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "a": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Prince Henri (Walferdange)"
+   },
+   {
+    "id": 1001275,
+    "d": "2027-05-02T16:00:00+02:00",
+    "tag": 27,
+    "h": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "a": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade An de Millewisen (Strassen)"
+   },
+   {
+    "id": 1001274,
+    "d": "2027-05-02T16:00:00+02:00",
+    "tag": 27,
+    "h": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "a": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade John Grün (Mondorf)"
+   },
+   {
+    "id": 1001273,
+    "d": "2027-05-02T16:00:00+02:00",
+    "tag": 27,
+    "h": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "a": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Municipal (Rumelange)"
+   },
+   {
+    "id": 1001284,
+    "d": "2027-05-09T16:00:00+02:00",
+    "tag": 28,
+    "h": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "a": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade du Centre Sportif Deich (Ettelbruck)"
+   },
+   {
+    "id": 1001288,
+    "d": "2027-05-09T16:00:00+02:00",
+    "tag": 28,
+    "h": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "a": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Nosbaum (Dudelange)"
+   },
+   {
+    "id": 1001286,
+    "d": "2027-05-09T16:00:00+02:00",
+    "tag": 28,
+    "h": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "a": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Municipal de la Ville de Differdange"
+   },
+   {
+    "id": 1001281,
+    "d": "2027-05-09T16:00:00+02:00",
+    "tag": 28,
+    "h": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "a": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Achille Hammerel (Luxembourg)"
+   },
+   {
+    "id": 1001285,
+    "d": "2027-05-09T16:00:00+02:00",
+    "tag": 28,
+    "h": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "a": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Alphonse Theis (Hesperange)"
+   },
+   {
+    "id": 1001283,
+    "d": "2027-05-09T16:00:00+02:00",
+    "tag": 28,
+    "h": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "a": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Dribbel (Bascharage)"
+   },
+   {
+    "id": 1001282,
+    "d": "2027-05-09T16:00:00+02:00",
+    "tag": 28,
+    "h": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "a": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Becker (Hostert, synth.)"
+   },
+   {
+    "id": 1001287,
+    "d": "2027-05-09T16:00:00+02:00",
+    "tag": 28,
+    "h": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "a": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Party-Rent-Arena (Rosport)"
+   },
+   {
+    "id": 1001293,
+    "d": "2027-05-15T18:00:00+02:00",
+    "tag": 29,
+    "h": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "a": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Klengbousbierg (Bissen)"
+   },
+   {
+    "id": 1001297,
+    "d": "2027-05-15T18:00:00+02:00",
+    "tag": 29,
+    "h": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "a": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Am Pëtz (Weidingen)"
+   },
+   {
+    "id": 1001292,
+    "d": "2027-05-15T18:00:00+02:00",
+    "tag": 29,
+    "h": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "a": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Haupert (Niederkorn)"
+   },
+   {
+    "id": 1001298,
+    "d": "2027-05-15T18:00:00+02:00",
+    "tag": 29,
+    "h": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "a": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Achille Hammerel (Luxembourg)"
+   },
+   {
+    "id": 1001291,
+    "d": "2027-05-15T18:00:00+02:00",
+    "tag": 29,
+    "h": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "a": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Prince Henri (Walferdange)"
+   },
+   {
+    "id": 1001294,
+    "d": "2027-05-15T18:00:00+02:00",
+    "tag": 29,
+    "h": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "a": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade An de Millewisen (Strassen)"
+   },
+   {
+    "id": 1001295,
+    "d": "2027-05-15T18:00:00+02:00",
+    "tag": 29,
+    "h": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "a": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade John Grün (Mondorf)"
+   },
+   {
+    "id": 1001296,
+    "d": "2027-05-15T18:00:00+02:00",
+    "tag": 29,
+    "h": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "a": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Municipal (Rumelange)"
+   },
+   {
+    "id": 1001308,
+    "d": "2027-05-23T16:00:00+02:00",
+    "tag": 30,
+    "h": {
+     "id": 44695,
+     "n": "AS La Jeunesse d'Esch/Alzette"
+    },
+    "a": {
+     "id": 44975,
+     "n": "Progrès Niederkorn"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade de la Frontière (Esch)"
+   },
+   {
+    "id": 1001303,
+    "d": "2027-05-23T16:00:00+02:00",
+    "tag": 30,
+    "h": {
+     "id": 44690,
+     "n": "Etzella Ettelbruck"
+    },
+    "a": {
+     "id": 44884,
+     "n": "FC Wiltz 71"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade du Centre Sportif Deich (Ettelbruck)"
+   },
+   {
+    "id": 1001307,
+    "d": "2027-05-23T16:00:00+02:00",
+    "tag": 30,
+    "h": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "a": {
+     "id": 44790,
+     "n": "Atert Bissen"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Nosbaum (Dudelange)"
+   },
+   {
+    "id": 1001305,
+    "d": "2027-05-23T16:00:00+02:00",
+    "tag": 30,
+    "h": {
+     "id": 44988,
+     "n": "FC Differdange 03"
+    },
+    "a": {
+     "id": 44543,
+     "n": "US Mondorf-les-Bains"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Municipal de la Ville de Differdange"
+   },
+   {
+    "id": 1001304,
+    "d": "2027-05-23T16:00:00+02:00",
+    "tag": 30,
+    "h": {
+     "id": 44811,
+     "n": "Swift Hesperange"
+    },
+    "a": {
+     "id": 44823,
+     "n": "US Rumelange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Alphonse Theis (Hesperange)"
+   },
+   {
+    "id": 1001302,
+    "d": "2027-05-23T16:00:00+02:00",
+    "tag": 30,
+    "h": {
+     "id": 44912,
+     "n": "U.N. Käerjeng 97"
+    },
+    "a": {
+     "id": 44980,
+     "n": "Racing FC Union Luxembourg"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Dribbel (Bascharage)"
+   },
+   {
+    "id": 1001301,
+    "d": "2027-05-23T16:00:00+02:00",
+    "tag": 30,
+    "h": {
+     "id": 45017,
+     "n": "US Hostert"
+    },
+    "a": {
+     "id": 44598,
+     "n": "Résidence Walferdange"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Becker (Hostert, synth.)"
+   },
+   {
+    "id": 1001306,
+    "d": "2027-05-23T16:00:00+02:00",
+    "tag": 30,
+    "h": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "a": {
+     "id": 44678,
+     "n": "Una Strassen"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Party-Rent-Arena (Rosport)"
+   }
+  ],
+  "tabelle": [
+   {
+    "pl": 1,
+    "id": 44678,
+    "n": "Una Strassen",
+    "sp": 8,
+    "s": 8,
+    "u": 0,
+    "nl": 0,
+    "t": 17,
+    "g": 2,
+    "pkt": 24
+   },
+   {
+    "pl": 2,
+    "id": 44988,
+    "n": "FC Differdange 03",
+    "sp": 8,
+    "s": 7,
+    "u": 0,
+    "nl": 1,
+    "t": 19,
+    "g": 5,
+    "pkt": 21
+   },
+   {
+    "pl": 3,
+    "id": 44543,
+    "n": "US Mondorf-les-Bains",
+    "sp": 8,
+    "s": 6,
+    "u": 0,
+    "nl": 2,
+    "t": 16,
+    "g": 11,
+    "pkt": 18
+   },
+   {
+    "pl": 4,
+    "id": 44980,
+    "n": "Racing FC Union Luxembourg",
+    "sp": 8,
+    "s": 5,
+    "u": 2,
+    "nl": 1,
+    "t": 21,
+    "g": 8,
+    "pkt": 17
+   },
+   {
+    "pl": 5,
+    "id": 44975,
+    "n": "Progrès Niederkorn",
+    "sp": 8,
+    "s": 5,
+    "u": 1,
+    "nl": 2,
+    "t": 13,
+    "g": 5,
+    "pkt": 16
+   },
+   {
+    "pl": 6,
+    "id": 44912,
+    "n": "U.N. Käerjeng 97",
+    "sp": 8,
+    "s": 5,
+    "u": 0,
+    "nl": 3,
+    "t": 23,
+    "g": 15,
+    "pkt": 15
+   },
+   {
+    "pl": 7,
+    "id": 44790,
+    "n": "Atert Bissen",
+    "sp": 8,
+    "s": 5,
+    "u": 0,
+    "nl": 3,
+    "t": 18,
+    "g": 11,
+    "pkt": 15
+   },
+   {
+    "pl": 8,
+    "id": 44598,
+    "n": "Résidence Walferdange",
+    "sp": 8,
+    "s": 5,
+    "u": 0,
+    "nl": 3,
+    "t": 16,
+    "g": 10,
+    "pkt": 15
+   },
+   {
+    "pl": 9,
+    "id": 45017,
+    "n": "US Hostert",
+    "sp": 8,
+    "s": 3,
+    "u": 2,
+    "nl": 3,
+    "t": 14,
+    "g": 11,
+    "pkt": 11
+   },
+   {
+    "pl": 10,
+    "id": 44695,
+    "n": "AS La Jeunesse d'Esch/Alzette",
+    "sp": 8,
+    "s": 2,
+    "u": 1,
+    "nl": 5,
+    "t": 14,
+    "g": 17,
+    "pkt": 7
+   },
+   {
+    "pl": 11,
+    "id": 44586,
+    "n": "F91 Dudelange",
+    "sp": 8,
+    "s": 2,
+    "u": 1,
+    "nl": 5,
+    "t": 8,
+    "g": 15,
+    "pkt": 7
+   },
+   {
+    "pl": 12,
+    "id": 44823,
+    "n": "US Rumelange",
+    "sp": 8,
+    "s": 2,
+    "u": 0,
+    "nl": 6,
+    "t": 8,
+    "g": 23,
+    "pkt": 6
+   },
+   {
+    "pl": 13,
+    "id": 44749,
+    "n": "Victoria Rosport",
+    "sp": 8,
+    "s": 1,
+    "u": 2,
+    "nl": 5,
+    "t": 11,
+    "g": 20,
+    "pkt": 5
+   },
+   {
+    "pl": 14,
+    "id": 44690,
+    "n": "Etzella Ettelbruck",
+    "sp": 8,
+    "s": 1,
+    "u": 2,
+    "nl": 5,
+    "t": 6,
+    "g": 15,
+    "pkt": 5
+   },
+   {
+    "pl": 15,
+    "id": 44884,
+    "n": "FC Wiltz 71",
+    "sp": 8,
+    "s": 1,
+    "u": 1,
+    "nl": 6,
+    "t": 14,
+    "g": 22,
+    "pkt": 4
+   },
+   {
+    "pl": 16,
+    "id": 44811,
+    "n": "Swift Hesperange",
+    "sp": 8,
+    "s": 0,
+    "u": 0,
+    "nl": 8,
+    "t": 2,
+    "g": 30,
+    "pkt": -12
+   }
+  ]
+ },
+ "nati": {
+  "spiele": [
+   {
+    "id": 13823340,
+    "d": "2025-03-22T18:00:00+01:00",
+    "h": {
+     "id": "Luxemburg",
+     "n": "Luxemburg"
+    },
+    "a": {
+     "id": "Schweden",
+     "n": "Schweden"
+    },
+    "hs": 1,
+    "as": 0,
+    "gespielt": true,
+    "wett": "Testspiele",
+    "runde": null
+   },
+   {
+    "id": 13800564,
+    "d": "2025-03-25T20:45:00+01:00",
+    "h": {
+     "id": "Schweiz",
+     "n": "Schweiz"
+    },
+    "a": {
+     "id": "Luxemburg",
+     "n": "Luxemburg"
+    },
+    "hs": 3,
+    "as": 1,
+    "gespielt": true,
+    "wett": "Testspiele",
+    "runde": null
+   },
+   {
+    "id": 13870197,
+    "d": "2025-06-06T19:00:00+02:00",
+    "h": {
+     "id": "Luxemburg",
+     "n": "Luxemburg"
+    },
+    "a": {
+     "id": "Slowenien",
+     "n": "Slowenien"
+    },
+    "hs": 0,
+    "as": 1,
+    "gespielt": true,
+    "wett": "Testspiele",
+    "runde": null
+   },
+   {
+    "id": 13870198,
+    "d": "2025-06-10T20:45:00+02:00",
+    "h": {
+     "id": "Luxemburg",
+     "n": "Luxemburg"
+    },
+    "a": {
+     "id": "Republik Irland",
+     "n": "Republik Irland"
+    },
+    "hs": 0,
+    "as": 0,
+    "gespielt": true,
+    "wett": "Testspiele",
+    "runde": null
+   },
+   {
+    "id": 13755677,
+    "d": "2025-09-04T20:45:00+02:00",
+    "h": {
+     "id": "Luxemburg",
+     "n": "Luxemburg"
+    },
+    "a": {
+     "id": "Nordirland",
+     "n": "Nordirland"
+    },
+    "hs": 1,
+    "as": 3,
+    "gespielt": true,
+    "wett": "WM-Qualifikation",
+    "runde": "A"
+   },
+   {
+    "id": 13755682,
+    "d": "2025-09-07T20:45:00+02:00",
+    "h": {
+     "id": "Luxemburg",
+     "n": "Luxemburg"
+    },
+    "a": {
+     "id": "Slowakei",
+     "n": "Slowakei"
+    },
+    "hs": 0,
+    "as": 1,
+    "gespielt": true,
+    "wett": "WM-Qualifikation",
+    "runde": "A"
+   },
+   {
+    "id": 13874161,
+    "d": "2025-10-10T20:45:00+02:00",
+    "h": {
+     "id": "Deutschland",
+     "n": "Deutschland"
+    },
+    "a": {
+     "id": "Luxemburg",
+     "n": "Luxemburg"
+    },
+    "hs": 4,
+    "as": 0,
+    "gespielt": true,
+    "wett": "WM-Qualifikation",
+    "runde": "A"
+   },
+   {
+    "id": 13755676,
+    "d": "2025-10-13T20:45:00+02:00",
+    "h": {
+     "id": "Slowakei",
+     "n": "Slowakei"
+    },
+    "a": {
+     "id": "Luxemburg",
+     "n": "Luxemburg"
+    },
+    "hs": 2,
+    "as": 0,
+    "gespielt": true,
+    "wett": "WM-Qualifikation",
+    "runde": "A"
+   },
+   {
+    "id": 13874163,
+    "d": "2025-11-14T20:45:00+01:00",
+    "h": {
+     "id": "Luxemburg",
+     "n": "Luxemburg"
+    },
+    "a": {
+     "id": "Deutschland",
+     "n": "Deutschland"
+    },
+    "hs": 0,
+    "as": 2,
+    "gespielt": true,
+    "wett": "WM-Qualifikation",
+    "runde": "A"
+   },
+   {
+    "id": 13755683,
+    "d": "2025-11-17T20:45:00+01:00",
+    "h": {
+     "id": "Nordirland",
+     "n": "Nordirland"
+    },
+    "a": {
+     "id": "Luxemburg",
+     "n": "Luxemburg"
+    },
+    "hs": 1,
+    "as": 0,
+    "gespielt": true,
+    "wett": "WM-Qualifikation",
+    "runde": "A"
+   },
+   {
+    "id": 14784205,
+    "d": "2026-03-26T18:00:00+01:00",
+    "h": {
+     "id": "Malta",
+     "n": "Malta"
+    },
+    "a": {
+     "id": "Luxemburg",
+     "n": "Luxemburg"
+    },
+    "hs": 0,
+    "as": 2,
+    "gespielt": true,
+    "wett": "UEFA Nations League",
+    "runde": "PlayOff-C/D-Hinspiel"
+   },
+   {
+    "id": 14784207,
+    "d": "2026-03-31T18:00:00+02:00",
+    "h": {
+     "id": "Luxemburg",
+     "n": "Luxemburg"
+    },
+    "a": {
+     "id": "Malta",
+     "n": "Malta"
+    },
+    "hs": 3,
+    "as": 0,
+    "gespielt": true,
+    "wett": "UEFA Nations League",
+    "runde": "PlayOff-C/D-Rückspiel"
+   },
+   {
+    "id": 14858781,
+    "d": "2026-06-03T20:45:00+02:00",
+    "h": {
+     "id": "Luxemburg",
+     "n": "Luxemburg"
+    },
+    "a": {
+     "id": "Italien",
+     "n": "Italien"
+    },
+    "hs": 0,
+    "as": 1,
+    "gespielt": true,
+    "wett": "Testspiele",
+    "runde": null
+   },
+   {
+    "id": 14864210,
+    "d": "2026-06-06T20:00:00+02:00",
+    "h": {
+     "id": "Albanien",
+     "n": "Albanien"
+    },
+    "a": {
+     "id": "Luxemburg",
+     "n": "Luxemburg"
+    },
+    "hs": 0,
+    "as": 1,
+    "gespielt": true,
+    "wett": "Testspiele",
+    "runde": null
+   },
+   {
+    "id": 14856468,
+    "d": "2026-09-26T18:00:00+02:00",
+    "h": {
+     "id": "Bulgarien",
+     "n": "Bulgarien"
+    },
+    "a": {
+     "id": "Luxemburg",
+     "n": "Luxemburg"
+    },
+    "hs": 1,
+    "as": 2,
+    "gespielt": true,
+    "wett": "UEFA Nations League",
+    "runde": "C4"
+   },
+   {
+    "id": 14856470,
+    "d": "2026-09-29T20:45:00+02:00",
+    "h": {
+     "id": "Luxemburg",
+     "n": "Luxemburg"
+    },
+    "a": {
+     "id": "Island",
+     "n": "Island"
+    },
+    "hs": 0,
+    "as": 3,
+    "gespielt": true,
+    "wett": "UEFA Nations League",
+    "runde": "C4"
+   },
+   {
+    "id": 14856472,
+    "d": "2026-10-03T18:00:00+02:00",
+    "h": {
+     "id": "Estland",
+     "n": "Estland"
+    },
+    "a": {
+     "id": "Luxemburg",
+     "n": "Luxemburg"
+    },
+    "hs": 1,
+    "as": 0,
+    "gespielt": true,
+    "wett": "UEFA Nations League",
+    "runde": "C4"
+   },
+   {
+    "id": 14856473,
+    "d": "2026-10-06T20:45:00+02:00",
+    "h": {
+     "id": "Luxemburg",
+     "n": "Luxemburg"
+    },
+    "a": {
+     "id": "Bulgarien",
+     "n": "Bulgarien"
+    },
+    "hs": 0,
+    "as": 2,
+    "gespielt": true,
+    "wett": "UEFA Nations League",
+    "runde": "C4"
+   },
+   {
+    "id": 14856475,
+    "d": "2026-11-13T20:45:00+01:00",
+    "h": {
+     "id": "Luxemburg",
+     "n": "Luxemburg"
+    },
+    "a": {
+     "id": "Estland",
+     "n": "Estland"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "wett": "UEFA Nations League",
+    "runde": "C4"
+   },
+   {
+    "id": 14856477,
+    "d": "2026-11-16T18:00:00+01:00",
+    "h": {
+     "id": "Island",
+     "n": "Island"
+    },
+    "a": {
+     "id": "Luxemburg",
+     "n": "Luxemburg"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "wett": "UEFA Nations League",
+    "runde": "C4"
+   }
+  ],
+  "gruppe": {
+   "n": "UEFA Nations League · Gruppe C4",
+   "tabelle": [
+    {
+     "pl": 1,
+     "id": "Island",
+     "n": "Island",
+     "sp": 4,
+     "s": 2,
+     "u": 2,
+     "nl": 0,
+     "t": 7,
+     "g": 1,
+     "pkt": 8
+    },
+    {
+     "pl": 2,
+     "id": "Estland",
+     "n": "Estland",
+     "sp": 4,
+     "s": 1,
+     "u": 3,
+     "nl": 0,
+     "t": 2,
+     "g": 1,
+     "pkt": 6
+    },
+    {
+     "pl": 3,
+     "id": "Bulgarien",
+     "n": "Bulgarien",
+     "sp": 4,
+     "s": 1,
+     "u": 1,
+     "nl": 2,
+     "t": 3,
+     "g": 5,
+     "pkt": 4
+    },
+    {
+     "pl": 4,
+     "id": "Luxemburg",
+     "n": "Luxemburg",
+     "sp": 4,
+     "s": 1,
+     "u": 0,
+     "nl": 3,
+     "t": 2,
+     "g": 7,
+     "pkt": 3
+    }
+   ]
   }
  }
 }

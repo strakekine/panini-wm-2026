@@ -35,8 +35,6 @@
   .seg{display:grid;grid-template-columns:repeat(auto-fit,minmax(74px,1fr));gap:1px;background:#333;border:1px solid #333;border-radius:10px;overflow:hidden;margin-top:9px}
   .seg button{background:#222;white-space:nowrap;color:#b9bfbc;border:0;padding:9px 10px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:.3px}
   .seg button img{height:28px;display:block;margin:-6px auto}
-  /* BGL und Roude Léiw grün (vom Nutzer): haben mit den Koeppchen-Mannschaften nichts zu tun. */
-  .seg button.extra{background:#0f6b58;color:#e3f4ef}
   .seg button.on{background:#fff;color:#111}
   main{max-width:720px;margin:0 auto;padding:4px 12px 60px}
 
@@ -434,7 +432,7 @@ function nachSpieltag(spiele) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "19.10.2026 o";
+const FASSUNG = "19.10.2026 p";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -566,7 +564,7 @@ function render() {
   if (!tabs.some(t => t.id === ST.team) && !extra.some(t => t.id === ST.team))
     ST.team = (tabs.find(t => t.kat === "U13") || tabs[0])?.id ?? null;
   document.getElementById("seg").innerHTML = [...tabs, ...extra].map(t =>
-    `<button data-t="${t.id}" class="${t.id === ST.team ? "on" : ""}${typeof t.id === "string" ? " extra" : ""}">${t.bild ? `<img alt="${esc(t.reiter)}" src="${FLF_LOGO}">` : esc(t.reiter || t.n)}</button>`).join("");
+    `<button data-t="${t.id}" class="${t.id === ST.team ? "on" : ""}">${t.bild ? `<img alt="${esc(t.reiter)}" src="${FLF_LOGO}">` : esc(t.reiter || t.n)}</button>`).join("");
   if (ST.team == null) { main.innerHTML = `<div class="note">Keine Spiele gefunden.</div>`; return; }
 
   const now = Date.now();

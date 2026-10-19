@@ -11,6 +11,12 @@
 // Tag ±3 h). So hängt der Live-Kasten nicht daran, dass der GitHub-Lauf pünktlich startet.
 // Nur Koeppchen-Spiele (kein offener Vermittler). Je Spiel höchstens eine FuPa-Abfrage alle 20 s.
 // Zurück kommen nur die Felder, die die App braucht — Tore und Karten als Ereignislisten.
+//
+// Zeitplan (Plan B, 19.10.2026): GitHub startet seine geplanten Läufe unzuverlässig (am 18.10. fast
+// alle ausgelassen). Darum stößt der Worker den FLF-Abruf selbst an — er holt nichts von der FLF, er
+// drückt nur bei GitHub auf „Abruf starten“ (wie ein Handstart). GitHubs eigener Zeitplan bleibt als
+// Reserve. Einrichten: Settings → Variables and Secrets → Secret GITHUB_TOKEN (Fine-grained Token,
+// nur dieses Repo, Actions: Read and write); Settings → Triggers → Cron Triggers → „*/15 * * * *“.
 
 const API = "https://api.fupa.net/v1/matches/";
 const MERKEN_MS = 20e3;
@@ -93,7 +99,46 @@ function antwort(body, status = 200) {
   });
 }
 
+const REPO = "strakekine/panini-wm-2026", WORKFLOW = "fussball.yml";
+
+// Soll der Takt (alle 15 min, UTC) jetzt einen Abruf anstoßen? Wochenende: 8–22 Uhr Luxemburger Zeit,
+// jede Viertelstunde (eigene Uhr, damit Sommer/Winter stimmt). Mo–Fr: 20:15 UTC, also gut eine Stunde
+// nach GitHubs eigenem Abend-Lauf (19:17 UTC) — Reserve, falls der ausfällt.
+export function abrufFaellig(ms) {
+  const teile = Object.fromEntries(new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Luxembourg", weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+  }).formatToParts(new Date(ms)).map(p => [p.type, p.value]));
+  const h = +teile.hour, m = +teile.minute;
+  if (m % 15) return false;
+  if (teile.weekday === "Sat" || teile.weekday === "Sun") return h >= 8 && (h < 22 || (h === 22 && m === 0));
+  const u = new Date(ms);
+  return u.getUTCHours() === 20 && u.getUTCMinutes() === 15;
+}
+
+async function anstossen(env) {
+  const r = await fetch(`https://api.github.com/repos/${REPO}/actions/workflows/${WORKFLOW}/dispatches`, {
+    method: "POST",
+    headers: {
+      authorization: "Bearer " + env.GITHUB_TOKEN,
+      accept: "application/vnd.github+json",
+      "user-agent": "koeppchen-live",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({ ref: "main" }),
+  });
+  // 204 = gestartet. 401/403: Token abgelaufen oder falsch — dann läuft nur noch GitHubs Reserve.
+  if (r.status !== 204) console.log("GitHub-Anstoß fehlgeschlagen:", r.status, await r.text());
+  return r.status;
+}
+
 export default {
+  async scheduled(event, env, ctx) {
+    // Auf die volle Viertelstunde runden: Cloudflare startet den Takt manchmal ein paar Sekunden später.
+    const t = Math.round(event.scheduledTime / 60e3) * 60e3;
+    if (!env.GITHUB_TOKEN || !abrufFaellig(t)) return;
+    ctx.waitUntil(anstossen(env));
+  },
+
   async fetch(req) {
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
     const q = new URL(req.url).searchParams;

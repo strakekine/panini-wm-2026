@@ -9,7 +9,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { aufbereiten, spiel, reiter, ics, eigeneSpiele, CLUB } from "../tools/fussball.mjs";
 import { liveAus, gleich as liveGleich, spielJetzt, naechstesSpiel, passendesSpiel } from "../tools/fussball-live.mjs";
-import { kuerzen, passendesSpiel as wPassend, saisonVon } from "../tools/cloudflare-worker.js";
+import worker, { kuerzen, passendesSpiel as wPassend, saisonVon, abrufFaellig } from "../tools/cloudflare-worker.js";
 
 const hier = path.dirname(fileURLToPath(import.meta.url));
 const src = fs.readFileSync(path.join(hier, "..", "fussball.html"), "utf8");
@@ -279,6 +279,31 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   gleich(M.ereignisListe(Lv).map(e => e.typ + e.min), ["tor12", "karte30"], "Tore und Karten nach Minute");
   ok(M.ereignisListe({ tore: Lv.tore }).length === 1, "alte live.json ohne Karten geht");
   ok(M.imLiveFenster(vS, t0) && !M.imLiveFenster(vS, Date.parse("2026-10-19T12:00:00+02:00")), "Abfrage jede Minute nur im Fenster");
+}
+
+// Plan B: Worker stößt den FLF-Abruf an (Zeiten in Luxemburger Zeit, Sommer und Winter).
+{
+  const f = iso => abrufFaellig(Date.parse(iso));
+  ok(f("2026-10-24T08:00:00+02:00") && f("2026-10-24T14:45:00+02:00") && f("2026-10-24T22:00:00+02:00"), "Samstag 8–22 Uhr jede Viertelstunde (Sommerzeit)");
+  ok(!f("2026-10-24T07:45:00+02:00") && !f("2026-10-24T22:15:00+02:00") && !f("2026-10-24T14:50:00+02:00"), "nicht vor 8, nicht nach 22, nur Viertelstunden");
+  ok(f("2026-10-25T08:00:00+01:00") && f("2026-10-25T21:45:00+01:00") && !f("2026-10-25T07:45:00+01:00"), "Sonntag nach der Zeitumstellung: Fenster bleibt 8–22 Uhr");
+  ok(f("2026-10-26T20:15:00Z") && !f("2026-10-26T20:00:00Z") && !f("2026-10-26T19:15:00Z"), "Mo–Fr nur 20:15 UTC");
+  ok(f("2026-10-23T20:15:00Z") && !f("2026-10-23T21:15:00Z"), "Freitag wie Wochentag");
+  let tage = 0; for (let t = Date.parse("2026-10-24T00:00:00+02:00"); t < Date.parse("2026-10-31T00:00:00+01:00"); t += 15 * 60e3) tage += abrufFaellig(t);
+  ok(tage === 2 * 57 + 5, "eine Woche: 57 Anstöße je Wochenendtag + 5 Abende, waren " + tage);
+  // scheduled(): ohne Token nichts, mit Token genau ein POST an GitHub.
+  const aufrufe = [], echt = globalThis.fetch;
+  globalThis.fetch = async (url, o) => { aufrufe.push([url, o]); return new Response(null, { status: 204 }); };
+  const warte = []; const ctx = { waitUntil: p => warte.push(p) };
+  await worker.scheduled({ scheduledTime: Date.parse("2026-10-24T10:00:03+02:00") }, {}, ctx);
+  ok(aufrufe.length === 0, "ohne GITHUB_TOKEN kein Anstoß");
+  await worker.scheduled({ scheduledTime: Date.parse("2026-10-24T10:00:03+02:00") }, { GITHUB_TOKEN: "x" }, ctx);
+  await worker.scheduled({ scheduledTime: Date.parse("2026-10-24T03:00:00+02:00") }, { GITHUB_TOKEN: "x" }, ctx);
+  await Promise.all(warte);
+  globalThis.fetch = echt;
+  ok(aufrufe.length === 1 && aufrufe[0][0].endsWith("/actions/workflows/fussball.yml/dispatches")
+     && aufrufe[0][1].method === "POST" && JSON.parse(aufrufe[0][1].body).ref === "main"
+     && aufrufe[0][1].headers.authorization === "Bearer x", "mit Token ein POST an GitHub, nachts keiner");
 }
 
 console.log(fehler ? `${fehler} von ${n} Prüfungen fehlgeschlagen` : `alle ${n} Prüfungen grün`);

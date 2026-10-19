@@ -62,9 +62,15 @@ die FLF ein Ergebnis hat oder 3 h nach Anstoß. Steht der LIVE-Kasten da, entfä
 **Quelle:** Hinter https://extranet.flf.lu/match steckt `https://extranet.flf.lu/api/graphql`
 (Angular-App), antwortet **ohne Anmeldung**, schickt aber **keine CORS-Freigabe** — der Browser
 kann sie nicht direkt fragen. Darum: `tools/fussball.mjs` (Node, keine Abhängigkeiten) holt die
-Daten, `.github/workflows/fussball.yml` lässt es Sa/So 9–19 Uhr alle 15 min (8 und 19–21 Uhr
-stündlich) und Mo–Fr einmal um 20 Uhr laufen (vom Nutzer so gewünscht; Cron in UTC, im Sommer eine
-Stunde später). Ein „Neu laden“, das die Action startet, ginge nur mit einem GitHub-Schlüssel in der
+Daten. **Takt (Plan B, vom Nutzer 19.10.2026):** Der Cloudflare-Worker (`scheduled`, Cron
+`*/15 * * * *`, `abrufFaellig()`) stößt `fussball.yml` per `workflow_dispatch` an — Sa/So 8–22 Uhr
+Luxemburger Zeit jede Viertelstunde, Mo–Fr 20:15 UTC. GitHubs eigener Zeitplan bleibt als Reserve:
+Sa/So stündlich (:17 UTC 6–20), Mo–Fr 19:17 UTC. Doppelte Läufe schaden nicht (`concurrency`,
+Commit nur bei Änderung). Abwechseln GitHub/Cloudflare im Viertelstundentakt hat der Nutzer
+vorgeschlagen, abgeraten: GitHub kommt ~20 min zu spät oder gar nicht, das gäbe Lücken.
+Der Worker braucht das Secret `GITHUB_TOKEN` (Fine-grained, nur dieses Repo, Actions: Read and
+write) — **läuft nach höchstens einem Jahr ab**, dann meldet der Worker 401 im Log und nur die
+Reserve läuft; neues Token anlegen und im Worker ersetzen. Ein „Neu laden“, das die Action startet, ginge nur mit einem GitHub-Schlüssel in der
 öffentlichen Datei — abgelehnt; live ginge nur über einen eigenen Vermittler (Cloudflare Worker),
 dem Nutzer als zu viel Aufwand vorgeschlagen. Einen „Neu laden“-Knopf gibt es darum nicht mehr
 (hätte nur die Datei neu gelesen; das passiert beim Öffnen und bei `visibilitychange` ohnehin).
@@ -174,7 +180,8 @@ im Kalender an), Pages baut also auch nach Action-Commits neu.
 ein; erst ein Handstart (`gh api -X POST …/actions/workflows/fussball.yml/dispatches -f ref=main`)
 brachte es in App und Kalender. Möglich, dass es an den vielen Änderungen der Workflow-Dateien an
 dem Tag lag — am nächsten Wochenende nachsehen. Dem Nutzer vorgeschlagen, noch offen: die
-Live-Wache fragt nach Abpfiff eine Stunde lang alle 15 min selbst die FLF ab.
+Live-Wache fragt nach Abpfiff eine Stunde lang alle 15 min selbst die FLF ab — überholt durch
+Plan B (Worker stößt an). 18.10. abends: 20:17 → 20:39, 21:17 ausgelassen, 22:17 → 22:40.
 
 **Klasse wechselt während der Saison** (Phase 1 → 2): gesucht wird nach dem Verein, die Klassen
 ergeben sich aus den Spielen. Die zuletzt begonnene Ligaklasse ist die aktuelle, die anderen

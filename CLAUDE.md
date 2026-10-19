@@ -58,7 +58,16 @@ fünf (Seniors hätten sonst die halbe Saison dort).
 **BGL League und Roude Léiw** (vom Nutzer, 19.10.2026; „BGL League“ vom Nutzer — die FLF schreibt
 „BGL Ligue“, unter diesem Namen wird die Klasse gesucht). **Reiter: „BGL“ und das FLF-Logo**
 (`FLF_LOGO`, vom Nutzer als Bild, 55×72; Knöpfe in alter Größe, längere Texte passten nicht).
-Bei den BGL-Spielen steht das Stadion (`ort`). zwei Reiter hinter den Mannschaften
+Bei den BGL-Spielen steht das Stadion (`ort`). Beide Reiter **grün** (`.seg button.extra`, vom Nutzer: haben mit den
+Koeppchen-Mannschaften nichts zu tun), ausgewählt weiß wie alle. **Roude Léiw** hat den
+„Heute Spieltag“-Kasten (`heuteHtml`, gemeinsam mit den Mannschaften; Stadion per Einzelabruf
+`matches/<slug>` für die nächsten drei Spiele, die Liste hat keins) und einen **Liveticker** (vom
+Nutzer, 19.10.2026): FuPa tickert die Länderspiele (z. B. Yann Ferreira). `natiSpiel` bringt den
+FuPa-`slug` mit, `natiLiveSpiel` (Fenster wie Seniors 1), `liveBasis` baut das Gerüst mit Slug, die
+App fragt den Worker direkt — **kein GitHub-Lauf, keine live.json**; ohne Worker kein Ticker, das
+Ergebnis kommt dann mit dem nächsten Abruf. Der Worker lässt dafür Slugs mit `luxemburg-m1` durch
+(**neu einfügen nötig**). `liveHtml` ist gemeinsam; fett steht die eigene Seite (`wir`), vorher war
+bei den Seniors immer die Heimmannschaft fett — falsch bei Auswärtsspielen. zwei Reiter hinter den Mannschaften
 (`extraReiter`, `id` „bgl“/„nati“ als Text), ohne Kalender, Ticker, Spieltag-Kasten. **BGL**:
 Spiele aus der FLF (`bglHolen`, Klasse per Name, Nummer wechselt je Saison), zuletzt gespielter
 Spieltag (`bglSicht`, auch angefangen) und die **zwei** nächsten (vom Nutzer). **Tabelle von FuPa**

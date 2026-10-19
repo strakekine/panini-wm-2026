@@ -9,7 +9,7 @@
 // Aufruf: GET /?slug=<FuPa-Spiel-Slug> oder GET /?anstoss=<ISO-Zeit aus dem FLF-Spielplan> —
 // dann sucht der Worker das Spiel der Seniors 1 selbst bei FuPa (gleiche Zeit, sonst am selben
 // Tag ±3 h). So hängt der Live-Kasten nicht daran, dass der GitHub-Lauf pünktlich startet.
-// Nur Koeppchen-Spiele (kein offener Vermittler). Je Spiel höchstens eine FuPa-Abfrage alle 20 s.
+// Nur Koeppchen-Spiele und Länderspiele Luxemburgs (kein offener Vermittler). Je Spiel höchstens eine FuPa-Abfrage alle 20 s.
 // Zurück kommen nur die Felder, die die App braucht — Tore und Karten als Ereignislisten.
 //
 // Zeitplan (Plan B, 19.10.2026): GitHub startet seine geplanten Läufe unzuverlässig (am 18.10. fast
@@ -151,7 +151,8 @@ export default {
       slug = (await slugZu(anstoss)) || "";
       if (!slug) return antwort('{"fehler":"spiel nicht gefunden"}', 404);
     }
-    if (!/^[a-z0-9-]{5,160}$/.test(slug) || !slug.includes("fc-koeppchen")) return antwort('{"fehler":"slug"}', 400);
+    // Koeppchen-Spiele und Länderspiele Luxemburgs (Reiter „Roude Léiw“, seit 19.10.2026).
+    if (!/^[a-z0-9-_]{5,160}$/.test(slug) || !(slug.includes("fc-koeppchen") || slug.includes("luxemburg-m1"))) return antwort('{"fehler":"slug"}', 400);
 
     const g = gemerkt.get(slug);
     if (g && Date.now() - g.t < MERKEN_MS) return antwort(g.body);

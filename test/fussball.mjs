@@ -16,7 +16,7 @@ const src = fs.readFileSync(path.join(hier, "..", "fussball.html"), "utf8");
 const i = src.indexOf("==== Logik"), j = src.indexOf("==== Oberfläche");
 if (i < 0 || j < 0) throw new Error("Abschnittsmarken Logik/Oberfläche nicht gefunden");
 const M = new Function(src.slice(src.lastIndexOf("//", i), src.lastIndexOf("//", j)) + `
-  return { extraReiter, bglSicht, bglTabelle, natiSicht, spieltagHeute, liveSpiel, liveBasis, kartenArt, ereignisListe, torArt, mitWorker, liveAnzeige, liveZeit, imLiveFenster, REGELN, klasseVon, zonen, ausgang, aufteilen, anzeige, sicht, nachSpieltag, roem };`)();
+  return { natiLiveSpiel, extraReiter, bglSicht, bglTabelle, natiSicht, spieltagHeute, liveSpiel, liveBasis, kartenArt, ereignisListe, torArt, mitWorker, liveAnzeige, liveZeit, imLiveFenster, REGELN, klasseVon, zonen, ausgang, aufteilen, anzeige, sicht, nachSpieltag, roem };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text) { n++; if (!bed) { fehler++; console.log("✗ " + text); } }
@@ -344,6 +344,12 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   gleich(tab, [{ pl: 4, id: "Luxemburg", n: "Luxemburg", sp: 4, s: 1, u: 0, nl: 3, t: 2, g: 7, pkt: 3 }], "Nati: Tabelle umgerechnet");
   const nv = M.natiSicht({ spiele: roh.map(natiSpiel), gruppe: null }, Date.parse("2026-10-19T12:00:00+02:00"));
   gleich([nv.kommend.map(s => s.id), nv.gespielt.map(s => s.id)], [[4, 5], [3, 2, 1]], "Nati: kommend und Ergebnisse");
+  const nvs = M.natiSicht({ spiele: roh.map(m => ({ ...natiSpiel(m), slug: "lux-" + m.id })), gruppe: null }, 0);
+  const t4 = Date.parse("2026-11-13T20:45:00+01:00");
+  ok(M.natiLiveSpiel(nvs, t4 - 10 * 60e3)?.id === 4 && M.natiLiveSpiel(nvs, t4 + 170 * 60e3)?.id === 4, "Nati live: 15 min vor bis 180 min nach Anstoß");
+  ok(M.natiLiveSpiel(nvs, t4 - 20 * 60e3) === null && M.natiLiveSpiel(nvs, t4 + 190 * 60e3) === null, "Nati live: außerhalb des Fensters nichts");
+  const nh = M.spieltagHeute(M.natiSicht({ spiele: roh.map(natiSpiel), gruppe: null }, t4 - 8 * 3600e3), t4 - 8 * 3600e3);
+  ok(nh && nh.sp.id === 4 && !nh.begonnen, "Nati: Heute-Spieltag-Kasten am Länderspieltag");
 }
 
 // Plan B: Worker stößt den FLF-Abruf an (Zeiten in Luxemburger Zeit, Sommer und Winter).
@@ -365,6 +371,13 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   await worker.scheduled({ scheduledTime: Date.parse("2026-10-24T10:00:03+02:00") }, { GITHUB_TOKEN: "x" }, ctx);
   await worker.scheduled({ scheduledTime: Date.parse("2026-10-24T03:00:00+02:00") }, { GITHUB_TOKEN: "x" }, ctx);
   await Promise.all(warte);
+  // Worker liefert Koeppchen- und Länderspiele, sonst nichts.
+  const vorher = aufrufe.length;
+  const fremd = await worker.fetch(new Request("https://w/?slug=fc-irgendwer-m1-fc-anderer-m1-261018"));
+  ok(fremd.status === 400 && aufrufe.length === vorher, "Worker: fremdes Spiel abgelehnt, FuPa nicht gefragt");
+  globalThis.fetch = async () => new Response(JSON.stringify({ slug: "luxemburg-m1-estland-m1-261113", homeGoal: 1, awayGoal: 0, section: "LIVE" }), { status: 200 });
+  const lux = await worker.fetch(new Request("https://w/?slug=luxemburg-m1-estland-m1-261113"));
+  ok(lux.status === 200 && (await lux.json()).hs === 1, "Worker: Länderspiel Luxemburg erlaubt");
   globalThis.fetch = echt;
   ok(aufrufe.length === 1 && aufrufe[0][0].endsWith("/actions/workflows/fussball.yml/dispatches")
      && aufrufe[0][1].method === "POST" && JSON.parse(aufrufe[0][1].body).ref === "main"

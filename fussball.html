@@ -35,6 +35,8 @@
   .seg{display:grid;grid-template-columns:repeat(auto-fit,minmax(74px,1fr));gap:1px;background:#333;border:1px solid #333;border-radius:10px;overflow:hidden;margin-top:9px}
   .seg button{background:#222;white-space:nowrap;color:#b9bfbc;border:0;padding:9px 10px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:.3px}
   .seg button img{height:28px;display:block;margin:-6px auto}
+  /* BGL und Roude Léiw grün (vom Nutzer): haben mit den Koeppchen-Mannschaften nichts zu tun. */
+  .seg button.extra{background:#0f6b58;color:#e3f4ef}
   .seg button.on{background:#fff;color:#111}
   main{max-width:720px;margin:0 auto;padding:4px 12px 60px}
 
@@ -341,8 +343,9 @@ function liveSpiel(v, now) {
 function liveBasis(L, sp) {
   if (!sp) return L;
   if (L && L.flfId === sp.id) return L;
-  return { flfId: sp.id, slug: null, url: null, anstoss: sp.d, h: sp.h.n, a: sp.a.n,
-           section: "", tore: [], karten: [] };
+  // Länderspiele bringen ihren FuPa-Slug mit (tools/fussball.mjs), dort fragt die App den Worker direkt.
+  return { flfId: sp.id, slug: sp.slug || null, url: sp.slug ? "https://www.fupa.net/match/" + sp.slug : null,
+           anstoss: sp.d, h: sp.h.n, a: sp.a.n, section: "", tore: [], karten: [] };
 }
 
 function imLiveFenster(v, now) {
@@ -402,6 +405,12 @@ function bglTabelle(bgl) {
   return { tabelle: tab, selbst: true, flfSp };
 }
 
+// Länderspiel im Live-Fenster (wie bei den Seniors 1), nur mit FuPa-Slug.
+function natiLiveSpiel(v, now) {
+  return [...v.kommend, ...v.gespielt].find(sp => sp.slug && now >= Date.parse(sp.d) - LIVE_FENSTER.vor
+    && now <= Date.parse(sp.d) + LIVE_FENSTER.nach) || null;
+}
+
 // Nationalteam: kommend/gespielt wie bei einer Mannschaft (3-h-Grenze).
 function natiSicht(nati, now) {
   const grenze = now - 3 * 3600e3;
@@ -425,7 +434,7 @@ function nachSpieltag(spiele) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "19.10.2026 n";
+const FASSUNG = "19.10.2026 o";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -557,12 +566,12 @@ function render() {
   if (!tabs.some(t => t.id === ST.team) && !extra.some(t => t.id === ST.team))
     ST.team = (tabs.find(t => t.kat === "U13") || tabs[0])?.id ?? null;
   document.getElementById("seg").innerHTML = [...tabs, ...extra].map(t =>
-    `<button data-t="${t.id}" class="${t.id === ST.team ? "on" : ""}">${t.bild ? `<img alt="${esc(t.reiter)}" src="${FLF_LOGO}">` : esc(t.reiter || t.n)}</button>`).join("");
+    `<button data-t="${t.id}" class="${t.id === ST.team ? "on" : ""}${typeof t.id === "string" ? " extra" : ""}">${t.bild ? `<img alt="${esc(t.reiter)}" src="${FLF_LOGO}">` : esc(t.reiter || t.n)}</button>`).join("");
   if (ST.team == null) { main.innerHTML = `<div class="note">Keine Spiele gefunden.</div>`; return; }
 
   const now = Date.now();
   if (ST.team === "bgl" || ST.team === "nati") {
-    LIVE_SP = null; LIVE_POLL = false;
+    LIVE_SP = null; LIVE_POLL = false;   // natiHtml setzt beide, wenn ein Länderspiel läuft
     main.innerHTML = (ST.team === "bgl" ? bglHtml(now) : natiHtml(now)) + fuss();
     return;
   }
@@ -577,43 +586,9 @@ function render() {
   LIVE_POLL = !!lv || imLiveFenster(v, now);
   // Spieltag-Kasten, solange (noch) kein LIVE-Kasten da ist.
   const heute = !lv && spieltagHeute(v, now);
-  if (heute) {
-    const sp = heute.sp, zeit = wann(sp.d).split(" · ")[1];
-    const live = v.team.reiter === LIVE_REITER;
-    const titel = heute.begonnen ? "Spiel läuft" : "Heute Spieltag! ⚽";
-    const oben = heute.begonnen ? (zeit ? "seit " + zeit : "heute") : (zeit ? "Anstoß " + zeit : "Uhrzeit noch offen");
-    const unten = heute.begonnen
-      ? (live ? "Der Liveticker erscheint hier, sobald bei FuPa getickert wird." : "Das Ergebnis erscheint, sobald es eingetragen ist.")
-      : (live ? "Liveticker startet mit dem Anpfiff." : "");
-    h += `<section class="card heute"><div class="chead"><h2>${titel}</h2>${sp.typ === "CUP" ? `<span class="pill">Pokal</span>` : ""}</div><div class="cbody">
-      <div class="wann">${esc(oben)}</div>
-      <div class="m" style="border:0"><div class="t h${v.ids.has(sp.h.id) ? " wir" : ""}">${umbruch(anzeige(sp.h.n))}</div>
-      <div class="sc offen">–</div><div class="t${v.ids.has(sp.a.id) ? " wir" : ""}">${umbruch(anzeige(sp.a.n))}</div></div>
-      ${sp.ort ? `<div class="wo">📍 ${esc(sp.ort)}</div>` : ""}
-      ${unten ? `<div class="zusatz">${esc(unten)}</div>` : ""}
-      </div></section>`;
-  }
-
-  if (lv) {
-    const tore = ereignisListe(lv).map(e => {
-      const min = `${e.min}${e.plus ? "+" + e.plus : ""}.`;
-      const wer = `<span class="muted">(${esc(anzeige(e.heim ? lv.h : lv.a))})</span>`;
-      if (e.typ === "karte") {
-        const k = kartenArt(e.art);
-        return `<li>${k.zeichen} ${min} ${esc(e.name || "")} · <b>${k.text}</b> ${wer}</li>`;
-      }
-      const art = torArt(e.art);
-      return `<li>⚽ ${min} ${esc(e.name || "Tor")}${art ? ` · <b>${art}</b>` : ""} ${wer}</li>`;
-    }).join("");
-    h += `<section class="card live"><div class="chead"><h2>${lv.laeuft ? `<span class="punkt"></span>Live` : "Endstand laut FuPa"}</h2>
-      <div class="hint">${esc(wann(lv.anstoss))}</div></div><div class="cbody">
-      <div class="m" style="border:0"><div class="t h wir">${umbruch(anzeige(lv.h))}</div>
-      <div class="stand">${lv.hs ?? "–"} : ${lv.as ?? "–"}</div><div class="t">${umbruch(anzeige(lv.a))}</div></div>
-      <div class="zeit" id="liveZeit">${esc(lv.zeit)}</div>
-      ${tore ? `<ul class="tore">${tore}</ul>` : ""}
-      <div class="quelle">Liveticker von <a href="${esc(lv.url)}" target="_blank" rel="noopener">FuPa</a>${lv.ticker ? " (" + esc(lv.ticker) + ")" : ""} · ${WORKER_URL && W ? "fast live" : "bis zu 7 min Verzögerung"} · offiziell zählt die FLF</div>
-      </div></section>`;
-  }
+  if (heute) h += heuteHtml(heute, v.ids, { live: v.team.reiter === LIVE_REITER, pill: sp => sp.typ === "CUP" ? "Pokal" : "",
+    ohneLive: "Das Ergebnis erscheint, sobald es eingetragen ist." });
+  if (lv) h += liveHtml(lv, n => anzeige(n).startsWith("Koeppchen"), "offiziell zählt die FLF");
 
   if (v.status && v.status.was) {
     h += `<div class="note ${v.status.was.art}"><b>${esc(v.aktuell.n)} ist beendet.</b> ${esc(v.status.was.txt)}` +
@@ -684,6 +659,46 @@ function fuss() {
     <div style="margin-top:6px;font-size:11px">Fassung ${FASSUNG}</div></footer>`;
 }
 
+// „Heute Spieltag“ (Mannschaften und Roude Léiw).
+function heuteHtml(heute, ids, { live, pill, ohneLive }) {
+  const sp = heute.sp, zeit = wann(sp.d).split(" · ")[1];
+  const titel = heute.begonnen ? "Spiel läuft" : "Heute Spieltag! ⚽";
+  const oben = heute.begonnen ? (zeit ? "seit " + zeit : "heute") : (zeit ? "Anstoß " + zeit : "Uhrzeit noch offen");
+  const unten = heute.begonnen
+    ? (live ? "Der Liveticker erscheint hier, sobald bei FuPa getickert wird." : ohneLive)
+    : (live ? "Liveticker startet mit dem Anpfiff." : "");
+  const p = pill(sp);
+  return `<section class="card heute"><div class="chead"><h2>${titel}</h2>${p ? `<span class="pill">${esc(p)}</span>` : ""}</div><div class="cbody">
+    <div class="wann">${esc(oben)}</div>
+    <div class="m" style="border:0"><div class="t h${ids.has(sp.h.id) ? " wir" : ""}">${umbruch(anzeige(sp.h.n))}</div>
+    <div class="sc offen">–</div><div class="t${ids.has(sp.a.id) ? " wir" : ""}">${umbruch(anzeige(sp.a.n))}</div></div>
+    ${sp.ort ? `<div class="wo">📍 ${esc(sp.ort)}</div>` : ""}
+    ${unten ? `<div class="zusatz">${esc(unten)}</div>` : ""}
+    </div></section>`;
+}
+
+// LIVE-Kasten (Seniors 1 und Roude Léiw). `wir(name)`: welche Seite fett steht.
+function liveHtml(lv, wir, zusatz) {
+  const tore = ereignisListe(lv).map(e => {
+    const min = `${e.min}${e.plus ? "+" + e.plus : ""}.`;
+    const wer = `<span class="muted">(${esc(anzeige(e.heim ? lv.h : lv.a))})</span>`;
+    if (e.typ === "karte") {
+      const k = kartenArt(e.art);
+      return `<li>${k.zeichen} ${min} ${esc(e.name || "")} · <b>${k.text}</b> ${wer}</li>`;
+    }
+    const art = torArt(e.art);
+    return `<li>⚽ ${min} ${esc(e.name || "Tor")}${art ? ` · <b>${art}</b>` : ""} ${wer}</li>`;
+  }).join("");
+  return `<section class="card live"><div class="chead"><h2>${lv.laeuft ? `<span class="punkt"></span>Live` : "Endstand laut FuPa"}</h2>
+    <div class="hint">${esc(wann(lv.anstoss))}</div></div><div class="cbody">
+    <div class="m" style="border:0"><div class="t h${wir(lv.h) ? " wir" : ""}">${umbruch(anzeige(lv.h))}</div>
+    <div class="stand">${lv.hs ?? "–"} : ${lv.as ?? "–"}</div><div class="t${wir(lv.a) ? " wir" : ""}">${umbruch(anzeige(lv.a))}</div></div>
+    <div class="zeit" id="liveZeit">${esc(lv.zeit)}</div>
+    ${tore ? `<ul class="tore">${tore}</ul>` : ""}
+    <div class="quelle">Liveticker von <a href="${esc(lv.url)}" target="_blank" rel="noopener">FuPa</a>${lv.ticker ? " (" + esc(lv.ticker) + ")" : ""} · ${WORKER_URL && W ? "fast live" : "bis zu 7 min Verzögerung"}${zusatz ? " · " + zusatz : ""}</div>
+    </div></section>`;
+}
+
 function bglHtml(now) {
   const b = D.bgl, v = bglSicht(b, now);
   document.getElementById("sub").textContent = "BGL League · " + D.saison.n.replace("Saison ", "");
@@ -707,7 +722,16 @@ function natiHtml(now) {
   const v = natiSicht(D.nati, now), ids = new Set(["Luxemburg"]);
   document.getElementById("sub").textContent = "Roude Léiw" + (v.gruppe ? " · " + v.gruppe.n : "");
   const meta = sp => [esc(wann(sp.d)), esc(sp.wett + (sp.runde && !/^\d+$/.test(sp.runde) ? " " + sp.runde : ""))].filter(Boolean).join(" · ");
-  let h = `<section class="card"><div class="chead"><h2>Nächste Spiele</h2></div><div class="cbody">`;
+  let h = "";
+  // Liveticker über den Worker (FuPa tickert die Länderspiele), Slug aus den Daten — ohne GitHub-Lauf.
+  LIVE_SP = natiLiveSpiel(v, now);
+  LIVE_POLL = !!LIVE_SP && !!WORKER_URL;
+  const lv = LIVE_SP && liveAnzeige(mitWorker(liveBasis(null, LIVE_SP), W), v, now);
+  const heute = !lv && spieltagHeute(v, now);
+  if (heute) h += heuteHtml(heute, ids, { live: !!WORKER_URL && !!heute.sp.slug, pill: sp => sp.wett === "Testspiele" ? "Testspiel" : "",
+    ohneLive: "Das Ergebnis erscheint, sobald FuPa es hat." });
+  if (lv) h += liveHtml(lv, n => n === "Luxemburg", "");
+  h += `<section class="card"><div class="chead"><h2>Nächste Spiele</h2></div><div class="cbody">`;
   h += v.kommend.length ? v.kommend.map(sp => spielZeile(sp, ids, meta(sp))).join("") : `<div class="muted">Noch keine Länderspiele angesetzt.</div>`;
   h += `</div></section>`;
   if (v.gruppe) h += `<section class="card"><div class="chead"><h2>Tabelle</h2><div class="hint">${esc(v.gruppe.n)}</div></div>

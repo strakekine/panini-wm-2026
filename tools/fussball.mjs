@@ -176,7 +176,7 @@ export function natiSpiel(m) {
   const n = t => t.name?.full || t.name || "";
   const r = m.round || {};
   return {
-    id: m.id, d: m.kickoff,
+    id: m.id, d: m.kickoff, slug: m.slug,
     h: { id: n(m.homeTeam), n: n(m.homeTeam) }, a: { id: n(m.awayTeam), n: n(m.awayTeam) },
     hs: m.homeGoal ?? null, as: m.awayGoal ?? null, gespielt: m.section === "POST",
     wett: r.competitionSeason?.name || m.competition?.name || "", runde: r.title || null,
@@ -225,7 +225,13 @@ async function natiHolen() {
     const st = await fupa(`standings?competition=${g.comp}&group=${g.group}`);
     if (st?.standings?.length) gruppe = { n: g.n, tabelle: natiTabelle(st.standings) };
   }
-  return { spiele: alle.map(natiSpiel).sort((a, b) => a.d.localeCompare(b.d)), gruppe };
+  const spiele = alle.map(natiSpiel).sort((a, b) => a.d.localeCompare(b.d));
+  // Stadion steht nur im einzelnen Spiel, nicht in der Liste: für die nächsten drei nachfragen
+  // („Heute Spieltag“-Kasten).
+  for (const sp of spiele.filter(s => !s.gespielt && Date.parse(s.d) > Date.now() - 6 * 3600e3).slice(0, 3)) {
+    try { const m = await fupa("matches/" + sp.slug); if (m?.venue?.name) sp.ort = m.venue.name; } catch (e) {}
+  }
+  return { spiele, gruppe };
 }
 
 // BGL-Tabelle von FuPa (Wettbewerb „nationaldivision“): Die FLF rechnet ihre erst nach der

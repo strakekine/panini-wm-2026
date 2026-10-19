@@ -458,7 +458,7 @@ function nachSpieltag(spiele) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "19.10.2026 s";
+const FASSUNG = "19.10.2026 t";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -690,13 +690,18 @@ function heuteHtml(heute, ids, { live, pill, ohneLive }) {
   const min = !heute.begonnen && minutenBisAnpfiff(sp, Date.now());
   // Nächster Wechsel des Kastens (Countdown an, Anpfiff) — der Takt unten baut dann neu.
   if (!heute.begonnen && zeit) UMSCHALT = Date.parse(sp.d) - (min ? 0 : COUNTDOWN_MS);
+  // 15 min nach Anpfiff ohne Tickerer: nicht weiter auf den Ticker vertrösten (vom Nutzer, 19.10.2026).
+  const keinTicker = heute.begonnen && Date.now() >= Date.parse(sp.d) + 15 * 60e3;
+  if (heute.begonnen && live && !keinTicker) UMSCHALT = Date.parse(sp.d) + 15 * 60e3;
   const titel = heute.begonnen ? "Spiel läuft" : min ? "Gleich geht's los! ⚽" : "Heute Spieltag! ⚽";
   const oben = heute.begonnen ? esc(zeit ? "seit " + zeit : "heute")
     : min ? `<span id="countdown" data-d="${esc(sp.d)}">${countdownText(min)}</span> · ${esc(zeit)}`
     : esc(zeit ? "Anstoß " + zeit : "Uhrzeit noch offen");
   // Nicht „startet mit dem Anpfiff“: bei den Reserven tickert nicht immer jemand (vom Nutzer).
   const unten = heute.begonnen
-    ? (live ? "Der Liveticker erscheint hier, sobald bei FuPa getickert wird." : ohneLive)
+    ? (!live ? ohneLive : keinTicker
+        ? "Bisher tickert niemand bei FuPa – heute gibt es wohl keinen Liveticker. Das Ergebnis kommt, sobald die FLF es einträgt."
+        : "Der Liveticker erscheint hier, falls bei FuPa jemand tickert.")
     : (live ? "Liveticker, wenn verfügbar — sobald bei FuPa jemand tickert." : "");
   const p = pill(sp);
   return `<section class="card heute"><div class="chead"><h2>${titel}</h2>${p ? `<span class="pill">${esc(p)}</span>` : ""}</div><div class="cbody">

@@ -105,8 +105,10 @@ Sa/So stündlich (:17 UTC 6–20), Mo–Fr 19:17 UTC, täglich 22:37 UTC. Doppel
 Commit nur bei Änderung). Abwechseln GitHub/Cloudflare im Viertelstundentakt hat der Nutzer
 vorgeschlagen, abgeraten: GitHub kommt ~20 min zu spät oder gar nicht, das gäbe Lücken.
 Der Worker braucht das Secret `GITHUB_TOKEN` (Fine-grained, nur dieses Repo, Actions: Read and
-write) — **läuft nach höchstens einem Jahr ab**, dann meldet der Worker 401 im Log und nur die
-Reserve läuft; neues Token anlegen und im Worker ersetzen. Ein „Neu laden“, das die Action startet, ginge nur mit einem GitHub-Schlüssel in der
+write). **Eingerichtet vom Nutzer am 19.10.2026: Token ohne Ablaufdatum („No expiration“), Secret
+unter „Runtime variables and secrets“, Cron Trigger „every 15 minutes“, neuer Code eingefügt**
+(Länderspiel-Slug geprüft: 200). Wird das Token je gelöscht oder widerrufen, meldet der Worker
+401 im Log und nur die Reserve läuft; dann neues Token anlegen und im Worker ersetzen. Ein „Neu laden“, das die Action startet, ginge nur mit einem GitHub-Schlüssel in der
 öffentlichen Datei — abgelehnt; live ginge nur über einen eigenen Vermittler (Cloudflare Worker),
 dem Nutzer als zu viel Aufwand vorgeschlagen. Einen „Neu laden“-Knopf gibt es darum nicht mehr
 (hätte nur die Datei neu gelesen; das passiert beim Öffnen und bei `visibilitychange` ohnehin).

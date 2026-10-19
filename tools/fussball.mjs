@@ -233,8 +233,10 @@ async function natiHolen() {
 // Punktabzüge samt Begründung (`text`). FuPa schreibt die Vereine deutsch („Differdingen“), die
 // Spieltage kommen von der FLF („Differdange“) — darum bekommt jede Zeile den FLF-Namen der
 // Mannschaft mit denselben Zahlen (Spiele, S/U/N, Tore) aus den FLF-Ergebnissen. Passt eine Zeile
-// nicht eindeutig, bleibt der FuPa-Name.
-export function fupaTabelleMitFlfNamen(standings, flfSpiele) {
+// nicht eindeutig, gilt die gemerkte Zuordnung (`gemerkt`: FuPa-`teamId` → FLF-Name, bleibt über
+// die Jahre gleich, steht in data/fussball.json), sonst bleibt der FuPa-Name. Am Saisonanfang haben
+// viele dieselben Zahlen (dreimal 1:0) — dafür das Gedächtnis (vom Nutzer, 19.10.2026).
+export function fupaTabelleMitFlfNamen(standings, flfSpiele, gemerkt = {}) {
   const z = new Map();
   for (const sp of flfSpiele) {
     if (!sp.gespielt || sp.hs == null || sp.as == null) continue;
@@ -247,14 +249,19 @@ export function fupaTabelleMitFlfNamen(standings, flfSpiele) {
   const sig = r => [r.sp, r.s, r.u, r.nl, r.t, r.g].join("/");
   const nachSig = new Map();
   for (const r of z.values()) nachSig.set(sig(r), nachSig.has(sig(r)) ? null : r);
-  return standings.map(x => {
+  const namen = { ...gemerkt }, nachName = new Map([...z.values()].map(r => [r.n, r]));
+  const tabelle = standings.map(x => {
     const zeile = { pl: x.rank, sp: x.matches, s: x.wins, u: x.draws, nl: x.defeats, t: x.ownGoals, g: x.againstGoals, pkt: x.points };
+    const key = String(x.team.teamId ?? x.team.slug);
     const flf = nachSig.get(sig(zeile));
-    return { ...zeile, id: flf ? flf.id : x.team.slug, n: flf ? flf.n : x.team.name.full };
+    if (flf) namen[key] = flf.n;
+    const n = namen[key];
+    return { ...zeile, id: nachName.get(n)?.id ?? n ?? x.team.slug, n: n ?? x.team.name.full };
   });
+  return { tabelle, namen };
 }
 
-async function bglHolen(saison, zeit) {
+async function bglHolen(saison, zeit, alt) {
   const div = (await gq(Q_DIVS, { s: saison.id })).divisions.find(d => d.name.trim() === BGL_NAME);
   if (!div) throw new Error("FLF: " + BGL_NAME + " nicht gefunden");
   await pause(1000);
@@ -262,12 +269,15 @@ async function bglHolen(saison, zeit) {
   await pause(1000);
   const { rankings } = await gq(Q_RANKING, { c: { seasonId: saison.id, divisionId: div.id, matchTypeId: "CC" } });
   const spiele = matches.map(spiel).sort((a, b) => a.d.localeCompare(b.d) || a.h.n.localeCompare(b.h.n));
-  let tab = tabelle(rankings), quelle = "FLF", text = null;
+  let tab = tabelle(rankings), quelle = "FLF", text = null, namen = alt?.namen || {};
   try {
     const st = await fupa("standings?competition=nationaldivision");
-    if (st?.standings?.length) { tab = fupaTabelleMitFlfNamen(st.standings, spiele); quelle = "FuPa"; text = st.text || null; }
+    if (st?.standings?.length) {
+      const r = fupaTabelleMitFlfNamen(st.standings, spiele, alt?.namen);
+      tab = r.tabelle; namen = r.namen; quelle = "FuPa"; text = st.text || null;
+    }
   } catch (e) { console.error("BGL-Tabelle von FuPa:", e.message, "— nehme die der FLF"); }
-  return { n: div.name.trim(), spiele, tabelle: tab, quelle, text };
+  return { n: div.name.trim(), spiele, tabelle: tab, quelle, text, namen };
 }
 
 // Vereinsspiele + je Klasse alle Spiele und Tabelle → das, was die App liest.
@@ -361,7 +371,7 @@ async function main() {
   const neu = aufbereiten({ saison, vereinsSpiele, klassen });
   // BGL und Nationalteam dürfen den Abruf nicht kippen: fällt eins aus, bleibt der alte Stand.
   const alt = existsSync(OUT) ? JSON.parse(readFileSync(OUT, "utf8")) : {};
-  try { neu.bgl = await bglHolen(saison, zeit); } catch (e) { console.error("BGL:", e.message); neu.bgl = alt.bgl || null; }
+  try { neu.bgl = await bglHolen(saison, zeit, alt.bgl); } catch (e) { console.error("BGL:", e.message); neu.bgl = alt.bgl || null; }
   try { neu.nati = await natiHolen(); } catch (e) { console.error("Nationalteam:", e.message); neu.nati = alt.nati || null; }
   // Nur schreiben, wenn sich inhaltlich etwas geändert hat — sonst committet die Action alle 2 h
   // eine Datei, in der nur der Zeitstempel neu ist.

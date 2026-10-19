@@ -55,8 +55,10 @@ false). Die App zeigt dort nur Termine und blendet Ergebnisse auch dann aus, wen
 Schnittstelle eins liefern sollte. Freundschaftsspiele (FM) liegen landesweit in einer Klasse
 „Amicaux 1/2“ — davon nur die eigenen, keine fremden abrufen. „Nächste Spiele“ zeigt höchstens
 fünf (Seniors hätten sonst die halbe Saison dort).
-**BGL League und Roude Léiw** (vom Nutzer, 19.10.2026; so beschriftet, vom Nutzer — die FLF schreibt
-„BGL Ligue“, unter diesem Namen wird die Klasse gesucht): zwei Reiter hinter den Mannschaften
+**BGL League und Roude Léiw** (vom Nutzer, 19.10.2026; „BGL League“ vom Nutzer — die FLF schreibt
+„BGL Ligue“, unter diesem Namen wird die Klasse gesucht). **Reiter: „BGL“ und das FLF-Logo**
+(`FLF_LOGO`, vom Nutzer als Bild, 55×72; Knöpfe in alter Größe, längere Texte passten nicht).
+Bei den BGL-Spielen steht das Stadion (`ort`). zwei Reiter hinter den Mannschaften
 (`extraReiter`, `id` „bgl“/„nati“ als Text), ohne Kalender, Ticker, Spieltag-Kasten. **BGL**:
 Spiele aus der FLF (`bglHolen`, Klasse per Name, Nummer wechselt je Saison), zuletzt gespielter
 Spieltag (`bglSicht`, auch angefangen) und die **zwei** nächsten (vom Nutzer). **Tabelle von FuPa**
@@ -64,7 +66,9 @@ Spieltag (`bglSicht`, auch angefangen) und die **zwei** nächsten (vom Nutzer). 
 selbst gerechnet), weil die FLF-Tabelle hinterherhinkt (19.10.: nach 8 Spielen, gespielt 10). FuPa
 führt Punktabzüge samt Begründung (`text`, Swift Hesperange −12, wird angezeigt). FuPa schreibt
 deutsch („Differdingen“) — `fupaTabelleMitFlfNamen` gibt jeder Zeile den FLF-Namen der Mannschaft
-mit denselben Zahlen (Sp/S/U/N/Tore) aus den FLF-Ergebnissen, am 19.10. alle 16 eindeutig. FuPa weg
+mit denselben Zahlen (Sp/S/U/N/Tore) aus den FLF-Ergebnissen, am 19.10. alle 16 eindeutig. Jede Zuordnung
+wird **gemerkt** (`bgl.namen`, FuPa-`teamId` → FLF-Name, in data/fussball.json): am Saisonanfang
+haben viele dieselben Zahlen, dann gilt das Gedächtnis (vom Nutzer). FuPa weg
 → FLF-Tabelle; hinkt die, rechnet `bglTabelle` in der App selbst (letzter Rückfall, mit Hinweis).
 **Roude Léiw** von FuPa (`natiHolen`,
 `luxemburg-m1-<Jahr>` für Vorjahr/Jahr/Folgejahr, `flavor` past+current); Tabelle über

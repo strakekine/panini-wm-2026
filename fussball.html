@@ -33,7 +33,8 @@
   .sub{color:#b9bfbc;font-size:12.5px;margin-top:1px}
   /* Reiter im Raster: acht passen in zwei Reihen à vier, auch auf dem kleinen iPhone. */
   .seg{display:grid;grid-template-columns:repeat(auto-fit,minmax(74px,1fr));gap:1px;background:#333;border:1px solid #333;border-radius:10px;overflow:hidden;margin-top:9px}
-  .seg button{background:#222;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#b9bfbc;border:0;padding:9px 3px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:.1px}
+  .seg button{background:#222;white-space:nowrap;color:#b9bfbc;border:0;padding:9px 10px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:.3px}
+  .seg button img{height:28px;display:block;margin:-6px auto}
   .seg button.on{background:#fff;color:#111}
   main{max-width:720px;margin:0 auto;padding:4px 12px 60px}
 
@@ -354,7 +355,7 @@ function imLiveFenster(v, now) {
 // ---- BGL Ligue und Nationalteam (eigene Reiter, vom Nutzer 19.10.2026) ----
 // Zusätzliche Reiter hinter den Mannschaften; `id` ist Text, die Mannschaften haben Zahlen.
 function extraReiter(D) {
-  return [D.bgl && { id: "bgl", reiter: "BGL League" }, D.nati && { id: "nati", reiter: "Roude Léiw" }].filter(Boolean);
+  return [D.bgl && { id: "bgl", reiter: "BGL" }, D.nati && { id: "nati", reiter: "Roude Léiw", bild: true }].filter(Boolean);
 }
 
 // BGL: letzter Spieltag = der höchste, an dem schon gespielt wurde (auch angefangen — die offenen
@@ -424,7 +425,7 @@ function nachSpieltag(spiele) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "19.10.2026 m";
+const FASSUNG = "19.10.2026 n";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -489,6 +490,8 @@ const QUELLEN_LIVE = [
 ];
 // Logo nur einmal eingebettet (im Home-Icon), Kopf und Fußzeile nehmen es von dort.
 const LOGO = document.querySelector('link[rel="apple-touch-icon"]').href;
+// FLF-Logo für den Reiter „Roude Léiw“ (vom Nutzer als Bild, 55×72, 32 Farben).
+const FLF_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADcAAABICAMAAABlcZ1gAAAAYFBMVEXfKC+oHiLQ4OoAAACZ0/DnrK357u5yHx5lZWdTsN////8dYY+ooqObXV3iU1gZFRZzxe02iLbRo6OOsMZdjK05ms2xsbHfPUJGep+qf3//AACKQT/+/f1Rtuj06eqEPDuQAeA8AAAAIHRSTlP+/vwA//8F/f//uP////////8F////Bv//BgH////9/l20T9cAAAJ7SURBVHjandfroqIgEABgnEAltLTLOe0u4vu/5Q4XBU0FnF9ZfjmoMAy5mCgvJah4XH/K0gIysSsj0SjY9eEgCVgRjQrh33JyjlVjOx5FOxIN/1xK6ybWKnkc6mbgQ0PimYyHhySHTfDnUpI9Bg0cQbLNoMZo9mFJgOGHTVbXah8SuZVkYx3sjXFURCFf/6+yrNp+MGpyo9x090ZmOlnfMRqZ6kCHsgNsQSY69mvf+t8bY0ev3MqpIpwyiFWiq4rVdLsxSMpzrKppoh3Rr/uiWNO6GD3/SvjgOeCPwPS/jAbfINl53mh8YwkOKOcdDb9gbSD3HAw26PJbxiKuc27o8t5PTXoh+mHgOU6nKYT4aMnzHBcCpHoKwbss9xZP8+klOM1xvXCnP8WbZtyX2UkqeLLjOL75KvAN9xxF9/Rp9zTDvYLx8tR1ST+/8LxU1+GNgVWxaFTcLQeoFa6LfvHen398WAwQF1KlUuYtXSRaIzVrqorO9zBRHJpZ8pv7PeroID6zk4CLPmgH0fUFX20IXW2KRtxRf2ewXjemZquU9azr50e/Lp+HDi/4nIuvrcBJ15O0/wRbC7wpiU4OfjLp9wxS12v6fmXXaTfX4ZST/HXOSQ7nHPBzToI6506OL+ogJ7xTQ04EjmewbsdRsMWF2nrdQVC6l+7fIk8qKcYwgHSHYA438qwU5aGzB851vt6b4NQ6u08OILUrqL+emcWeuX2y25d7aPIcAhemaZnel099wAypPR8dAo6H3fubBX3HBKkbkMs3HN/MHmGfQ2NPcWa2z/Ew4mjYV4V9XCwWfdwEiyrSpeK2fdE3zjC3T3WwqMZIVKu++EQf/h/Q40g3HHy04AAAAABJRU5ErkJggg==";
 
 function load() { try { ST = { ...ST, ...JSON.parse(localStorage.getItem(KEY) || "{}") }; } catch (e) {} }
 function persist() { try { localStorage.setItem(KEY, JSON.stringify(ST)); } catch (e) {} }
@@ -554,7 +557,7 @@ function render() {
   if (!tabs.some(t => t.id === ST.team) && !extra.some(t => t.id === ST.team))
     ST.team = (tabs.find(t => t.kat === "U13") || tabs[0])?.id ?? null;
   document.getElementById("seg").innerHTML = [...tabs, ...extra].map(t =>
-    `<button data-t="${t.id}" class="${t.id === ST.team ? "on" : ""}">${esc(t.reiter || t.n)}</button>`).join("");
+    `<button data-t="${t.id}" class="${t.id === ST.team ? "on" : ""}">${t.bild ? `<img alt="${esc(t.reiter)}" src="${FLF_LOGO}">` : esc(t.reiter || t.n)}</button>`).join("");
   if (ST.team == null) { main.innerHTML = `<div class="note">Keine Spiele gefunden.</div>`; return; }
 
   const now = Date.now();
@@ -685,7 +688,7 @@ function bglHtml(now) {
   const b = D.bgl, v = bglSicht(b, now);
   document.getElementById("sub").textContent = "BGL League · " + D.saison.n.replace("Saison ", "");
   const tag = ([nr, sp], titel) => `<section class="card"><div class="chead"><h2>${titel} ${nr}</h2><div class="hint">${esc(wann(sp[0].d, false))}</div></div>
-    <div class="cbody">${sp.map(s => spielZeile(s, null, s.gespielt ? "" : esc(wann(s.d)))).join("")}</div></section>`;
+    <div class="cbody">${sp.map(s => spielZeile(s, null, [s.gespielt ? "" : esc(wann(s.d)), s.ort ? "📍 " + esc(s.ort) : ""].filter(Boolean).join(" · "))).join("")}</div></section>`;
   const t = bglTabelle(b);
   const abz = t.selbst ? t.tabelle.filter(r => r.abzug).map(r => `${esc(r.n)} ${r.abzug}`).join(", ") : "";
   // FuPa begründet Punktabzüge in einem Satz (`text`), den zeigen wir mit.

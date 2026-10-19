@@ -306,7 +306,13 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(M.bglTabelle({ spiele: erg, tabelle: flf }).tabelle === flf, "BGL: aktuelle FLF-Tabelle gilt");
   const st = (rank, slug, full, m, w, d, l, o, a, p) => ({ rank, matches: m, wins: w, draws: d, defeats: l, ownGoals: o, againstGoals: a, points: p, team: { slug, name: { full } } });
   const ft = fupaTabelleMitFlfNamen([st(1, "a", "FC A-Dorf", 2, 1, 1, 0, 3, 1, 4), st(2, "b", "B-Dorf", 2, 1, 0, 1, 3, 3, -9), st(3, "x", "Unbekannt", 5, 0, 0, 5, 0, 9, 0)], erg);
-  gleich(ft.map(r => [r.pl, r.id, r.n, r.pkt]), [[1, "A", "A", 4], [2, "B", "B", -9], [3, "x", "Unbekannt", 0]], "BGL: FuPa-Tabelle mit FLF-Namen, Abzug bleibt, Unpassendes behält FuPa-Namen");
+  gleich(ft.tabelle.map(r => [r.pl, r.id, r.n, r.pkt]), [[1, "A", "A", 4], [2, "B", "B", -9], [3, "x", "Unbekannt", 0]], "BGL: FuPa-Tabelle mit FLF-Namen, Abzug bleibt, Unpassendes behält FuPa-Namen");
+  gleich(ft.namen, { a: "A", b: "B" }, "BGL: Zuordnung wird gemerkt");
+  // Saisonanfang: zwei Vereine mit denselben Zahlen → nur das Gedächtnis hilft.
+  const gleichAuf = [{ d: "2027-08-01", h: { id: 7, n: "A" }, a: { id: 8, n: "C" }, hs: 1, as: 0, gespielt: true },
+                     { d: "2027-08-01", h: { id: 9, n: "B" }, a: { id: 10, n: "D" }, hs: 1, as: 0, gespielt: true }];
+  const neuSaison = fupaTabelleMitFlfNamen([st(1, "a", "FC A-Dorf", 1, 1, 0, 0, 1, 0, 3), st(2, "b", "B-Dorf", 1, 1, 0, 0, 1, 0, 3), st(3, "n", "Neuling", 1, 1, 0, 0, 1, 0, 3)], gleichAuf, ft.namen);
+  gleich(neuSaison.tabelle.map(r => [r.id, r.n]), [[7, "A"], [9, "B"], ["n", "Neuling"]], "BGL: gemerkte Namen gelten auch bei gleichen Zahlen, Neuling bleibt FuPa");
   gleich(M.extraReiter({ bgl, nati: null }).map(t => t.id), ["bgl"], "Reiter nur, wenn Daten da sind");
 
   const r = (typ, slug, title, cat) => ({ type: typ, slug, title, competitionSeason: { slug: "uefa-nations-league", name: "UEFA Nations League", category: { id: cat } } });

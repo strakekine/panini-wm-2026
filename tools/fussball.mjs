@@ -163,6 +163,82 @@ export function ics(D, t) {
   return z.map(falten).join("\r\n") + "\r\n";
 }
 
+// ---- BGL Ligue und Nationalmannschaft (zwei Reiter, vom Nutzer 19.10.2026) ----
+// Ohne Kalender, ohne Ticker. BGL aus der FLF (Klasse per Name gesucht, die Nummer wechselt je
+// Saison), Nationalmannschaft von FuPa — die FLF führt keine Länderspiele.
+export const BGL_NAME = "BGL Ligue";
+const Q_DIVS = `query($s: String){ divisions(criteria:{seasonId:$s}){ id name } }`;
+const FUPA = "https://api.fupa.net/v1/";
+
+// FuPa-Spiel der Nationalmannschaft → Format der App (Mannschaften über den Namen, FuPa schreibt
+// sie deutsch: „Estland“). `wett` = Wettbewerb, `runde` = „C4“, „PlayOff-C/D-Hinspiel“ …
+export function natiSpiel(m) {
+  const n = t => t.name?.full || t.name || "";
+  const r = m.round || {};
+  return {
+    id: m.id, d: m.kickoff,
+    h: { id: n(m.homeTeam), n: n(m.homeTeam) }, a: { id: n(m.awayTeam), n: n(m.awayTeam) },
+    hs: m.homeGoal ?? null, as: m.awayGoal ?? null, gespielt: m.section === "POST",
+    wett: r.competitionSeason?.name || m.competition?.name || "", runde: r.title || null,
+  };
+}
+
+// Welche Gruppe zeigt der Reiter? Die des nächsten Pflichtspiels, sonst die des letzten. Pflicht =
+// Gruppenrunde (`cupgroup`) oder Liga, aber kein Testspiel (Kategorie 6) und keine K.-o.-Runde
+// (keine Tabelle). Kommt die Qualifikation, wechselt die Tabelle so von selbst.
+export function natiGruppe(roh, now) {
+  const pflicht = roh.filter(m => m.round && m.round.slug && m.round.competitionSeason?.slug
+    && (m.round.type === "cupgroup" || m.round.type === "league") && m.round.competitionSeason.category?.id !== 6)
+    .sort((a, b) => a.kickoff.localeCompare(b.kickoff));
+  const m = pflicht.find(m => m.section !== "POST" && Date.parse(m.kickoff) >= now - 3 * 3600e3) || pflicht[pflicht.length - 1];
+  if (!m) return null;
+  const c = m.round.competitionSeason;
+  return { comp: c.slug, group: m.round.slug, n: c.name + (m.round.type === "cupgroup" ? " · Gruppe " + m.round.title : "") };
+}
+
+export function natiTabelle(standings) {
+  return (standings || []).map(r => ({ pl: r.rank, id: r.team.name.full, n: r.team.name.full, sp: r.matches,
+    s: r.wins, u: r.draws, nl: r.defeats, t: r.ownGoals, g: r.againstGoals, pkt: r.points }));
+}
+
+async function fupa(pfad) {
+  const r = await fetch(FUPA + pfad, { headers: { accept: "application/json" } });
+  if (r.status === 404) return null;
+  if (!r.ok) throw new Error("FuPa HTTP " + r.status + " " + pfad);
+  return r.json();
+}
+
+async function natiHolen() {
+  // FuPa führt Nationalteams je Kalenderjahr (luxemburg-m1-2026); um den Jahreswechsel liegen
+  // Spiele in zwei Jahren — darum drei Jahre, Doppelte über die ID raus.
+  const y = new Date().getFullYear(), roh = new Map();
+  for (const j of [y - 1, y, y + 1])
+    for (const flavor of ["past", "current"]) {
+      const l = await fupa(`teams/luxemburg-m1-${j}/matches?flavor=${flavor}`);
+      if (Array.isArray(l)) for (const m of l) roh.set(m.id, m);
+    }
+  if (!roh.size) throw new Error("FuPa: keine Spiele der Nationalmannschaft");
+  const alle = [...roh.values()];
+  const g = natiGruppe(alle, Date.now());
+  let gruppe = null;
+  if (g) {
+    const st = await fupa(`standings?competition=${g.comp}&group=${g.group}`);
+    if (st?.standings?.length) gruppe = { n: g.n, tabelle: natiTabelle(st.standings) };
+  }
+  return { spiele: alle.map(natiSpiel).sort((a, b) => a.d.localeCompare(b.d)), gruppe };
+}
+
+async function bglHolen(saison, zeit) {
+  const div = (await gq(Q_DIVS, { s: saison.id })).divisions.find(d => d.name.trim() === BGL_NAME);
+  if (!div) throw new Error("FLF: " + BGL_NAME + " nicht gefunden");
+  await pause(1000);
+  const { matches } = await gq(Q_MATCHES, { c: { ...zeit, divisionId: div.id, matchTypeId: "CC" } });
+  await pause(1000);
+  const { rankings } = await gq(Q_RANKING, { c: { seasonId: saison.id, divisionId: div.id, matchTypeId: "CC" } });
+  return { n: div.name.trim(), spiele: matches.map(spiel).sort((a, b) => a.d.localeCompare(b.d) || a.h.n.localeCompare(b.h.n)),
+           tabelle: tabelle(rankings) };
+}
+
 // Vereinsspiele + je Klasse alle Spiele und Tabelle → das, was die App liest.
 // vereinsSpiele tragen `ak` = Index in AGES (aus welcher Abfrage sie kommen).
 // Eine Mannschaft ist Altersklasse + Name, nicht die FLF-Nummer: Zur Phase 3 nach der
@@ -252,10 +328,13 @@ async function main() {
   }
 
   const neu = aufbereiten({ saison, vereinsSpiele, klassen });
+  // BGL und Nationalteam dürfen den Abruf nicht kippen: fällt eins aus, bleibt der alte Stand.
+  const alt = existsSync(OUT) ? JSON.parse(readFileSync(OUT, "utf8")) : {};
+  try { neu.bgl = await bglHolen(saison, zeit); } catch (e) { console.error("BGL:", e.message); neu.bgl = alt.bgl || null; }
+  try { neu.nati = await natiHolen(); } catch (e) { console.error("Nationalteam:", e.message); neu.nati = alt.nati || null; }
   // Nur schreiben, wenn sich inhaltlich etwas geändert hat — sonst committet die Action alle 2 h
   // eine Datei, in der nur der Zeitstempel neu ist.
   if (existsSync(OUT)) {
-    const alt = JSON.parse(readFileSync(OUT, "utf8"));
     if (JSON.stringify({ ...alt, stand: 0 }) === JSON.stringify({ ...neu, stand: 0 })) {
       console.log("unverändert");
       return;

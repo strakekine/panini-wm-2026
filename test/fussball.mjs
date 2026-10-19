@@ -7,7 +7,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { aufbereiten, spiel, reiter, ics, eigeneSpiele, CLUB } from "../tools/fussball.mjs";
+import { aufbereiten, spiel, reiter, ics, eigeneSpiele, CLUB, natiSpiel, natiGruppe, natiTabelle } from "../tools/fussball.mjs";
 import { liveAus, gleich as liveGleich, spielJetzt, naechstesSpiel, passendesSpiel } from "../tools/fussball-live.mjs";
 import worker, { kuerzen, passendesSpiel as wPassend, saisonVon, abrufFaellig } from "../tools/cloudflare-worker.js";
 
@@ -16,7 +16,7 @@ const src = fs.readFileSync(path.join(hier, "..", "fussball.html"), "utf8");
 const i = src.indexOf("==== Logik"), j = src.indexOf("==== Oberfläche");
 if (i < 0 || j < 0) throw new Error("Abschnittsmarken Logik/Oberfläche nicht gefunden");
 const M = new Function(src.slice(src.lastIndexOf("//", i), src.lastIndexOf("//", j)) + `
-  return { spieltagHeute, liveSpiel, liveBasis, kartenArt, ereignisListe, torArt, mitWorker, liveAnzeige, liveZeit, imLiveFenster, REGELN, klasseVon, zonen, ausgang, aufteilen, anzeige, sicht, nachSpieltag, roem };`)();
+  return { extraReiter, bglSicht, bglTabelle, natiSicht, spieltagHeute, liveSpiel, liveBasis, kartenArt, ereignisListe, torArt, mitWorker, liveAnzeige, liveZeit, imLiveFenster, REGELN, klasseVon, zonen, ausgang, aufteilen, anzeige, sicht, nachSpieltag, roem };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text) { n++; if (!bed) { fehler++; console.log("✗ " + text); } }
@@ -279,6 +279,52 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   gleich(M.ereignisListe(Lv).map(e => e.typ + e.min), ["tor12", "karte30"], "Tore und Karten nach Minute");
   ok(M.ereignisListe({ tore: Lv.tore }).length === 1, "alte live.json ohne Karten geht");
   ok(M.imLiveFenster(vS, t0) && !M.imLiveFenster(vS, Date.parse("2026-10-19T12:00:00+02:00")), "Abfrage jede Minute nur im Fenster");
+}
+
+// BGL Ligue und Nationalteam (Reiter ohne Kalender/Ticker).
+{
+  const sp = (tag, d, gespielt) => ({ id: tag * 10 + d.length, tag, d, h: { id: 1, n: "A" }, a: { id: 2, n: "B" }, hs: gespielt ? 1 : null, as: gespielt ? 0 : null, gespielt });
+  const bgl = { n: "BGL Ligue", tabelle: [], spiele: [
+    sp(8, "2026-10-04T16:00:00+02:00", true), sp(9, "2026-10-17T18:00:00+02:00", true), sp(9, "2026-10-18T16:00:00+02:00", false),
+    sp(10, "2026-10-25T16:00:00+01:00", false), sp(11, "2026-11-01T16:00:00+01:00", false), sp(12, "2026-11-08T16:00:00+01:00", false),
+    sp(5, "2026-12-02T19:00:00+01:00", false) /* verlegt */] };
+  const v = M.bglSicht(bgl, Date.parse("2026-10-19T10:00:00+02:00"));
+  ok(v.letzter[0] === 9 && v.letzter[1].length === 2, "BGL: letzter Spieltag 9, auch mit offenem Spiel");
+  gleich(v.naechste.map(t => t[0]), [10, 11], "BGL: zwei nächste Spieltage");
+  const v0 = M.bglSicht({ spiele: bgl.spiele.map(x => ({ ...x, gespielt: false })) }, Date.parse("2026-07-01T10:00:00+02:00"));
+  ok(v0.letzter === null && v0.naechste[0][0] === 5, "BGL vor Saisonbeginn: kein letzter Spieltag, ab dem ersten");
+  ok(M.bglSicht({ spiele: bgl.spiele.slice(0, 2) }, Date.parse("2026-10-19T10:00:00+02:00")).naechste.length === 0, "BGL Saisonende: keine nächsten");
+  const g = (h, a, hs, as) => ({ d: "2026-08-01", h: { id: h, n: h }, a: { id: a, n: a }, hs, as, gespielt: true });
+  const erg = [g("A", "B", 2, 0), g("C", "A", 1, 1), g("B", "C", 3, 1)];
+  const t1 = M.bglTabelle({ spiele: erg, tabelle: [{ pl: 1, id: "A", n: "A", sp: 1, pkt: 3 }] });
+  ok(t1.selbst && t1.flfSp === 1, "BGL: FLF-Tabelle zurück → selbst gerechnet");
+  gleich(t1.tabelle.map(r => [r.pl, r.id, r.sp, r.pkt, r.t, r.g]), [[1, "A", 2, 4, 3, 1], [2, "B", 2, 3, 3, 3], [3, "C", 2, 1, 2, 4]], "BGL: eigene Tabelle Punkte/Tore");
+  const t2 = M.bglTabelle({ spiele: [{ ...erg[0], d: "2026-08-01" }, { ...erg[1], d: "2026-08-08" }, { ...erg[2], d: "2026-08-15" }],
+    tabelle: [{ id: "A", n: "A", sp: 1, pkt: 3 }, { id: "B", n: "B", sp: 1, pkt: -12 }, { id: "C", n: "C", sp: 0, pkt: 0 }] });
+  gleich(t2.tabelle.map(r => [r.id, r.pkt, r.abzug]), [["A", 4, 0], ["C", 1, 0], ["B", -9, -12]], "BGL: Punktabzug aus der FLF-Tabelle bleibt");
+  const flf = [{ pl: 1, id: "X", n: "X", sp: 2, pkt: 6 }];
+  ok(M.bglTabelle({ spiele: erg, tabelle: flf }).tabelle === flf, "BGL: aktuelle FLF-Tabelle gilt");
+  gleich(M.extraReiter({ bgl, nati: null }).map(t => t.id), ["bgl"], "Reiter nur, wenn Daten da sind");
+
+  const r = (typ, slug, title, cat) => ({ type: typ, slug, title, competitionSeason: { slug: "uefa-nations-league", name: "UEFA Nations League", category: { id: cat } } });
+  const f = (id, kickoff, section, round) => ({ id, kickoff, section, homeTeam: { name: { full: "Luxemburg" } }, awayTeam: { name: { full: "Estland" } },
+    homeGoal: section === "POST" ? 0 : null, awayGoal: section === "POST" ? 1 : null, round });
+  const test = { type: "league", slug: "99", competitionSeason: { slug: "testspiele", name: "Testspiele", category: { id: 6 } } };
+  const roh = [f(1, "2026-03-26T18:00:00+01:00", "POST", r("cupko", "quali-playoffs", "PlayOff", 4)),
+               f(2, "2026-06-03T20:45:00+02:00", "POST", test),
+               f(3, "2026-10-06T20:45:00+02:00", "POST", r("cupgroup", "c4", "C4", 4)),
+               f(4, "2026-11-13T20:45:00+01:00", "PRE", r("cupgroup", "c4", "C4", 4)),
+               f(5, "2027-03-25T20:45:00+01:00", "PRE", { type: "cupgroup", slug: "f", title: "F", competitionSeason: { slug: "wm-quali", name: "WM-Qualifikation", category: { id: 4 } } })];
+  gleich(natiGruppe(roh, Date.parse("2026-10-19T12:00:00+02:00")), { comp: "uefa-nations-league", group: "c4", n: "UEFA Nations League · Gruppe C4" }, "Nati: Gruppe des nächsten Pflichtspiels");
+  ok(natiGruppe(roh, Date.parse("2026-12-01T12:00:00+01:00")).comp === "wm-quali", "Nati: wechselt von selbst zur Qualifikation");
+  ok(natiGruppe(roh.slice(0, 4), Date.parse("2026-12-01T12:00:00+01:00")).group === "c4", "Nati: ohne neues Pflichtspiel bleibt die letzte Gruppe");
+  ok(natiGruppe(roh.slice(0, 2), Date.parse("2026-12-01T12:00:00+01:00")) === null, "Nati: Testspiele und K.-o. haben keine Tabelle");
+  const ns = natiSpiel(roh[2]);
+  ok(ns.h.n === "Luxemburg" && ns.hs === 0 && ns.gespielt && ns.wett === "UEFA Nations League" && ns.runde === "C4", "Nati: Spiel umgerechnet");
+  const tab = natiTabelle([{ rank: 4, matches: 4, wins: 1, draws: 0, defeats: 3, ownGoals: 2, againstGoals: 7, points: 3, team: { name: { full: "Luxemburg" } } }]);
+  gleich(tab, [{ pl: 4, id: "Luxemburg", n: "Luxemburg", sp: 4, s: 1, u: 0, nl: 3, t: 2, g: 7, pkt: 3 }], "Nati: Tabelle umgerechnet");
+  const nv = M.natiSicht({ spiele: roh.map(natiSpiel), gruppe: null }, Date.parse("2026-10-19T12:00:00+02:00"));
+  gleich([nv.kommend.map(s => s.id), nv.gespielt.map(s => s.id)], [[4, 5], [3, 2, 1]], "Nati: kommend und Ergebnisse");
 }
 
 // Plan B: Worker stößt den FLF-Abruf an (Zeiten in Luxemburger Zeit, Sommer und Winter).

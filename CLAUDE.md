@@ -55,6 +55,20 @@ false). Die App zeigt dort nur Termine und blendet Ergebnisse auch dann aus, wen
 Schnittstelle eins liefern sollte. Freundschaftsspiele (FM) liegen landesweit in einer Klasse
 „Amicaux 1/2“ — davon nur die eigenen, keine fremden abrufen. „Nächste Spiele“ zeigt höchstens
 fünf (Seniors hätten sonst die halbe Saison dort).
+**BGL Ligue und Nati** (vom Nutzer, 19.10.2026): zwei Reiter hinter den Mannschaften (`extraReiter`,
+`id` „bgl“/„nati“ als Text), ohne Kalender, Ticker, Spieltag-Kasten. **BGL** aus der FLF (`bglHolen`,
+Klasse per Name „BGL Ligue“ gesucht, Nummer wechselt je Saison): Tabelle, zuletzt gespielter
+Spieltag (`bglSicht`, auch angefangen) und die **zwei** nächsten (vom Nutzer). **Die FLF-Tabelle
+hinkt hinterher** (19.10.: nach 8 Spielen, gespielt 10) — dann rechnet `bglTabelle` selbst (Punkte,
+Tordifferenz, Tore; Hinweis unter der Tabelle) und übernimmt **Punktabzüge** aus der FLF-Tabelle
+(Swift Hesperange −12: FLF-Punkte minus die ersten `sp` Spiele). **Nati** von FuPa (`natiHolen`,
+`luxemburg-m1-<Jahr>` für Vorjahr/Jahr/Folgejahr, `flavor` past+current); Tabelle über
+`GET api.fupa.net/v1/standings?competition=<slug>&group=<round.slug>` (ohne Saison = aktuelle).
+`natiGruppe` nimmt die Gruppe des nächsten Pflichtspiels (Gruppenrunde/Liga, kein Testspiel
+= Kategorie 6, kein K.-o.), sonst des letzten — **Wechsel Nations League → Qualifikation von
+selbst, aber noch nie echt gesehen**: beim ersten Qualifikationsspiel nachsehen, ob FuPa die
+Gruppe genauso führt. Ergebnisse: die letzten acht. Fällt einer der Abrufe aus, bleibt der
+alte Stand (der FLF-Abruf der Mannschaften läuft trotzdem durch).
 **Heute-Spieltag-Kasten** (vom Nutzer, 18.10.2026): an jedem Reiter oben „Heute Spieltag! ⚽ Anstoß HH:MM“
 mit Gegner und Ort (`spieltagHeute`, Tag in Luxemburger Zeit), ab Anstoß „Spiel läuft“; weg, sobald
 die FLF ein Ergebnis hat oder 3 h nach Anstoß. Steht der LIVE-Kasten da, entfällt er.

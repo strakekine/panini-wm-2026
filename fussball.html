@@ -351,6 +351,64 @@ function imLiveFenster(v, now) {
   });
 }
 
+// ---- BGL Ligue und Nationalteam (eigene Reiter, vom Nutzer 19.10.2026) ----
+// Zusätzliche Reiter hinter den Mannschaften; `id` ist Text, die Mannschaften haben Zahlen.
+function extraReiter(D) {
+  return [D.bgl && { id: "bgl", reiter: "BGL Ligue" }, D.nati && { id: "nati", reiter: "Nati" }].filter(Boolean);
+}
+
+// BGL: letzter Spieltag = der höchste, an dem schon gespielt wurde (auch angefangen — die offenen
+// Spiele stehen dann mit Uhrzeit drin), dahinter die zwei nächsten (vom Nutzer: beide nächsten).
+// Ein einzelnes verlegtes Spiel bleibt in seinem Spieltag, verschiebt also nichts.
+function bglSicht(bgl, now) {
+  const tage = nachSpieltag(bgl.spiele);
+  const grenze = now - 3 * 3600e3;
+  let i = -1;
+  tage.forEach(([, sp], k) => { if (sp.some(s => s.gespielt || Date.parse(s.d) < grenze)) i = k; });
+  return { letzter: i >= 0 ? tage[i] : null, naechste: tage.slice(i + 1, i + 3) };
+}
+
+// Die FLF rechnet ihre Tabelle erst nach der Freigabe der Ergebnisse (19.10.2026: BGL-Tabelle
+// nach 8 Spielen, gespielt waren 10). Liegt sie zurück, rechnen wir selbst: Punkte, Tordifferenz,
+// Tore. Bei Punktgleichheit kann die FLF anders sortieren — das steht dann unter der Tabelle.
+function bglTabelle(bgl) {
+  const z = new Map();
+  // Punktabzüge (Swift Hesperange 2026-27: −12) stehen nur in der FLF-Tabelle. Abzug = FLF-Punkte
+  // minus das, was die ersten `sp` Spiele der Mannschaft ergeben — so weit hat die FLF gezählt.
+  const flf = new Map((bgl.tabelle || []).map(r => [r.id, r]));
+  for (const sp of [...bgl.spiele].sort((a, b) => a.d.localeCompare(b.d))) {
+    if (!sp.gespielt || sp.hs == null || sp.as == null) continue;
+    for (const [t, f, g] of [[sp.h, sp.hs, sp.as], [sp.a, sp.as, sp.hs]]) {
+      const r = z.get(t.id) || { id: t.id, n: t.n, sp: 0, s: 0, u: 0, nl: 0, t: 0, g: 0, pkt: 0, bisFlf: 0 };
+      r.sp++; r.t += f; r.g += g;
+      const p = f > g ? 3 : f === g ? 1 : 0;
+      if (p === 3) r.s++; else if (p === 1) r.u++; else r.nl++;
+      r.pkt += p;
+      if (r.sp <= (flf.get(t.id)?.sp ?? 0)) r.bisFlf += p;
+      z.set(t.id, r);
+    }
+  }
+  for (const r of z.values()) {
+    const f = flf.get(r.id);
+    r.abzug = f ? Math.min(0, f.pkt - r.bisFlf) : 0;
+    r.pkt += r.abzug;
+    delete r.bisFlf;
+  }
+  const flfSp = Math.max(0, ...(bgl.tabelle || []).map(r => r.sp)), unsSp = Math.max(0, ...[...z.values()].map(r => r.sp));
+  if (bgl.tabelle?.length && flfSp >= unsSp) return { tabelle: bgl.tabelle, selbst: false };
+  const tab = [...z.values()].sort((a, b) => b.pkt - a.pkt || (b.t - b.g) - (a.t - a.g) || b.t - a.t || a.n.localeCompare(b.n));
+  tab.forEach((r, i) => r.pl = i + 1);
+  return { tabelle: tab, selbst: true, flfSp };
+}
+
+// Nationalteam: kommend/gespielt wie bei einer Mannschaft (3-h-Grenze).
+function natiSicht(nati, now) {
+  const grenze = now - 3 * 3600e3;
+  const kommend = nati.spiele.filter(sp => !sp.gespielt && Date.parse(sp.d) >= grenze);
+  const gespielt = nati.spiele.filter(sp => sp.gespielt || Date.parse(sp.d) < grenze).reverse();
+  return { kommend, gespielt, gruppe: nati.gruppe };
+}
+
 // Spieltage einer Klasse, für „Alle Spiele“.
 function nachSpieltag(spiele) {
   const m = new Map();
@@ -366,7 +424,7 @@ function nachSpieltag(spiele) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "18.10.2026 k";
+const FASSUNG = "19.10.2026 l";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -492,12 +550,19 @@ function render() {
   if (!D) return;
   const { tabs } = aufteilen(D);
   // Seniors stehen vorn, geöffnet wird beim ersten Mal aber die U13 (die der Kinder).
-  if (!tabs.some(t => t.id === ST.team)) ST.team = (tabs.find(t => t.kat === "U13") || tabs[0])?.id ?? null;
-  document.getElementById("seg").innerHTML = tabs.map(t =>
+  const extra = extraReiter(D);
+  if (!tabs.some(t => t.id === ST.team) && !extra.some(t => t.id === ST.team))
+    ST.team = (tabs.find(t => t.kat === "U13") || tabs[0])?.id ?? null;
+  document.getElementById("seg").innerHTML = [...tabs, ...extra].map(t =>
     `<button data-t="${t.id}" class="${t.id === ST.team ? "on" : ""}">${esc(t.reiter || t.n)}</button>`).join("");
   if (ST.team == null) { main.innerHTML = `<div class="note">Keine Spiele gefunden.</div>`; return; }
 
   const now = Date.now();
+  if (ST.team === "bgl" || ST.team === "nati") {
+    LIVE_SP = null; LIVE_POLL = false;
+    main.innerHTML = (ST.team === "bgl" ? bglHtml(now) : natiHtml(now)) + fuss();
+    return;
+  }
   const v = sicht(D, ST.team, now);
   const ids = v.ids, alter = v.team.alter || "";
   document.getElementById("sub").textContent = (alter ? alter + " · " : "") + D.saison.n.replace("Saison ", "");
@@ -602,13 +667,49 @@ function render() {
       <div class="cbody">${tabelleHtml(k, v.eigen)}<div style="margin-top:10px">${alleSpieleHtml(k, ids)}</div></div></details>`;
   }
 
+  main.innerHTML = h + fuss();
+}
+
+function fuss() {
   const stand = new Date(D.stand).toLocaleString("de-DE", { timeZone: TZ, weekday: "short", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" });
-  h += `<footer>Daten von <a href="https://extranet.flf.lu/match" target="_blank" rel="noopener">extranet.flf.lu</a>, zuletzt geändert ${esc(stand)}<br>
+  const quelle = ST.team === "nati" ? `<a href="https://www.fupa.net/team/luxemburg-m1" target="_blank" rel="noopener">FuPa</a>`
+    : `<a href="https://extranet.flf.lu/match" target="_blank" rel="noopener">extranet.flf.lu</a>`;
+  return `<footer>Daten von ${quelle}, zuletzt geändert ${esc(stand)}<br>
     Am Wochenende alle 15 Minuten aktualisiert, unter der Woche abends um 20 Uhr.
     <br><button class="teilen" id="teilen">↗︎ App teilen</button>
     <div class="von">Gemacht von Laurent R. <img alt="" src="${LOGO}"></div>
     <div style="margin-top:6px;font-size:11px">Fassung ${FASSUNG}</div></footer>`;
-  main.innerHTML = h;
+}
+
+function bglHtml(now) {
+  const b = D.bgl, v = bglSicht(b, now);
+  document.getElementById("sub").textContent = "BGL Ligue · " + D.saison.n.replace("Saison ", "");
+  const tag = ([nr, sp], titel) => `<section class="card"><div class="chead"><h2>${titel} ${nr}</h2><div class="hint">${esc(wann(sp[0].d, false))}</div></div>
+    <div class="cbody">${sp.map(s => spielZeile(s, null, s.gespielt ? "" : esc(wann(s.d)))).join("")}</div></section>`;
+  const t = bglTabelle(b);
+  const abz = t.selbst ? t.tabelle.filter(r => r.abzug).map(r => `${esc(r.n)} ${r.abzug}`).join(", ") : "";
+  const hinweis = t.selbst ? `<div class="muted" style="font-size:12px;margin-top:8px">Aus den Ergebnissen gerechnet — die FLF-Tabelle steht noch auf ${t.flfSp} Spielen. Bei Punktgleichheit kann die FLF anders sortieren.${abz ? ` Punktabzug laut FLF: ${abz}.` : ""}</div>` : "";
+  let h = `<section class="card"><div class="chead"><h2>Tabelle</h2><div class="hint">${esc(b.n)}</div></div>
+    <div class="cbody">${tabelleHtml({ n: b.n, tabelle: t.tabelle }, new Set())}${hinweis}</div></section>`;
+  if (v.letzter) h += tag(v.letzter, "Zuletzt: Spieltag");
+  for (const t of v.naechste) h += tag(t, "Nächster: Spieltag");
+  if (!v.naechste.length) h += `<div class="note">Keine weiteren Spieltage eingetragen.</div>`;
+  return h;
+}
+
+function natiHtml(now) {
+  const v = natiSicht(D.nati, now), ids = new Set(["Luxemburg"]);
+  document.getElementById("sub").textContent = "Nationalmannschaft" + (v.gruppe ? " · " + v.gruppe.n : "");
+  const meta = sp => [esc(wann(sp.d)), esc(sp.wett + (sp.runde && !/^\d+$/.test(sp.runde) ? " " + sp.runde : ""))].filter(Boolean).join(" · ");
+  let h = `<section class="card"><div class="chead"><h2>Nächste Spiele</h2></div><div class="cbody">`;
+  h += v.kommend.length ? v.kommend.map(sp => spielZeile(sp, ids, meta(sp))).join("") : `<div class="muted">Noch keine Länderspiele angesetzt.</div>`;
+  h += `</div></section>`;
+  if (v.gruppe) h += `<section class="card"><div class="chead"><h2>Tabelle</h2><div class="hint">${esc(v.gruppe.n)}</div></div>
+    <div class="cbody">${tabelleHtml(v.gruppe, ids)}</div></section>`;
+  h += `<section class="card"><div class="chead"><h2>Ergebnisse</h2></div><div class="cbody">`;
+  // Die letzten acht — FuPa liefert auch das Vorjahr mit, das wäre eine lange Liste.
+  h += v.gespielt.length ? v.gespielt.slice(0, 8).map(sp => spielZeile(sp, ids, meta(sp))).join("") : `<div class="muted">Noch nichts gespielt.</div>`;
+  return h + `</div></section>`;
 }
 
 async function holen() {
@@ -652,7 +753,7 @@ document.addEventListener("click", e => {
   const b = e.target.closest("button");
   if (!b) return;
   if (b.dataset.t) {
-    ST.team = +b.dataset.t; persist(); render(); window.scrollTo(0, 0);
+    ST.team = /^\d+$/.test(b.dataset.t) ? +b.dataset.t : b.dataset.t; persist(); render(); window.scrollTo(0, 0);
     // Live-Reiter gewählt: Worker sofort fragen, nicht erst beim nächsten 20-s-Takt.
     if (LIVE_SP) holenWorker().then(w => { if (w) { W = w; render(); } });
   }

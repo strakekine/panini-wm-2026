@@ -308,6 +308,17 @@ function spieltagHeute(v, now) {
   return sp ? { sp, begonnen: now >= Date.parse(sp.d) } : null;
 }
 
+// Countdown in den letzten 15 min vor Anpfiff (vom Nutzer, 19.10.2026, für alle Reiter): Minuten,
+// aufgerundet; null außerhalb und bei „Uhrzeit noch offen“ (00:00 bei der FLF).
+const COUNTDOWN_MS = 15 * 60e3;
+function minutenBisAnpfiff(sp, now) {
+  const a = Date.parse(sp.d), rest = a - now;
+  if (!(rest > 0) || rest > COUNTDOWN_MS) return null;
+  const zeit = new Date(a).toLocaleTimeString("de-DE", { timeZone: "Europe/Luxembourg", hour: "2-digit", minute: "2-digit" });
+  return zeit === "00:00" ? null : Math.ceil(rest / 60e3);
+}
+const countdownText = m => `Anpfiff in ${m} ${m === 1 ? "Minute" : "Minuten"}`;
+
 // Liegt bei diesem Reiter gerade ein Spiel im Live-Fenster? Dann fragt die App jede Minute nach.
 // Stand vom Cloudflare-Worker (tools/cloudflare-worker.js, ~20 s alt) über den von GitHub legen
 // (data/live.json, bis zu 7 min alt). Vom Worker kommt nur der Stand; welches Spiel, Anstoß und
@@ -444,7 +455,7 @@ function nachSpieltag(spiele) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "19.10.2026 q";
+const FASSUNG = "19.10.2026 r";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -570,6 +581,7 @@ function alleSpieleHtml(k, ids) {
 function render() {
   const main = document.getElementById("main");
   if (!D) return;
+  UMSCHALT = null;   // setzt heuteHtml, wenn ein Spieltag-Kasten steht
   const { tabs } = aufteilen(D);
   // Seniors stehen vorn, geöffnet wird beim ersten Mal aber die U13 (die der Kinder).
   const extra = extraReiter(D);
@@ -672,14 +684,20 @@ function fuss() {
 // „Heute Spieltag“ (Mannschaften und Roude Léiw).
 function heuteHtml(heute, ids, { live, pill, ohneLive }) {
   const sp = heute.sp, zeit = wann(sp.d).split(" · ")[1];
-  const titel = heute.begonnen ? "Spiel läuft" : "Heute Spieltag! ⚽";
-  const oben = heute.begonnen ? (zeit ? "seit " + zeit : "heute") : (zeit ? "Anstoß " + zeit : "Uhrzeit noch offen");
+  const min = !heute.begonnen && minutenBisAnpfiff(sp, Date.now());
+  // Nächster Wechsel des Kastens (Countdown an, Anpfiff) — der Takt unten baut dann neu.
+  if (!heute.begonnen && zeit) UMSCHALT = Date.parse(sp.d) - (min ? 0 : COUNTDOWN_MS);
+  const titel = heute.begonnen ? "Spiel läuft" : min ? "Gleich geht's los! ⚽" : "Heute Spieltag! ⚽";
+  const oben = heute.begonnen ? esc(zeit ? "seit " + zeit : "heute")
+    : min ? `<span id="countdown" data-d="${esc(sp.d)}">${countdownText(min)}</span> · ${esc(zeit)}`
+    : esc(zeit ? "Anstoß " + zeit : "Uhrzeit noch offen");
+  // Nicht „startet mit dem Anpfiff“: bei den Reserven tickert nicht immer jemand (vom Nutzer).
   const unten = heute.begonnen
     ? (live ? "Der Liveticker erscheint hier, sobald bei FuPa getickert wird." : ohneLive)
-    : (live ? "Liveticker startet mit dem Anpfiff." : "");
+    : (live ? "Liveticker, wenn verfügbar — sobald bei FuPa jemand tickert." : "");
   const p = pill(sp);
   return `<section class="card heute"><div class="chead"><h2>${titel}</h2>${p ? `<span class="pill">${esc(p)}</span>` : ""}</div><div class="cbody">
-    <div class="wann">${esc(oben)}</div>
+    <div class="wann">${oben}</div>
     <div class="m" style="border:0"><div class="t h${ids.has(sp.h.id) ? " wir" : ""}">${umbruch(anzeige(sp.h.n))}</div>
     <div class="sc offen">–</div><div class="t${ids.has(sp.a.id) ? " wir" : ""}">${umbruch(anzeige(sp.a.n))}</div></div>
     ${sp.ort ? `<div class="wo">📍 ${esc(sp.ort)}</div>` : ""}
@@ -812,6 +830,14 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) aktu
 // Aufgeklapptes (z. B. „Klappt nicht?“) jede Minute wieder zuklappt.
 // Mit Worker alle 20 s (so lange merkt er sich den Stand), sonst jede Minute.
 let LIVE_POLL = false;
+// Countdown: jede 10 s die Minuten nachführen; zum Beginn des Countdowns und beim Anpfiff neu bauen.
+let UMSCHALT = null;
+setInterval(() => {
+  if (document.hidden || !D) return;
+  if (UMSCHALT && Date.now() >= UMSCHALT) { render(); return; }
+  const el = document.getElementById("countdown"), m = el && minutenBisAnpfiff({ d: el.dataset.d }, Date.now());
+  if (m) el.textContent = countdownText(m);
+}, 10e3);
 setInterval(async () => {
   if (!LIVE_POLL || document.hidden || !D) return;
   const vorher = JSON.stringify(mitWorker(liveBasis(L, LIVE_SP), W));

@@ -16,7 +16,7 @@ const src = fs.readFileSync(path.join(hier, "..", "fussball.html"), "utf8");
 const i = src.indexOf("==== Logik"), j = src.indexOf("==== Oberfläche");
 if (i < 0 || j < 0) throw new Error("Abschnittsmarken Logik/Oberfläche nicht gefunden");
 const M = new Function(src.slice(src.lastIndexOf("//", i), src.lastIndexOf("//", j)) + `
-  return { natiLiveSpiel, extraReiter, bglSicht, bglTabelle, natiSicht, spieltagHeute, liveSpiel, liveBasis, kartenArt, ereignisListe, torArt, mitWorker, liveAnzeige, liveZeit, imLiveFenster, REGELN, klasseVon, zonen, ausgang, aufteilen, anzeige, sicht, nachSpieltag, roem };`)();
+  return { natiLiveSpiel, extraReiter, bglSicht, bglTabelle, natiSicht, spieltagHeute, minutenBisAnpfiff, liveSpiel, liveBasis, kartenArt, ereignisListe, torArt, mitWorker, liveAnzeige, liveZeit, imLiveFenster, REGELN, klasseVon, zonen, ausgang, aufteilen, anzeige, sicht, nachSpieltag, roem };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text) { n++; if (!bed) { fehler++; console.log("✗ " + text); } }
@@ -279,6 +279,13 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(mw.hs === 2 && mw.slug === Wk.slug && /fupa\.net\/match\//.test(mw.url), "Worker füllt das Gerüst samt Slug");
   ok(M.mitWorker(b0, { ...Wk, fuer: 999 }).hs === undefined, "Worker-Antwort für ein anderes Spiel zählt nicht");
   ok(M.liveAnzeige(mw, vS, t0) && M.liveAnzeige(b0, vS, t0) === null, "Kasten erst mit Worker-Daten");
+  // Countdown 15 min vor Anpfiff
+  {
+    const sp = { d: "2026-10-19T20:00:00+02:00" }, um = hm => Date.parse("2026-10-19T" + hm + ":00+02:00");
+    gleich([um("19:44"), um("19:45"), um("19:48:30".slice(0, 5)) + 30e3, um("19:59") + 30e3, um("20:00")].map(t => M.minutenBisAnpfiff(sp, t)),
+      [null, 15, 12, 1, null], "Countdown: ab 15 min, aufgerundet, beim Anpfiff weg");
+    ok(M.minutenBisAnpfiff({ d: "2026-12-05T00:00:01+01:00" }, Date.parse("2026-12-04T23:50:00+01:00")) === null, "Uhrzeit offen: kein Countdown");
+  }
   // „Heute Spieltag“
   const morgens = Date.parse("2026-10-18T09:00:00+02:00");
   const hm = M.spieltagHeute(M.sicht(DS, 44831, morgens), morgens);

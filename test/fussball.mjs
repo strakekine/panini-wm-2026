@@ -238,6 +238,7 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(M.liveAnzeige({ ...Lv, section: "POST" }, vS, t0).zeit === "Abpfiff", "nach Abpfiff: Endstand laut FuPa");
   ok(M.liveAnzeige({ ...Lv, section: "PRE" }, vS, t0) === null, "vor Anpfiff kein Kasten");
   ok(M.liveAnzeige(Lv, M.sicht(D, 45396, t0), t0) === null, "kein Kasten bei U13 1");
+  ok(M.liveAnzeige({ ...Lv, hs: null, as: null, ticker: null, tore: [], karten: [] }, vS, t0) === null, "FuPa „LIVE“ ohne Tickerer: kein Kasten");
   ok(M.liveAnzeige(Lv, vS, Date.parse("2026-10-18T20:30:00+02:00")) === null, "spätestens 4 h nach Anstoß weg");
   const spFlf = roh(PH, "CC", "2026-10-18T16:00:00+02:00", SEN, BEG, 2, 1, { ak: 0, tag: 8 });
   const DF = aufbereiten({ saison: { id: "20262027", name: "Saison 2026-2027" }, vereinsSpiele: [spFlf],

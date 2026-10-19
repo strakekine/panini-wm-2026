@@ -242,6 +242,9 @@ function liveAnzeige(L, v, now) {
   if (!sp || (sp.gespielt && sp.hs != null)) return null;
   if (now > Date.parse(L.anstoss) + 4 * 3600e3) return null;
   if (L.section !== "LIVE" && L.section !== "POST") return null;
+  // FuPa setzt ab Anpfiff von selbst „LIVE“, auch ohne Tickerer (19.10.2026, Seniors 2 gegen Titus:
+  // kein Stand, kein Name). Dann bleibt der Spieltag-Kasten „Spiel läuft“ stehen.
+  if (L.hs == null && L.as == null && !L.ticker && !(L.tore || []).length) return null;
   return { ...L, zeit: liveZeit(L, now), laeuft: L.section === "LIVE" };
 }
 
@@ -455,7 +458,7 @@ function nachSpieltag(spiele) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "19.10.2026 r";
+const FASSUNG = "19.10.2026 s";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action

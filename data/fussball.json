@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-19T21:31:36.881Z",
+ "stand": "2026-10-19T22:56:37.391Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -4749,6 +4749,30 @@
     },
     {
      "pl": 2,
+     "id": 45624,
+     "n": "FC Differdange 03",
+     "sp": 5,
+     "s": 3,
+     "u": 1,
+     "nl": 1,
+     "t": 22,
+     "g": 8,
+     "pkt": 10
+    },
+    {
+     "pl": 3,
+     "id": 44553,
+     "n": "Union Titus Pétange I",
+     "sp": 5,
+     "s": 3,
+     "u": 1,
+     "nl": 1,
+     "t": 15,
+     "g": 11,
+     "pkt": 10
+    },
+    {
+     "pl": 4,
      "id": 45482,
      "n": "US Rumelange",
      "sp": 5,
@@ -4760,7 +4784,19 @@
      "pkt": 10
     },
     {
-     "pl": 3,
+     "pl": 5,
+     "id": 44791,
+     "n": "Atert Bissen I",
+     "sp": 4,
+     "s": 3,
+     "u": 0,
+     "nl": 1,
+     "t": 21,
+     "g": 9,
+     "pkt": 9
+    },
+    {
+     "pl": 6,
      "id": 44981,
      "n": "Racing FC Union Luxembourg",
      "sp": 5,
@@ -4772,63 +4808,27 @@
      "pkt": 8
     },
     {
-     "pl": 4,
-     "id": 45624,
-     "n": "FC Differdange 03",
-     "sp": 4,
-     "s": 2,
-     "u": 1,
-     "nl": 1,
-     "t": 15,
-     "g": 7,
-     "pkt": 7
-    },
-    {
-     "pl": 5,
-     "id": 44553,
-     "n": "Union Titus Pétange I",
-     "sp": 4,
-     "s": 2,
-     "u": 1,
-     "nl": 1,
-     "t": 12,
-     "g": 10,
-     "pkt": 7
-    },
-    {
-     "pl": 6,
-     "id": 45230,
-     "n": "U.N. Käerjeng 97 I",
-     "sp": 4,
-     "s": 2,
-     "u": 0,
-     "nl": 2,
-     "t": 11,
-     "g": 10,
-     "pkt": 6
-    },
-    {
      "pl": 7,
-     "id": 44791,
-     "n": "Atert Bissen I",
-     "sp": 3,
+     "id": 45403,
+     "n": "FC Koeppchen Wormeldange I",
+     "sp": 5,
      "s": 2,
      "u": 0,
-     "nl": 1,
-     "t": 10,
-     "g": 9,
+     "nl": 3,
+     "t": 13,
+     "g": 17,
      "pkt": 6
     },
     {
      "pl": 8,
-     "id": 45403,
-     "n": "FC Koeppchen Wormeldange I",
-     "sp": 4,
+     "id": 45230,
+     "n": "U.N. Käerjeng 97 I",
+     "sp": 5,
      "s": 2,
      "u": 0,
-     "nl": 2,
+     "nl": 3,
      "t": 12,
-     "g": 14,
+     "g": 17,
      "pkt": 6
     },
     {
@@ -4871,12 +4871,12 @@
      "pl": 12,
      "id": 46224,
      "n": "FC Lorentzweiler",
-     "sp": 4,
+     "sp": 5,
      "s": 0,
      "u": 0,
-     "nl": 4,
+     "nl": 5,
      "t": 5,
-     "g": 12,
+     "g": 23,
      "pkt": 0
     }
    ],
@@ -5361,9 +5361,9 @@
       "id": 44553,
       "n": "Union Titus Pétange I"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 1,
+     "as": 3,
+     "gespielt": true,
      "forfait": false,
      "ort": "Am Ga (Wormeldange, synth.)"
     },

@@ -1,19 +1,19 @@
-// Abruf FLF → data/fussball.json für index.html.
-// Läuft als GitHub Action (.github/workflows/fussball.yml), lokal: node tools/fussball.mjs
-// Alles Vereinsbezogene steht in verein.json (Vorlage aus vorlage-verein/, erzeugt mit neu.mjs).
+// Abruf FLF → <verein>/data/fussball.json für <verein>/index.html, für alle Vereine im Repo.
+// Läuft als GitHub Action (.github/workflows/fussball.yml), lokal: node tools/fussball.mjs [ordner …]
+// Ein Verein = ein Ordner mit verein.json. BGL und Nationalteam sind für alle gleich und werden
+// einmal je Lauf geholt (gemeinsam.json im Wurzelordner, mit dem Namensgedächtnis der BGL).
 // Quelle ist die GraphQL-Schnittstelle hinter https://extranet.flf.lu/match, die ohne
 // Anmeldung antwortet, aber keine CORS-Freigabe schickt — darum dieser Umweg.
 // Gesucht wird nach dem Verein, nicht nach einer Klasse: Steigt eine Mannschaft auf,
 // erscheint die neue Klasse mit ihrem ersten Spiel von selbst.
 
 import { writeFileSync, readFileSync, existsSync, mkdirSync, readdirSync, unlinkSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+export const WURZEL = fileURLToPath(new URL("..", import.meta.url));
 
 export const API = "https://extranet.flf.lu/api/graphql";
-// verein.json liegt im Wurzelordner. Im Test fehlt sie notfalls, dann gilt ein Beispielverein.
-const CFG_URL = new URL("../verein.json", import.meta.url);
-export const CFG = existsSync(CFG_URL) ? JSON.parse(readFileSync(CFG_URL, "utf8"))
-  : { name: "FC Beispiel", kurz: "Beispiel", flfName: "FC Beispiel", clubId: 1, slug: "fc-beispiel", bgl: false, nati: false };
-export const CLUB = CFG.clubId;
 // Altersklassen in der Reihenfolge der Reiter. id = ageCategoryId
 // der FLF. Die Réserves sind bei der FLF eine eigene Kategorie („Seniors (R)“, 9999) und stehen
 // am Ende als „Seniors 2“ (Réserves I) und „Seniors 3“ (Réserves II): `plus` verschiebt die
@@ -39,16 +39,19 @@ export const ALLE_AGES = [
   { id: 12, kat: "U7", n: "U7 Bambinis" },
 ];
 const STANDARD = [1, 2, 3, 11, 4, 7, 5, 17, 9999];
-export const AGES = (CFG.alter || STANDARD).map(id => {
-  const a = ALLE_AGES.find(x => x.id === +id);
-  if (!a) throw new Error("verein.json: unbekannte Altersklasse " + id);
-  return a;
-});
-const OUT = new URL("../data/fussball.json", import.meta.url);
-const KAL = new URL("../kalender/", import.meta.url);
-// So schreibt die FLF die Mannschaften (ohne I/II) — nicht unbedingt wie den Verein selbst
+
+// Der Verein, der gerade dran ist (die Vereine laufen nacheinander). CLUB = FLF-Nummer, VEREIN = so
+// schreibt die FLF die Mannschaften (ohne I/II) — nicht unbedingt wie den Verein selbst
 // (Koeppchen: Verein „Wormeldange FC Koeppchen“, Mannschaften „FC Koeppchen Wormeldange I“).
-export const VEREIN = CFG.flfName;
+export let CFG, CLUB, VEREIN, AGES;
+export function setVerein(cfg) {
+  CFG = cfg; CLUB = +cfg.clubId; VEREIN = cfg.flfName;
+  AGES = (cfg.alter || STANDARD).map(id => {
+    const a = ALLE_AGES.find(x => x.id === +id);
+    if (!a) throw new Error(cfg.slug + "/verein.json: unbekannte Altersklasse " + id);
+    return a;
+  });
+}
 
 const M_FIELDS = `match{ id gameday matchDate isPlayed isForfait homeScore awayScore finalHomeScore finalAwayScore finalScoreComment }
   division{ id name showResult showRanking } matchType{ id }
@@ -121,7 +124,8 @@ const ARAB = { I: 1, II: 2, III: 3, IV: 4, V: 5 };
 export const zusatz = n => (/\s(I|II|III|IV|V)$/.exec(n) || [])[1] || "";
 export function reiter(t) {
   const r = zusatz(t.n);
-  const nr = r ? ARAB[r] + (t.plus || 0) : t.ohne;
+  // Réserves ohne I/II (nur eine Mannschaft, Sporting Bertrange 2026-27) sind trotzdem „Seniors 2“.
+  const nr = r ? ARAB[r] + (t.plus || 0) : t.plus ? 1 + t.plus : t.ohne;
   return [t.kat, nr].filter(Boolean).join(" ");
 }
 
@@ -382,13 +386,27 @@ export function aufbereiten({ saison, vereinsSpiele, klassen }) {
   };
 }
 
-async function main() {
+export async function saisonHolen() {
   const d = await gq(Q_DEFAULTS);
   const saison = d.seasons.find(s => s.id === d.defaultValues.currentSeasonId);
   if (!saison) throw new Error("Saison nicht gefunden: " + d.defaultValues.currentSeasonId);
   // Ohne Zeitraum antwortet die Schnittstelle mit INTERNAL_SERVER_ERROR.
-  const zeit = { seasonId: saison.id, startDate: day(saison.startDate), endDate: day(saison.endDate) };
+  return { saison, zeit: { seasonId: saison.id, startDate: day(saison.startDate), endDate: day(saison.endDate) } };
+}
 
+// BGL und Nationalteam, einmal für alle. Fällt eins aus, bleibt der alte Stand.
+export async function gemeinsamHolen({ saison, zeit }) {
+  const datei = join(WURZEL, "gemeinsam.json");
+  const alt = existsSync(datei) ? JSON.parse(readFileSync(datei, "utf8")) : {};
+  const neu = {};
+  try { neu.bgl = await bglHolen(saison, zeit, alt.bgl); } catch (e) { console.error("BGL:", e.message); neu.bgl = alt.bgl || null; }
+  try { neu.nati = await natiHolen(); } catch (e) { console.error("Nationalteam:", e.message); neu.nati = alt.nati || null; }
+  if (JSON.stringify(alt) !== JSON.stringify(neu)) writeFileSync(datei, JSON.stringify(neu, null, 1) + "\n");
+  return neu;
+}
+
+export async function vereinHolen(dir, { saison, zeit }, gemeinsam) {
+  const out = join(dir, "data", "fussball.json");
   const vereinsSpiele = [];
   for (const [ak, a] of AGES.entries()) {
     const { matches } = await gq(Q_MATCHES, { c: { ...zeit, clubId: CLUB, ageCategoryId: a.id, matchTypeId: "ALL" } });
@@ -413,36 +431,56 @@ async function main() {
   }
 
   const neu = aufbereiten({ saison, vereinsSpiele, klassen });
-  // BGL und Nationalteam dürfen den Abruf nicht kippen: fällt eins aus, bleibt der alte Stand.
-  const alt = existsSync(OUT) ? JSON.parse(readFileSync(OUT, "utf8")) : {};
-  if (CFG.bgl) try { neu.bgl = await bglHolen(saison, zeit, alt.bgl); } catch (e) { console.error("BGL:", e.message); neu.bgl = alt.bgl || null; }
-  if (CFG.nati) try { neu.nati = await natiHolen(); } catch (e) { console.error("Nationalteam:", e.message); neu.nati = alt.nati || null; }
-  // Nur schreiben, wenn sich inhaltlich etwas geändert hat — sonst committet die Action alle 2 h
-  // eine Datei, in der nur der Zeitstempel neu ist.
-  if (existsSync(OUT)) {
-    if (JSON.stringify({ ...alt, stand: 0 }) === JSON.stringify({ ...neu, stand: 0 })) {
-      console.log("unverändert");
-      return;
-    }
+  if (CFG.bgl !== false && gemeinsam.bgl) neu.bgl = gemeinsam.bgl;
+  if (CFG.nati !== false && gemeinsam.nati) neu.nati = gemeinsam.nati;
+  // Nur schreiben, wenn sich inhaltlich etwas geändert hat — sonst committet die Action bei jedem
+  // Lauf eine Datei, in der nur der Zeitstempel neu ist.
+  const alt = existsSync(out) ? JSON.parse(readFileSync(out, "utf8")) : null;
+  if (alt && JSON.stringify({ ...alt, stand: 0 }) === JSON.stringify({ ...neu, stand: 0 })) console.log(CFG.slug + ": unverändert");
+  else {
+    mkdirSync(join(dir, "data"), { recursive: true });
+    writeFileSync(out, JSON.stringify(neu, null, 1) + "\n");
+    console.log(CFG.slug + ": geschrieben,", neu.teams.length, "Mannschaften ·", Object.keys(neu.klassen).length, "Klassen");
   }
-  writeFileSync(OUT, JSON.stringify(neu, null, 1) + "\n");
-  console.log("geschrieben:", neu.teams.map(t => t.n).join(", "), "·", Object.keys(neu.klassen).length, "Klassen");
+  kalender(dir, neu);
 }
 
 // Kalender werden immer neu geschrieben (aus dem aktuellen Stand); unveränderte Dateien
 // sind Byte für Byte gleich, git sieht dann keine Änderung.
-function kalender() {
-  const D = JSON.parse(readFileSync(OUT, "utf8"));
-  mkdirSync(KAL, { recursive: true });
+function kalender(dir, D) {
+  const kal = join(dir, "kalender");
+  mkdirSync(kal, { recursive: true });
   const soll = new Set();
   for (const t of D.teams.filter(t => t.datei)) {
-    writeFileSync(new URL(t.datei, KAL), ics(D, t));
+    writeFileSync(join(kal, t.datei), ics(D, t));
     soll.add(t.datei);
   }
   // Mannschaft weg (neue Saison) → Datei weg; ein bestehendes Abo zeigt dann nichts mehr.
-  for (const f of readdirSync(KAL)) if (f.endsWith(".ics") && !soll.has(f)) unlinkSync(new URL(f, KAL));
-  console.log("Kalender:", [...soll].join(", "));
+  for (const f of readdirSync(kal)) if (f.endsWith(".ics") && !soll.has(f)) unlinkSync(join(kal, f));
+}
+
+// Alle Ordner mit verein.json (oder nur die genannten).
+export function vereinsOrdner(nur = []) {
+  return readdirSync(WURZEL, { withFileTypes: true })
+    .filter(e => e.isDirectory() && existsSync(join(WURZEL, e.name, "verein.json")))
+    .map(e => e.name).filter(n => !nur.length || nur.includes(n)).sort();
+}
+
+async function main(nur) {
+  const vereine = vereinsOrdner(nur);
+  if (!vereine.length) { console.log("keine Vereine"); return; }
+  const s = await saisonHolen();
+  const gemeinsam = await gemeinsamHolen(s);
+  // Ein Verein, der ausfällt, hält die anderen nicht auf; er behält seinen alten Stand.
+  let fehler = 0;
+  for (const v of vereine) {
+    try {
+      setVerein(JSON.parse(readFileSync(join(WURZEL, v, "verein.json"), "utf8")));
+      await vereinHolen(join(WURZEL, v), s, gemeinsam);
+    } catch (e) { fehler++; console.error(v + ":", e.message); }
+  }
+  if (fehler === vereine.length) throw new Error("alle Vereine fehlgeschlagen");
 }
 
 if (import.meta.url === `file://${process.argv[1]}`)
-  main().then(kalender).catch(e => { console.error(e); process.exit(1); });
+  main(process.argv.slice(2)).catch(e => { console.error(e); process.exit(1); });

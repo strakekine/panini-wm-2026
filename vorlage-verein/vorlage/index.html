@@ -64,7 +64,7 @@
   .live .quelle{font-size:11.5px;color:var(--muted);text-align:center;margin-top:8px}
   .live .quelle a{color:var(--accentT)}
   .note{font-size:13.5px;line-height:1.4;padding:10px 12px;border-radius:10px;margin:12px 0;background:var(--panel);border:1px solid var(--line)}
-  .note.up{border-color:var(--accent);background:var(--tint)}
+  .note.up{border-color:var(--good);background:var(--goodTint)}
   .note.down{border-color:#e9a3ac;background:#fbecee}
   .muted{color:var(--muted)}
 
@@ -330,8 +330,9 @@ function mitWorker(L, W) {
 }
 
 // Live gibt es nur für diesen Reiter (FuPa tickert nur dort; der Worker sucht nur dessen Spiele).
-// Die Vorlage hat keinen eigenen Live-Worker: ohne `liveReiter` in verein.json kein Liveticker.
-const LIVE_REITER = V.liveReiter || null;
+// Gesetzt von neu.mjs, wenn der Verein bei FuPa gefunden ist (`fupa` in verein.json) und es einen
+// Worker gibt (repo.json) — sonst kein Liveticker.
+const LIVE_REITER = V.worker && V.fupa ? V.liveReiter || "Seniors 1" : null;
 
 // Das Spiel dieses Reiters, das gerade im Live-Fenster liegt, oder null.
 function liveSpiel(v, now) {
@@ -446,15 +447,15 @@ const KEY = "fussball_" + V.slug;
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
   // nach wenigen Minuten aktuell, ohne auf den Neuaufbau von GitHub Pages zu warten.
-  `https://raw.githubusercontent.com/${V.repo}/main/data/fussball.json`,
+  `https://raw.githubusercontent.com/${V.repo}/main/${V.slug}/data/fussball.json`,
   "data/fussball.json",
 ];
 const TZ = "Europe/Luxembourg";
 // Kalender liegen auf GitHub Pages (text/calendar), nicht auf raw.githubusercontent (text/plain).
 const PAGES = `https://${V.repo.split("/")[0].toLowerCase()}.github.io/${V.repo.split("/")[1]}/`;
-const KALENDER = PAGES + "kalender/";
+const KALENDER = PAGES + V.slug + "/kalender/";
 // Immer die öffentliche Adresse teilen, auch wenn die App vom Home-Bildschirm oder lokal läuft.
-const APP_URL = PAGES;
+const APP_URL = PAGES + V.slug + "/";
 // Eigener Text geht über `teilen` in verein.json. Der Link steht IM Text und wird nicht
 // zusätzlich als `url` übergeben: Mit `url` zeigt iMessage nur die Link-Vorschau und lässt den
 // Text weg (am iPhone gemeldet; WhatsApp nahm beides).
@@ -494,18 +495,17 @@ let LIVE_SP = null;
 async function holenWorker() {
   if (!WORKER_URL || !LIVE_SP) return null;
   const sp = LIVE_SP, b = liveBasis(L, sp);
-  const q = b.slug ? "?slug=" + encodeURIComponent(b.slug) : "?anstoss=" + encodeURIComponent(sp.d);
+  // `verein`: der Worker ist für alle Vereine des Repos derselbe und sucht so die richtige Mannschaft.
+  const q = (b.slug ? "?slug=" + encodeURIComponent(b.slug) : "?anstoss=" + encodeURIComponent(sp.d)) + "&verein=" + encodeURIComponent(V.slug);
   try {
     const r = await fetch(WORKER_URL + q, { cache: "no-store" });
     if (r.ok) return { ...(await r.json()), fuer: sp.id };
   } catch (e) {}
   return null;   // Worker weg → es bleibt beim Stand von GitHub
 }
-// Ohne Liveticker (Vorlage) gar nicht erst nachfragen.
-const QUELLEN_LIVE = LIVE_REITER ? [
-  `https://raw.githubusercontent.com/${V.repo}/main/data/live.json`,
-  "data/live.json",
-] : [];
+// Der Ticker kommt nur vom Worker; eine live.json aus einem GitHub-Lauf (wie bei Koeppchen) gibt
+// es hier nicht. Ohne Worker kein Ticker, das Ergebnis kommt mit dem nächsten FLF-Abruf.
+const QUELLEN_LIVE = [];
 // Logo nur einmal eingebettet (im Home-Icon), Kopf und Fußzeile nehmen es von dort.
 const LOGO = document.querySelector('link[rel="apple-touch-icon"]').href;
 // FLF-Logo für den Reiter „Roude Léiw“ (vom Nutzer als Bild, 55×72, 32 Farben).
@@ -595,7 +595,7 @@ function render() {
   LIVE_POLL = !!lv || imLiveFenster(v, now);
   // Spieltag-Kasten, solange (noch) kein LIVE-Kasten da ist.
   const heute = !lv && spieltagHeute(v, now);
-  if (heute) h += heuteHtml(heute, v.ids, { live: v.team.reiter === LIVE_REITER, pill: sp => sp.typ === "CUP" ? "Pokal" : "",
+  if (heute) h += heuteHtml(heute, v.ids, { live: !!LIVE_REITER && v.team.reiter === LIVE_REITER, pill: sp => sp.typ === "CUP" ? "Pokal" : "",
     ohneLive: "Das Ergebnis erscheint, sobald es eingetragen ist." });
   if (lv) h += liveHtml(lv, n => anzeige(n).startsWith(V.kurz), "offiziell zählt die FLF");
 

@@ -1,12 +1,13 @@
-# Holt Spiele und Tabellen des Vereins (verein.json) von der FLF und legt sie als
-# data/fussball.json ab (gelesen von index.html), dazu je Mannschaft ein Kalender-Abo unter kalender/*.ics.
+# Holt für jeden Vereinsordner (mit verein.json) Spiele und Tabellen von der FLF und legt sie als
+# <verein>/data/fussball.json ab (gelesen von <verein>/index.html), dazu je Mannschaft ein
+# Kalender-Abo unter <verein>/kalender/*.ics. BGL und Nationalteam einmal für alle (gemeinsam.json).
 name: Fussball-Daten
 
 on:
   schedule:
     # Zeiten in UTC (GitHub kennt keine Zeitzone). Luxemburg ist UTC+1, im Sommer UTC+2.
     # GitHub startet geplante Läufe oft verspätet oder lässt sie aus. Wer es pünktlicher will:
-    # tools/anstoss-worker.js (Cloudflare) stößt diesen Workflow alle 15 min an.
+    # tools/worker.js (Cloudflare) stößt diesen Workflow alle 15 min an.
     # Samstag und Sonntag stündlich (7:17–21:17 Winterzeit).
     - cron: "17 6-20 * * 0,6"
     # Montag bis Freitag einmal abends (20:17 Winterzeit).
@@ -26,7 +27,8 @@ concurrency:
 jobs:
   abruf:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Je Verein gut eine Minute (FLF-Abfragen mit 1 s Pause).
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -36,7 +38,7 @@ jobs:
       - run: node tools/fussball.mjs
       - name: Commit, falls sich etwas geändert hat
         run: |
-          git add data/fussball.json kalender
+          git add -A -- '*/data/fussball.json' '*/kalender' gemeinsam.json
           if git diff --cached --quiet; then echo "keine Änderung"; exit 0; fi
           git config user.name "fussball-abruf"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

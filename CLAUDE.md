@@ -31,12 +31,15 @@ Acht voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
 - **`fussball.html`** — „FC Koeppchen“: Tabelle, Ergebnisse und nächste Spiele der Jugend
   (U13, U15, U11, U9) und der Seniors, automatisch von der FLF (GitHub Action). Details unten.
 
-- **`vorlage-verein/`** — Grundgerüst, um „FC Koeppchen“ für einen anderen FLF-Verein zu bauen
-  (vom Nutzer, 19.10.2026: **`fussball.html` dabei nicht anfassen**). Eigene Kopie von App und Abruf,
-  alles Vereinsbezogene in `verein.json`; `suche.mjs` findet Vereinsnummer und FLF-Mannschaftsnamen,
-  `neu.mjs` baut daraus mit Logo und zwei Farben ein fertiges Repo (Ausgabe nicht im Git). Ein Repo
-  je Verein. Details in `vorlage-verein/README.md`. Gegenprobe: Koeppchen durch die Vorlage
-  ergibt dieselben Daten wie `data/fussball.json`.
+- **`vorlage-verein/`** — Inhalt des künftigen Repos **`fussball-vereine`**: die Koeppchen-App für
+  andere FLF-Vereine (vom Nutzer, 19.10.2026: **`fussball.html` dabei nicht anfassen**). Eigene
+  Kopie von App und Abruf; ein Repo, ein Workflow, ein Cloudflare-Worker für alle Vereine (vom
+  Nutzer so entschieden: „ein Repo für alle anderen Vereine“, Worker-Frage Claude überlassen →
+  einer für alle, liest `vereine.json`). Je Verein ein Ordner mit `verein.json`; Liveticker Seniors 1
+  und Nationalteam nur über den Worker. `tools/suche.mjs` findet FLF-Nummer, FLF-Mannschaftsnamen
+  und den FuPa-Slug (über gleiche Tabellenzahlen — FuPa schreibt Orte deutsch, „Sporting
+  Bartringen“). Details in `vorlage-verein/README.md`. Wird das Repo angelegt, gilt dort der Stand;
+  dieser Ordner kann dann weg.
 
 Der Repo-Name passt damit nur noch zum ersten Punkt. Nicht wundern und nichts danach
 sortieren: was hier liegt, steht in dieser Liste.

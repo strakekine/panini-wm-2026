@@ -1,6 +1,6 @@
 # panini-wm-2026
 
-Sieben voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
+Acht voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
 
 - **`panini*.html`** — Sticker-Tracker für die Panini WM 2026 (Emil, Leo, generisch).
   Reine Einzeldatei-Webapps, kein Build, kein Framework.
@@ -30,6 +30,13 @@ Sieben voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
   siehe **`pine/CLAUDE.md`**, bevor dort etwas geändert wird.
 - **`fussball.html`** — „FC Koeppchen“: Tabelle, Ergebnisse und nächste Spiele der Jugend
   (U13, U15, U11, U9) und der Seniors, automatisch von der FLF (GitHub Action). Details unten.
+
+- **`vorlage-verein/`** — Grundgerüst, um „FC Koeppchen“ für einen anderen FLF-Verein zu bauen
+  (vom Nutzer, 19.10.2026: **`fussball.html` dabei nicht anfassen**). Eigene Kopie von App und Abruf,
+  alles Vereinsbezogene in `verein.json`; `suche.mjs` findet Vereinsnummer und FLF-Mannschaftsnamen,
+  `neu.mjs` baut daraus mit Logo und zwei Farben ein fertiges Repo (Ausgabe nicht im Git). Ein Repo
+  je Verein. Details in `vorlage-verein/README.md`. Gegenprobe: Koeppchen durch die Vorlage
+  ergibt dieselben Daten wie `data/fussball.json`.
 
 Der Repo-Name passt damit nur noch zum ersten Punkt. Nicht wundern und nichts danach
 sortieren: was hier liegt, steht in dieser Liste.

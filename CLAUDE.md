@@ -240,7 +240,7 @@ ein; erst ein Handstart (`gh api -X POST …/actions/workflows/fussball.yml/disp
 brachte es in App und Kalender. Möglich, dass es an den vielen Änderungen der Workflow-Dateien an
 dem Tag lag — am nächsten Wochenende nachsehen. Dem Nutzer vorgeschlagen, noch offen: die
 Live-Wache fragt nach Abpfiff eine Stunde lang alle 15 min selbst die FLF ab — überholt durch
-Plan B (Worker stößt an). 18.10. abends: 20:17 → 20:39, 21:17 ausgelassen, 22:17 → 22:40.
+Plan B (Worker stößt an). 18.10. abends: 20:17 → 20:39, 21:17 ausgelassen, 22:17 → 22:40. **19.10. (Mo): Plan B geprüft** — der Worker stieß pünktlich um 20:15:24 UTC an (`workflow_dispatch`, ohne Handstart, Lauf grün); GitHubs eigener Zeitplan (19:17 UTC) lief den ganzen Tag **kein einziges Mal**.
 
 **Klasse wechselt während der Saison** (Phase 1 → 2): gesucht wird nach dem Verein, die Klassen
 ergeben sich aus den Spielen. Die zuletzt begonnene Ligaklasse ist die aktuelle, die anderen

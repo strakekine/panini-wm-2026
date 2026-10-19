@@ -38,7 +38,7 @@ jobs:
       - run: node tools/fussball.mjs
       - name: Commit, falls sich etwas geändert hat
         run: |
-          git add -A -- '*/data/fussball.json' '*/kalender' gemeinsam.json
+          git add -A -- ':(glob)*/data/fussball.json' ':(glob)*/kalender/**' gemeinsam.json
           if git diff --cached --quiet; then echo "keine Änderung"; exit 0; fi
           git config user.name "fussball-abruf"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

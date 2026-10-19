@@ -1,6 +1,6 @@
 # panini-wm-2026
 
-Sieben voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
+Sieben voneinander unabhängige Dinge (Übersicht für Menschen: `README.md`) liegen in diesem Repo, alle auf `main`:
 
 - **`panini*.html`** — Sticker-Tracker für die Panini WM 2026 (Emil, Leo, generisch).
   Reine Einzeldatei-Webapps, kein Build, kein Framework.
@@ -30,6 +30,11 @@ Sieben voneinander unabhängige Dinge liegen in diesem Repo, alle auf `main`:
   siehe **`pine/CLAUDE.md`**, bevor dort etwas geändert wird.
 - **`fussball.html`** — „FC Koeppchen“: Tabelle, Ergebnisse und nächste Spiele der Jugend
   (U13, U15, U11, U9) und der Seniors, automatisch von der FLF (GitHub Action). Details unten.
+  **Andere Vereine** liegen im eigenen Repo **`strakekine/fussball-vereine`** (19.10.2026, vom
+  Nutzer: ein Repo für alle anderen Vereine; eine App je Ordner aus einer Vorlage, ein Worker für
+  alle). Von dort aus wird `fussball.html` nie angefasst — und umgekehrt: Verbesserungen hier
+  wandern nicht von selbst dorthin. Die Vorlage lag vorher als `vorlage-verein/` auf dem Branch
+  `claude/trusting-cannon-s4bpz7`; gültig ist der Stand im neuen Repo.
 
 Der Repo-Name passt damit nur noch zum ersten Punkt. Nicht wundern und nichts danach
 sortieren: was hier liegt, steht in dieser Liste.

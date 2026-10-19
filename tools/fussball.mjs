@@ -232,11 +232,17 @@ async function natiHolen() {
 // Freigabe der Ergebnisse (19.10.2026: nach 8 Spielen, gespielt 10), FuPa ist aktuell und führt
 // Punktabzüge samt Begründung (`text`). FuPa schreibt die Vereine deutsch („Differdingen“), die
 // Spieltage kommen von der FLF („Differdange“) — darum bekommt jede Zeile den FLF-Namen der
-// Mannschaft mit denselben Zahlen (Spiele, S/U/N, Tore) aus den FLF-Ergebnissen. Passt eine Zeile
-// nicht eindeutig, gilt die gemerkte Zuordnung (`gemerkt`: FuPa-`teamId` → FLF-Name, bleibt über
-// die Jahre gleich, steht in data/fussball.json), sonst bleibt der FuPa-Name. Am Saisonanfang haben
-// viele dieselben Zahlen (dreimal 1:0) — dafür das Gedächtnis (vom Nutzer, 19.10.2026).
-export function fupaTabelleMitFlfNamen(standings, flfSpiele, gemerkt = {}) {
+// Mannschaft mit denselben Zahlen (Spiele, S/U/N, Tore) aus den FLF-Ergebnissen. Ist eine Zeile
+// nicht eindeutig zuzuordnen, bleibt der FuPa-Name. Zieht die FLF mit ihrer Tabelle irgendwann
+// zeitnah nach, zurück auf die der FLF umstellen (vom Nutzer) — dann entfällt das alles. Absicherungen (vom Nutzer, 19.10.2026), damit nie ein
+// falscher Name dasteht — höchstens mal ein deutscher:
+//  1. Gemerkt geht vor: `gemerkt` (FuPa-`teamId` → FLF-Name, in data/fussball.json) wird nie
+//     überschrieben. Umbenennungen (Fusion) trägt man von Hand in `bgl.namen` nach.
+//  2. Neu zugeordnet wird nur, wenn die Zahlen auf beiden Seiten eindeutig sind und erst ab
+//     `minSp` Spielen — am Saisonanfang haben viele dieselben (dreimal 1:0). Weichen FuPa und FLF
+//     kurz voneinander ab (Ergebnis nur auf einer Seite), gibt es so keinen Zufallstreffer.
+//  3. Kein FLF-Name zweimal: einen schon vergebenen bekommt kein zweiter Verein.
+export function fupaTabelleMitFlfNamen(standings, flfSpiele, gemerkt = {}, minSp = 3) {
   const z = new Map();
   for (const sp of flfSpiele) {
     if (!sp.gespielt || sp.hs == null || sp.as == null) continue;
@@ -247,14 +253,20 @@ export function fupaTabelleMitFlfNamen(standings, flfSpiele, gemerkt = {}) {
     }
   }
   const sig = r => [r.sp, r.s, r.u, r.nl, r.t, r.g].join("/");
-  const nachSig = new Map();
-  for (const r of z.values()) nachSig.set(sig(r), nachSig.has(sig(r)) ? null : r);
-  const namen = { ...gemerkt }, nachName = new Map([...z.values()].map(r => [r.n, r]));
-  const tabelle = standings.map(x => {
-    const zeile = { pl: x.rank, sp: x.matches, s: x.wins, u: x.draws, nl: x.defeats, t: x.ownGoals, g: x.againstGoals, pkt: x.points };
-    const key = String(x.team.teamId ?? x.team.slug);
-    const flf = nachSig.get(sig(zeile));
-    if (flf) namen[key] = flf.n;
+  const anzahl = (liste, f) => liste.reduce((m, x) => m.set(f(x), (m.get(f(x)) || 0) + 1), new Map());
+  const flfAnz = anzahl([...z.values()], sig);
+  const zeilen = standings.map(x => ({ x, zeile: { pl: x.rank, sp: x.matches, s: x.wins, u: x.draws, nl: x.defeats,
+    t: x.ownGoals, g: x.againstGoals, pkt: x.points }, key: String(x.team.teamId ?? x.team.slug) }));
+  const fupaAnz = anzahl(zeilen, r => sig(r.zeile));
+  const namen = { ...gemerkt }, vergeben = new Set(Object.values(namen));
+  for (const { zeile, key } of zeilen) {
+    if (namen[key] || zeile.sp < minSp || flfAnz.get(sig(zeile)) !== 1 || fupaAnz.get(sig(zeile)) !== 1) continue;
+    const flf = [...z.values()].find(r => sig(r) === sig(zeile));
+    if (vergeben.has(flf.n)) continue;
+    namen[key] = flf.n; vergeben.add(flf.n);
+  }
+  const nachName = new Map([...z.values()].map(r => [r.n, r]));
+  const tabelle = zeilen.map(({ x, zeile, key }) => {
     const n = namen[key];
     return { ...zeile, id: nachName.get(n)?.id ?? n ?? x.team.slug, n: n ?? x.team.name.full };
   });

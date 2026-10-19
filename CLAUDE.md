@@ -68,7 +68,11 @@ führt Punktabzüge samt Begründung (`text`, Swift Hesperange −12, wird angez
 deutsch („Differdingen“) — `fupaTabelleMitFlfNamen` gibt jeder Zeile den FLF-Namen der Mannschaft
 mit denselben Zahlen (Sp/S/U/N/Tore) aus den FLF-Ergebnissen, am 19.10. alle 16 eindeutig. Jede Zuordnung
 wird **gemerkt** (`bgl.namen`, FuPa-`teamId` → FLF-Name, in data/fussball.json): am Saisonanfang
-haben viele dieselben Zahlen, dann gilt das Gedächtnis (vom Nutzer). FuPa weg
+haben viele dieselben Zahlen, dann gilt das Gedächtnis (vom Nutzer). **Absicherungen** (vom Nutzer):
+gemerkt wird nie überschrieben (Umbenennung von Hand in `bgl.namen`), neu zugeordnet nur bei
+eindeutigen Zahlen auf beiden Seiten und ab 3 Spielen, kein FLF-Name zweimal — schlimmstenfalls
+steht ein deutscher Name da, nie ein falscher. Gegenprobe gemacht. **Zieht die FLF mit ihrer Tabelle
+irgendwann zeitnah nach, zurück auf die FLF-Tabelle umstellen** (vom Nutzer) — dann entfällt das. FuPa weg
 → FLF-Tabelle; hinkt die, rechnet `bglTabelle` in der App selbst (letzter Rückfall, mit Hinweis).
 **Roude Léiw** von FuPa (`natiHolen`,
 `luxemburg-m1-<Jahr>` für Vorjahr/Jahr/Folgejahr, `flavor` past+current); Tabelle über

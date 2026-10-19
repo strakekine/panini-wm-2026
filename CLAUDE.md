@@ -128,6 +128,17 @@ den Text weg (am iPhone gemeldet), WhatsApp nicht. Ohne Teilen-Leiste in die Zwi
 **Fassung:** `FASSUNG` steht ganz unten — bei jeder Änderung an `fussball.html` hochzählen; am
 iPhone läuft nach einem Push oft noch die alte Datei (Zwischenspeicher), erst Fassung prüfen lassen.
 
+**Liveticker auch für Seniors 2 und 3** (vom Nutzer, 19.10.2026, Fassung q). FuPa tickert die Réserves
+regelmäßig (2026-27: Seniors 2 4 von 6 Pflichtspielen, Seniors 3 alle 8; wechselnde Tickerer, oft
+der Gegner). FuPa-Teams `fc-koeppchen-mr1-<Saison>` = Réserves I, `mr2` = Réserves II. **Worker
+unverändert** (sucht per `?anstoss=` nur Seniors 1): Der FLF-Abruf holt die FuPa-Slugs vorab
+(`reserveHolen`/`reserveSlugs`, Spiele gestern bis +3 Wochen, über `passendesSpiel`) nach
+`D.fupa` (FLF-Spiel-ID → Slug); die App fragt den Worker damit direkt (`liveSpiel(v, now, fupa)`).
+Ohne Slug (FuPa führt das Spiel noch nicht) kein Ticker. Kein GitHub-Lauf, keine live.json für die
+Reserven. **Heim/Gast**: FuPa führte Beggen–Koeppchen II (23.10.) andersherum als die FLF (FLF
+stimmt, Stadion in Beggen) — der Kasten nimmt dann FuPas Reihenfolge, sonst stünde der Stand
+verkehrt (Slug beginnt mit der Heimmannschaft). Im Browser mit nachgebautem Worker geprüft.
+
 **Live-Ticker Seniors 1 (gebaut 18.10.2026, vom Nutzer gewünscht).** Test am 18.10. gegen Beggen:
 **die FLF trägt während des Spiels nichts ein** (alle Felder leer), **FuPa liefert live** Stand,
 Minute, Halbzeit und Torschützen, sobald jemand am Platz tickert (bei Koeppchen: Paul Krier).

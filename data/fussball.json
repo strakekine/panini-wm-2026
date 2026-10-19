@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-19T08:04:29.701Z",
+ "stand": "2026-10-19T16:02:25.803Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -1991,6 +1991,24 @@
      "ort": "Stade Op der Millen (Remich)"
     },
     {
+     "id": 1002127,
+     "d": "2026-11-14T19:30:00+01:00",
+     "tag": 12,
+     "h": {
+      "id": 44560,
+      "n": "Union Titus Pétange"
+     },
+     "a": {
+      "id": 44831,
+      "n": "FC Koeppchen Wormeldange"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Stade Municipal (Pétange)"
+    },
+    {
      "id": 1002121,
      "d": "2026-11-15T16:00:00+01:00",
      "tag": 12,
@@ -2097,24 +2115,6 @@
      "gespielt": false,
      "forfait": false,
      "ort": "Stade Fernand Weber (Canach)"
-    },
-    {
-     "id": 1002127,
-     "d": "2026-11-15T16:00:00+01:00",
-     "tag": 12,
-     "h": {
-      "id": 44560,
-      "n": "Union Titus Pétange"
-     },
-     "a": {
-      "id": 44831,
-      "n": "FC Koeppchen Wormeldange"
-     },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
-     "forfait": false,
-     "ort": "Stade Municipal (Pétange)"
     },
     {
      "id": 1002122,
@@ -11643,9 +11643,9 @@
       "id": 46381,
       "n": "Olympia Christnach-Waldbillig"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 2,
+     "as": 13,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain 2 (Mensdorf, synth.)"
     },
@@ -19297,6 +19297,24 @@
     "ort": "Party-Rent-Arena (Rosport)"
    },
    {
+    "id": 1001128,
+    "d": "2026-10-31T16:00:00+01:00",
+    "tag": 12,
+    "h": {
+     "id": 44586,
+     "n": "F91 Dudelange"
+    },
+    "a": {
+     "id": 44749,
+     "n": "Victoria Rosport"
+    },
+    "hs": null,
+    "as": null,
+    "gespielt": false,
+    "forfait": false,
+    "ort": "Stade Jos Nosbaum (Dudelange)"
+   },
+   {
     "id": 1001127,
     "d": "2026-10-31T18:00:00+01:00",
     "tag": 12,
@@ -19331,24 +19349,6 @@
     "gespielt": false,
     "forfait": false,
     "ort": "Stade Klengbousbierg (Bissen)"
-   },
-   {
-    "id": 1001128,
-    "d": "2026-10-31T18:00:00+01:00",
-    "tag": 12,
-    "h": {
-     "id": 44586,
-     "n": "F91 Dudelange"
-    },
-    "a": {
-     "id": 44749,
-     "n": "Victoria Rosport"
-    },
-    "hs": null,
-    "as": null,
-    "gespielt": false,
-    "forfait": false,
-    "ort": "Stade Jos Nosbaum (Dudelange)"
    },
    {
     "id": 1001126,
@@ -22665,5 +22665,10 @@
     }
    ]
   }
+ },
+ "fupa": {
+  "1011051": "fc-koeppchen-mr1-union-titus-petingen-mr1-261019",
+  "1015062": "fc-koeppchen-mr2-fc-avenir-beggen-mr1-261023",
+  "1015075": "us-moutfort-medingen-mr1-fc-koeppchen-mr2-261030"
  }
 }

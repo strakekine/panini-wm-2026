@@ -324,16 +324,28 @@ function mitWorker(L, W) {
   return neu;
 }
 
-// Live gibt es nur für diesen Reiter (FuPa tickert nur dort; der Worker sucht nur dessen Spiele).
-const LIVE_REITER = "Seniors 1";
+// Live gibt es nur bei den Seniors (FuPa führt keine Jugend). Seniors 1: der Worker sucht das Spiel
+// selbst (per Anstoßzeit). Seniors 2/3 (seit 19.10.2026): nur mit FuPa-Slug, den der Abruf vorab
+// holt (`D.fupa`, FLF-Spiel-ID → Slug) — die Suche im Worker kennt nur die Seniors 1.
+const LIVE_REITER = "Seniors 1", LIVE_RESERVE = ["Seniors 2", "Seniors 3"];
+function hatLive(v) {
+  return !!v && (v.team.reiter === LIVE_REITER || LIVE_RESERVE.includes(v.team.reiter));
+}
 
 // Das Spiel dieses Reiters, das gerade im Live-Fenster liegt, oder null.
-function liveSpiel(v, now) {
-  if (!v || v.team.reiter !== LIVE_REITER) return null;
-  return [...v.kommend, ...v.gespielt].find(sp => {
+function liveSpiel(v, now, fupa = {}) {
+  if (!hatLive(v)) return null;
+  const sp = [...v.kommend, ...v.gespielt].find(sp => {
     const a = Date.parse(sp.d);
     return now >= a - LIVE_FENSTER.vor && now <= a + LIVE_FENSTER.nach;
   }) || null;
+  if (!sp || v.team.reiter === LIVE_REITER) return sp;
+  const slug = fupa[sp.id];
+  if (!slug) return null;
+  // Heim/Gast wie bei FuPa (der Stand kommt von dort). Gesehen: Beggen–Koeppchen II am 23.10.2026
+  // führt die FLF mit Beggen als Heim, FuPa mit Koeppchen. Der Slug beginnt mit der Heimmannschaft.
+  const fupaWirHeim = slug.startsWith("fc-koeppchen-"), flfWirHeim = v.ids.has(sp.h.id);
+  return fupaWirHeim === flfWirHeim ? { ...sp, slug } : { ...sp, slug, h: sp.a, a: sp.h };
 }
 
 // Grundlage für den Kasten: live.json, wenn sie dieses Spiel meint — sonst ein leeres Gerüst aus
@@ -432,7 +444,7 @@ function nachSpieltag(spiele) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "19.10.2026 p";
+const FASSUNG = "19.10.2026 q";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -579,12 +591,12 @@ function render() {
   const art = sp => sp.typ === "CUP" ? "Pokal" : sp.typ === "FM" ? "Freundschaftsspiel" : "";
   let h = "";
 
-  LIVE_SP = liveSpiel(v, now);
+  LIVE_SP = liveSpiel(v, now, D.fupa || {});
   const lv = liveAnzeige(mitWorker(liveBasis(L, LIVE_SP), W), v, now);
   LIVE_POLL = !!lv || imLiveFenster(v, now);
   // Spieltag-Kasten, solange (noch) kein LIVE-Kasten da ist.
   const heute = !lv && spieltagHeute(v, now);
-  if (heute) h += heuteHtml(heute, v.ids, { live: v.team.reiter === LIVE_REITER, pill: sp => sp.typ === "CUP" ? "Pokal" : "",
+  if (heute) h += heuteHtml(heute, v.ids, { live: v.team.reiter === LIVE_REITER || !!(D.fupa || {})[heute.sp.id], pill: sp => sp.typ === "CUP" ? "Pokal" : "",
     ohneLive: "Das Ergebnis erscheint, sobald es eingetragen ist." });
   if (lv) h += liveHtml(lv, n => anzeige(n).startsWith("Koeppchen"), "offiziell zählt die FLF");
 
@@ -675,7 +687,7 @@ function heuteHtml(heute, ids, { live, pill, ohneLive }) {
     </div></section>`;
 }
 
-// LIVE-Kasten (Seniors 1 und Roude Léiw). `wir(name)`: welche Seite fett steht.
+// LIVE-Kasten (Seniors 1–3 und Roude Léiw). `wir(name)`: welche Seite fett steht.
 function liveHtml(lv, wir, zusatz) {
   const tore = ereignisListe(lv).map(e => {
     const min = `${e.min}${e.plus ? "+" + e.plus : ""}.`;

@@ -298,6 +298,40 @@ async function bglHolen(saison, zeit, alt) {
   return { n: div.name.trim(), spiele, tabelle: tab, quelle, text, namen };
 }
 
+// ---- Liveticker Seniors 2/3 (vom Nutzer 19.10.2026) ----
+// FuPa tickert auch die Réserves regelmäßig (2026-27: Seniors 2 4 von 6, Seniors 3 alle 8 Pflicht-
+// spiele). Der Worker sucht per Anstoßzeit nur Spiele der Seniors 1 — darum holt der Abruf hier die
+// FuPa-Slugs der Reserven vorab (FuPa-Team mr1 = Réserves I, mr2 = Réserves II), und die App fragt
+// den Worker direkt mit Slug. So muss der Worker nicht neu eingefügt werden. Nur Spiele von gestern
+// bis in drei Wochen, damit die Datei nicht bei jeder fernen Verlegung neu geschrieben wird.
+export const FUPA_RESERVE = { "Seniors 2": "mr1", "Seniors 3": "mr2" };
+export function reserveSlugs(D, fupaJeReiter, passend, now) {
+  const aus = {};
+  for (const t of D.teams.filter(t => FUPA_RESERVE[t.reiter])) {
+    const fs = fupaJeReiter[t.reiter] || [];
+    for (const sp of eigeneSpiele(D, t)) {
+      const a = Date.parse(sp.d);
+      if (a < now - 86400e3 || a > now + 21 * 86400e3) continue;
+      const f = passend(fs, sp.d);
+      if (f?.slug?.includes("fc-koeppchen")) aus[sp.id] = f.slug;
+    }
+  }
+  return aus;
+}
+
+async function reserveHolen(D, saison) {
+  const { passendesSpiel } = await import("./fussball-live.mjs");   // dynamisch: die Datei importiert diese
+  const s = saison.id.slice(0, 4) + "-" + saison.id.slice(6, 8), je = {};
+  for (const [r, k] of Object.entries(FUPA_RESERVE)) {
+    je[r] = [];
+    for (const flavor of ["current", "past"]) {
+      const j = await fupa(`teams/fc-koeppchen-${k}-${s}/matches?flavor=${flavor}`);
+      if (Array.isArray(j)) je[r].push(...j);
+    }
+  }
+  return reserveSlugs(D, je, passendesSpiel, Date.now());
+}
+
 // Vereinsspiele + je Klasse alle Spiele und Tabelle → das, was die App liest.
 // vereinsSpiele tragen `ak` = Index in AGES (aus welcher Abfrage sie kommen).
 // Eine Mannschaft ist Altersklasse + Name, nicht die FLF-Nummer: Zur Phase 3 nach der
@@ -391,6 +425,7 @@ async function main() {
   const alt = existsSync(OUT) ? JSON.parse(readFileSync(OUT, "utf8")) : {};
   try { neu.bgl = await bglHolen(saison, zeit, alt.bgl); } catch (e) { console.error("BGL:", e.message); neu.bgl = alt.bgl || null; }
   try { neu.nati = await natiHolen(); } catch (e) { console.error("Nationalteam:", e.message); neu.nati = alt.nati || null; }
+  try { neu.fupa = await reserveHolen(neu, saison); } catch (e) { console.error("FuPa Reserven:", e.message); neu.fupa = alt.fupa || {}; }
   // Nur schreiben, wenn sich inhaltlich etwas geändert hat — sonst committet die Action alle 2 h
   // eine Datei, in der nur der Zeitstempel neu ist.
   if (existsSync(OUT)) {

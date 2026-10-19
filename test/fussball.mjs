@@ -7,7 +7,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { aufbereiten, spiel, reiter, ics, eigeneSpiele, CLUB, natiSpiel, natiGruppe, natiTabelle, fupaTabelleMitFlfNamen } from "../tools/fussball.mjs";
+import { aufbereiten, spiel, reiter, ics, eigeneSpiele, CLUB, natiSpiel, natiGruppe, natiTabelle, fupaTabelleMitFlfNamen, reserveSlugs } from "../tools/fussball.mjs";
 import { liveAus, gleich as liveGleich, spielJetzt, naechstesSpiel, passendesSpiel } from "../tools/fussball-live.mjs";
 import worker, { kuerzen, passendesSpiel as wPassend, saisonVon, abrufFaellig } from "../tools/cloudflare-worker.js";
 
@@ -254,6 +254,24 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   const spS = M.liveSpiel(vS, t0);
   ok(spS && spS.id === flf.id, "laufendes Spiel der Seniors 1 aus dem Spielplan");
   ok(M.liveSpiel(M.sicht(D, 45396, t0), t0) === null, "kein Live für U13");
+  // Seniors 2/3: nur mit FuPa-Slug aus dem Abruf (der Worker sucht per Anstoß nur Seniors 1).
+  const vR = { ...vS, team: { ...vS.team, reiter: "Seniors 2" } };
+  ok(M.liveSpiel(vR, t0) === null, "Seniors 2 ohne Slug: kein Live");
+  const spR = M.liveSpiel(vR, t0, { [flf.id]: "fc-koeppchen-mr1-x-261018" });
+  ok(spR && spR.slug === "fc-koeppchen-mr1-x-261018" && M.liveBasis(null, spR).slug === spR.slug, "Seniors 2 mit Slug: Worker direkt");
+  const spT = M.liveSpiel(vR, t0, { [flf.id]: vR.ids.has(flf.h.id) ? "beggen-mr1-fc-koeppchen-mr1-261018" : "fc-koeppchen-mr1-x-261018" });
+  ok(spT.h.id === flf.a.id && spT.a.id === flf.h.id, "Heim/Gast bei FuPa andersherum: Seiten getauscht");
+  ok(M.liveSpiel({ ...vS, team: { ...vS.team, reiter: "Seniors 4" } }, t0, { [flf.id]: "x" }) === null, "andere Reiter nicht");
+  {
+    const sp = (id, d) => ({ id, d, h: { id: 7, n: "FC Koeppchen Wormeldange I" }, a: { id: 8, n: "B" } });
+    const DR = { teams: [{ id: 7, reiter: "Seniors 2", klassen: [5] }, { id: 9, reiter: "U13 1", klassen: [5] }],
+      klassen: { 5: { n: "R1", typ: "CC", spiele: [sp(1, "2026-10-19T20:00:00+02:00"), sp(2, "2026-12-19T20:00:00+01:00"),
+        sp(3, "2026-10-01T20:00:00+02:00"), sp(4, "2026-10-26T19:30:00+01:00")] } } };
+    const fsR = [{ kickoff: "2026-10-19T20:00:00+02:00", slug: "fc-koeppchen-mr1-titus-261019" },
+                 { kickoff: "2026-10-26T19:30:00+01:00", slug: "fremd-mr1-261026" }];
+    const r = reserveSlugs(DR, { "Seniors 2": fsR }, passendesSpiel, Date.parse("2026-10-19T12:00:00+02:00"));
+    gleich(r, { 1: "fc-koeppchen-mr1-titus-261019" }, "Reserve-Slugs: nur nahe Spiele, nur Koeppchen-Slugs");
+  }
   const b0 = M.liveBasis(null, spS);
   ok(b0.slug === null && b0.flfId === flf.id && b0.h === flf.h.n, "Gerüst ohne live.json");
   ok(M.liveBasis({ ...Lv, flfId: 1 }, spS).slug === null, "live.json vom letzten Spiel gilt nicht");

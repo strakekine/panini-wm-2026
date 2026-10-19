@@ -17,7 +17,7 @@ import { eigeneSpiele } from "./fussball.mjs";
 const DATEN = new URL("../data/fussball.json", import.meta.url);
 const OUT = new URL("../data/live.json", import.meta.url);
 const API = "https://api.fupa.net/v1/matches/";
-export const REITER = "Seniors 1";           // nur dort tickert jemand (FuPa führt keine Jugend)
+export const REITER = "Seniors 1";           // Reserven: App fragt den Worker direkt (D.fupa), ohne diesen Lauf
 // Zeitfenster um den Anstoß. 180 statt 150 min: Pokal mit Verlängerung und Elfmeterschießen
 // dauert 155–165 min ab Anpfiff (vom Nutzer gefragt). Normale Spiele enden früher, weil der Lauf
 // nach zweimal „POST“ aufhört.

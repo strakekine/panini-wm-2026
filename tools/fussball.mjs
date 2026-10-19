@@ -228,6 +228,32 @@ async function natiHolen() {
   return { spiele: alle.map(natiSpiel).sort((a, b) => a.d.localeCompare(b.d)), gruppe };
 }
 
+// BGL-Tabelle von FuPa (Wettbewerb „nationaldivision“): Die FLF rechnet ihre erst nach der
+// Freigabe der Ergebnisse (19.10.2026: nach 8 Spielen, gespielt 10), FuPa ist aktuell und führt
+// Punktabzüge samt Begründung (`text`). FuPa schreibt die Vereine deutsch („Differdingen“), die
+// Spieltage kommen von der FLF („Differdange“) — darum bekommt jede Zeile den FLF-Namen der
+// Mannschaft mit denselben Zahlen (Spiele, S/U/N, Tore) aus den FLF-Ergebnissen. Passt eine Zeile
+// nicht eindeutig, bleibt der FuPa-Name.
+export function fupaTabelleMitFlfNamen(standings, flfSpiele) {
+  const z = new Map();
+  for (const sp of flfSpiele) {
+    if (!sp.gespielt || sp.hs == null || sp.as == null) continue;
+    for (const [t, f, g] of [[sp.h, sp.hs, sp.as], [sp.a, sp.as, sp.hs]]) {
+      const r = z.get(t.id) || { id: t.id, n: t.n, sp: 0, s: 0, u: 0, nl: 0, t: 0, g: 0 };
+      r.sp++; r.t += f; r.g += g; if (f > g) r.s++; else if (f === g) r.u++; else r.nl++;
+      z.set(t.id, r);
+    }
+  }
+  const sig = r => [r.sp, r.s, r.u, r.nl, r.t, r.g].join("/");
+  const nachSig = new Map();
+  for (const r of z.values()) nachSig.set(sig(r), nachSig.has(sig(r)) ? null : r);
+  return standings.map(x => {
+    const zeile = { pl: x.rank, sp: x.matches, s: x.wins, u: x.draws, nl: x.defeats, t: x.ownGoals, g: x.againstGoals, pkt: x.points };
+    const flf = nachSig.get(sig(zeile));
+    return { ...zeile, id: flf ? flf.id : x.team.slug, n: flf ? flf.n : x.team.name.full };
+  });
+}
+
 async function bglHolen(saison, zeit) {
   const div = (await gq(Q_DIVS, { s: saison.id })).divisions.find(d => d.name.trim() === BGL_NAME);
   if (!div) throw new Error("FLF: " + BGL_NAME + " nicht gefunden");
@@ -235,8 +261,13 @@ async function bglHolen(saison, zeit) {
   const { matches } = await gq(Q_MATCHES, { c: { ...zeit, divisionId: div.id, matchTypeId: "CC" } });
   await pause(1000);
   const { rankings } = await gq(Q_RANKING, { c: { seasonId: saison.id, divisionId: div.id, matchTypeId: "CC" } });
-  return { n: div.name.trim(), spiele: matches.map(spiel).sort((a, b) => a.d.localeCompare(b.d) || a.h.n.localeCompare(b.h.n)),
-           tabelle: tabelle(rankings) };
+  const spiele = matches.map(spiel).sort((a, b) => a.d.localeCompare(b.d) || a.h.n.localeCompare(b.h.n));
+  let tab = tabelle(rankings), quelle = "FLF", text = null;
+  try {
+    const st = await fupa("standings?competition=nationaldivision");
+    if (st?.standings?.length) { tab = fupaTabelleMitFlfNamen(st.standings, spiele); quelle = "FuPa"; text = st.text || null; }
+  } catch (e) { console.error("BGL-Tabelle von FuPa:", e.message, "— nehme die der FLF"); }
+  return { n: div.name.trim(), spiele, tabelle: tab, quelle, text };
 }
 
 // Vereinsspiele + je Klasse alle Spiele und Tabelle → das, was die App liest.

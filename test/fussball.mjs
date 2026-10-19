@@ -7,7 +7,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { aufbereiten, spiel, reiter, ics, eigeneSpiele, CLUB, natiSpiel, natiGruppe, natiTabelle } from "../tools/fussball.mjs";
+import { aufbereiten, spiel, reiter, ics, eigeneSpiele, CLUB, natiSpiel, natiGruppe, natiTabelle, fupaTabelleMitFlfNamen } from "../tools/fussball.mjs";
 import { liveAus, gleich as liveGleich, spielJetzt, naechstesSpiel, passendesSpiel } from "../tools/fussball-live.mjs";
 import worker, { kuerzen, passendesSpiel as wPassend, saisonVon, abrufFaellig } from "../tools/cloudflare-worker.js";
 
@@ -304,6 +304,9 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   gleich(t2.tabelle.map(r => [r.id, r.pkt, r.abzug]), [["A", 4, 0], ["C", 1, 0], ["B", -9, -12]], "BGL: Punktabzug aus der FLF-Tabelle bleibt");
   const flf = [{ pl: 1, id: "X", n: "X", sp: 2, pkt: 6 }];
   ok(M.bglTabelle({ spiele: erg, tabelle: flf }).tabelle === flf, "BGL: aktuelle FLF-Tabelle gilt");
+  const st = (rank, slug, full, m, w, d, l, o, a, p) => ({ rank, matches: m, wins: w, draws: d, defeats: l, ownGoals: o, againstGoals: a, points: p, team: { slug, name: { full } } });
+  const ft = fupaTabelleMitFlfNamen([st(1, "a", "FC A-Dorf", 2, 1, 1, 0, 3, 1, 4), st(2, "b", "B-Dorf", 2, 1, 0, 1, 3, 3, -9), st(3, "x", "Unbekannt", 5, 0, 0, 5, 0, 9, 0)], erg);
+  gleich(ft.map(r => [r.pl, r.id, r.n, r.pkt]), [[1, "A", "A", 4], [2, "B", "B", -9], [3, "x", "Unbekannt", 0]], "BGL: FuPa-Tabelle mit FLF-Namen, Abzug bleibt, Unpassendes behält FuPa-Namen");
   gleich(M.extraReiter({ bgl, nati: null }).map(t => t.id), ["bgl"], "Reiter nur, wenn Daten da sind");
 
   const r = (typ, slug, title, cat) => ({ type: typ, slug, title, competitionSeason: { slug: "uefa-nations-league", name: "UEFA Nations League", category: { id: cat } } });

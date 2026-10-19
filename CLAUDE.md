@@ -55,13 +55,18 @@ false). Die App zeigt dort nur Termine und blendet Ergebnisse auch dann aus, wen
 Schnittstelle eins liefern sollte. Freundschaftsspiele (FM) liegen landesweit in einer Klasse
 „Amicaux 1/2“ — davon nur die eigenen, keine fremden abrufen. „Nächste Spiele“ zeigt höchstens
 fünf (Seniors hätten sonst die halbe Saison dort).
-**BGL Ligue und Nati** (vom Nutzer, 19.10.2026): zwei Reiter hinter den Mannschaften (`extraReiter`,
-`id` „bgl“/„nati“ als Text), ohne Kalender, Ticker, Spieltag-Kasten. **BGL** aus der FLF (`bglHolen`,
-Klasse per Name „BGL Ligue“ gesucht, Nummer wechselt je Saison): Tabelle, zuletzt gespielter
-Spieltag (`bglSicht`, auch angefangen) und die **zwei** nächsten (vom Nutzer). **Die FLF-Tabelle
-hinkt hinterher** (19.10.: nach 8 Spielen, gespielt 10) — dann rechnet `bglTabelle` selbst (Punkte,
-Tordifferenz, Tore; Hinweis unter der Tabelle) und übernimmt **Punktabzüge** aus der FLF-Tabelle
-(Swift Hesperange −12: FLF-Punkte minus die ersten `sp` Spiele). **Nati** von FuPa (`natiHolen`,
+**BGL League und Roude Léiw** (vom Nutzer, 19.10.2026; so beschriftet, vom Nutzer — die FLF schreibt
+„BGL Ligue“, unter diesem Namen wird die Klasse gesucht): zwei Reiter hinter den Mannschaften
+(`extraReiter`, `id` „bgl“/„nati“ als Text), ohne Kalender, Ticker, Spieltag-Kasten. **BGL**:
+Spiele aus der FLF (`bglHolen`, Klasse per Name, Nummer wechselt je Saison), zuletzt gespielter
+Spieltag (`bglSicht`, auch angefangen) und die **zwei** nächsten (vom Nutzer). **Tabelle von FuPa**
+(`standings?competition=nationaldivision`, ohne Saison = aktuelle; vom Nutzer: das Original statt
+selbst gerechnet), weil die FLF-Tabelle hinterherhinkt (19.10.: nach 8 Spielen, gespielt 10). FuPa
+führt Punktabzüge samt Begründung (`text`, Swift Hesperange −12, wird angezeigt). FuPa schreibt
+deutsch („Differdingen“) — `fupaTabelleMitFlfNamen` gibt jeder Zeile den FLF-Namen der Mannschaft
+mit denselben Zahlen (Sp/S/U/N/Tore) aus den FLF-Ergebnissen, am 19.10. alle 16 eindeutig. FuPa weg
+→ FLF-Tabelle; hinkt die, rechnet `bglTabelle` in der App selbst (letzter Rückfall, mit Hinweis).
+**Roude Léiw** von FuPa (`natiHolen`,
 `luxemburg-m1-<Jahr>` für Vorjahr/Jahr/Folgejahr, `flavor` past+current); Tabelle über
 `GET api.fupa.net/v1/standings?competition=<slug>&group=<round.slug>` (ohne Saison = aktuelle).
 `natiGruppe` nimmt die Gruppe des nächsten Pflichtspiels (Gruppenrunde/Liga, kein Testspiel

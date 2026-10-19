@@ -100,8 +100,9 @@ die FLF ein Ergebnis hat oder 3 h nach Anstoß. Steht der LIVE-Kasten da, entfä
 kann sie nicht direkt fragen. Darum: `tools/fussball.mjs` (Node, keine Abhängigkeiten) holt die
 Daten. **Takt (Plan B, vom Nutzer 19.10.2026):** Der Cloudflare-Worker (`scheduled`, Cron
 `*/15 * * * *`, `abrufFaellig()`) stößt `fussball.yml` per `workflow_dispatch` an — Sa/So 8–22 Uhr
-Luxemburger Zeit jede Viertelstunde, Mo–Fr 20:15 UTC. GitHubs eigener Zeitplan bleibt als Reserve:
-Sa/So stündlich (:17 UTC 6–20), Mo–Fr 19:17 UTC. Doppelte Läufe schaden nicht (`concurrency`,
+Luxemburger Zeit jede Viertelstunde, Mo–Fr 20:15 UTC, **jeden Tag 23:30** (vom Nutzer: Länderspiele
+um 20:45 sind sonst erst am nächsten Morgen drin). GitHubs eigener Zeitplan bleibt als Reserve:
+Sa/So stündlich (:17 UTC 6–20), Mo–Fr 19:17 UTC, täglich 22:37 UTC. Doppelte Läufe schaden nicht (`concurrency`,
 Commit nur bei Änderung). Abwechseln GitHub/Cloudflare im Viertelstundentakt hat der Nutzer
 vorgeschlagen, abgeraten: GitHub kommt ~20 min zu spät oder gar nicht, das gäbe Lücken.
 Der Worker braucht das Secret `GITHUB_TOKEN` (Fine-grained, nur dieses Repo, Actions: Read and

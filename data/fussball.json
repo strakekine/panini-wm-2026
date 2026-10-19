@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-19T06:35:16.289Z",
+ "stand": "2026-10-19T06:46:38.011Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -22228,7 +22228,25 @@
    }
   ],
   "quelle": "FuPa",
-  "text": "Wegen mehrerer Verfehlungen gegen die Lizenzauflagen wurden Swift Hesperingen zwölf Punkte abgezogen. Zudem unterliegt der Verein noch mehrerer Transfersperren seitens der FIFA, so dass er keine neuen Spieler verpflichten darf."
+  "text": "Wegen mehrerer Verfehlungen gegen die Lizenzauflagen wurden Swift Hesperingen zwölf Punkte abgezogen. Zudem unterliegt der Verein noch mehrerer Transfersperren seitens der FIFA, so dass er keine neuen Spieler verpflichten darf.",
+  "namen": {
+   "12269": "US Mondorf-les-Bains",
+   "12279": "Etzella Ettelbruck",
+   "12287": "US Hostert",
+   "12308": "FC Wiltz 71",
+   "12319": "F91 Dudelange",
+   "12337": "U.N. Käerjeng 97",
+   "12358": "Progrès Niederkorn",
+   "12368": "US Rumelange",
+   "12378": "Victoria Rosport",
+   "12389": "FC Differdange 03",
+   "12401": "AS La Jeunesse d'Esch/Alzette",
+   "96951": "Résidence Walferdange",
+   "96972": "Atert Bissen",
+   "97095": "Racing FC Union Luxembourg",
+   "97097": "Una Strassen",
+   "97313": "Swift Hesperange"
+  }
  },
  "nati": {
   "spiele": [

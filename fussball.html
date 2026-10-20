@@ -459,7 +459,7 @@ function nachSpieltag(spiele) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "20.10.2026 c";
+const FASSUNG = "20.10.2026 d";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -658,7 +658,7 @@ function render() {
   for (const sp of v.gespielt) {
     const pokal = art(sp) ? " · " + art(sp) : "";
     const fehlt = !sp.gespielt && sp.erg !== false ? " · Ergebnis noch nicht eingetragen" : "";
-    h += spielZeile(sp, ids, `${esc(wann(sp.d, false))}${pokal}${sp.forfait ? " · Forfait" : ""}${fehlt}`);
+    h += spielZeile(sp, ids, `${esc(wann(sp.d, false))}${pokal}${sp.forfait ? (Date.parse(sp.d) > now ? " · Forfait, im Voraus gewertet" : " · Forfait") : ""}${fehlt}`);
   }
   h += `</div></section>`;
 

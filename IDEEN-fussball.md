@@ -40,3 +40,16 @@ Erst entscheiden, wenn die App zwei, drei Wochen im Betrieb ist und klar ist, ob
   Weiterleiten — damit die App überhaupt bei den Eltern ankommt.
 - **Anonymer Zähler**: der Worker zählt, wie oft die App am Tag geöffnet wird (nur eine Zahl, keine
   Geräte). Damit ließe sich die Frage „wird sie genutzt?“ vor den Mitteilungen beantworten.
+
+## Wochenvorschau: Teile für den Verein (vom Nutzer zurückgestellt, 20.10.2026)
+
+Die Wochenvorschau selbst wird gebaut; diese Zusätze erst mal nicht:
+
+- **Platzbelegung Am Ga**: je Tag mit Heimspielen eine Zeile „Am Ga: 10:00–18:00 belegt, 4 Spiele“
+  (für Buvette, Platzwart, Schiedsrichterbetreuung).
+- **„Woche teilen“**: fertiger Text für WhatsApp-Gruppen („⚽ FC Koeppchen diese Woche: Sa 10:00
+  U13 1 – Hosingen (🏠 Am Ga) …“), über `navigator.share` wie „App teilen“ (nur `text`).
+- **Kalender-Abo „Alle Heimspiele“** (steht auch oben bei den Vorschlägen).
+- **Anonymer Zähler** (oben): Handys pro Tag und Öffnungen pro Tag (Öffnen = Start oder zurück nach
+  ≥ 30 min im Hintergrund), auf Wunsch je Reiter; Speicher D1 statt KV (mehr Schreibvorgänge
+  frei); Anzeige über `WORKER_URL?zahlen`, letzte 30 Tage. Vom Nutzer gewünscht, noch nicht gebaut.

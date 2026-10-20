@@ -45,7 +45,7 @@ Nutzer: Laurent; seine Kinder spielen bei den **U13 Minimes des FC Koeppchen Wor
 (Luxemburg). App-Name „FC Koeppchen“, Logo vom Nutzer (eingebettet als PNG, 180 px, 32 Farben).
 **Vereinsfarben**: weiss, schwarz, ein bisschen Grün (Türkis aus dem Logo) — vom Nutzer so
 gewünscht, darum hell und nicht dunkel wie die anderen Apps. Zeigt ohne Suchen: nächste Spiele,
-Tabelle, eigene Ergebnisse, alle Spiele der Klasse, frühere Phasen aufklappbar. Einzeldatei,
+Tabelle, eigene Ergebnisse, alle Spiele der Klasse, frühere Phasen aufklappbar (aufklappbare Karten mit Knopf „Anzeigen ▾“/„Zuklappen ▴“, vom Nutzer, Fassung m). Einzeldatei,
 iPhone-Regeln der Pizza-App.
 
 **Mannschaften** (vom Nutzer, 18.10.2026): Reiter in dieser Reihenfolge **Seniors 1, U13 1, U13 2,

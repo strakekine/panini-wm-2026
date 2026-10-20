@@ -861,7 +861,8 @@ function wocheHtml(tage, alle, now) {
         lv ? `<span class="wlivetxt">${lv.laeuft ? "🔴 LIVE · " + esc(lv.zeit) : "Abpfiff · laut Ticker"}</span>`
           : laeuft ? `<span class="wlivetxt">läuft</span>`
           : s.gespielt ? "" : esc(zeitOffen(s) ? "Uhrzeit offen" : wann(s.d).split(" · ")[1]),
-        !s.gespielt && !laeuft && s.ort ? "📍 " + esc(s.ort) : "",
+        // Stadion, solange die FLF kein Ergebnis hat — auch während das Spiel läuft (vom Nutzer).
+        !s0.gespielt && s.ort ? "📍 " + esc(s.ort) : "",
         s.typ === "CUP" ? "Pokal" : s.typ === "FM" ? "Test" : "",
         s.forfait ? "Forfait" : "",
         s.zugleich.length ? `<span class="wzugleich">gleichzeitig mit ${esc(s.zugleich.join(", "))}</span>` : ""];

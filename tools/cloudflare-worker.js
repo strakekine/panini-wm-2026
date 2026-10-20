@@ -136,6 +136,34 @@ async function anstossen(env) {
   return r.status;
 }
 
+// ---- Anonymer Zähler (vom Nutzer, 20.10.2026) ----
+// Die App meldet sich beim Öffnen: ?zaehle=1, dazu neu=1 beim ersten Mal am Tag (merkt sich das
+// Handy selbst) und reiter=<gewählter Reiter>. Gespeichert werden nur Zahlen je Tag, keine Kennung,
+// keine Adresse. Speicher: Cloudflare D1, im Worker als Binding „DB“ (Settings → Bindings → D1).
+// Ohne Binding tut der Zähler nichts. Ansehen: ?zahlen (die letzten 30 Tage).
+const REITER_OK = /^[A-Za-zÀ-ÿ0-9 ]{1,20}$/;
+export async function zaehlen(db, tag, neu, reiter) {
+  await db.batch([
+    db.prepare("CREATE TABLE IF NOT EXISTS tage (tag TEXT PRIMARY KEY, handys INTEGER NOT NULL DEFAULT 0, oeffnungen INTEGER NOT NULL DEFAULT 0)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS reiter (tag TEXT NOT NULL, reiter TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (tag, reiter))"),
+  ]);
+  const s = [db.prepare("INSERT INTO tage (tag, handys, oeffnungen) VALUES (?1, ?2, 1) ON CONFLICT(tag) DO UPDATE SET handys = handys + ?2, oeffnungen = oeffnungen + 1").bind(tag, neu ? 1 : 0)];
+  if (reiter && REITER_OK.test(reiter))
+    s.push(db.prepare("INSERT INTO reiter (tag, reiter, n) VALUES (?1, ?2, 1) ON CONFLICT(tag, reiter) DO UPDATE SET n = n + 1").bind(tag, reiter));
+  await db.batch(s);
+}
+export async function zahlenSeite(db) {
+  const tage = (await db.prepare("SELECT tag, handys, oeffnungen FROM tage ORDER BY tag DESC LIMIT 30").all()).results || [];
+  const r = (await db.prepare("SELECT reiter, SUM(n) AS n FROM reiter WHERE tag >= ?1 GROUP BY reiter ORDER BY n DESC").bind(tage.at(-1)?.tag || "").all()).results || [];
+  const zeile = t => `<tr><td>${t.tag}</td><td>${t.handys}</td><td>${t.oeffnungen}</td></tr>`;
+  return `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FC Koeppchen · Zahlen</title><style>body{font-family:system-ui,sans-serif;margin:16px;color:#111}table{border-collapse:collapse;width:100%;max-width:420px}
+td,th{padding:6px 8px;border-bottom:1px solid #ddd;text-align:right}td:first-child,th:first-child{text-align:left}h2{margin-top:24px}</style>
+<h1>FC Koeppchen · Zahlen</h1><p>Handys = verschiedene Handys am Tag, Öffnungen = Starts (oder zurück nach ≥ 30 min).</p>
+<table><tr><th>Tag</th><th>Handys</th><th>Öffnungen</th></tr>${tage.map(zeile).join("") || "<tr><td colspan=3>noch nichts gezählt</td></tr>"}</table>
+<h2>Reiter beim Öffnen (dieselben Tage)</h2><table>${r.map(x => `<tr><td>${x.reiter}</td><td>${x.n}</td></tr>`).join("") || "<tr><td>—</td></tr>"}</table>`;
+}
+
 export default {
   async scheduled(event, env, ctx) {
     // Auf die volle Viertelstunde runden: Cloudflare startet den Takt manchmal ein paar Sekunden später.
@@ -144,9 +172,17 @@ export default {
     ctx.waitUntil(anstossen(env));
   },
 
-  async fetch(req) {
+  async fetch(req, env = {}) {
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
     const q = new URL(req.url).searchParams;
+    if (q.has("zaehle")) {
+      if (env.DB) try { await zaehlen(env.DB, tagLux(Date.now()), q.get("neu") === "1", q.get("reiter") || ""); } catch (e) { console.log("Zähler:", e.message); }
+      return new Response(null, { status: 204, headers: CORS });
+    }
+    if (q.has("zahlen")) {
+      if (!env.DB) return new Response("Zähler nicht eingerichtet (D1-Binding „DB“ fehlt).", { status: 503, headers: { "content-type": "text/plain; charset=utf-8" } });
+      return new Response(await zahlenSeite(env.DB), { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
+    }
     let slug = q.get("slug") || "";
     const anstoss = q.get("anstoss") || "";
     if (!slug && anstoss) {

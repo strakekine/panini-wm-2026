@@ -43,7 +43,7 @@ Erst entscheiden, wenn die App zwei, drei Wochen im Betrieb ist und klar ist, ob
 
 ## Wochenvorschau: Teile für den Verein (vom Nutzer zurückgestellt, 20.10.2026)
 
-Die Wochenvorschau selbst wird gebaut; diese Zusätze erst mal nicht:
+Die Wochenvorschau selbst ist gebaut („Unsere Woche“, 20.10.2026); diese Zusätze erst mal nicht:
 
 - **Platzbelegung Am Ga**: je Tag mit Heimspielen eine Zeile „Am Ga: 10:00–18:00 belegt, 4 Spiele“
   (für Buvette, Platzwart, Schiedsrichterbetreuung).
@@ -52,4 +52,4 @@ Die Wochenvorschau selbst wird gebaut; diese Zusätze erst mal nicht:
 - **Kalender-Abo „Alle Heimspiele“** (steht auch oben bei den Vorschlägen).
 - **Anonymer Zähler** (oben): Handys pro Tag und Öffnungen pro Tag (Öffnen = Start oder zurück nach
   ≥ 30 min im Hintergrund), auf Wunsch je Reiter; Speicher D1 statt KV (mehr Schreibvorgänge
-  frei); Anzeige über `WORKER_URL?zahlen`, letzte 30 Tage. Vom Nutzer gewünscht, noch nicht gebaut.
+  frei); Anzeige über `WORKER_URL?zahlen`, letzte 30 Tage. **Gebaut 20.10.2026** (siehe CLAUDE.md).

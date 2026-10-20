@@ -97,7 +97,29 @@ Gruppe genauso führt. Ergebnisse: die letzten acht. Fällt einer der Abrufe aus
 alte Stand (der FLF-Abruf der Mannschaften läuft trotzdem durch).
 **Heute-Spieltag-Kasten** (vom Nutzer, 18.10.2026): an jedem Reiter oben „Heute Spieltag! ⚽ Anstoß HH:MM“
 mit Gegner und Ort (`spieltagHeute`, Tag in Luxemburger Zeit), ab Anstoß „Spiel läuft“; weg, sobald
-die FLF ein Ergebnis hat oder 3 h nach Anstoß. Steht der LIVE-Kasten da, entfällt er. Der LIVE-Kasten kommt erst mit Stand, Tickerer oder Tor — FuPa setzt ab Anpfiff von selbst „LIVE“, auch ohne Tickerer (19.10., Fassung s). Ohne Tickerer heißt es ab Anpfiff „erscheint hier, falls bei FuPa jemand tickert“, ab 15 min danach „Bisher tickert niemand … Ergebnis kommt, sobald die FLF es einträgt“ (vom Nutzer, Fassung t). Stadion überall mit 📍 davor, nur bei kommenden Spielen (vom Nutzer, 20.10., Fassung a/b). BGL-Reiter bewusst anders als die Mannschaften: Tabelle, zuletzt gespielter Spieltag, nächste Spieltage (vom Nutzer, 20.10.: einheitlich ausprobiert, Tabelle zuerst ist besser). Datum im Spieltag-Kopf größer (`.tagdatum`, 15 px). **Ideen und Vorgemerktes stehen in `IDEEN-fussball.md`** (Mitteilungen „Spieltag komplett“/„Tabelle aktualisiert“ u. a.). Forfait mit Termin in der Zukunft (Larochette gegen Koeppchen II, 5.12. und 3.5., von der FLF schon gewertet) heißt „Forfait, im Voraus gewertet“ und bleibt oben in den Ergebnissen (vom Nutzer, Fassung d). **Karten-Link am 📍: geprüft und vom Nutzer verworfen** (20.10., „nur ein Gimmick“): FLF-`sportField` hat nur `id` und `name`; FuPa-`venue` hat lat/long und Adresse, aber nur Seniors/Nati und falsch, wenn FuPa das Spiel falsch führt. **Countdown** (vom Nutzer, 19.10.2026, alle
+die FLF ein Ergebnis hat oder 3 h nach Anstoß. Steht der LIVE-Kasten da, entfällt er. Der LIVE-Kasten kommt erst mit Stand, Tickerer oder Tor — FuPa setzt ab Anpfiff von selbst „LIVE“, auch ohne Tickerer (19.10., Fassung s). Ohne Tickerer heißt es ab Anpfiff „erscheint hier, falls bei FuPa jemand tickert“, ab 15 min danach „Bisher tickert niemand … Ergebnis kommt, sobald die FLF es einträgt“ (vom Nutzer, Fassung t). Stadion überall mit 📍 davor, nur bei kommenden Spielen (vom Nutzer, 20.10., Fassung a/b). BGL-Reiter bewusst anders als die Mannschaften: Tabelle, zuletzt gespielter Spieltag, nächste Spieltage (vom Nutzer, 20.10.: einheitlich ausprobiert, Tabelle zuerst ist besser). Datum im Spieltag-Kopf größer (`.tagdatum`, 15 px). **Ideen und Vorgemerktes stehen in `IDEEN-fussball.md`** (Mitteilungen „Spieltag komplett“/„Tabelle aktualisiert“ u. a.). Forfait mit Termin in der Zukunft (Larochette gegen Koeppchen II, 5.12. und 3.5., von der FLF schon gewertet) heißt „Forfait, im Voraus gewertet“ und bleibt oben in den Ergebnissen (vom Nutzer, Fassung d). **Unsere Woche** (vom Nutzer, 20.10.2026, Fassung f): breiter Knopf über allen Reitern
+(`.seg button.woche`, `grid-column:1/-1`, Vereinslogo links/rechts) mit „· n Spiele“, „· heute n Spiele“
+oder „· 🔴 n Spiele gerade LIVE“. Reiter `"woche"`: alle Spiele aller Koeppchen-Reiter Mo–So
+(`wocheTage`, ab So 22 Uhr die nächste Woche), je Spiel einmal (`wocheSpiele`, Pokal ohne I/II heißt
+„U13“), nach Tagen; Zeile = `spielZeile` mit Schild der Mannschaft, 🏠/✈️, Uhrzeit oder „läuft“/
+„🔴 LIVE · Minute“ (rot), 📍 Stadion bis die FLF ein Ergebnis hat; Tippen öffnet den Reiter
+(`data-gehe`). Kopf: Zeitraum, „n Spiele, davon m zu Hause“, nach dem Wochenende die Bilanz
+(`wocheBilanz`). „gleichzeitig mit …“ bei < 90 min Abstand und anderem Platz. Live: `liveKandidaten`/
+`holenWorkerAlle` fragen den Worker alle 20 s für jedes Spiel im Live-Fenster (Seniors 1–3), egal
+welcher Reiter offen ist; `WS` = Stand je FLF-Spiel. Bei vertauschtem FuPa-Spiel dreht die Woche die
+**Zahlen** (FLF-Namen bleiben), der Live-Kasten im Reiter noch die **Namen** — vom Nutzer entschieden:
+auch der Kasten bekommt die FLF-Reihenfolge, **aber erst nach dem Blick am Fr 23.10.** (67 von 68
+FuPa-Spielen der Saison haben dieselbe Reihenfolge wie die FLF, nur Beggen–Koeppchen II nicht).
+Vereins-Zusätze (Platzbelegung, Woche teilen, Heimspiel-Kalender) zurückgestellt → `IDEEN-fussball.md`.
+Reiter-Raster: Handy 4 je Reihe, ab 600 px 6 je Reihe (12 Knöpfe = 2 volle Reihen).
+**Anonymer Zähler** (vom Nutzer, 20.10.2026): App meldet `WORKER_URL?zaehle=1&neu=0|1&reiter=…` nach
+dem ersten Laden und nach ≥ 30 min im Hintergrund; `neu` merkt sich nur das Handy
+(`fussball_v1_gezaehlt` = Tag). Worker schreibt in **D1** (Binding `DB`, Tabellen `tage`, `reiter`, legt
+sie selbst an), ohne Binding still 204. Ansehen: `WORKER_URL?zahlen` (30 Tage). **Neu einfügen und D1
+einrichten nötig** (Stand 20.10.). Test mit nachgebautem D1, Gegenprobe gemacht.
+Fußzeile: „sonst morgens um 7, abends (Mo–Fr) und um 23:30“ — der Abend-Anstoß ist 20:15 UTC, also
+im Winter 21:15, im Sommer 22:15 Ortszeit.
+**Karten-Link am 📍: geprüft und vom Nutzer verworfen** (20.10., „nur ein Gimmick“): FLF-`sportField` hat nur `id` und `name`; FuPa-`venue` hat lat/long und Adresse, aber nur Seniors/Nati und falsch, wenn FuPa das Spiel falsch führt. **Countdown** (vom Nutzer, 19.10.2026, alle
 Reiter): 15 min vor Anpfiff wird daraus „Gleich geht's los! ⚽ · Anpfiff in n Minuten“
 (`minutenBisAnpfiff`, aufgerundet, nicht bei Uhrzeit 00:00); ein 10-s-Takt führt die Minuten nach
 und baut zum Beginn des Countdowns und beim Anpfiff neu (`UMSCHALT`). Bei Reitern mit Ticker steht

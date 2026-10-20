@@ -509,7 +509,7 @@ function wocheBilanz(alle) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "20.10.2026 e";
+const FASSUNG = "20.10.2026 f";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -739,7 +739,7 @@ function fuss() {
   const quelle = ST.team === "nati" ? `<a href="https://www.fupa.net/team/luxemburg-m1" target="_blank" rel="noopener">FuPa</a>`
     : `<a href="https://extranet.flf.lu/match" target="_blank" rel="noopener">extranet.flf.lu</a>`;
   return `<footer>Daten von ${quelle}, zuletzt geändert ${esc(stand)}<br>
-    Am Wochenende alle 15 Minuten aktualisiert, unter der Woche abends um 20 Uhr.
+    Am Wochenende alle 15 Minuten aktualisiert, sonst morgens um 7, abends (Mo–Fr) und um 23:30 Uhr.
     <br><button class="teilen" id="teilen">↗︎ App teilen</button>
     <div class="von">Gemacht von Laurent R. <img alt="" src="${LOGO}"></div>
     <div style="margin-top:6px;font-size:11px">Fassung ${FASSUNG}</div></footer>`;
@@ -1006,11 +1006,26 @@ setInterval(async () => {
   if (el && jetzt) el.textContent = liveZeit(jetzt, Date.now());
 }, WORKER_URL ? 20e3 : 60e3);
 
+// Anonymer Zähler (Worker, ?zahlen): beim Start und nach ≥ 30 min im Hintergrund eine Meldung.
+// „neu“ beim ersten Mal am Tag — das merkt sich nur dieses Handy, der Worker bekommt keine Kennung.
+let VERSTECKT_SEIT = 0;
+function zaehle() {
+  if (!WORKER_URL) return;
+  let neu = "0";
+  try { const t = tagLux(Date.now()); if (localStorage.getItem(KEY + "_gezaehlt") !== t) { localStorage.setItem(KEY + "_gezaehlt", t); neu = "1"; } } catch (e) {}
+  const r = typeof ST.team === "number" ? (D?.teams.find(t => t.id === ST.team)?.reiter || "") : ST.team === "woche" ? "Woche" : ST.team === "bgl" ? "BGL" : ST.team === "nati" ? "Roude Léiw" : "";
+  fetch(WORKER_URL + "?zaehle=1&neu=" + neu + "&reiter=" + encodeURIComponent(r), { mode: "no-cors", keepalive: true }).catch(() => {});
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) VERSTECKT_SEIT = Date.now();
+  else if (VERSTECKT_SEIT && Date.now() - VERSTECKT_SEIT >= 30 * 60e3) zaehle();
+});
+
 document.getElementById("logo").src = LOGO;
 load();
 try { D = JSON.parse(localStorage.getItem(KEY + "_data") || "null"); } catch (e) {}
 render();
-aktualisieren();
+aktualisieren().finally(zaehle);   // nach dem Laden, damit der Reiter bekannt ist
 </script>
 </body>
 </html>

@@ -9,14 +9,14 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { aufbereiten, spiel, reiter, ics, eigeneSpiele, CLUB, natiSpiel, natiGruppe, natiTabelle, fupaTabelleMitFlfNamen, reserveSlugs } from "../tools/fussball.mjs";
 import { liveAus, gleich as liveGleich, spielJetzt, naechstesSpiel, passendesSpiel } from "../tools/fussball-live.mjs";
-import worker, { kuerzen, passendesSpiel as wPassend, saisonVon, abrufFaellig } from "../tools/cloudflare-worker.js";
+import worker, { kuerzen, passendesSpiel as wPassend, saisonVon, abrufFaellig, zaehlen, zahlenSeite } from "../tools/cloudflare-worker.js";
 
 const hier = path.dirname(fileURLToPath(import.meta.url));
 const src = fs.readFileSync(path.join(hier, "..", "fussball.html"), "utf8");
 const i = src.indexOf("==== Logik"), j = src.indexOf("==== Oberfläche");
 if (i < 0 || j < 0) throw new Error("Abschnittsmarken Logik/Oberfläche nicht gefunden");
 const M = new Function(src.slice(src.lastIndexOf("//", i), src.lastIndexOf("//", j)) + `
-  return { natiLiveSpiel, extraReiter, bglSicht, bglTabelle, natiSicht, spieltagHeute, minutenBisAnpfiff, liveSpiel, liveBasis, kartenArt, ereignisListe, torArt, mitWorker, liveAnzeige, liveZeit, imLiveFenster, REGELN, klasseVon, zonen, ausgang, aufteilen, anzeige, sicht, nachSpieltag, roem };`)();
+  return { natiLiveSpiel, extraReiter, bglSicht, bglTabelle, natiSicht, spieltagHeute, minutenBisAnpfiff, liveSpiel, liveBasis, kartenArt, ereignisListe, torArt, mitWorker, liveAnzeige, liveZeit, imLiveFenster, REGELN, klasseVon, zonen, ausgang, aufteilen, anzeige, sicht, nachSpieltag, roem, wocheTage, wocheSpiele, wocheBilanz };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text) { n++; if (!bed) { fehler++; console.log("✗ " + text); } }
@@ -280,6 +280,20 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(mw.hs === 2 && mw.slug === Wk.slug && /fupa\.net\/match\//.test(mw.url), "Worker füllt das Gerüst samt Slug");
   ok(M.mitWorker(b0, { ...Wk, fuer: 999 }).hs === undefined, "Worker-Antwort für ein anderes Spiel zählt nicht");
   ok(M.liveAnzeige(mw, vS, t0) && M.liveAnzeige(b0, vS, t0) === null, "Kasten erst mit Worker-Daten");
+  // Unsere Woche
+  {
+    const di = Date.parse("2026-10-20T12:00:00+02:00");
+    gleich(M.wocheTage(di), ["2026-10-19","2026-10-20","2026-10-21","2026-10-22","2026-10-23","2026-10-24","2026-10-25"], "Woche Mo–So um einen Dienstag");
+    gleich(M.wocheTage(Date.parse("2026-10-25T21:59:00+02:00"))[0], "2026-10-19", "Sonntag vor 22 Uhr: noch diese Woche");
+    gleich(M.wocheTage(Date.parse("2026-10-25T22:00:00+01:00"))[0], "2026-10-26", "Sonntag ab 22 Uhr: nächste Woche (auch über die Zeitumstellung)");
+    const w = M.wocheSpiele(D, M.wocheTage(di), di);
+    ok(w.filter(sp => sp.d.startsWith("2026-10-24")).length === 1, "Pokalspiel nur einmal, obwohl bei U13 1 und U13 2");
+    ok(w.find(sp => sp.d.startsWith("2026-10-24"))?.reiter === "U13", "Pokal ohne I/II heißt „U13“");
+    ok(!w.some(sp => sp.d.startsWith("2026-10-17")), "Spiel der Vorwoche nicht dabei");
+    const bil = M.wocheBilanz([{ gespielt: true, heim: true, hs: 2, as: 1 }, { gespielt: true, heim: false, hs: 2, as: 1 },
+      { gespielt: true, heim: true, hs: 1, as: 1 }, { gespielt: true, heim: true, hs: 3, as: 0, erg: false }]);
+    gleich(bil, { s: 1, u: 1, n: 1 }, "Bilanz: Heim/Gast richtig, ohne veröffentlichte Ergebnisse (U9/U11) nicht gezählt");
+  }
   // Countdown 15 min vor Anpfiff
   {
     const sp = { d: "2026-10-19T20:00:00+02:00" }, um = hm => Date.parse("2026-10-19T" + hm + ":00+02:00");
@@ -412,5 +426,32 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
      && aufrufe[0][1].headers.authorization === "Bearer x", "mit Token ein POST an GitHub, nachts keiner");
 }
 
+
+// Anonymer Zähler im Worker, mit nachgebautem D1 (nur die drei Anweisungen, die er braucht).
+{
+  const tage = new Map(), rei = new Map();
+  const st = sql => ({ sql, a: [], bind(...a) { this.a = a; return this; },
+    async run() {
+      if (sql.startsWith("INSERT INTO tage")) { const [t, h] = this.a, x = tage.get(t) || { tag: t, handys: 0, oeffnungen: 0 }; x.handys += h; x.oeffnungen++; tage.set(t, x); }
+      if (sql.startsWith("INSERT INTO reiter")) { const k = this.a.join("|"); rei.set(k, (rei.get(k) || 0) + 1); }
+    },
+    async all() {
+      if (sql.startsWith("SELECT tag")) return { results: [...tage.values()].sort((a, b) => b.tag.localeCompare(a.tag)) };
+      const m = new Map(); for (const [k, n] of rei) { const r = k.split("|")[1]; m.set(r, (m.get(r) || 0) + n); }
+      return { results: [...m].map(([reiter, n]) => ({ reiter, n })) };
+    } });
+  const db = { prepare: st, batch: async l => { for (const x of l) await x.run(); } };
+  await zaehlen(db, "2026-10-24", true, "U13 1");
+  await zaehlen(db, "2026-10-24", false, "U13 1");
+  await zaehlen(db, "2026-10-24", true, "Seniors 1");
+  await zaehlen(db, "2026-10-24", false, "<script>");
+  gleich(tage.get("2026-10-24"), { tag: "2026-10-24", handys: 2, oeffnungen: 4 }, "Zähler: 2 Handys, 4 Öffnungen");
+  ok(rei.get("2026-10-24|U13 1") === 2 && rei.size === 2, "Zähler: Reiter gezählt, Unsinn verworfen");
+  const seite = await zahlenSeite(db);
+  ok(seite.includes("<td>2026-10-24</td><td>2</td><td>4</td>") && seite.includes("U13 1"), "Zahlen-Seite zeigt Tag und Reiter");
+  const ohne = await worker.fetch(new Request("https://w/?zaehle=1&neu=1"), {});
+  ok(ohne.status === 204, "Zähler ohne D1: still 204");
+  ok((await worker.fetch(new Request("https://w/?zahlen"), {})).status === 503, "Zahlen ohne D1: 503 mit Hinweis");
+}
 console.log(fehler ? `${fehler} von ${n} Prüfungen fehlgeschlagen` : `alle ${n} Prüfungen grün`);
 process.exit(fehler ? 1 : 0);

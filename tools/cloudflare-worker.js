@@ -138,29 +138,50 @@ async function anstossen(env) {
 
 // ---- Anonymer Zähler (vom Nutzer, 20.10.2026) ----
 // Die App meldet sich beim Öffnen: ?zaehle=1, dazu neu=1 beim ersten Mal am Tag (merkt sich das
-// Handy selbst) und reiter=<gewählter Reiter>. Gespeichert werden nur Zahlen je Tag, keine Kennung,
-// keine Adresse. Speicher: Cloudflare D1, im Worker als Binding „DB“ (Settings → Bindings → D1).
+// Handy selbst), reiter=<gewählter Reiter> und art=app|web (Home-Bildschirm oder Browser — die
+// beiden haben getrennte Speicher, ein Handy mit beiden zählt also zweimal). Die Stunde nimmt der
+// Worker selbst (Luxemburger Zeit). Gespeichert werden nur Zahlen je Tag, keine Kennung, keine
+// Adresse. Speicher: Cloudflare D1, im Worker als Binding „DB“ (Settings → Bindings → D1).
 // Ohne Binding tut der Zähler nichts. Ansehen: ?zahlen (die letzten 30 Tage).
 const REITER_OK = /^[A-Za-zÀ-ÿ0-9 ]{1,20}$/;
-export async function zaehlen(db, tag, neu, reiter) {
+const ARTEN = ["app", "web"];
+export const stundeLux = ms => +new Date(ms).toLocaleString("en-GB", { timeZone: "Europe/Luxembourg", hour: "2-digit", hourCycle: "h23" });
+export async function zaehlen(db, tag, neu, reiter, art = "", stunde = null) {
   await db.batch([
     db.prepare("CREATE TABLE IF NOT EXISTS tage (tag TEXT PRIMARY KEY, handys INTEGER NOT NULL DEFAULT 0, oeffnungen INTEGER NOT NULL DEFAULT 0)"),
     db.prepare("CREATE TABLE IF NOT EXISTS reiter (tag TEXT NOT NULL, reiter TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (tag, reiter))"),
+    db.prepare("CREATE TABLE IF NOT EXISTS arten (tag TEXT NOT NULL, art TEXT NOT NULL, handys INTEGER NOT NULL DEFAULT 0, oeffnungen INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (tag, art))"),
+    db.prepare("CREATE TABLE IF NOT EXISTS stunden (tag TEXT NOT NULL, stunde INTEGER NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (tag, stunde))"),
   ]);
   const s = [db.prepare("INSERT INTO tage (tag, handys, oeffnungen) VALUES (?1, ?2, 1) ON CONFLICT(tag) DO UPDATE SET handys = handys + ?2, oeffnungen = oeffnungen + 1").bind(tag, neu ? 1 : 0)];
   if (reiter && REITER_OK.test(reiter))
     s.push(db.prepare("INSERT INTO reiter (tag, reiter, n) VALUES (?1, ?2, 1) ON CONFLICT(tag, reiter) DO UPDATE SET n = n + 1").bind(tag, reiter));
+  if (ARTEN.includes(art))
+    s.push(db.prepare("INSERT INTO arten (tag, art, handys, oeffnungen) VALUES (?1, ?2, ?3, 1) ON CONFLICT(tag, art) DO UPDATE SET handys = handys + ?3, oeffnungen = oeffnungen + 1").bind(tag, art, neu ? 1 : 0));
+  if (Number.isInteger(stunde) && stunde >= 0 && stunde < 24)
+    s.push(db.prepare("INSERT INTO stunden (tag, stunde, n) VALUES (?1, ?2, 1) ON CONFLICT(tag, stunde) DO UPDATE SET n = n + 1").bind(tag, stunde));
   await db.batch(s);
 }
 export async function zahlenSeite(db) {
   const tage = (await db.prepare("SELECT tag, handys, oeffnungen FROM tage ORDER BY tag DESC LIMIT 30").all()).results || [];
-  const r = (await db.prepare("SELECT reiter, SUM(n) AS n FROM reiter WHERE tag >= ?1 GROUP BY reiter ORDER BY n DESC").bind(tage.at(-1)?.tag || "").all()).results || [];
-  const zeile = t => `<tr><td>${t.tag}</td><td>${t.handys}</td><td>${t.oeffnungen}</td></tr>`;
+  const ab = tage.at(-1)?.tag || "";
+  // Ältere Datenbanken haben die Tabellen arten/stunden erst nach dem ersten neuen Zählen.
+  const alle = async (sql) => { try { return (await db.prepare(sql).bind(ab).all()).results || []; } catch (e) { return []; } };
+  const r = await alle("SELECT reiter, SUM(n) AS n FROM reiter WHERE tag >= ?1 GROUP BY reiter ORDER BY n DESC");
+  const a = await alle("SELECT tag, art, handys, oeffnungen FROM arten WHERE tag >= ?1");
+  const h = await alle("SELECT stunde, SUM(n) AS n FROM stunden WHERE tag >= ?1 GROUP BY stunde ORDER BY stunde");
+  const art = (tag, x) => { const z = a.find(y => y.tag === tag && y.art === x); return z ? `${z.handys} / ${z.oeffnungen}` : "–"; };
+  const zeile = t => `<tr><td>${t.tag}</td><td>${t.handys}</td><td>${t.oeffnungen}</td><td>${art(t.tag, "app")}</td><td>${art(t.tag, "web")}</td></tr>`;
+  const max = Math.max(1, ...h.map(x => x.n));
+  const stunde = x => `<tr><td>${String(x.stunde).padStart(2, "0")} Uhr</td><td>${x.n}</td><td class="bar"><span style="width:${Math.round(100 * x.n / max)}%"></span></td></tr>`;
   return `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FC Koeppchen · Zahlen</title><style>body{font-family:system-ui,sans-serif;margin:16px;color:#111}table{border-collapse:collapse;width:100%;max-width:420px}
-td,th{padding:6px 8px;border-bottom:1px solid #ddd;text-align:right}td:first-child,th:first-child{text-align:left}h2{margin-top:24px}</style>
-<h1>FC Koeppchen · Zahlen</h1><p>Handys = verschiedene Handys am Tag, Öffnungen = Starts (oder zurück nach ≥ 30 min).</p>
-<table><tr><th>Tag</th><th>Handys</th><th>Öffnungen</th></tr>${tage.map(zeile).join("") || "<tr><td colspan=3>noch nichts gezählt</td></tr>"}</table>
+<title>FC Koeppchen · Zahlen</title><style>body{font-family:system-ui,sans-serif;margin:16px;color:#111}table{border-collapse:collapse;width:100%;max-width:520px}
+td,th{padding:6px 8px;border-bottom:1px solid #ddd;text-align:right}td:first-child,th:first-child{text-align:left}h2{margin-top:24px}
+td.bar{width:50%;text-align:left}td.bar span{display:inline-block;height:10px;background:#1aa39a;border-radius:2px}</style>
+<h1>FC Koeppchen · Zahlen</h1><p>Handys = verschiedene Handys am Tag, Öffnungen = Starts (oder zurück nach ≥ 30 min).
+App = vom Home-Bildschirm, Browser = in Safari o. Ä., je „Handys / Öffnungen“. Wer beides benutzt, zählt bei den Handys zweimal.</p>
+<table><tr><th>Tag</th><th>Handys</th><th>Öffnungen</th><th>App</th><th>Browser</th></tr>${tage.map(zeile).join("") || "<tr><td colspan=5>noch nichts gezählt</td></tr>"}</table>
+<h2>Uhrzeit der Öffnungen (dieselben Tage)</h2><table>${h.map(stunde).join("") || "<tr><td>—</td></tr>"}</table>
 <h2>Reiter beim Öffnen (dieselben Tage)</h2><table>${r.map(x => `<tr><td>${x.reiter}</td><td>${x.n}</td></tr>`).join("") || "<tr><td>—</td></tr>"}</table>`;
 }
 
@@ -176,7 +197,7 @@ export default {
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
     const q = new URL(req.url).searchParams;
     if (q.has("zaehle")) {
-      if (env.DB) try { await zaehlen(env.DB, tagLux(Date.now()), q.get("neu") === "1", q.get("reiter") || ""); } catch (e) { console.log("Zähler:", e.message); }
+      if (env.DB) try { { const t = Date.now(); await zaehlen(env.DB, tagLux(t), q.get("neu") === "1", q.get("reiter") || "", q.get("art") || "", stundeLux(t)); } } catch (e) { console.log("Zähler:", e.message); }
       return new Response(null, { status: 204, headers: CORS });
     }
     if (q.has("zahlen")) {

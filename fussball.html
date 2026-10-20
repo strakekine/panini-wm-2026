@@ -509,7 +509,7 @@ function wocheBilanz(alle) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "20.10.2026 g";
+const FASSUNG = "20.10.2026 h";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -1014,7 +1014,8 @@ function zaehle() {
   let neu = "0";
   try { const t = tagLux(Date.now()); if (localStorage.getItem(KEY + "_gezaehlt") !== t) { localStorage.setItem(KEY + "_gezaehlt", t); neu = "1"; } } catch (e) {}
   const r = typeof ST.team === "number" ? (D?.teams.find(t => t.id === ST.team)?.reiter || "") : ST.team === "woche" ? "Woche" : ST.team === "bgl" ? "BGL" : ST.team === "nati" ? "Roude Léiw" : "";
-  fetch(WORKER_URL + "?zaehle=1&neu=" + neu + "&reiter=" + encodeURIComponent(r), { mode: "no-cors", keepalive: true }).catch(() => {});
+  const app = navigator.standalone === true || matchMedia("(display-mode: standalone)").matches;
+  fetch(WORKER_URL + "?zaehle=1&neu=" + neu + "&art=" + (app ? "app" : "web") + "&reiter=" + encodeURIComponent(r), { mode: "no-cors", keepalive: true }).catch(() => {});
 }
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) VERSTECKT_SEIT = Date.now();

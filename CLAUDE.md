@@ -117,7 +117,7 @@ dem ersten Laden und nach ≥ 30 min im Hintergrund; `neu` merkt sich nur das Ha
 (`fussball_v1_gezaehlt` = Tag). Worker schreibt in **D1** (Binding `DB`, Tabellen `tage`, `reiter`, legt
 sie selbst an), ohne Binding still 204. Ansehen: `WORKER_URL?zahlen` (30 Tage). **Eingerichtet vom Nutzer am 20.10.2026** (D1 `koeppchen-zahlen`, Binding `DB`, Code neu
 eingefügt, damit auch 22:15 Ortszeit); geprüft: zaehle 204, zahlen 200, fremder Slug 400. Ein Testaufruf von
-Claude zählt am 20.10. als eine Öffnung. Test mit nachgebautem D1, Gegenprobe gemacht.
+Claude zählt am 20.10. als eine Öffnung. **Seit Fassung h** (vom Nutzer): `art=app|web` (Home-Bildschirm/Browser, je Handys / Öffnungen; Safari und Home-Bildschirm haben getrennte Speicher, wer beides nutzt, zählt doppelt) und die Stunde in Ortszeit (`stundeLux`, nimmt der Worker selbst), Tabellen `arten`, `stunden`. **Worker neu einfügen nötig** (Stand 20.10.). Test mit nachgebautem D1, Gegenprobe gemacht.
 Fußzeile nennt die Abrufzeiten genau (vom Nutzer): täglich 7:00 und 23:30, Mo–Fr 22:15, Sa/So 8–22
 alle 15 min. Dafür rechnet der Worker den Wochentags-Abend seit 20.10. in Ortszeit (vorher 20:15 UTC).
 **Karten-Link am 📍: geprüft und vom Nutzer verworfen** (20.10., „nur ein Gimmick“): FLF-`sportField` hat nur `id` und `name`; FuPa-`venue` hat lat/long und Adresse, aber nur Seniors/Nati und falsch, wenn FuPa das Spiel falsch führt. **Countdown** (vom Nutzer, 19.10.2026, alle

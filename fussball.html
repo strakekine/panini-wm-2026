@@ -36,6 +36,12 @@
   .seg button{background:#222;white-space:nowrap;color:#b9bfbc;border:0;padding:9px 10px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:.3px}
   .seg button img{height:28px;display:block;margin:-6px auto}
   .seg button.on{background:#fff;color:#111}
+  .seg button.woche{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:10px;text-transform:uppercase;letter-spacing:.6px}
+  .seg button.woche img{height:22px;margin:-4px 0;display:inline-block}
+  .wzus{font-size:15px;font-weight:600;text-align:center}
+  .wzeile{cursor:pointer}
+  .pill.wteam{margin-left:0;background:#111}
+  .wzugleich{color:#b45309;font-weight:600}
   main{max-width:720px;margin:0 auto;padding:4px 12px 60px}
 
   .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin:12px 0;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.04)}
@@ -455,11 +461,52 @@ function nachSpieltag(spiele) {
   return [...m.entries()].sort((a, b) => a[0] - b[0]);
 }
 
+// ---- Unsere Woche (vom Nutzer, 20.10.2026) ----
+// Alle Spiele aller Koeppchen-Reiter Mo–So (Luxemburger Zeit). Ab Sonntag 22 Uhr die nächste Woche.
+// Ein Spiel steht einmal da, auch wenn es bei zwei Reitern hängt (Pokal U13 ohne I/II → „U13“).
+const LUX_TAG = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+function wocheTage(now) {
+  const wt = new Date(now).toLocaleDateString("en-GB", { timeZone: "Europe/Luxembourg", weekday: "short" });
+  const i = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(wt);
+  const h = +new Date(now).toLocaleTimeString("en-GB", { timeZone: "Europe/Luxembourg", hour: "2-digit", hourCycle: "h23" });
+  const start = now - i * 864e5 + (i === 6 && h >= 22 ? 7 * 864e5 : 0);
+  return [0, 1, 2, 3, 4, 5, 6].map(k => tagLux(start + k * 864e5));
+}
+function wocheSpiele(D, tage, now) {
+  const { tabs } = aufteilen(D);
+  const zuTeam = new Map();
+  for (const t of D.teams) for (const id of (t.ids || [t.id])) zuTeam.set(id, t);
+  const seen = new Map();
+  for (const t of tabs) {
+    const v = sicht(D, t.id, now);
+    for (const sp of [...v.kommend, ...v.gespielt]) {
+      if (seen.has(sp.id) || !tage.includes(tagLux(Date.parse(sp.d)))) continue;
+      const wt = zuTeam.get(sp.wir);
+      seen.set(sp.id, { ...sp, reiter: wt?.reiter || wt?.kat || t.reiter, tab: wt?.reiter ? wt.id : t.id, heim: sp.h.id === sp.wir });
+    }
+  }
+  const alle = [...seen.values()].sort((a, b) => a.d.localeCompare(b.d) || a.reiter.localeCompare(b.reiter));
+  // Gleichzeitig: zwei eigene Spiele am selben Tag, Anstoß < 90 min auseinander, anderer Platz.
+  for (const a of alle) a.zugleich = alle.filter(b => b !== a && tagLux(Date.parse(b.d)) === tagLux(Date.parse(a.d))
+    && !zeitOffen(a) && !zeitOffen(b) && Math.abs(Date.parse(a.d) - Date.parse(b.d)) < 90 * 60e3 && a.ort !== b.ort).map(b => b.reiter);
+  return alle;
+}
+const zeitOffen = sp => new Date(sp.d).toLocaleTimeString("de-DE", { timeZone: "Europe/Luxembourg", hour: "2-digit", minute: "2-digit" }) === "00:00";
+function wocheBilanz(alle) {
+  const b = { s: 0, u: 0, n: 0 };
+  for (const sp of alle) {
+    if (!sp.gespielt || sp.hs == null || sp.erg === false) continue;
+    const f = sp.heim ? sp.hs - sp.as : sp.as - sp.hs;
+    b[f > 0 ? "s" : f < 0 ? "n" : "u"]++;
+  }
+  return b;
+}
+
 // ==== Oberfläche ====
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "20.10.2026 d";
+const FASSUNG = "20.10.2026 e";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -589,13 +636,22 @@ function render() {
   const { tabs } = aufteilen(D);
   // Seniors stehen vorn, geöffnet wird beim ersten Mal aber die U13 (die der Kinder).
   const extra = extraReiter(D);
-  if (!tabs.some(t => t.id === ST.team) && !extra.some(t => t.id === ST.team))
+  if (!tabs.some(t => t.id === ST.team) && !extra.some(t => t.id === ST.team) && ST.team !== "woche")
     ST.team = (tabs.find(t => t.kat === "U13") || tabs[0])?.id ?? null;
-  document.getElementById("seg").innerHTML = [...tabs, ...extra].map(t =>
+  const wTage = wocheTage(Date.now()), wAlle = wocheSpiele(D, wTage, Date.now());
+  const heuteN = wAlle.filter(sp => tagLux(Date.parse(sp.d)) === tagLux(Date.now())).length;
+  const wZahl = heuteN ? `heute ${heuteN} ${heuteN === 1 ? "Spiel" : "Spiele"}` : `${wAlle.length} ${wAlle.length === 1 ? "Spiel" : "Spiele"}`;
+  document.getElementById("seg").innerHTML = `<button data-t="woche" class="woche${ST.team === "woche" ? " on" : ""}"><img alt="" src="${LOGO}">Unsere Woche · ${wZahl}<img alt="" src="${LOGO}"></button>` + [...tabs, ...extra].map(t =>
     `<button data-t="${t.id}" class="${t.id === ST.team ? "on" : ""}">${t.bild ? `<img alt="${esc(t.reiter)}" src="${FLF_LOGO}">` : esc(t.reiter || t.n)}</button>`).join("");
   if (ST.team == null) { main.innerHTML = `<div class="note">Keine Spiele gefunden.</div>`; return; }
 
   const now = Date.now();
+  if (ST.team === "woche") {
+    LIVE_SP = null; LIVE_POLL = false;
+    document.getElementById("sub").textContent = "Unsere Woche · " + D.saison.n.replace("Saison ", "");
+    main.innerHTML = wocheHtml(wTage, wAlle, now) + fuss();
+    return;
+  }
   if (ST.team === "bgl" || ST.team === "nati") {
     LIVE_SP = null; LIVE_POLL = false;   // natiHtml setzt beide, wenn ein Länderspiel läuft
     main.innerHTML = (ST.team === "bgl" ? bglHtml(now) : natiHtml(now)) + fuss();
@@ -736,6 +792,43 @@ function liveHtml(lv, wir, zusatz) {
     </div></section>`;
 }
 
+function wocheHtml(tage, alle, now) {
+  const kurz = d => { const x = new Date(d + "T12:00:00"); return x.getDate() + "." + (x.getMonth() + 1) + "."; };
+  const heim = alle.filter(sp => sp.heim).length;
+  const vorbei = alle.length && alle.every(sp => sp.gespielt || Date.parse(sp.d) < now - 3 * 3600e3);
+  const b = wocheBilanz(alle);
+  const zus = !alle.length ? "Diese Woche keine Spiele."
+    : vorbei && b.s + b.u + b.n ? `${b.s} ${b.s === 1 ? "Sieg" : "Siege"}, ${b.u} Remis, ${b.n} ${b.n === 1 ? "Niederlage" : "Niederlagen"}`
+    : `${alle.length} ${alle.length === 1 ? "Spiel" : "Spiele"}, davon ${heim} zu Hause`;
+  let h = `<section class="card"><div class="chead"><h2>Unsere Woche</h2><div class="hint tagdatum">${kurz(tage[0])} – ${kurz(tage[6])}</div></div>
+    <div class="cbody"><div class="wzus">${esc(zus)}</div></div></section>`;
+  if (!alle.length) {
+    const naechstes = aufteilen(D).tabs.flatMap(t => sicht(D, t.id, now).kommend.map(sp => ({ ...sp, reiter: t.reiter })))
+      .sort((a, b) => a.d.localeCompare(b.d))[0];
+    if (naechstes) h += `<div class="note">Nächstes Spiel: ${esc(wann(naechstes.d))} · ${esc(naechstes.reiter)} gegen ${esc(anzeige(naechstes.heim === false ? naechstes.h.n : naechstes.a.n))}</div>`;
+    return h;
+  }
+  for (const tag of tage) {
+    const sp = alle.filter(s => tagLux(Date.parse(s.d)) === tag);
+    if (!sp.length) continue;
+    const istHeute = tag === tagLux(now);
+    const titel = new Date(tag + "T12:00:00").toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "numeric" });
+    h += `<section class="card${istHeute ? " heute" : ""}"><div class="chead"><h2>${istHeute ? "Heute · " : ""}${esc(titel)}</h2></div><div class="cbody">`;
+    for (const s of [...sp.filter(x => !zeitOffen(x)), ...sp.filter(zeitOffen)]) {
+      const ids = new Set([s.wir]);
+      const teile = [`<span class="pill wteam">${esc(s.reiter)}</span>`, s.heim ? "🏠" : "✈️",
+        s.gespielt ? "" : esc(zeitOffen(s) ? "Uhrzeit offen" : wann(s.d).split(" · ")[1]),
+        !s.gespielt && s.ort ? "📍 " + esc(s.ort) : "",
+        s.typ === "CUP" ? "Pokal" : s.typ === "FM" ? "Test" : "",
+        s.forfait ? "Forfait" : "",
+        s.zugleich.length ? `<span class="wzugleich">gleichzeitig mit ${esc(s.zugleich.join(", "))}</span>` : ""];
+      h += `<div class="wzeile" data-gehe="${s.tab}">${spielZeile(s, ids, teile.filter(Boolean).join(" · "))}</div>`;
+    }
+    h += `</div></section>`;
+  }
+  return h;
+}
+
 function bglHtml(now) {
   const b = D.bgl, v = bglSicht(b, now);
   document.getElementById("sub").textContent = "BGL League · " + D.saison.n.replace("Saison ", "");
@@ -819,6 +912,8 @@ async function aktualisieren() {
 }
 
 document.addEventListener("click", e => {
+  const z = e.target.closest("[data-gehe]");
+  if (z) { ST.team = +z.dataset.gehe; persist(); render(); window.scrollTo(0, 0); return; }
   const b = e.target.closest("button");
   if (!b) return;
   if (b.dataset.t) {

@@ -142,6 +142,8 @@ async function anstossen(env) {
 // beiden haben getrennte Speicher, ein Handy mit beiden zählt also zweimal). Die Stunde nimmt der
 // Worker selbst (Luxemburger Zeit). Gespeichert werden nur Zahlen je Tag, keine Kennung, keine
 // Adresse. Speicher: Cloudflare D1, im Worker als Binding „DB“ (Settings → Bindings → D1).
+// Dazu ?angesehen=1&reiter=… bei jedem Umschalten auf einen anderen Reiter; der Reiter beim
+// Öffnen zählt dort mit, die Liste zeigt also alles, was angeschaut wurde.
 // Ohne Binding tut der Zähler nichts. Ansehen: ?zahlen (die letzten 30 Tage).
 const REITER_OK = /^[A-Za-zÀ-ÿ0-9 ]{1,20}$/;
 const ARTEN = ["app", "web"];
@@ -152,15 +154,23 @@ export async function zaehlen(db, tag, neu, reiter, art = "", stunde = null) {
     db.prepare("CREATE TABLE IF NOT EXISTS reiter (tag TEXT NOT NULL, reiter TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (tag, reiter))"),
     db.prepare("CREATE TABLE IF NOT EXISTS arten (tag TEXT NOT NULL, art TEXT NOT NULL, handys INTEGER NOT NULL DEFAULT 0, oeffnungen INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (tag, art))"),
     db.prepare("CREATE TABLE IF NOT EXISTS stunden (tag TEXT NOT NULL, stunde INTEGER NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (tag, stunde))"),
+    db.prepare(TAB_ANGESEHEN),
   ]);
   const s = [db.prepare("INSERT INTO tage (tag, handys, oeffnungen) VALUES (?1, ?2, 1) ON CONFLICT(tag) DO UPDATE SET handys = handys + ?2, oeffnungen = oeffnungen + 1").bind(tag, neu ? 1 : 0)];
   if (reiter && REITER_OK.test(reiter))
-    s.push(db.prepare("INSERT INTO reiter (tag, reiter, n) VALUES (?1, ?2, 1) ON CONFLICT(tag, reiter) DO UPDATE SET n = n + 1").bind(tag, reiter));
+    s.push(db.prepare("INSERT INTO reiter (tag, reiter, n) VALUES (?1, ?2, 1) ON CONFLICT(tag, reiter) DO UPDATE SET n = n + 1").bind(tag, reiter),
+           db.prepare(PLUS_ANGESEHEN).bind(tag, reiter));
   if (ARTEN.includes(art))
     s.push(db.prepare("INSERT INTO arten (tag, art, handys, oeffnungen) VALUES (?1, ?2, ?3, 1) ON CONFLICT(tag, art) DO UPDATE SET handys = handys + ?3, oeffnungen = oeffnungen + 1").bind(tag, art, neu ? 1 : 0));
   if (Number.isInteger(stunde) && stunde >= 0 && stunde < 24)
     s.push(db.prepare("INSERT INTO stunden (tag, stunde, n) VALUES (?1, ?2, 1) ON CONFLICT(tag, stunde) DO UPDATE SET n = n + 1").bind(tag, stunde));
   await db.batch(s);
+}
+const TAB_ANGESEHEN = "CREATE TABLE IF NOT EXISTS angesehen (tag TEXT NOT NULL, reiter TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (tag, reiter))";
+const PLUS_ANGESEHEN = "INSERT INTO angesehen (tag, reiter, n) VALUES (?1, ?2, 1) ON CONFLICT(tag, reiter) DO UPDATE SET n = n + 1";
+export async function ansehen(db, tag, reiter) {
+  if (!reiter || !REITER_OK.test(reiter)) return;
+  await db.batch([db.prepare(TAB_ANGESEHEN), db.prepare(PLUS_ANGESEHEN).bind(tag, reiter)]);
 }
 export async function zahlenSeite(db) {
   const tage = (await db.prepare("SELECT tag, handys, oeffnungen FROM tage ORDER BY tag DESC LIMIT 30").all()).results || [];
@@ -169,6 +179,7 @@ export async function zahlenSeite(db) {
   const alle = async (sql) => { try { return (await db.prepare(sql).bind(ab).all()).results || []; } catch (e) { return []; } };
   const r = await alle("SELECT reiter, SUM(n) AS n FROM reiter WHERE tag >= ?1 GROUP BY reiter ORDER BY n DESC");
   const a = await alle("SELECT tag, art, handys, oeffnungen FROM arten WHERE tag >= ?1");
+  const g = await alle("SELECT reiter, SUM(n) AS n FROM angesehen WHERE tag >= ?1 GROUP BY reiter ORDER BY n DESC");
   const h = await alle("SELECT stunde, SUM(n) AS n FROM stunden WHERE tag >= ?1 GROUP BY stunde ORDER BY stunde");
   const art = (tag, x) => { const z = a.find(y => y.tag === tag && y.art === x); return z ? `${z.handys} / ${z.oeffnungen}` : "–"; };
   const zeile = t => `<tr><td>${t.tag}</td><td>${t.handys}</td><td>${t.oeffnungen}</td><td>${art(t.tag, "app")}</td><td>${art(t.tag, "web")}</td></tr>`;
@@ -182,6 +193,7 @@ td.bar{width:50%;text-align:left}td.bar span{display:inline-block;height:10px;ba
 App = vom Home-Bildschirm, Browser = in Safari o. Ä., je „Handys / Öffnungen“. Wer beides benutzt, zählt bei den Handys zweimal.</p>
 <table><tr><th>Tag</th><th>Handys</th><th>Öffnungen</th><th>App</th><th>Browser</th></tr>${tage.map(zeile).join("") || "<tr><td colspan=5>noch nichts gezählt</td></tr>"}</table>
 <h2>Uhrzeit der Öffnungen (dieselben Tage)</h2><table>${h.map(stunde).join("") || "<tr><td>—</td></tr>"}</table>
+<h2>Reiter angesehen (Öffnen und Umschalten, dieselben Tage)</h2><table>${g.map(x => `<tr><td>${x.reiter}</td><td>${x.n}</td></tr>`).join("") || "<tr><td>—</td></tr>"}</table>
 <h2>Reiter beim Öffnen (dieselben Tage)</h2><table>${r.map(x => `<tr><td>${x.reiter}</td><td>${x.n}</td></tr>`).join("") || "<tr><td>—</td></tr>"}</table>`;
 }
 
@@ -198,6 +210,10 @@ export default {
     const q = new URL(req.url).searchParams;
     if (q.has("zaehle")) {
       if (env.DB) try { { const t = Date.now(); await zaehlen(env.DB, tagLux(t), q.get("neu") === "1", q.get("reiter") || "", q.get("art") || "", stundeLux(t)); } } catch (e) { console.log("Zähler:", e.message); }
+      return new Response(null, { status: 204, headers: CORS });
+    }
+    if (q.has("angesehen")) {
+      if (env.DB) try { await ansehen(env.DB, tagLux(Date.now()), q.get("reiter") || ""); } catch (e) { console.log("Zähler:", e.message); }
       return new Response(null, { status: 204, headers: CORS });
     }
     if (q.has("zahlen")) {

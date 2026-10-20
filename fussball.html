@@ -509,7 +509,7 @@ function wocheBilanz(alle) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "20.10.2026 h";
+const FASSUNG = "20.10.2026 i";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -958,11 +958,11 @@ async function aktualisieren() {
 
 document.addEventListener("click", e => {
   const z = e.target.closest("[data-gehe]");
-  if (z) { ST.team = +z.dataset.gehe; persist(); render(); window.scrollTo(0, 0); return; }
+  if (z) { ST.team = +z.dataset.gehe; persist(); render(); window.scrollTo(0, 0); angesehen(); return; }
   const b = e.target.closest("button");
   if (!b) return;
   if (b.dataset.t) {
-    ST.team = /^\d+$/.test(b.dataset.t) ? +b.dataset.t : b.dataset.t; persist(); render(); window.scrollTo(0, 0);
+    ST.team = /^\d+$/.test(b.dataset.t) ? +b.dataset.t : b.dataset.t; persist(); render(); window.scrollTo(0, 0); angesehen();
     // Live-Reiter gewählt: Worker sofort fragen, nicht erst beim nächsten 20-s-Takt.
     if (LIVE_SP) holenWorker().then(w => { if (w) { W = w; render(); } });
   }
@@ -1008,12 +1008,22 @@ setInterval(async () => {
 
 // Anonymer Zähler (Worker, ?zahlen): beim Start und nach ≥ 30 min im Hintergrund eine Meldung.
 // „neu“ beim ersten Mal am Tag — das merkt sich nur dieses Handy, der Worker bekommt keine Kennung.
-let VERSTECKT_SEIT = 0;
+let VERSTECKT_SEIT = 0, ZULETZT_GESEHEN = "";
+const reiterName = () => typeof ST.team === "number" ? (D?.teams.find(t => t.id === ST.team)?.reiter || "") : ST.team === "woche" ? "Woche" : ST.team === "bgl" ? "BGL" : ST.team === "nati" ? "Roude Léiw" : "";
+// Umschalten auf einen anderen Reiter (Reiter-Knopf oder Tippen auf ein Spiel in der Woche).
+// Derselbe Reiter zweimal hintereinander zählt einmal.
+function angesehen() {
+  const r = reiterName();
+  if (!WORKER_URL || !r || r === ZULETZT_GESEHEN) return;
+  ZULETZT_GESEHEN = r;
+  fetch(WORKER_URL + "?angesehen=1&reiter=" + encodeURIComponent(r), { mode: "no-cors", keepalive: true }).catch(() => {});
+}
 function zaehle() {
   if (!WORKER_URL) return;
   let neu = "0";
   try { const t = tagLux(Date.now()); if (localStorage.getItem(KEY + "_gezaehlt") !== t) { localStorage.setItem(KEY + "_gezaehlt", t); neu = "1"; } } catch (e) {}
-  const r = typeof ST.team === "number" ? (D?.teams.find(t => t.id === ST.team)?.reiter || "") : ST.team === "woche" ? "Woche" : ST.team === "bgl" ? "BGL" : ST.team === "nati" ? "Roude Léiw" : "";
+  const r = reiterName();
+  ZULETZT_GESEHEN = r;
   const app = navigator.standalone === true || matchMedia("(display-mode: standalone)").matches;
   fetch(WORKER_URL + "?zaehle=1&neu=" + neu + "&art=" + (app ? "app" : "web") + "&reiter=" + encodeURIComponent(r), { mode: "no-cors", keepalive: true }).catch(() => {});
 }

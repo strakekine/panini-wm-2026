@@ -9,7 +9,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { aufbereiten, spiel, reiter, ics, eigeneSpiele, CLUB, natiSpiel, natiGruppe, natiTabelle, fupaTabelleMitFlfNamen, reserveSlugs } from "../tools/fussball.mjs";
 import { liveAus, gleich as liveGleich, spielJetzt, naechstesSpiel, passendesSpiel } from "../tools/fussball-live.mjs";
-import worker, { kuerzen, passendesSpiel as wPassend, saisonVon, abrufFaellig, zaehlen, zahlenSeite, stundeLux } from "../tools/cloudflare-worker.js";
+import worker, { kuerzen, passendesSpiel as wPassend, saisonVon, abrufFaellig, zaehlen, zahlenSeite, stundeLux, ansehen } from "../tools/cloudflare-worker.js";
 
 const hier = path.dirname(fileURLToPath(import.meta.url));
 const src = fs.readFileSync(path.join(hier, "..", "fussball.html"), "utf8");
@@ -429,17 +429,19 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
 
 // Anonymer Zähler im Worker, mit nachgebautem D1 (nur die drei Anweisungen, die er braucht).
 {
-  const tage = new Map(), rei = new Map(), arten = new Map(), std = new Map();
+  const tage = new Map(), rei = new Map(), arten = new Map(), std = new Map(), ges = new Map();
   const st = sql => ({ sql, a: [], bind(...a) { this.a = a; return this; },
     async run() {
       if (sql.startsWith("INSERT INTO tage")) { const [t, h] = this.a, x = tage.get(t) || { tag: t, handys: 0, oeffnungen: 0 }; x.handys += h; x.oeffnungen++; tage.set(t, x); }
       if (sql.startsWith("INSERT INTO reiter")) { const k = this.a.join("|"); rei.set(k, (rei.get(k) || 0) + 1); }
       if (sql.startsWith("INSERT INTO arten")) { const [t, a, h] = this.a, k = t + "|" + a, x = arten.get(k) || { tag: t, art: a, handys: 0, oeffnungen: 0 }; x.handys += h; x.oeffnungen++; arten.set(k, x); }
+      if (sql.startsWith("INSERT INTO angesehen")) { const k = this.a.join("|"); ges.set(k, (ges.get(k) || 0) + 1); }
       if (sql.startsWith("INSERT INTO stunden")) { const k = this.a.join("|"); std.set(k, (std.get(k) || 0) + 1); }
     },
     async all() {
       if (sql.startsWith("SELECT tag, handys")) return { results: [...tage.values()].sort((a, b) => b.tag.localeCompare(a.tag)) };
       if (sql.startsWith("SELECT tag, art")) return { results: [...arten.values()] };
+      if (sql.includes("FROM angesehen")) { const m = new Map(); for (const [k, n] of ges) { const r = k.split("|")[1]; m.set(r, (m.get(r) || 0) + n); } return { results: [...m].map(([reiter, n]) => ({ reiter, n })) }; }
       if (sql.startsWith("SELECT stunde")) { const m = new Map(); for (const [k, n] of std) { const h = +k.split("|")[1]; m.set(h, (m.get(h) || 0) + n); } return { results: [...m].sort((a, b) => a[0] - b[0]).map(([stunde, n]) => ({ stunde, n })) }; }
       const m = new Map(); for (const [k, n] of rei) { const r = k.split("|")[1]; m.set(r, (m.get(r) || 0) + n); }
       return { results: [...m].map(([reiter, n]) => ({ reiter, n })) };
@@ -454,7 +456,11 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(arten.get("2026-10-24|app").handys === 1 && arten.get("2026-10-24|app").oeffnungen === 2 && arten.get("2026-10-24|web").handys === 1 && arten.size === 2, "Zähler: App/Browser getrennt, Unsinn verworfen");
   ok(std.get("2026-10-24|16") === 2 && std.get("2026-10-24|9") === 1 && std.size === 2, "Zähler: Stunden gezählt, 24 verworfen");
   ok(stundeLux(Date.parse("2026-10-24T14:30:00Z")) === 16 && stundeLux(Date.parse("2026-10-26T14:30:00Z")) === 15 && stundeLux(Date.parse("2026-10-24T22:10:00Z")) === 0, "Stunde in Luxemburger Zeit (Sommer/Winter, Mitternacht 0)");
+  await ansehen(db, "2026-10-24", "U9 1"); await ansehen(db, "2026-10-24", "U9 1"); await ansehen(db, "2026-10-24", "<b>");
+  ok(ges.get("2026-10-24|U13 1") === 2 && ges.get("2026-10-24|Seniors 1") === 1 && ges.get("2026-10-24|U9 1") === 2 && ges.size === 3, "Angesehen: Öffnen und Umschalten gezählt, Unsinn verworfen");
+  ok(rei.size === 2 && tage.get("2026-10-24").oeffnungen === 4, "Umschalten zählt nicht als Öffnung");
   const seite = await zahlenSeite(db);
+  ok(/Reiter angesehen[^]*<td>U9 1<\/td><td>2<\/td>/.test(seite), "Zahlen-Seite zeigt angesehene Reiter");
   ok(seite.includes("<td>2026-10-24</td><td>2</td><td>4</td><td>1 / 2</td><td>1 / 1</td>") && seite.includes("U13 1") && seite.includes("<td>16 Uhr</td><td>2</td>") && seite.includes("<td>09 Uhr</td><td>1</td>"), "Zahlen-Seite zeigt Tag, App/Browser, Stunden und Reiter");
   const ohne = await worker.fetch(new Request("https://w/?zaehle=1&neu=1"), {});
   ok(ohne.status === 204, "Zähler ohne D1: still 204");

@@ -110,7 +110,7 @@ kann sie nicht direkt fragen. Darum: `tools/fussball.mjs` (Node, keine Abhängig
 Daten. **Takt (Plan B, vom Nutzer 19.10.2026):** Der Cloudflare-Worker (`scheduled`, Cron
 `*/15 * * * *`, `abrufFaellig()`) stößt `fussball.yml` per `workflow_dispatch` an — Sa/So 8–22 Uhr
 Luxemburger Zeit jede Viertelstunde, Mo–Fr 20:15 UTC, **jeden Tag 23:30** (vom Nutzer: Länderspiele
-um 20:45 sind sonst erst am nächsten Morgen drin). GitHubs eigener Zeitplan bleibt als Reserve:
+um 20:45 sind sonst erst am nächsten Morgen drin). **Und jeden Tag 7:00** (vom Nutzer, 20.10.: die FLF trug Seniors 2 vom 19.10. erst nach dem 23:30-Lauf ein; geholt hat es dann GitHubs Reserve um 00:56 statt 00:37). **Neu einfügen nötig.** GitHubs eigener Zeitplan bleibt als Reserve:
 Sa/So stündlich (:17 UTC 6–20), Mo–Fr 19:17 UTC, täglich 22:37 UTC. Doppelte Läufe schaden nicht (`concurrency`,
 Commit nur bei Änderung). Abwechseln GitHub/Cloudflare im Viertelstundentakt hat der Nutzer
 vorgeschlagen, abgeraten: GitHub kommt ~20 min zu spät oder gar nicht, das gäbe Lücken.

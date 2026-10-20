@@ -509,7 +509,7 @@ function wocheBilanz(alle) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "20.10.2026 i";
+const FASSUNG = "20.10.2026 j";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -1008,7 +1008,7 @@ setInterval(async () => {
 
 // Anonymer Zähler (Worker, ?zahlen): beim Start und nach ≥ 30 min im Hintergrund eine Meldung.
 // „neu“ beim ersten Mal am Tag — das merkt sich nur dieses Handy, der Worker bekommt keine Kennung.
-let VERSTECKT_SEIT = 0, ZULETZT_GESEHEN = "";
+let VERSTECKT_SEIT = 0, ZULETZT_GESEHEN = "", ZAEHLT = false;
 const reiterName = () => typeof ST.team === "number" ? (D?.teams.find(t => t.id === ST.team)?.reiter || "") : ST.team === "woche" ? "Woche" : ST.team === "bgl" ? "BGL" : ST.team === "nati" ? "Roude Léiw" : "";
 // Umschalten auf einen anderen Reiter (Reiter-Knopf oder Tippen auf ein Spiel in der Woche).
 // Derselbe Reiter zweimal hintereinander zählt einmal.
@@ -1018,8 +1018,15 @@ function angesehen() {
   ZULETZT_GESEHEN = r;
   fetch(WORKER_URL + "?angesehen=1&reiter=" + encodeURIComponent(r), { mode: "no-cors", keepalive: true }).catch(() => {});
 }
+// Zwei Sperren gegen doppeltes Zählen (vom Nutzer am Computer gesehen: +2 je Öffnen): Chrome und
+// Edge laden Seiten beim Tippen der Adresse unsichtbar vor (prerender) — dort erst beim echten
+// Anzeigen zählen; und höchstens eine Öffnung je Minute (auch über zwei Ladevorgänge hinweg).
 function zaehle() {
   if (!WORKER_URL) return;
+  if (document.prerendering) { document.addEventListener("prerenderingchange", zaehle, { once: true }); return; }
+  if (document.visibilityState !== "visible") return;   // kommt beim Sichtbarwerden über visibilitychange
+  try { const z = +localStorage.getItem(KEY + "_zuletztGezaehlt") || 0; if (Date.now() - z < 60e3) { ZAEHLT = true; ZULETZT_GESEHEN = reiterName(); return; } localStorage.setItem(KEY + "_zuletztGezaehlt", String(Date.now())); } catch (e) {}
+  ZAEHLT = true;
   let neu = "0";
   try { const t = tagLux(Date.now()); if (localStorage.getItem(KEY + "_gezaehlt") !== t) { localStorage.setItem(KEY + "_gezaehlt", t); neu = "1"; } } catch (e) {}
   const r = reiterName();
@@ -1029,7 +1036,7 @@ function zaehle() {
 }
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) VERSTECKT_SEIT = Date.now();
-  else if (VERSTECKT_SEIT && Date.now() - VERSTECKT_SEIT >= 30 * 60e3) zaehle();
+  else if (!ZAEHLT || (VERSTECKT_SEIT && Date.now() - VERSTECKT_SEIT >= 30 * 60e3)) zaehle();
 });
 
 document.getElementById("logo").src = LOGO;

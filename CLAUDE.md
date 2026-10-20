@@ -101,7 +101,7 @@ die FLF ein Ergebnis hat oder 3 h nach Anstoß. Steht der LIVE-Kasten da, entfä
 (`.seg button.woche`, `grid-column:1/-1`, Vereinslogo links/rechts) mit „· n Spiele“, „· heute n Spiele“
 oder „· 🔴 n Spiele gerade LIVE“. Reiter `"woche"`: alle Spiele aller Koeppchen-Reiter Mo–So
 (`wocheTage`, ab So 22 Uhr die nächste Woche), je Spiel einmal (`wocheSpiele`, Pokal ohne I/II heißt
-„U13“), nach Tagen; Zeile = `spielZeile` mit Schild der Mannschaft, 🏠/✈️, Uhrzeit oder „läuft“/
+„U13“), nach Tagen; Zeile = `spielZeile` mit Schild der Mannschaft (`.pill.wteam`, 14 px, vom Nutzer: größer, Fassung k), 🏠/✈️, Uhrzeit oder „läuft“/
 „🔴 LIVE · Minute“ (rot), 📍 Stadion bis die FLF ein Ergebnis hat; Tippen öffnet den Reiter
 (`data-gehe`). Kopf: Zeitraum, „n Spiele, davon m zu Hause“, nach dem Wochenende die Bilanz
 (`wocheBilanz`). „gleichzeitig mit …“ bei < 90 min Abstand und anderem Platz. Live: `liveKandidaten`/

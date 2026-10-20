@@ -509,7 +509,7 @@ function wocheBilanz(alle) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "20.10.2026 k";
+const FASSUNG = "20.10.2026 l";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -637,10 +637,10 @@ function render() {
   if (!D) return;
   UMSCHALT = null;   // setzt heuteHtml, wenn ein Spieltag-Kasten steht
   const { tabs } = aufteilen(D);
-  // Seniors stehen vorn, geöffnet wird beim ersten Mal aber die U13 (die der Kinder).
+  // Beim allerersten Öffnen „Unsere Woche“ (vom Nutzer, 20.10.2026), danach der zuletzt gewählte
+  // Reiter (persist beim Umschalten). Gibt es den gemerkten Reiter nicht mehr, auch die Woche.
   const extra = extraReiter(D);
-  if (!tabs.some(t => t.id === ST.team) && !extra.some(t => t.id === ST.team) && ST.team !== "woche")
-    ST.team = (tabs.find(t => t.kat === "U13") || tabs[0])?.id ?? null;
+  if (!tabs.some(t => t.id === ST.team) && !extra.some(t => t.id === ST.team)) ST.team = "woche";
   const wTage = wocheTage(Date.now()), wAlle = wocheSpiele(D, wTage, Date.now());
   const heuteN = wAlle.filter(sp => tagLux(Date.parse(sp.d)) === tagLux(Date.now())).length;
   const liveN = liveZahl(Date.now());

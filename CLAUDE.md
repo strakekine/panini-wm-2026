@@ -49,7 +49,7 @@ Tabelle, eigene Ergebnisse, alle Spiele der Klasse, frühere Phasen aufklappbar.
 iPhone-Regeln der Pizza-App.
 
 **Mannschaften** (vom Nutzer, 18.10.2026): Reiter in dieser Reihenfolge **Seniors 1, U13 1, U13 2,
-U15, U11 1, U11 2, U9 1, U9 2, Seniors 2, Seniors 3** (Seniors 2/3 = Réserves I/II). Beim ersten Öffnen ist trotzdem U13 1 gewählt (die der Kinder). Beschriftung arabisch
+U15, U11 1, U11 2, U9 1, U9 2, Seniors 2, Seniors 3** (Seniors 2/3 = Réserves I/II). Beim allerersten Öffnen steht die App auf „Unsere Woche“, danach auf dem zuletzt gewählten Reiter (vom Nutzer, 20.10.2026, Fassung l; vorher U13 1). Beschriftung arabisch
 („U13 1“, nicht „Mannschaft I“). Reihenfolge und Auswahl stehen in `AGES` in
 `tools/fussball.mjs` (ageCategoryId: U13 4, U15 11, U11 7, U9 5, Seniors 1). Réserves sind bei der FLF eine
 eigene Kategorie (9999, „Seniors (R)“). Bewusst nicht dabei: U7 (zwei Bambini-Teams gemeldet, aber noch kein Spiel — bei

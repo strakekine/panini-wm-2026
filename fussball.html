@@ -458,7 +458,7 @@ function nachSpieltag(spiele) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "20.10.2026 a";
+const FASSUNG = "20.10.2026 b";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -739,18 +739,20 @@ function bglHtml(now) {
   const b = D.bgl, v = bglSicht(b, now);
   document.getElementById("sub").textContent = "BGL League · " + D.saison.n.replace("Saison ", "");
   const tag = ([nr, sp], titel) => `<section class="card"><div class="chead"><h2>${titel} ${nr}</h2><div class="hint">${esc(wann(sp[0].d, false))}</div></div>
-    <div class="cbody">${sp.map(s => spielZeile(s, null, [s.gespielt ? "" : esc(wann(s.d)), s.ort ? "📍 " + esc(s.ort) : ""].filter(Boolean).join(" · "))).join("")}</div></section>`;
+    <div class="cbody">${sp.map(s => spielZeile(s, null, s.gespielt ? [] : [esc(wann(s.d)), s.ort ? "📍 " + esc(s.ort) : ""].filter(Boolean).join(" · "))).join("")}</div></section>`;
   const t = bglTabelle(b);
   const abz = t.selbst ? t.tabelle.filter(r => r.abzug).map(r => `${esc(r.n)} ${r.abzug}`).join(", ") : "";
   // FuPa begründet Punktabzüge in einem Satz (`text`), den zeigen wir mit.
   const grund = b.text ? `<div class="muted" style="font-size:12px;margin-top:8px">${esc(b.text)}</div>` : "";
   const quelle = b.quelle === "FuPa" ? `<div class="muted" style="font-size:12px;margin-top:8px">Tabelle von FuPa (aktueller als die der FLF), Spiele von der FLF.</div>` : "";
   const hinweis = grund + quelle + (t.selbst ? `<div class="muted" style="font-size:12px;margin-top:8px">Aus den Ergebnissen gerechnet — die FLF-Tabelle steht noch auf ${t.flfSp} Spielen. Bei Punktgleichheit kann die FLF anders sortieren.${abz ? ` Punktabzug laut FLF: ${abz}.` : ""}</div>` : "");
-  let h = `<section class="card"><div class="chead"><h2>Tabelle</h2><div class="hint">BGL League</div></div>
+  // Reihenfolge wie bei den anderen Reitern: Nächstes, Tabelle, Gespieltes (vom Nutzer, 20.10.2026).
+  // Stadion nur bei Spielen, die noch kommen.
+  let h = v.naechste.map(t => tag(t, "Nächster: Spieltag")).join("");
+  if (!v.naechste.length) h += `<div class="note">Keine weiteren Spieltage eingetragen.</div>`;
+  h += `<section class="card"><div class="chead"><h2>Tabelle</h2><div class="hint">BGL League</div></div>
     <div class="cbody">${tabelleHtml({ n: b.n, tabelle: t.tabelle }, new Set())}${hinweis}</div></section>`;
   if (v.letzter) h += tag(v.letzter, "Zuletzt: Spieltag");
-  for (const t of v.naechste) h += tag(t, "Nächster: Spieltag");
-  if (!v.naechste.length) h += `<div class="note">Keine weiteren Spieltage eingetragen.</div>`;
   return h;
 }
 

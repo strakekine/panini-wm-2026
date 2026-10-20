@@ -32,10 +32,11 @@
   h1{font-family:'Bebas Neue',sans-serif;letter-spacing:1.5px;margin:0;font-size:28px;color:#fff;line-height:1.05}
   .sub{color:#b9bfbc;font-size:12.5px;margin-top:1px}
   /* Reiter im Raster: acht passen in zwei Reihen à vier, auch auf dem kleinen iPhone. */
-  .seg{display:grid;grid-template-columns:repeat(auto-fit,minmax(74px,1fr));gap:1px;background:#333;border:1px solid #333;border-radius:10px;overflow:hidden;margin-top:9px}
+  .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#333;border:1px solid #333;border-radius:10px;overflow:hidden;margin-top:9px}
   .seg button{background:#222;white-space:nowrap;color:#b9bfbc;border:0;padding:9px 10px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:.3px}
   .seg button img{height:28px;display:block;margin:-6px auto}
   .seg button.on{background:#fff;color:#111}
+  @media (min-width:600px){.seg{grid-template-columns:repeat(6,1fr)}}
   .seg button.woche{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:10px;text-transform:uppercase;letter-spacing:.6px}
   .seg button.woche img{height:22px;margin:-4px 0;display:inline-block}
   .wzus{font-size:15px;font-weight:600;text-align:center}

@@ -43,6 +43,8 @@
   .wzeile{cursor:pointer}
   .pill.wteam{margin-left:0;background:#111}
   .wzugleich{color:#b45309;font-weight:600}
+  .wlive .sc{background:#d4001a !important;color:#fff !important}
+  .wlivetxt{color:#d4001a;font-weight:700}
   main{max-width:720px;margin:0 auto;padding:4px 12px 60px}
 
   .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin:12px 0;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.04)}
@@ -641,7 +643,8 @@ function render() {
     ST.team = (tabs.find(t => t.kat === "U13") || tabs[0])?.id ?? null;
   const wTage = wocheTage(Date.now()), wAlle = wocheSpiele(D, wTage, Date.now());
   const heuteN = wAlle.filter(sp => tagLux(Date.parse(sp.d)) === tagLux(Date.now())).length;
-  const wZahl = heuteN ? `heute ${heuteN} ${heuteN === 1 ? "Spiel" : "Spiele"}` : `${wAlle.length} ${wAlle.length === 1 ? "Spiel" : "Spiele"}`;
+  const liveN = liveZahl(Date.now());
+  const wZahl = liveN ? `🔴 ${liveN} ${liveN === 1 ? "Spiel" : "Spiele"} gerade LIVE` : heuteN ? `heute ${heuteN} ${heuteN === 1 ? "Spiel" : "Spiele"}` : `${wAlle.length} ${wAlle.length === 1 ? "Spiel" : "Spiele"}`;
   document.getElementById("seg").innerHTML = `<button data-t="woche" class="woche${ST.team === "woche" ? " on" : ""}"><img alt="" src="${LOGO}">Unsere Woche · ${wZahl}<img alt="" src="${LOGO}"></button>` + [...tabs, ...extra].map(t =>
     `<button data-t="${t.id}" class="${t.id === ST.team ? "on" : ""}">${t.bild ? `<img alt="${esc(t.reiter)}" src="${FLF_LOGO}">` : esc(t.reiter || t.n)}</button>`).join("");
   if (ST.team == null) { main.innerHTML = `<div class="note">Keine Spiele gefunden.</div>`; return; }
@@ -793,6 +796,36 @@ function liveHtml(lv, wir, zusatz) {
     </div></section>`;
 }
 
+// Live in der Woche und im Knopf: alle Spiele mit möglichem Ticker im Live-Fenster (Seniors 1–3),
+// je Spiel ein Worker-Stand in WS (FLF-Spiel-ID → Antwort). Unabhängig vom offenen Reiter.
+const WS = new Map();
+function liveKandidaten(now) {
+  if (!D) return [];
+  return aufteilen(D).tabs.map(t => {
+    const v = sicht(D, t.id, now), sp = liveSpiel(v, now, D.fupa || {});
+    return sp && { sp, v };
+  }).filter(Boolean);
+}
+function liveStand(k, now) {
+  return liveAnzeige(mitWorker(liveBasis(L, k.sp), WS.get(k.sp.id) || (W && W.fuer === k.sp.id ? W : null)), k.v, now);
+}
+function liveZahl(now) { return liveKandidaten(now).filter(k => liveStand(k, now)?.laeuft).length; }
+async function holenWorkerAlle() {
+  if (!WORKER_URL) return false;
+  let neu = false;
+  await Promise.all(liveKandidaten(Date.now()).map(async k => {
+    const b = liveBasis(L, k.sp);
+    const q = b.slug ? "?slug=" + encodeURIComponent(b.slug) : "?anstoss=" + encodeURIComponent(k.sp.d);
+    try {
+      const r = await fetch(WORKER_URL + q, { cache: "no-store" });
+      if (!r.ok) return;
+      const w = { ...(await r.json()), fuer: k.sp.id };
+      if (JSON.stringify(WS.get(k.sp.id)) !== JSON.stringify(w)) { WS.set(k.sp.id, w); neu = true; }
+    } catch (e) {}
+  }));
+  return neu;
+}
+
 function wocheHtml(tage, alle, now) {
   const kurz = d => { const x = new Date(d + "T12:00:00"); return x.getDate() + "." + (x.getMonth() + 1) + "."; };
   const heim = alle.filter(sp => sp.heim).length;
@@ -815,15 +848,24 @@ function wocheHtml(tage, alle, now) {
     const istHeute = tag === tagLux(now);
     const titel = new Date(tag + "T12:00:00").toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "numeric" });
     h += `<section class="card${istHeute ? " heute" : ""}"><div class="chead"><h2>${istHeute ? "Heute · " : ""}${esc(titel)}</h2></div><div class="cbody">`;
-    for (const s of [...sp.filter(x => !zeitOffen(x)), ...sp.filter(zeitOffen)]) {
+    const kand = liveKandidaten(now);
+    for (const s0 of [...sp.filter(x => !zeitOffen(x)), ...sp.filter(zeitOffen)]) {
+      const k = kand.find(k => k.sp.id === s0.id), lv = k && liveStand(k, now);
+      // Live-Stand vom Ticker, bis die FLF das Ergebnis hat; ohne Ticker nur „läuft“.
+      // FuPa kann Heim/Gast andersherum führen (liveSpiel dreht dann k.sp) — hier gilt die FLF-Reihenfolge.
+      const gedreht = k && k.sp.h.id !== s0.h.id;
+      const s = lv ? { ...s0, gespielt: true, hs: gedreht ? lv.as : lv.hs, as: gedreht ? lv.hs : lv.as } : s0;
+      const laeuft = !lv && !s0.gespielt && now >= Date.parse(s0.d) && now <= Date.parse(s0.d) + 3 * 3600e3 && !zeitOffen(s0);
       const ids = new Set([s.wir]);
       const teile = [`<span class="pill wteam">${esc(s.reiter)}</span>`, s.heim ? "🏠" : "✈️",
-        s.gespielt ? "" : esc(zeitOffen(s) ? "Uhrzeit offen" : wann(s.d).split(" · ")[1]),
-        !s.gespielt && s.ort ? "📍 " + esc(s.ort) : "",
+        lv ? `<span class="wlivetxt">${lv.laeuft ? "🔴 LIVE · " + esc(lv.zeit) : "Abpfiff · laut Ticker"}</span>`
+          : laeuft ? `<span class="wlivetxt">läuft</span>`
+          : s.gespielt ? "" : esc(zeitOffen(s) ? "Uhrzeit offen" : wann(s.d).split(" · ")[1]),
+        !s.gespielt && !laeuft && s.ort ? "📍 " + esc(s.ort) : "",
         s.typ === "CUP" ? "Pokal" : s.typ === "FM" ? "Test" : "",
         s.forfait ? "Forfait" : "",
         s.zugleich.length ? `<span class="wzugleich">gleichzeitig mit ${esc(s.zugleich.join(", "))}</span>` : ""];
-      h += `<div class="wzeile" data-gehe="${s.tab}">${spielZeile(s, ids, teile.filter(Boolean).join(" · "))}</div>`;
+      h += `<div class="wzeile${lv?.laeuft ? " wlive" : ""}" data-gehe="${s.tab}">${spielZeile(s, ids, teile.filter(Boolean).join(" · "))}</div>`;
     }
     h += `</div></section>`;
   }
@@ -910,6 +952,7 @@ async function aktualisieren() {
   }
   render();   // setzt LIVE_SP für den Reiter, der gerade offen ist
   if (LIVE_SP) { const w = await holenWorker(); if (w) { W = w; render(); } }
+  if (await holenWorkerAlle()) render();
 }
 
 document.addEventListener("click", e => {
@@ -937,6 +980,11 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) aktu
 // Aufgeklapptes (z. B. „Klappt nicht?“) jede Minute wieder zuklappt.
 // Mit Worker alle 20 s (so lange merkt er sich den Stand), sonst jede Minute.
 let LIVE_POLL = false;
+// Woche und Knopf: alle laufenden Spiele mit Ticker, egal welcher Reiter offen ist.
+setInterval(async () => {
+  if (document.hidden || !D || !liveKandidaten(Date.now()).length) return;
+  if (await holenWorkerAlle()) render();
+}, 20e3);
 // Countdown: jede 10 s die Minuten nachführen; zum Beginn des Countdowns und beim Anpfiff neu bauen.
 let UMSCHALT = null;
 setInterval(() => {

@@ -97,7 +97,7 @@ Gruppe genauso führt. Ergebnisse: die letzten acht. Fällt einer der Abrufe aus
 alte Stand (der FLF-Abruf der Mannschaften läuft trotzdem durch).
 **Heute-Spieltag-Kasten** (vom Nutzer, 18.10.2026): an jedem Reiter oben „Heute Spieltag! ⚽ Anstoß HH:MM“
 mit Gegner und Ort (`spieltagHeute`, Tag in Luxemburger Zeit), ab Anstoß „Spiel läuft“; weg, sobald
-die FLF ein Ergebnis hat oder 3 h nach Anstoß. Steht der LIVE-Kasten da, entfällt er. Der LIVE-Kasten kommt erst mit Stand, Tickerer oder Tor — FuPa setzt ab Anpfiff von selbst „LIVE“, auch ohne Tickerer (19.10., Fassung s). Ohne Tickerer heißt es ab Anpfiff „erscheint hier, falls bei FuPa jemand tickert“, ab 15 min danach „Bisher tickert niemand … Ergebnis kommt, sobald die FLF es einträgt“ (vom Nutzer, Fassung t). **Countdown** (vom Nutzer, 19.10.2026, alle
+die FLF ein Ergebnis hat oder 3 h nach Anstoß. Steht der LIVE-Kasten da, entfällt er. Der LIVE-Kasten kommt erst mit Stand, Tickerer oder Tor — FuPa setzt ab Anpfiff von selbst „LIVE“, auch ohne Tickerer (19.10., Fassung s). Ohne Tickerer heißt es ab Anpfiff „erscheint hier, falls bei FuPa jemand tickert“, ab 15 min danach „Bisher tickert niemand … Ergebnis kommt, sobald die FLF es einträgt“ (vom Nutzer, Fassung t). Stadion überall mit 📍 davor, wie bei der BGL (vom Nutzer, 20.10., Fassung 20.10. a). **Countdown** (vom Nutzer, 19.10.2026, alle
 Reiter): 15 min vor Anpfiff wird daraus „Gleich geht's los! ⚽ · Anpfiff in n Minuten“
 (`minutenBisAnpfiff`, aufgerundet, nicht bei Uhrzeit 00:00); ein 10-s-Takt führt die Minuten nach
 und baut zum Beginn des Countdowns und beim Anpfiff neu (`UMSCHALT`). Bei Reitern mit Ticker steht

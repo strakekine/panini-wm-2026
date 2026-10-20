@@ -458,7 +458,7 @@ function nachSpieltag(spiele) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "19.10.2026 t";
+const FASSUNG = "20.10.2026 a";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -628,8 +628,8 @@ function render() {
     const pokal = art(sp) ? `<span class="pill">${art(sp)}</span>` : "";
     if (i === 0) {
       h += `<div class="next"><div class="when">${esc(wann(sp.d))} <span class="muted" style="font-family:Barlow;font-size:14px;letter-spacing:0">${bisDahin(sp.d, now)}</span></div>
-        ${spielZeile(sp, ids, `${esc(sp.ort || "")}${pokal}<br>${esc(sp.klasse)}`)}</div>`;
-    } else h += spielZeile(sp, ids, `${esc(wann(sp.d))}${sp.ort ? " · " + esc(sp.ort) : ""}${pokal}`);
+        ${spielZeile(sp, ids, `${sp.ort ? "📍 " + esc(sp.ort) : ""}${pokal}<br>${esc(sp.klasse)}`)}</div>`;
+    } else h += spielZeile(sp, ids, `${esc(wann(sp.d))}${sp.ort ? " · 📍 " + esc(sp.ort) : ""}${pokal}`);
   });
   if (v.kommend.length > ZEIG)
     h += `<div class="muted" style="text-align:center;font-size:12.5px;margin-top:8px">+ ${v.kommend.length - ZEIG} weitere unter „Alle Spiele der Klasse“</div>`;

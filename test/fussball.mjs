@@ -398,8 +398,8 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(f("2026-10-24T08:00:00+02:00") && f("2026-10-24T14:45:00+02:00") && f("2026-10-24T22:00:00+02:00"), "Samstag 8–22 Uhr jede Viertelstunde (Sommerzeit)");
   ok(!f("2026-10-24T07:45:00+02:00") && !f("2026-10-24T22:15:00+02:00") && !f("2026-10-24T14:50:00+02:00"), "nicht vor 8, nicht nach 22, nur Viertelstunden");
   ok(f("2026-10-25T08:00:00+01:00") && f("2026-10-25T21:45:00+01:00") && !f("2026-10-25T07:45:00+01:00"), "Sonntag nach der Zeitumstellung: Fenster bleibt 8–22 Uhr");
-  ok(f("2026-10-26T20:15:00Z") && !f("2026-10-26T20:00:00Z") && !f("2026-10-26T19:15:00Z"), "Mo–Fr nur 20:15 UTC");
-  ok(f("2026-10-23T20:15:00Z") && !f("2026-10-23T21:15:00Z"), "Freitag wie Wochentag");
+  ok(f("2026-10-26T22:15:00+01:00") && !f("2026-10-26T21:15:00+01:00") && !f("2026-10-26T22:00:00+01:00"), "Mo–Fr 22:15 Ortszeit, auch im Winter");
+  ok(f("2026-10-23T22:15:00+02:00") && !f("2026-10-23T21:15:00+02:00"), "Freitag wie Wochentag, Sommerzeit");
   let tage = 0; for (let t = Date.parse("2026-10-24T00:00:00+02:00"); t < Date.parse("2026-10-31T00:00:00+01:00"); t += 15 * 60e3) tage += abrufFaellig(t);
   ok(f("2026-10-21T23:30:00+02:00") && f("2026-10-31T23:30:00+01:00") && !f("2026-10-21T23:15:00+02:00"), "jeden Abend 23:30 (Sommer und Winter)");
   ok(tage === 2 * 57 + 5 + 7 + 7, "eine Woche: 57 Anstöße je Wochenendtag + 5 Abende + 7× 23:30 + 7× 7:00, waren " + tage);

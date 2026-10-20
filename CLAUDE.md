@@ -117,8 +117,8 @@ dem ersten Laden und nach ≥ 30 min im Hintergrund; `neu` merkt sich nur das Ha
 (`fussball_v1_gezaehlt` = Tag). Worker schreibt in **D1** (Binding `DB`, Tabellen `tage`, `reiter`, legt
 sie selbst an), ohne Binding still 204. Ansehen: `WORKER_URL?zahlen` (30 Tage). **Neu einfügen und D1
 einrichten nötig** (Stand 20.10.). Test mit nachgebautem D1, Gegenprobe gemacht.
-Fußzeile: „sonst morgens um 7, abends (Mo–Fr) und um 23:30“ — der Abend-Anstoß ist 20:15 UTC, also
-im Winter 21:15, im Sommer 22:15 Ortszeit.
+Fußzeile nennt die Abrufzeiten genau (vom Nutzer): täglich 7:00 und 23:30, Mo–Fr 22:15, Sa/So 8–22
+alle 15 min. Dafür rechnet der Worker den Wochentags-Abend seit 20.10. in Ortszeit (vorher 20:15 UTC).
 **Karten-Link am 📍: geprüft und vom Nutzer verworfen** (20.10., „nur ein Gimmick“): FLF-`sportField` hat nur `id` und `name`; FuPa-`venue` hat lat/long und Adresse, aber nur Seniors/Nati und falsch, wenn FuPa das Spiel falsch führt. **Countdown** (vom Nutzer, 19.10.2026, alle
 Reiter): 15 min vor Anpfiff wird daraus „Gleich geht's los! ⚽ · Anpfiff in n Minuten“
 (`minutenBisAnpfiff`, aufgerundet, nicht bei Uhrzeit 00:00); ein 10-s-Takt führt die Minuten nach
@@ -131,7 +131,7 @@ Anpfiff“: bei den Reserven tickert nicht immer jemand).
 kann sie nicht direkt fragen. Darum: `tools/fussball.mjs` (Node, keine Abhängigkeiten) holt die
 Daten. **Takt (Plan B, vom Nutzer 19.10.2026):** Der Cloudflare-Worker (`scheduled`, Cron
 `*/15 * * * *`, `abrufFaellig()`) stößt `fussball.yml` per `workflow_dispatch` an — Sa/So 8–22 Uhr
-Luxemburger Zeit jede Viertelstunde, Mo–Fr 20:15 UTC, **jeden Tag 23:30** (vom Nutzer: Länderspiele
+Luxemburger Zeit jede Viertelstunde, Mo–Fr 22:15 Ortszeit (bis 20.10. 20:15 UTC), **jeden Tag 23:30** (vom Nutzer: Länderspiele
 um 20:45 sind sonst erst am nächsten Morgen drin). **Und jeden Tag 7:00** (vom Nutzer, 20.10.: die FLF trug Seniors 2 vom 19.10. erst nach dem 23:30-Lauf ein; geholt hat es dann GitHubs Reserve um 00:56 statt 00:37). **Eingefügt vom Nutzer am 20.10., geprüft: Anstoß 7:00:23, Lauf grün.** GitHubs eigener Zeitplan bleibt als Reserve:
 Sa/So stündlich (:17 UTC 6–20), Mo–Fr 19:17 UTC, täglich 22:37 UTC. Doppelte Läufe schaden nicht (`concurrency`,
 Commit nur bei Änderung). Abwechseln GitHub/Cloudflare im Viertelstundentakt hat der Nutzer

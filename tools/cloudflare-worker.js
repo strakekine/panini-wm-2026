@@ -102,8 +102,8 @@ function antwort(body, status = 200) {
 const REPO = "strakekine/panini-wm-2026", WORKFLOW = "fussball.yml";
 
 // Soll der Takt (alle 15 min, UTC) jetzt einen Abruf anstoßen? Wochenende: 8–22 Uhr Luxemburger Zeit,
-// jede Viertelstunde (eigene Uhr, damit Sommer/Winter stimmt). Mo–Fr: 20:15 UTC, also gut eine Stunde
-// nach GitHubs eigenem Abend-Lauf (19:17 UTC) — Reserve, falls der ausfällt. Dazu jeden Tag 23:30 und 7:00.
+// jede Viertelstunde (eigene Uhr, damit Sommer/Winter stimmt). Mo–Fr: 22:15 Luxemburger Zeit, nach
+// GitHubs eigenem Abend-Lauf (19:17 UTC) — Reserve, falls der ausfällt. Dazu jeden Tag 23:30 und 7:00.
 export function abrufFaellig(ms) {
   const teile = Object.fromEntries(new Intl.DateTimeFormat("en-GB", {
     timeZone: "Europe/Luxembourg", weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23",
@@ -116,8 +116,8 @@ export function abrufFaellig(ms) {
   // dann da, wenn man aufsteht (vom Nutzer).
   if (h === 7 && m === 0) return true;
   if (teile.weekday === "Sat" || teile.weekday === "Sun") return h >= 8 && (h < 22 || (h === 22 && m === 0));
-  const u = new Date(ms);
-  return u.getUTCHours() === 20 && u.getUTCMinutes() === 15;
+  // Mo–Fr 22:15 Luxemburger Zeit (bis 20.10.2026: 20:15 UTC, das wäre im Winter 21:15 gewesen).
+  return h === 22 && m === 15;
 }
 
 async function anstossen(env) {

@@ -429,7 +429,7 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
 
 // Anonymer Zähler im Worker, mit nachgebautem D1 (nur die drei Anweisungen, die er braucht).
 {
-  const tage = new Map(), rei = new Map(), arten = new Map(), std = new Map(), ges = new Map(), erste = new Map();
+  const tage = new Map(), rei = new Map(), arten = new Map(), std = new Map(), ges = new Map(), erste = new Map(), ich = new Map();
   const st = sql => ({ sql, a: [], bind(...a) { this.a = a; return this; },
     async run() {
       if (sql.startsWith("INSERT INTO tage")) { const [t, h] = this.a, x = tage.get(t) || { tag: t, handys: 0, oeffnungen: 0 }; x.handys += h; x.oeffnungen++; tage.set(t, x); }
@@ -437,11 +437,13 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
       if (sql.startsWith("INSERT INTO arten")) { const [t, a, h] = this.a, k = t + "|" + a, x = arten.get(k) || { tag: t, art: a, handys: 0, oeffnungen: 0 }; x.handys += h; x.oeffnungen++; arten.set(k, x); }
       if (sql.startsWith("INSERT INTO angesehen")) { const k = this.a.join("|"); ges.set(k, (ges.get(k) || 0) + 1); }
       if (sql.startsWith("INSERT INTO erste")) { const k = this.a.join("|"); erste.set(k, (erste.get(k) || 0) + 1); }
+      if (sql.startsWith("INSERT INTO ich")) { const k = this.a.join("|"); ich.set(k, (ich.get(k) || 0) + 1); }
       if (sql.startsWith("INSERT INTO stunden")) { const k = this.a.join("|"); std.set(k, (std.get(k) || 0) + 1); }
     },
     async all() {
       if (sql.startsWith("SELECT tag, handys")) return { results: [...tage.values()].sort((a, b) => b.tag.localeCompare(a.tag)) };
       if (sql.startsWith("SELECT tag, art, n FROM erste")) return { results: [...erste].map(([k, n]) => { const [tag, art] = k.split("|"); return { tag, art, n }; }) };
+      if (sql.startsWith("SELECT tag, was")) return { results: [...ich].map(([k, n]) => { const [tag, was] = k.split("|"); return { tag, was, n }; }) };
       if (sql.startsWith("SELECT tag, art")) return { results: [...arten.values()] };
       const quelle = sql.includes("FROM angesehen") ? ges : sql.includes("FROM stunden") ? std : rei;
       return { results: [...quelle].map(([k, n]) => { const [tag, x] = k.split("|"); return { tag, k: sql.includes("FROM stunden") ? +x : x, n }; }) };
@@ -476,6 +478,14 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(erste.get("2026-10-25|web") === 1 && erste.get("2026-10-25|app") === 1 && erste.size === 2, "Neue Nutzer: nur mit erst, je App/Browser");
   ok(zwei.includes("<td>2 <small>(App 1, Browser 1)</small></td>") && zwei.includes("<td>2026-10-24</td><td>2</td><td>4</td><td>1 / 2</td><td>1 / 1</td><td>0</td>") && zwei.includes("Öffnungen, 2 neu</summary>"), "Zahlen-Seite: Spalte Neu");
   ok(zwei.indexOf("<details open><summary>2026-10-25") > 0 && !zwei.includes("<details open><summary>2026-10-24"), "neuester Tag aufgeklappt, ältere zu");
+  // Eigenes Gerät: nur in der Tabelle ich, nirgends sonst.
+  const vorherT = JSON.stringify([...tage, ...rei, ...arten, ...std, ...ges, ...erste]);
+  await worker.fetch(new Request("https://w/?zaehle=1&neu=1&erst=1&art=app&reiter=U13%201&ich=1"), { DB: db });
+  await worker.fetch(new Request("https://w/?zaehle=1&neu=0&art=app&reiter=U13%201&ich=1"), { DB: db });
+  await worker.fetch(new Request("https://w/?angesehen=1&reiter=BGL&ich=1"), { DB: db });
+  ok(JSON.stringify([...tage, ...rei, ...arten, ...std, ...ges, ...erste]) === vorherT && ich.size === 2, "Eigenes Gerät: zählt nirgends mit, nur getrennt");
+  const mitIch = await zahlenSeite(db);
+  ok([...ich.keys()].every(k => k.endsWith("|oeffnung") ? ich.get(k) === 2 : ich.get(k) === 1) && /Eigene Geräte[^]*<td>2<\/td><td>1<\/td>/.test(mitIch), "Zahlen-Seite: eigene Geräte getrennt (2 Öffnungen, 1 Umschalten)");
   const ohne = await worker.fetch(new Request("https://w/?zaehle=1&neu=1"), {});
   ok(ohne.status === 204, "Zähler ohne D1: still 204");
   ok((await worker.fetch(new Request("https://w/?zahlen"), {})).status === 503, "Zahlen ohne D1: 503 mit Hinweis");

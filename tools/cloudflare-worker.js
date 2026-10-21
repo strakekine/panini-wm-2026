@@ -175,6 +175,12 @@ export async function ansehen(db, tag, reiter) {
   if (!reiter || !REITER_OK.test(reiter)) return;
   await db.batch([db.prepare(TAB_ANGESEHEN), db.prepare(PLUS_ANGESEHEN).bind(tag, reiter)]);
 }
+// Eigene Geräte (vom Nutzer, 21.10.2026): ein Handy, das in der App als „meins“ markiert ist, schickt
+// ich=1 mit und landet nur hier, getrennt von allen anderen Zahlen.
+const TAB_ICH = "CREATE TABLE IF NOT EXISTS ich (tag TEXT NOT NULL, was TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (tag, was))";
+export async function ichZaehlen(db, tag, was) {
+  await db.batch([db.prepare(TAB_ICH), db.prepare("INSERT INTO ich (tag, was, n) VALUES (?1, ?2, 1) ON CONFLICT(tag, was) DO UPDATE SET n = n + 1").bind(tag, was)]);
+}
 export async function zahlenSeite(db) {
   const tage = (await db.prepare("SELECT tag, handys, oeffnungen FROM tage ORDER BY tag DESC LIMIT 30").all()).results || [];
   const ab = tage.at(-1)?.tag || "";
@@ -186,6 +192,9 @@ export async function zahlenSeite(db) {
   const g = await alle("SELECT tag, reiter AS k, n FROM angesehen WHERE tag >= ?1");
   const h = await alle("SELECT tag, stunde AS k, n FROM stunden WHERE tag >= ?1");
   const e = await alle("SELECT tag, art, n FROM erste WHERE tag >= ?1");
+  const ich = await alle("SELECT tag, was, n FROM ich WHERE tag >= ?1");
+  const ichTage = [...new Set(ich.map(z => z.tag))].sort().reverse();
+  const ichN = (tag, was) => ich.find(z => z.tag === tag && z.was === was)?.n || 0;
   const neuAm = (tag, x) => e.filter(z => z.tag === tag && (!x || z.art === x)).reduce((s, z) => s + z.n, 0);
   const neuText = tag => { const n = neuAm(tag); return n ? `${n} <small>(App ${neuAm(tag, "app")}, Browser ${neuAm(tag, "web")})</small>` : e.length ? "0" : "–"; };
   const summe = (zeilen, tag) => { const m = new Map(); for (const z of zeilen) if (!tag || z.tag === tag) m.set(z.k, (m.get(z.k) || 0) + z.n); return [...m]; };
@@ -208,7 +217,9 @@ App = vom Home-Bildschirm, Browser = in Safari o. Ä., je „Handys / Öffnungen
 Neu = zum allerersten Mal geöffnet (gezählt ab 21.10.2026); wer die App aus Safari auf den Home-Bildschirm legt, ist dort noch einmal neu.</p>
 <table><tr><th>Tag</th><th>Handys</th><th>Öffnungen</th><th>App</th><th>Browser</th><th>Neu</th></tr>${tage.map(zeile).join("") || "<tr><td colspan=6>noch nichts gezählt</td></tr>"}</table>
 <h2>Je Tag</h2>${jeTag || "<p>—</p>"}
-<h2>Alle 30 Tage zusammen</h2>${teile("", ", dieselben Tage")}`;
+<h2>Alle 30 Tage zusammen</h2>${teile("", ", dieselben Tage")}
+<h2>Eigene Geräte (nicht mitgezählt)</h2><p>Geräte, die in der App als eigenes markiert sind (5× auf „Gemacht von …“ tippen). Sie stehen nur hier.</p>
+<table><tr><th>Tag</th><th>Öffnungen</th><th>Umschalten</th></tr>${ichTage.map(t => `<tr><td>${t}</td><td>${ichN(t, "oeffnung")}</td><td>${ichN(t, "umschalten")}</td></tr>`).join("") || "<tr><td colspan=3>—</td></tr>"}</table>`;
 }
 
 export default {
@@ -222,6 +233,10 @@ export default {
   async fetch(req, env = {}) {
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
     const q = new URL(req.url).searchParams;
+    if (q.get("ich") === "1" && (q.has("zaehle") || q.has("angesehen"))) {
+      if (env.DB) try { await ichZaehlen(env.DB, tagLux(Date.now()), q.has("zaehle") ? "oeffnung" : "umschalten"); } catch (e) { console.log("Zähler:", e.message); }
+      return new Response(null, { status: 204, headers: CORS });
+    }
     if (q.has("zaehle")) {
       if (env.DB) try { { const t = Date.now(); await zaehlen(env.DB, tagLux(t), q.get("neu") === "1", q.get("reiter") || "", q.get("art") || "", stundeLux(t), q.get("erst") === "1"); } } catch (e) { console.log("Zähler:", e.message); }
       return new Response(null, { status: 204, headers: CORS });

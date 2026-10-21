@@ -24,7 +24,7 @@ wichtige Meldungen für Eltern und Spieler; nachts nichts (nach 22 Uhr → 7 Uhr
 | U9, U11 | ✓ | – | – | ✓ | – | – |
 | Seniors 1–3 | ✓ | – | ✓ | ✓ (Réserves) | ✓ | ✓ |
 | BGL | – | ✓ | – | – | – | – |
-| Roude Léiw | ✓ | – | – | – | – | ✓ |
+| Roude Léiw | ✓ | – | – | – | ✓ | ✓ |
 | Woche | einmal „neue Woche online“ (Spielzahl) |
 
 - **Heute Spiel:** „Heute Spiel um 10:00 in Remich“ je Mannschaft (nicht in der Woche — wen eine andere
@@ -38,6 +38,8 @@ wichtige Meldungen für Eltern und Spieler; nachts nichts (nach 22 Uhr → 7 Uhr
   Spiel von Seniors 2 – live in der App“, sobald wirklich getickert wird (erster Eintrag des Tickerers,
   nicht FuPas automatisches LIVE), und der Endstand (Ticker, sonst FLF). Grund auch technisch: Cloudflare
   gratis ≈ 50 Sendungen je Aufruf, jede Mitteilung geht einzeln an jedes Handy.
+- **Roude Léiw wie die Seniors** (vom Nutzer, 21.10.): „Heute tickert FuPa das Länderspiel – live in der
+  App“ und der Endstand. Den Ticker in der App gibt es seit 19.10. (FuPa-Slug `luxemburg-m1-…`).
 - **Ticker läuft / Endstand erkennt nur der Server:** der Worker müsste an Spieltagen in den Spielfenstern
   selbst bei FuPa nachsehen (~alle 5 min).
 - **Verlegungen/Absagen:** sagt der Trainer (vom Nutzer, 20.10.); höchstens wählbar und standardmäßig

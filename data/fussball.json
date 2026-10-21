@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-20T20:16:36.119Z",
+ "stand": "2026-10-21T12:34:07.150Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -4744,7 +4744,7 @@
      "u": 0,
      "nl": 1,
      "t": 28,
-     "g": 12,
+     "g": 13,
      "pkt": 12
     },
     {
@@ -4803,7 +4803,7 @@
      "s": 2,
      "u": 2,
      "nl": 1,
-     "t": 13,
+     "t": 14,
      "g": 15,
      "pkt": 8
     },
@@ -5398,7 +5398,7 @@
       "n": "Racing FC Union Luxembourg"
      },
      "hs": 5,
-     "as": 1,
+     "as": 2,
      "gespielt": true,
      "forfait": false,
      "ort": "Terrain 2 (Strassen, synth.)"
@@ -22667,7 +22667,8 @@
   }
  },
  "fupa": {
-  "1015062": "fc-koeppchen-mr2-fc-avenir-beggen-mr1-261023",
+  "1011066": "fc-victoria-rosport-mr1-fc-koeppchen-mr1-261026",
+  "1015062": "fc-avenir-beggen-mr1-fc-koeppchen-mr2-261023",
   "1015075": "us-moutfort-medingen-mr1-fc-koeppchen-mr2-261030"
  }
 }

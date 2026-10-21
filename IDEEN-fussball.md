@@ -5,23 +5,53 @@ Gesammelt, noch nicht gebaut. Wer etwas davon angeht, streicht es hier und träg
 
 ## Vorgemerkt (vom Nutzer, 20.10.2026)
 
-### Mitteilungen „Spieltag komplett“ und „Tabelle aktualisiert“
+### Mitteilungen (Plan vom Nutzer, 21.10.2026 — noch nicht gebaut)
 
-Erst entscheiden, wenn die App zwei, drei Wochen im Betrieb ist und klar ist, ob sie genutzt wird
-(Stand 20.10.: unter 100 Nutzer erwartet).
+Ursprünglich vorgemerkt am 20.10. als „Spieltag komplett“ / „Tabelle aktualisiert“; am 21.10. mit dem
+Nutzer ausgearbeitet. Entscheiden, wann gebaut wird, wenn der Zähler zeigt, dass die App genutzt wird
+(20.10.: 24 Handys, 10 davon vom Home-Bildschirm).
 
-- **Was:** je gewählter Mannschaft eine Mitteilung, wenn alle Ergebnisse eines Spieltags der
-  Klasse da sind, und wenn die FLF ihre Tabelle nachzieht (gezählte Spiele in der Tabelle ändern
-  sich). Keine Tore, keine Verlegungen (die sagt der Trainer, vom Nutzer).
-- **Wie:** Web Push für Home-Bildschirm-Apps (iOS ab 16.4, nur installiert, nicht in Safari).
-  Der FLF-Abruf (`tools/fussball.mjs`) erkennt die Ereignisse beim Vergleich alt/neu und meldet
-  sie dem Cloudflare-Worker; der Worker hält die Abonnements (anonymer Endpunkt von Apple +
-  gewählte Mannschaften, in KV/D1) und verschickt. VAPID-Schlüssel nur im Worker.
-  Abgemeldete Geräte (Antwort 404/410) löscht der Worker selbst.
-- **Grenzen:** kommt erst mit dem nächsten Abruf (unter der Woche 22:15, 23:30, 7:00).
-  U9/U11 nie (FLF veröffentlicht dort nichts). Gratis-Tarif Cloudflare reicht bei < 100 Nutzern
-  weit; beim Versand auf Rechenzeit je Durchgang achten (Verschlüsselung je Mitteilung).
-- **Aufwand:** etwa ein Tag, dazu einmal Einrichtung bei Cloudflare durch den Nutzer.
+**Bedienung:** Zahnrad oben in der App → Benachrichtigungszentrale: Hauptschalter (beim ersten Einschalten
+fragt iOS), „Meine Mannschaften“ zum Abhaken, darunter die Arten (jede für alle abgehakten Mannschaften;
+was es bei einer Mannschaft nicht gibt, fällt dort weg), unten „Test-Mitteilung senden“. Wenige, aber
+wichtige Meldungen für Eltern und Spieler; nachts nichts (nach 22 Uhr → 7 Uhr).
+
+**Was es pro Reiter gibt:**
+
+| | Heute Spiel | Spieltag komplett | Tabelle | Uhrzeit fest | Ticker läuft | Endstand |
+|---|---|---|---|---|---|---|
+| U13, U15 | ✓ | ✓ (mit unserem Ergebnis) | ✓ | (selten) | – | – |
+| U9, U11 | ✓ | – | – | ✓ | – | – |
+| Seniors 1–3 | ✓ | – | ✓ | ✓ (Réserves) | ✓ | ✓ |
+| BGL | – | ✓ | – | – | – | – |
+| Roude Léiw | ✓ | – | – | – | – | ✓ |
+| Woche | einmal „neue Woche online“ (Spielzahl) |
+
+- **Heute Spiel:** „Heute Spiel um 10:00 in Remich“ je Mannschaft (nicht in der Woche — wen eine andere
+  Mannschaft nicht interessiert, soll nichts davon bekommen, vom Nutzer). Morgens ~7:30, für Spiele vor
+  10 Uhr am Vorabend ~19 Uhr.
+- **Spieltag komplett und Tabelle sind zwei Meldungen** (vom Nutzer): die FLF zieht die Tabelle oft
+  erst später nach. Tabelle als „Koeppchen I jetzt 2. Platz“.
+- **Uhrzeit fest:** FLF trägt erst 00:00 ein (App zeigt dann nur das Datum), die Zeit später. Am 21.10.
+  ohne Uhrzeit: U9 30 von 40 kommenden Spielen, U11 27 von 36, Réserves 20 von 205.
+- **Seniors: keine Tor-Meldungen** (vom Nutzer: zu viel). Stattdessen einmal „Heute tickert FuPa das
+  Spiel von Seniors 2 – live in der App“, sobald wirklich getickert wird (erster Eintrag des Tickerers,
+  nicht FuPas automatisches LIVE), und der Endstand (Ticker, sonst FLF). Grund auch technisch: Cloudflare
+  gratis ≈ 50 Sendungen je Aufruf, jede Mitteilung geht einzeln an jedes Handy.
+- **Ticker läuft / Endstand erkennt nur der Server:** der Worker müsste an Spieltagen in den Spielfenstern
+  selbst bei FuPa nachsehen (~alle 5 min).
+- **Verlegungen/Absagen:** sagt der Trainer (vom Nutzer, 20.10.); höchstens wählbar und standardmäßig
+  aus — die FLF war beim Pokal Rodange (8.11. → 7.11.) früher dran.
+
+**Technik:** Web Push nur vom Home-Bildschirm, iOS ab 16.4. Abos (anonymer Apple-Endpunkt + gewählte
+Mannschaften/Arten) in D1; VAPID-Schlüssel als Secret im Worker; kleine Service-Worker-Datei im Repo.
+Der FLF-Abruf (`tools/fussball.mjs`) erkennt die Ereignisse beim Vergleich alt/neu. Abgemeldete Geräte
+(404/410) löscht der Worker selbst. U9/U11-Ergebnisse nie.
+
+**Testen nur für den Nutzer zuerst** (vom Nutzer): Zahnrad erscheint nur nach einem Geheimlink
+(`?test=…`, merkt sich das Handy); Service Worker wird nur dort eingerichtet, alle anderen merken
+nichts. Stufe 1: Erlauben + Test-Mitteilung. Stufe 2: echte Meldungen nur für ihn, ein, zwei
+Wochenenden. Stufe 3: für alle. Aufwand Stufe 1+2 etwa ein Tag, beim Nutzer ~10 min Cloudflare.
 
 ## Vorschläge von Claude (20.10.2026, noch nicht besprochen)
 

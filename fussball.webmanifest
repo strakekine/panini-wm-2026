@@ -1,0 +1,9 @@
+{
+  "name": "FC Koeppchen",
+  "short_name": "FC Koeppchen",
+  "start_url": "./fussball.html",
+  "scope": "./fussball.html",
+  "display": "standalone",
+  "background_color": "#f3f4f3",
+  "theme_color": "#111111"
+}

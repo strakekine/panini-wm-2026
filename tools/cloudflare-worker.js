@@ -22,7 +22,7 @@ const API = "https://api.fupa.net/v1/matches/";
 const MERKEN_MS = 20e3;
 const CORS = {
   "access-control-allow-origin": "*",
-  "access-control-allow-methods": "GET, OPTIONS",
+  "access-control-allow-methods": "GET, POST, OPTIONS",
 };
 const gemerkt = new Map(); // slug → { t, body } (je Worker-Instanz)
 const gefunden = new Map(); // anstoss → { t, slug } — die Suche kostet zwei Seitenabrufe, 6 h merken
@@ -227,6 +227,99 @@ Neu = zum allerersten Mal geöffnet (gezählt ab 21.10.2026); wer die App aus Sa
 <table><tr><th>Tag</th><th>Öffnungen</th><th>Umschalten</th></tr>${ichTage.map(t => `<tr><td>${kurz(t)}</td><td>${ichN(t, "oeffnung")}</td><td>${ichN(t, "umschalten")}</td></tr>`).join("") || "<tr><td colspan=3>—</td></tr>"}</table>`;
 }
 
+// ---- Mitteilungen (Web Push), Stufe 1: nur Erlauben und Test-Mitteilung (vom Nutzer, 21.10.2026) ----
+// Die App meldet ein Abo an (?push=anmelden, POST mit dem Abo als Text), der Worker merkt es sich in
+// D1 (Tabelle abos) und schickt auf ?push=test genau diesem Abo eine Test-Mitteilung. Schlüssel
+// (VAPID) erzeugt der Worker beim ersten Mal selbst und legt sie in D1 ab — nichts einzufügen.
+// Verschlüsselung nach RFC 8291 (aes128gcm), Anmeldung beim Push-Dienst nach RFC 8292 (VAPID).
+const PUSH_DIENST = /^https:\/\/([a-z0-9-]+\.)*(push\.apple\.com|fcm\.googleapis\.com|push\.services\.mozilla\.com|notify\.windows\.com)\//;
+const PUSH_ABSENDER = "https://strakekine.github.io/panini-wm-2026/fussball.html";
+const b64u = b => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const unb64u = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4)), c => c.charCodeAt(0));
+const verbinden = (...t) => { const r = new Uint8Array(t.reduce((n, x) => n + x.length, 0)); let o = 0; for (const x of t) { r.set(x, o); o += x.length; } return r; };
+async function hmac(schl, daten) {
+  const k = await crypto.subtle.importKey("raw", schl, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  return new Uint8Array(await crypto.subtle.sign("HMAC", k, daten));
+}
+const TAB_ABOS = "CREATE TABLE IF NOT EXISTS abos (endpoint TEXT PRIMARY KEY, abo TEXT NOT NULL, test INTEGER NOT NULL DEFAULT 1, seit TEXT NOT NULL)";
+export async function vapid(db) {
+  await db.prepare("CREATE TABLE IF NOT EXISTS push_schluessel (id INTEGER PRIMARY KEY, privat TEXT NOT NULL, oeffentlich TEXT NOT NULL)").run();
+  const lesen = () => db.prepare("SELECT privat, oeffentlich FROM push_schluessel WHERE id = 1").first();
+  let z = await lesen();
+  if (!z) {
+    const k = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
+    // OR IGNORE: kommen zwei erste Aufrufe gleichzeitig, gewinnt einer, beide lesen danach denselben.
+    await db.prepare("INSERT OR IGNORE INTO push_schluessel (id, privat, oeffentlich) VALUES (1, ?1, ?2)")
+      .bind(JSON.stringify(await crypto.subtle.exportKey("jwk", k.privateKey)), b64u(await crypto.subtle.exportKey("raw", k.publicKey))).run();
+    z = await lesen();
+  }
+  return z;
+}
+export async function vapidKopf(z, endpoint, jetzt = Date.now()) {
+  const te = new TextEncoder(), teil = o => b64u(te.encode(JSON.stringify(o)));
+  const ohne = teil({ typ: "JWT", alg: "ES256" }) + "." + teil({ aud: new URL(endpoint).origin, exp: Math.floor(jetzt / 1000) + 12 * 3600, sub: PUSH_ABSENDER });
+  const k = await crypto.subtle.importKey("jwk", JSON.parse(z.privat), { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]);
+  const sig = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, k, te.encode(ohne));
+  return `vapid t=${ohne}.${b64u(sig)}, k=${z.oeffentlich}`;
+}
+export async function verschluesseln(abo, text) {
+  const te = new TextEncoder(), eins = new Uint8Array([1]);
+  const uaPub = unb64u(abo.keys.p256dh), auth = unb64u(abo.keys.auth);
+  const as = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]);
+  const asPub = new Uint8Array(await crypto.subtle.exportKey("raw", as.publicKey));
+  const ua = await crypto.subtle.importKey("raw", uaPub, { name: "ECDH", namedCurve: "P-256" }, false, []);
+  const geheim = new Uint8Array(await crypto.subtle.deriveBits({ name: "ECDH", public: ua }, as.privateKey, 256));
+  const ikm = await hmac(await hmac(auth, geheim), verbinden(te.encode("WebPush: info\0"), uaPub, asPub, eins));
+  const salz = crypto.getRandomValues(new Uint8Array(16));
+  const prk = await hmac(salz, ikm);
+  const cek = (await hmac(prk, verbinden(te.encode("Content-Encoding: aes128gcm\0"), eins))).slice(0, 16);
+  const nonce = (await hmac(prk, verbinden(te.encode("Content-Encoding: nonce\0"), eins))).slice(0, 12);
+  const k = await crypto.subtle.importKey("raw", cek, "AES-GCM", false, ["encrypt"]);
+  const inhalt = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: nonce }, k, verbinden(te.encode(text), new Uint8Array([2]))));
+  const kopf = new Uint8Array(21);
+  kopf.set(salz); new DataView(kopf.buffer).setUint32(16, 4096); kopf[20] = 65;
+  return verbinden(kopf, asPub, inhalt);
+}
+export async function pushSenden(db, abo, nachricht, ttl = 3600) {
+  const z = await vapid(db);
+  return fetch(abo.endpoint, {
+    method: "POST",
+    headers: { authorization: await vapidKopf(z, abo.endpoint), "content-encoding": "aes128gcm", "content-type": "application/octet-stream", ttl: String(ttl), urgency: "normal" },
+    body: await verschluesseln(abo, JSON.stringify(nachricht)),
+  });
+}
+const aboOk = a => a && typeof a.endpoint === "string" && a.endpoint.length < 1000 && PUSH_DIENST.test(a.endpoint)
+  && typeof a.keys?.p256dh === "string" && a.keys.p256dh.length < 200 && typeof a.keys?.auth === "string" && a.keys.auth.length < 100;
+const zuletztGetestet = new Map(); // endpoint → Zeit, höchstens ein Test je 20 s
+export async function pushAnfrage(req, db, was) {
+  if (was === "schluessel") return antwort(JSON.stringify({ schluessel: (await vapid(db)).oeffentlich }));
+  if (req.method !== "POST") return antwort('{"fehler":"post"}', 405);
+  let x; try { x = JSON.parse(await req.text()); } catch (e) { return antwort('{"fehler":"json"}', 400); }
+  await db.prepare(TAB_ABOS).run();
+  if (was === "anmelden") {
+    if (!aboOk(x)) return antwort('{"fehler":"abo"}', 400);
+    const abo = { endpoint: x.endpoint, keys: { p256dh: x.keys.p256dh, auth: x.keys.auth } };
+    await db.prepare("INSERT OR REPLACE INTO abos (endpoint, abo, test, seit) VALUES (?1, ?2, 1, ?3)").bind(abo.endpoint, JSON.stringify(abo), new Date().toISOString()).run();
+    return antwort('{"ok":true}');
+  }
+  const z = typeof x.endpoint === "string" ? await db.prepare("SELECT abo FROM abos WHERE endpoint = ?1").bind(x.endpoint).first() : null;
+  if (was === "abmelden") {
+    if (z) await db.prepare("DELETE FROM abos WHERE endpoint = ?1").bind(x.endpoint).run();
+    return antwort('{"ok":true}');
+  }
+  if (was === "test") {
+    if (!z) return antwort('{"fehler":"nicht angemeldet"}', 404);
+    if (Date.now() - (zuletztGetestet.get(x.endpoint) || 0) < 20e3) return antwort('{"fehler":"zu schnell"}', 429);
+    zuletztGetestet.set(x.endpoint, Date.now());
+    const r = await pushSenden(db, JSON.parse(z.abo), { titel: "FC Koeppchen", text: "Test-Mitteilung ✓ So sehen Mitteilungen der App aus.", url: "fussball.html" });
+    // 404/410: Abo gibt es beim Push-Dienst nicht mehr (abgemeldet, App gelöscht) → vergessen.
+    if (r.status === 404 || r.status === 410) await db.prepare("DELETE FROM abos WHERE endpoint = ?1").bind(x.endpoint).run();
+    if (r.status >= 300) console.log("Push:", r.status, await r.text());
+    return antwort(JSON.stringify({ ok: r.status < 300, status: r.status }), r.status < 300 ? 200 : 502);
+  }
+  return antwort('{"fehler":"push"}', 400);
+}
+
 export default {
   async scheduled(event, env, ctx) {
     // Auf die volle Viertelstunde runden: Cloudflare startet den Takt manchmal ein paar Sekunden später.
@@ -238,6 +331,10 @@ export default {
   async fetch(req, env = {}) {
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
     const q = new URL(req.url).searchParams;
+    if (q.has("push")) {
+      if (!env.DB) return antwort('{"fehler":"kein D1"}', 503);
+      try { return await pushAnfrage(req, env.DB, q.get("push")); } catch (e) { console.log("Push:", e.message); return antwort('{"fehler":"intern"}', 500); }
+    }
     if (q.get("ich") === "1" && (q.has("zaehle") || q.has("angesehen"))) {
       if (env.DB) try { await ichZaehlen(env.DB, tagLux(Date.now()), q.has("zaehle") ? "oeffnung" : "umschalten"); } catch (e) { console.log("Zähler:", e.message); }
       return new Response(null, { status: 204, headers: CORS });

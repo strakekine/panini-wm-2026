@@ -9,7 +9,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { aufbereiten, spiel, reiter, ics, eigeneSpiele, CLUB, natiSpiel, natiGruppe, natiTabelle, fupaTabelleMitFlfNamen, reserveSlugs } from "../tools/fussball.mjs";
 import { liveAus, gleich as liveGleich, spielJetzt, naechstesSpiel, passendesSpiel } from "../tools/fussball-live.mjs";
-import worker, { kuerzen, passendesSpiel as wPassend, saisonVon, abrufFaellig, zaehlen, zahlenSeite, stundeLux, ansehen } from "../tools/cloudflare-worker.js";
+import worker, { kuerzen, passendesSpiel as wPassend, saisonVon, abrufFaellig, zaehlen, zahlenSeite, stundeLux, ansehen, verschluesseln, vapidKopf } from "../tools/cloudflare-worker.js";
 
 const hier = path.dirname(fileURLToPath(import.meta.url));
 const src = fs.readFileSync(path.join(hier, "..", "fussball.html"), "utf8");
@@ -489,6 +489,78 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   const ohne = await worker.fetch(new Request("https://w/?zaehle=1&neu=1"), {});
   ok(ohne.status === 204, "Zähler ohne D1: still 204");
   ok((await worker.fetch(new Request("https://w/?zahlen"), {})).status === 503, "Zahlen ohne D1: 503 mit Hinweis");
+}
+
+// Mitteilungen (Stufe 1): Verschlüsselung, VAPID, Anmelden/Test/Abmelden über den Worker.
+{
+  const b64 = x => Buffer.from(x).toString("base64url");
+  const ua = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]);
+  const uaPub = new Uint8Array(await crypto.subtle.exportKey("raw", ua.publicKey)), auth = crypto.getRandomValues(new Uint8Array(16));
+  const abo = { endpoint: "https://web.push.apple.com/QWER", keys: { p256dh: b64(uaPub), auth: b64(auth) } };
+  // Entschlüsseln wie das Handy (RFC 8291) — gegen http_ece einmal von Hand gegengeprüft (21.10.2026).
+  const hm = async (k, d) => new Uint8Array(await crypto.subtle.sign("HMAC", await crypto.subtle.importKey("raw", k, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]), d));
+  const cat = (...t) => Uint8Array.from(t.flatMap(x => [...x]));
+  const te = new TextEncoder();
+  const ent = async ct => {
+    const salz = ct.slice(0, 16), asPub = ct.slice(21, 86), inh = ct.slice(86);
+    const g = new Uint8Array(await crypto.subtle.deriveBits({ name: "ECDH", public: await crypto.subtle.importKey("raw", asPub, { name: "ECDH", namedCurve: "P-256" }, false, []) }, ua.privateKey, 256));
+    const ikm = await hm(await hm(auth, g), cat(te.encode("WebPush: info\0"), uaPub, asPub, [1]));
+    const prk = await hm(salz, ikm);
+    const k = await crypto.subtle.importKey("raw", (await hm(prk, cat(te.encode("Content-Encoding: aes128gcm\0"), [1]))).slice(0, 16), "AES-GCM", false, ["decrypt"]);
+    const klar = new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: (await hm(prk, cat(te.encode("Content-Encoding: nonce\0"), [1]))).slice(0, 12) }, k, inh));
+    return { text: new TextDecoder().decode(klar.slice(0, -1)), ende: klar.at(-1), rs: new DataView(ct.buffer, ct.byteOffset).getUint32(16), idlen: ct[20] };
+  };
+  const e1 = await ent(await verschluesseln(abo, '{"titel":"Tor ⚽ für Koeppchen"}'));
+  ok(e1.text === '{"titel":"Tor ⚽ für Koeppchen"}' && e1.ende === 2 && e1.rs === 4096 && e1.idlen === 65, "Push: verschlüsselt, Handy kann es lesen (aes128gcm)");
+  // Nachgebautes D1 für Schlüssel und Abos.
+  const reihen = { k: null, abos: new Map() };
+  const db = { prepare: sql => ({ a: [], bind(...a) { this.a = a; return this; },
+    async run() {
+      if (sql.startsWith("INSERT OR IGNORE INTO push_schluessel") && !reihen.k) reihen.k = { privat: this.a[0], oeffentlich: this.a[1] };
+      if (sql.startsWith("INSERT OR REPLACE INTO abos")) reihen.abos.set(this.a[0], { abo: this.a[1] });
+      if (sql.startsWith("DELETE FROM abos")) reihen.abos.delete(this.a[0]);
+    },
+    async first() { return sql.includes("push_schluessel") ? reihen.k : reihen.abos.get(this.a[0]) || null; } }) };
+  const anfrage = (was, body) => worker.fetch(new Request("https://w/?push=" + was, body === undefined ? {} : { method: "POST", body: JSON.stringify(body) }), { DB: db });
+  const s1 = await (await anfrage("schluessel")).json(), s2 = await (await anfrage("schluessel")).json();
+  ok(s1.schluessel?.length === 87 && s1.schluessel === s2.schluessel, "Push: Worker erzeugt Schlüssel einmal und behält ihn");
+  ok((await anfrage("anmelden", { ...abo, endpoint: "https://boese.example/x" })).status === 400 && (await anfrage("anmelden", { endpoint: abo.endpoint })).status === 400 && reihen.abos.size === 0, "Push: fremder Dienst oder Abo ohne Schlüssel abgelehnt");
+  ok((await anfrage("anmelden", abo)).status === 200 && reihen.abos.has(abo.endpoint), "Push: Abo angemeldet");
+  ok((await anfrage("test", { endpoint: "https://web.push.apple.com/unbekannt" })).status === 404, "Push: Test an unbekanntes Gerät → 404");
+  const echt = globalThis.fetch, gesendet = [];
+  let antwortStatus = 201;
+  globalThis.fetch = async (url, o) => { gesendet.push([url, o]); return new Response("", { status: antwortStatus }); };
+  const t1 = await anfrage("test", { endpoint: abo.endpoint });
+  const [url, o] = gesendet[0] || [];
+  const [, jwt, k] = (o?.headers.authorization || "").match(/^vapid t=([^,]+), k=(.+)$/) || [];
+  const [h, c, sig] = (jwt || "..").split(".");
+  const pub = await crypto.subtle.importKey("raw", Buffer.from(k || "", "base64url"), { name: "ECDSA", namedCurve: "P-256" }, false, ["verify"]).catch(() => null);
+  const echtSig = pub && await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, pub, Buffer.from(sig, "base64url"), te.encode(h + "." + c));
+  const nutz = JSON.parse((await ent(new Uint8Array(o.body))).text);
+  ok(t1.status === 200 && url === abo.endpoint && o.headers["content-encoding"] === "aes128gcm" && o.headers.ttl && k === s1.schluessel && echtSig
+     && JSON.parse(Buffer.from(c, "base64url")).aud === "https://web.push.apple.com" && nutz.titel === "FC Koeppchen" && /Test-Mitteilung/.test(nutz.text), "Push: Test-Mitteilung mit gültiger Unterschrift an Apple");
+  ok((await anfrage("test", { endpoint: abo.endpoint })).status === 429 && gesendet.length === 1, "Push: zweiter Test innerhalb 20 s gebremst");
+  // Abo beim Dienst weg (410) → Worker vergisst es.
+  const abo2 = { ...abo, endpoint: "https://web.push.apple.com/WEG" };
+  await anfrage("anmelden", abo2); antwortStatus = 410;
+  const t3 = await anfrage("test", { endpoint: abo2.endpoint });
+  ok(t3.status === 502 && !reihen.abos.has(abo2.endpoint) && reihen.abos.has(abo.endpoint), "Push: 410 vom Dienst → Abo gelöscht");
+  globalThis.fetch = echt;
+  ok((await anfrage("abmelden", { endpoint: abo.endpoint })).status === 200 && reihen.abos.size === 0, "Push: abgemeldet");
+  ok((await worker.fetch(new Request("https://w/?push=schluessel"), {})).status === 503, "Push ohne D1: 503");
+  ok((await worker.fetch(new Request("https://w/?push=test"), { DB: db })).status === 405, "Push: Test nur per POST");
+  // Service Worker: jede Nachricht wird sichtbar (iOS-Pflicht), Tippen öffnet die App.
+  const lauscher = {}, gezeigt = [], geoeffnet = [];
+  const selbst = { addEventListener: (n, f) => lauscher[n] = f, skipWaiting() {}, clients: { claim: async () => {}, matchAll: async () => [], openWindow: async u => geoeffnet.push(u) },
+    registration: { scope: "https://strakekine.github.io/panini-wm-2026/fussball.html", showNotification: async (t, o) => gezeigt.push([t, o]) } };
+  new Function("self", fs.readFileSync(path.join(hier, "..", "fussball-sw.js"), "utf8"))(selbst);
+  const warten = []; const ev = x => ({ ...x, waitUntil: p => warten.push(p) });
+  lauscher.push(ev({ data: { json: () => ({ titel: "FC Koeppchen", text: "Heute Spiel um 10:00" }) } }));
+  lauscher.push(ev({ data: null }));
+  lauscher.notificationclick(ev({ notification: { close() {}, data: { url: "fussball.html" } } }));
+  await Promise.all(warten);
+  ok(gezeigt.length === 2 && gezeigt[0][1].body === "Heute Spiel um 10:00" && gezeigt[1][0] === "FC Koeppchen" && geoeffnet[0] === "https://strakekine.github.io/panini-wm-2026/fussball.html", "Service Worker: zeigt jede Mitteilung, Tippen öffnet die App");
+  ok(!lauscher.fetch, "Service Worker hat keinen fetch-Teil (lädt und speichert nichts)");
 }
 console.log(fehler ? `${fehler} von ${n} Prüfungen fehlgeschlagen` : `alle ${n} Prüfungen grün`);
 process.exit(fehler ? 1 : 0);

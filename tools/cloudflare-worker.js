@@ -148,13 +148,14 @@ async function anstossen(env) {
 const REITER_OK = /^[A-Za-zÀ-ÿ0-9 ]{1,20}$/;
 const ARTEN = ["app", "web"];
 export const stundeLux = ms => +new Date(ms).toLocaleString("en-GB", { timeZone: "Europe/Luxembourg", hour: "2-digit", hourCycle: "h23" });
-export async function zaehlen(db, tag, neu, reiter, art = "", stunde = null) {
+export async function zaehlen(db, tag, neu, reiter, art = "", stunde = null, erst = false) {
   await db.batch([
     db.prepare("CREATE TABLE IF NOT EXISTS tage (tag TEXT PRIMARY KEY, handys INTEGER NOT NULL DEFAULT 0, oeffnungen INTEGER NOT NULL DEFAULT 0)"),
     db.prepare("CREATE TABLE IF NOT EXISTS reiter (tag TEXT NOT NULL, reiter TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (tag, reiter))"),
     db.prepare("CREATE TABLE IF NOT EXISTS arten (tag TEXT NOT NULL, art TEXT NOT NULL, handys INTEGER NOT NULL DEFAULT 0, oeffnungen INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (tag, art))"),
     db.prepare("CREATE TABLE IF NOT EXISTS stunden (tag TEXT NOT NULL, stunde INTEGER NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (tag, stunde))"),
     db.prepare(TAB_ANGESEHEN),
+    db.prepare("CREATE TABLE IF NOT EXISTS erste (tag TEXT NOT NULL, art TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (tag, art))"),
   ]);
   const s = [db.prepare("INSERT INTO tage (tag, handys, oeffnungen) VALUES (?1, ?2, 1) ON CONFLICT(tag) DO UPDATE SET handys = handys + ?2, oeffnungen = oeffnungen + 1").bind(tag, neu ? 1 : 0)];
   if (reiter && REITER_OK.test(reiter))
@@ -162,6 +163,8 @@ export async function zaehlen(db, tag, neu, reiter, art = "", stunde = null) {
            db.prepare(PLUS_ANGESEHEN).bind(tag, reiter));
   if (ARTEN.includes(art))
     s.push(db.prepare("INSERT INTO arten (tag, art, handys, oeffnungen) VALUES (?1, ?2, ?3, 1) ON CONFLICT(tag, art) DO UPDATE SET handys = handys + ?3, oeffnungen = oeffnungen + 1").bind(tag, art, neu ? 1 : 0));
+  // Erstes Öffnen auf diesem Gerät (je Speicher: Safari und Home-Bildschirm getrennt).
+  if (erst) s.push(db.prepare("INSERT INTO erste (tag, art, n) VALUES (?1, ?2, 1) ON CONFLICT(tag, art) DO UPDATE SET n = n + 1").bind(tag, ARTEN.includes(art) ? art : "?"));
   if (Number.isInteger(stunde) && stunde >= 0 && stunde < 24)
     s.push(db.prepare("INSERT INTO stunden (tag, stunde, n) VALUES (?1, ?2, 1) ON CONFLICT(tag, stunde) DO UPDATE SET n = n + 1").bind(tag, stunde));
   await db.batch(s);
@@ -182,6 +185,9 @@ export async function zahlenSeite(db) {
   const a = await alle("SELECT tag, art, handys, oeffnungen FROM arten WHERE tag >= ?1");
   const g = await alle("SELECT tag, reiter AS k, n FROM angesehen WHERE tag >= ?1");
   const h = await alle("SELECT tag, stunde AS k, n FROM stunden WHERE tag >= ?1");
+  const e = await alle("SELECT tag, art, n FROM erste WHERE tag >= ?1");
+  const neuAm = (tag, x) => e.filter(z => z.tag === tag && (!x || z.art === x)).reduce((s, z) => s + z.n, 0);
+  const neuText = tag => { const n = neuAm(tag); return n ? `${n} <small>(App ${neuAm(tag, "app")}, Browser ${neuAm(tag, "web")})</small>` : e.length ? "0" : "–"; };
   const summe = (zeilen, tag) => { const m = new Map(); for (const z of zeilen) if (!tag || z.tag === tag) m.set(z.k, (m.get(z.k) || 0) + z.n); return [...m]; };
   const liste = l => l.sort((x, y) => y[1] - x[1]).map(([k, n]) => `<tr><td>${k}</td><td>${n}</td></tr>`).join("") || "<tr><td>—</td></tr>";
   const uhr = l => { const max = Math.max(1, ...l.map(x => x[1]));
@@ -190,16 +196,17 @@ export async function zahlenSeite(db) {
 <h3>Reiter angesehen (Öffnen und Umschalten${was})</h3><table>${liste(summe(g, tag))}</table>
 <h3>Reiter beim Öffnen${was}</h3><table>${liste(summe(r, tag))}</table>`;
   const art = (tag, x) => { const z = a.find(y => y.tag === tag && y.art === x); return z ? `${z.handys} / ${z.oeffnungen}` : "–"; };
-  const zeile = t => `<tr><td>${t.tag}</td><td>${t.handys}</td><td>${t.oeffnungen}</td><td>${art(t.tag, "app")}</td><td>${art(t.tag, "web")}</td></tr>`;
-  const jeTag = tage.map((t, i) => `<details${i ? "" : " open"}><summary>${t.tag} · ${t.handys} Handys, ${t.oeffnungen} Öffnungen</summary>${teile(t.tag, "")}</details>`).join("");
+  const zeile = t => `<tr><td>${t.tag}</td><td>${t.handys}</td><td>${t.oeffnungen}</td><td>${art(t.tag, "app")}</td><td>${art(t.tag, "web")}</td><td>${neuText(t.tag)}</td></tr>`;
+  const jeTag = tage.map((t, i) => `<details${i ? "" : " open"}><summary>${t.tag} · ${t.handys} Handys, ${t.oeffnungen} Öffnungen${neuAm(t.tag) ? `, ${neuAm(t.tag)} neu` : ""}</summary>${teile(t.tag, "")}</details>`).join("");
   return `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FC Koeppchen · Zahlen</title><style>body{font-family:system-ui,sans-serif;margin:16px;color:#111}table{border-collapse:collapse;width:100%;max-width:520px}
 td,th{padding:6px 6px;border-bottom:1px solid #ddd;text-align:right;white-space:nowrap}td:first-child,th:first-child{text-align:left}h2{margin-top:28px}h3{font-size:15px;margin:16px 0 4px}
 td.bar{width:50%;text-align:left}td.bar span{display:inline-block;height:10px;background:#1aa39a;border-radius:2px}
 details{max-width:520px;border:1px solid #ddd;border-radius:10px;padding:8px 12px;margin:8px 0}summary{cursor:pointer;font-weight:700;color:#0f7a65}</style>
 <h1>FC Koeppchen · Zahlen</h1><p>Handys = verschiedene Handys am Tag, Öffnungen = Starts (oder zurück nach ≥ 30 min).
-App = vom Home-Bildschirm, Browser = in Safari o. Ä., je „Handys / Öffnungen“. Wer beides benutzt, zählt bei den Handys zweimal.</p>
-<table><tr><th>Tag</th><th>Handys</th><th>Öffnungen</th><th>App</th><th>Browser</th></tr>${tage.map(zeile).join("") || "<tr><td colspan=5>noch nichts gezählt</td></tr>"}</table>
+App = vom Home-Bildschirm, Browser = in Safari o. Ä., je „Handys / Öffnungen“. Wer beides benutzt, zählt bei den Handys zweimal.
+Neu = zum allerersten Mal geöffnet (gezählt ab 21.10.2026); wer die App aus Safari auf den Home-Bildschirm legt, ist dort noch einmal neu.</p>
+<table><tr><th>Tag</th><th>Handys</th><th>Öffnungen</th><th>App</th><th>Browser</th><th>Neu</th></tr>${tage.map(zeile).join("") || "<tr><td colspan=6>noch nichts gezählt</td></tr>"}</table>
 <h2>Je Tag</h2>${jeTag || "<p>—</p>"}
 <h2>Alle 30 Tage zusammen</h2>${teile("", ", dieselben Tage")}`;
 }
@@ -216,7 +223,7 @@ export default {
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
     const q = new URL(req.url).searchParams;
     if (q.has("zaehle")) {
-      if (env.DB) try { { const t = Date.now(); await zaehlen(env.DB, tagLux(t), q.get("neu") === "1", q.get("reiter") || "", q.get("art") || "", stundeLux(t)); } } catch (e) { console.log("Zähler:", e.message); }
+      if (env.DB) try { { const t = Date.now(); await zaehlen(env.DB, tagLux(t), q.get("neu") === "1", q.get("reiter") || "", q.get("art") || "", stundeLux(t), q.get("erst") === "1"); } } catch (e) { console.log("Zähler:", e.message); }
       return new Response(null, { status: 204, headers: CORS });
     }
     if (q.has("angesehen")) {

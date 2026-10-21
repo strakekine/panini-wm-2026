@@ -429,17 +429,19 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
 
 // Anonymer Zähler im Worker, mit nachgebautem D1 (nur die drei Anweisungen, die er braucht).
 {
-  const tage = new Map(), rei = new Map(), arten = new Map(), std = new Map(), ges = new Map();
+  const tage = new Map(), rei = new Map(), arten = new Map(), std = new Map(), ges = new Map(), erste = new Map();
   const st = sql => ({ sql, a: [], bind(...a) { this.a = a; return this; },
     async run() {
       if (sql.startsWith("INSERT INTO tage")) { const [t, h] = this.a, x = tage.get(t) || { tag: t, handys: 0, oeffnungen: 0 }; x.handys += h; x.oeffnungen++; tage.set(t, x); }
       if (sql.startsWith("INSERT INTO reiter")) { const k = this.a.join("|"); rei.set(k, (rei.get(k) || 0) + 1); }
       if (sql.startsWith("INSERT INTO arten")) { const [t, a, h] = this.a, k = t + "|" + a, x = arten.get(k) || { tag: t, art: a, handys: 0, oeffnungen: 0 }; x.handys += h; x.oeffnungen++; arten.set(k, x); }
       if (sql.startsWith("INSERT INTO angesehen")) { const k = this.a.join("|"); ges.set(k, (ges.get(k) || 0) + 1); }
+      if (sql.startsWith("INSERT INTO erste")) { const k = this.a.join("|"); erste.set(k, (erste.get(k) || 0) + 1); }
       if (sql.startsWith("INSERT INTO stunden")) { const k = this.a.join("|"); std.set(k, (std.get(k) || 0) + 1); }
     },
     async all() {
       if (sql.startsWith("SELECT tag, handys")) return { results: [...tage.values()].sort((a, b) => b.tag.localeCompare(a.tag)) };
+      if (sql.startsWith("SELECT tag, art, n FROM erste")) return { results: [...erste].map(([k, n]) => { const [tag, art] = k.split("|"); return { tag, art, n }; }) };
       if (sql.startsWith("SELECT tag, art")) return { results: [...arten.values()] };
       const quelle = sql.includes("FROM angesehen") ? ges : sql.includes("FROM stunden") ? std : rei;
       return { results: [...quelle].map(([k, n]) => { const [tag, x] = k.split("|"); return { tag, k: sql.includes("FROM stunden") ? +x : x, n }; }) };
@@ -461,7 +463,9 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(/Reiter angesehen[^]*<td>U9 1<\/td><td>2<\/td>/.test(seite), "Zahlen-Seite zeigt angesehene Reiter");
   ok(seite.includes("<td>2026-10-24</td><td>2</td><td>4</td><td>1 / 2</td><td>1 / 1</td>") && seite.includes("U13 1") && seite.includes("<td>16 Uhr</td><td>2</td>") && seite.includes("<td>09 Uhr</td><td>1</td>"), "Zahlen-Seite zeigt Tag, App/Browser, Stunden und Reiter");
   // Je Tag getrennt, darunter alle Tage zusammen.
-  await zaehlen(db, "2026-10-25", true, "BGL", "web", 20);
+  await zaehlen(db, "2026-10-25", true, "BGL", "web", 20, true);
+  await zaehlen(db, "2026-10-25", true, "Woche", "app", 21, true);
+  await zaehlen(db, "2026-10-25", false, "Woche", "app", 21);
   const zwei = await zahlenSeite(db);
   const tag25 = zwei.slice(zwei.indexOf("<summary>2026-10-25"), zwei.indexOf("<summary>2026-10-24"));
   const tag24 = zwei.slice(zwei.indexOf("<summary>2026-10-24"), zwei.indexOf("Alle 30 Tage"));
@@ -469,6 +473,8 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(tag25.includes("<td>20 Uhr</td><td>1</td>") && tag25.includes("<td>BGL</td><td>1</td>") && !tag25.includes("U13 1"), "Zahlen je Tag: 25.10. nur seine Öffnung");
   ok(tag24.includes("<td>16 Uhr</td><td>2</td>") && !tag24.includes("BGL") && tag24.includes("<td>U9 1</td><td>2</td>"), "Zahlen je Tag: 24.10. ohne den 25.");
   ok(gesamt.includes("<td>BGL</td><td>1</td>") && gesamt.includes("<td>U13 1</td><td>2</td>") && gesamt.includes("<td>20 Uhr</td>"), "Zahlen zusammen: beide Tage");
+  ok(erste.get("2026-10-25|web") === 1 && erste.get("2026-10-25|app") === 1 && erste.size === 2, "Neue Nutzer: nur mit erst, je App/Browser");
+  ok(zwei.includes("<td>2 <small>(App 1, Browser 1)</small></td>") && zwei.includes("<td>2026-10-24</td><td>2</td><td>4</td><td>1 / 2</td><td>1 / 1</td><td>0</td>") && zwei.includes("Öffnungen, 2 neu</summary>"), "Zahlen-Seite: Spalte Neu");
   ok(zwei.indexOf("<details open><summary>2026-10-25") > 0 && !zwei.includes("<details open><summary>2026-10-24"), "neuester Tag aufgeklappt, ältere zu");
   const ohne = await worker.fetch(new Request("https://w/?zaehle=1&neu=1"), {});
   ok(ohne.status === 204, "Zähler ohne D1: still 204");

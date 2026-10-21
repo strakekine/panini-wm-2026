@@ -510,7 +510,7 @@ function wocheBilanz(alle) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "20.10.2026 n";
+const FASSUNG = "21.10.2026 a";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -1010,6 +1010,15 @@ setInterval(async () => {
 // Anonymer Zähler (Worker, ?zahlen): beim Start und nach ≥ 30 min im Hintergrund eine Meldung.
 // „neu“ beim ersten Mal am Tag — das merkt sich nur dieses Handy, der Worker bekommt keine Kennung.
 let VERSTECKT_SEIT = 0, ZULETZT_GESEHEN = "", ZAEHLT = false;
+// Neue Nutzer (vom Nutzer, 21.10.2026): beim allerersten Öffnen auf diesem Gerät erst=1. Läuft vor
+// load() und dem ersten Abruf — wer schon Daten der App hat, war vorher da und zählt nicht als neu.
+let ERSTMALS = false;
+try {
+  if (!localStorage.getItem(KEY + "_erst")) {
+    if ([KEY, KEY + "_data", KEY + "_gezaehlt"].some(k => localStorage.getItem(k) != null)) localStorage.setItem(KEY + "_erst", "vorher");
+    else ERSTMALS = true;
+  }
+} catch (e) {}
 const reiterName = () => typeof ST.team === "number" ? (D?.teams.find(t => t.id === ST.team)?.reiter || "") : ST.team === "woche" ? "Woche" : ST.team === "bgl" ? "BGL" : ST.team === "nati" ? "Roude Léiw" : "";
 // Umschalten auf einen anderen Reiter (Reiter-Knopf oder Tippen auf ein Spiel in der Woche).
 // Derselbe Reiter zweimal hintereinander zählt einmal.
@@ -1032,8 +1041,10 @@ function zaehle() {
   try { const t = tagLux(Date.now()); if (localStorage.getItem(KEY + "_gezaehlt") !== t) { localStorage.setItem(KEY + "_gezaehlt", t); neu = "1"; } } catch (e) {}
   const r = reiterName();
   ZULETZT_GESEHEN = r;
+  let erst = "";
+  if (ERSTMALS) { ERSTMALS = false; erst = "&erst=1"; try { localStorage.setItem(KEY + "_erst", tagLux(Date.now())); } catch (e) {} }
   const app = navigator.standalone === true || matchMedia("(display-mode: standalone)").matches;
-  fetch(WORKER_URL + "?zaehle=1&neu=" + neu + "&art=" + (app ? "app" : "web") + "&reiter=" + encodeURIComponent(r), { mode: "no-cors", keepalive: true }).catch(() => {});
+  fetch(WORKER_URL + "?zaehle=1&neu=" + neu + erst + "&art=" + (app ? "app" : "web") + "&reiter=" + encodeURIComponent(r), { mode: "no-cors", keepalive: true }).catch(() => {});
 }
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) VERSTECKT_SEIT = Date.now();

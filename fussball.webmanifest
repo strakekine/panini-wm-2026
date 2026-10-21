@@ -4,6 +4,10 @@
   "start_url": "./fussball.html",
   "scope": "./fussball.html",
   "display": "standalone",
-  "background_color": "#f3f4f3",
-  "theme_color": "#111111"
+  "background_color": "#ffffff",
+  "theme_color": "#111111",
+  "icons": [
+    { "src": "bilder/fussball-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "bilder/fussball-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
 }

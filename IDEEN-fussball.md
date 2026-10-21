@@ -50,10 +50,11 @@ Mannschaften/Arten) in D1; VAPID-Schlüssel als Secret im Worker; kleine Service
 Der FLF-Abruf (`tools/fussball.mjs`) erkennt die Ereignisse beim Vergleich alt/neu. Abgemeldete Geräte
 (404/410) löscht der Worker selbst. U9/U11-Ergebnisse nie.
 
-**Testen nur für den Nutzer zuerst** (vom Nutzer): Zahnrad erscheint nur nach einem Geheimlink
-(`?test=…`, merkt sich das Handy); Service Worker wird nur dort eingerichtet, alle anderen merken
-nichts. Stufe 1: Erlauben + Test-Mitteilung. Stufe 2: echte Meldungen nur für ihn, ein, zwei
-Wochenenden. Stufe 3: für alle. Aufwand Stufe 1+2 etwa ein Tag, beim Nutzer ~10 min Cloudflare.
+**Testen nur für den Nutzer zuerst** (vom Nutzer): Zahnrad erscheint nur nach **5× Tippen auf das
+Vereinslogo oben** (vom Nutzer, 21.10.: statt Geheimlink — die Home-Bildschirm-App hat keine
+Adresszeile, Mitteilungen gehen aber nur dort; merkt sich das Handy). Service Worker wird nur dort
+eingerichtet, alle anderen merken nichts. Stufe 1: Erlauben + Test-Mitteilung. Stufe 2: echte Meldungen nur für ihn, ein, zwei
+Wochenenden. Stufe 3: für alle — **dabei das 5×-Tippen aufs Logo wieder ausbauen**. Aufwand Stufe 1+2 etwa ein Tag, beim Nutzer ~10 min Cloudflare.
 
 ## Vorschläge von Claude (20.10.2026, noch nicht besprochen)
 

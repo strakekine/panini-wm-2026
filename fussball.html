@@ -530,7 +530,7 @@ function wocheBilanz(alle) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "21.10.2026 k";
+const FASSUNG = "21.10.2026 l";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -1144,7 +1144,7 @@ async function mittHtml() {
     };
     h = abo && Notification.permission === "granted"
       ? `<p>✓ Mitteilungen sind auf diesem Gerät erlaubt. Nachts (22–7 Uhr) kommt nichts, das wartet bis morgens.</p>
-         <h3 class="mh">Meine Mannschaften</h3><p class="klein">Mannschaft anhaken, dann darunter wählen, was von ihr kommen soll.</p>
+         ${mAufraeumen()}<h3 class="mh">Meine Mannschaften</h3><p class="klein">Mannschaft anhaken, dann darunter wählen, was von ihr kommen soll.</p>
          ${mReiter().map(mannschaft).join("")}
          <button class="knopf" id="mTest">Test-Mitteilung senden</button>
          <button class="knopf zweit" id="mAus">Abmelden</button>`
@@ -1191,12 +1191,21 @@ const mReiter = () => [...(D?.teams || []).filter(t => t.reiter).map(t => t.reit
 function mWahl() {
   try {
     const w = JSON.parse(localStorage.getItem(KEY + "_mwahl"));
-    if (w && w.je && typeof w.je === "object") return w;
+    // Haken, die es bei einer Mannschaft nicht (mehr) gibt (z. B. Uhrzeit bei den Seniors bis Fassung k), fallen weg.
+    if (w && w.je && typeof w.je === "object")
+      return { je: Object.fromEntries(Object.entries(w.je).map(([r, l]) => [r, l.filter(k => mArtenFuer(r).includes(k))])) };
     // Alte Auswahl (eine Liste Mannschaften, eine Liste Arten für alle) übernehmen.
     if (w && Array.isArray(w.teams) && Array.isArray(w.arten))
       return { je: Object.fromEntries(w.teams.map(r => [r, mArtenFuer(r).filter(k => k === "woche" || w.arten.includes(k))])) };
   } catch (e) {}
   return { je: {} };
+}
+// Weicht die gespeicherte Auswahl von der bereinigten ab, einmal neu speichern (auch beim Worker).
+function mAufraeumen() {
+  let roh = null; try { roh = localStorage.getItem(KEY + "_mwahl"); } catch (e) {}
+  const sauber = JSON.stringify(mWahl());
+  if (roh && roh !== sauber) { try { localStorage.setItem(KEY + "_mwahl", sauber); } catch (e) {} setTimeout(mWahlSenden, 0); }
+  return "";
 }
 async function mWahlSenden() {
   const reg = await swReg(), abo = reg && await reg.pushManager.getSubscription();

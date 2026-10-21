@@ -441,10 +441,8 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
     async all() {
       if (sql.startsWith("SELECT tag, handys")) return { results: [...tage.values()].sort((a, b) => b.tag.localeCompare(a.tag)) };
       if (sql.startsWith("SELECT tag, art")) return { results: [...arten.values()] };
-      if (sql.includes("FROM angesehen")) { const m = new Map(); for (const [k, n] of ges) { const r = k.split("|")[1]; m.set(r, (m.get(r) || 0) + n); } return { results: [...m].map(([reiter, n]) => ({ reiter, n })) }; }
-      if (sql.startsWith("SELECT stunde")) { const m = new Map(); for (const [k, n] of std) { const h = +k.split("|")[1]; m.set(h, (m.get(h) || 0) + n); } return { results: [...m].sort((a, b) => a[0] - b[0]).map(([stunde, n]) => ({ stunde, n })) }; }
-      const m = new Map(); for (const [k, n] of rei) { const r = k.split("|")[1]; m.set(r, (m.get(r) || 0) + n); }
-      return { results: [...m].map(([reiter, n]) => ({ reiter, n })) };
+      const quelle = sql.includes("FROM angesehen") ? ges : sql.includes("FROM stunden") ? std : rei;
+      return { results: [...quelle].map(([k, n]) => { const [tag, x] = k.split("|"); return { tag, k: sql.includes("FROM stunden") ? +x : x, n }; }) };
     } });
   const db = { prepare: st, batch: async l => { for (const x of l) await x.run(); } };
   await zaehlen(db, "2026-10-24", true, "U13 1", "app", 16);
@@ -462,6 +460,16 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   const seite = await zahlenSeite(db);
   ok(/Reiter angesehen[^]*<td>U9 1<\/td><td>2<\/td>/.test(seite), "Zahlen-Seite zeigt angesehene Reiter");
   ok(seite.includes("<td>2026-10-24</td><td>2</td><td>4</td><td>1 / 2</td><td>1 / 1</td>") && seite.includes("U13 1") && seite.includes("<td>16 Uhr</td><td>2</td>") && seite.includes("<td>09 Uhr</td><td>1</td>"), "Zahlen-Seite zeigt Tag, App/Browser, Stunden und Reiter");
+  // Je Tag getrennt, darunter alle Tage zusammen.
+  await zaehlen(db, "2026-10-25", true, "BGL", "web", 20);
+  const zwei = await zahlenSeite(db);
+  const tag25 = zwei.slice(zwei.indexOf("<summary>2026-10-25"), zwei.indexOf("<summary>2026-10-24"));
+  const tag24 = zwei.slice(zwei.indexOf("<summary>2026-10-24"), zwei.indexOf("Alle 30 Tage"));
+  const gesamt = zwei.slice(zwei.indexOf("Alle 30 Tage"));
+  ok(tag25.includes("<td>20 Uhr</td><td>1</td>") && tag25.includes("<td>BGL</td><td>1</td>") && !tag25.includes("U13 1"), "Zahlen je Tag: 25.10. nur seine Öffnung");
+  ok(tag24.includes("<td>16 Uhr</td><td>2</td>") && !tag24.includes("BGL") && tag24.includes("<td>U9 1</td><td>2</td>"), "Zahlen je Tag: 24.10. ohne den 25.");
+  ok(gesamt.includes("<td>BGL</td><td>1</td>") && gesamt.includes("<td>U13 1</td><td>2</td>") && gesamt.includes("<td>20 Uhr</td>"), "Zahlen zusammen: beide Tage");
+  ok(zwei.indexOf("<details open><summary>2026-10-25") > 0 && !zwei.includes("<details open><summary>2026-10-24"), "neuester Tag aufgeklappt, ältere zu");
   const ohne = await worker.fetch(new Request("https://w/?zaehle=1&neu=1"), {});
   ok(ohne.status === 204, "Zähler ohne D1: still 204");
   ok((await worker.fetch(new Request("https://w/?zahlen"), {})).status === 503, "Zahlen ohne D1: 503 mit Hinweis");

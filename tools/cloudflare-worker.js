@@ -175,26 +175,33 @@ export async function ansehen(db, tag, reiter) {
 export async function zahlenSeite(db) {
   const tage = (await db.prepare("SELECT tag, handys, oeffnungen FROM tage ORDER BY tag DESC LIMIT 30").all()).results || [];
   const ab = tage.at(-1)?.tag || "";
-  // Ältere Datenbanken haben die Tabellen arten/stunden erst nach dem ersten neuen Zählen.
+  // Ältere Datenbanken haben die Tabellen arten/stunden/angesehen erst nach dem ersten neuen Zählen.
   const alle = async (sql) => { try { return (await db.prepare(sql).bind(ab).all()).results || []; } catch (e) { return []; } };
-  const r = await alle("SELECT reiter, SUM(n) AS n FROM reiter WHERE tag >= ?1 GROUP BY reiter ORDER BY n DESC");
+  // Je Tag gespeichert; zusammengezählt wird hier — so gibt es dieselben Listen für 30 Tage und je Tag.
+  const r = await alle("SELECT tag, reiter AS k, n FROM reiter WHERE tag >= ?1");
   const a = await alle("SELECT tag, art, handys, oeffnungen FROM arten WHERE tag >= ?1");
-  const g = await alle("SELECT reiter, SUM(n) AS n FROM angesehen WHERE tag >= ?1 GROUP BY reiter ORDER BY n DESC");
-  const h = await alle("SELECT stunde, SUM(n) AS n FROM stunden WHERE tag >= ?1 GROUP BY stunde ORDER BY stunde");
+  const g = await alle("SELECT tag, reiter AS k, n FROM angesehen WHERE tag >= ?1");
+  const h = await alle("SELECT tag, stunde AS k, n FROM stunden WHERE tag >= ?1");
+  const summe = (zeilen, tag) => { const m = new Map(); for (const z of zeilen) if (!tag || z.tag === tag) m.set(z.k, (m.get(z.k) || 0) + z.n); return [...m]; };
+  const liste = l => l.sort((x, y) => y[1] - x[1]).map(([k, n]) => `<tr><td>${k}</td><td>${n}</td></tr>`).join("") || "<tr><td>—</td></tr>";
+  const uhr = l => { const max = Math.max(1, ...l.map(x => x[1]));
+    return l.sort((x, y) => x[0] - y[0]).map(([k, n]) => `<tr><td>${String(k).padStart(2, "0")} Uhr</td><td>${n}</td><td class="bar"><span style="width:${Math.round(100 * n / max)}%"></span></td></tr>`).join("") || "<tr><td>—</td></tr>"; };
+  const teile = (tag, was) => `<h3>Uhrzeit der Öffnungen${was}</h3><table>${uhr(summe(h, tag))}</table>
+<h3>Reiter angesehen (Öffnen und Umschalten${was})</h3><table>${liste(summe(g, tag))}</table>
+<h3>Reiter beim Öffnen${was}</h3><table>${liste(summe(r, tag))}</table>`;
   const art = (tag, x) => { const z = a.find(y => y.tag === tag && y.art === x); return z ? `${z.handys} / ${z.oeffnungen}` : "–"; };
   const zeile = t => `<tr><td>${t.tag}</td><td>${t.handys}</td><td>${t.oeffnungen}</td><td>${art(t.tag, "app")}</td><td>${art(t.tag, "web")}</td></tr>`;
-  const max = Math.max(1, ...h.map(x => x.n));
-  const stunde = x => `<tr><td>${String(x.stunde).padStart(2, "0")} Uhr</td><td>${x.n}</td><td class="bar"><span style="width:${Math.round(100 * x.n / max)}%"></span></td></tr>`;
+  const jeTag = tage.map((t, i) => `<details${i ? "" : " open"}><summary>${t.tag} · ${t.handys} Handys, ${t.oeffnungen} Öffnungen</summary>${teile(t.tag, "")}</details>`).join("");
   return `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FC Koeppchen · Zahlen</title><style>body{font-family:system-ui,sans-serif;margin:16px;color:#111}table{border-collapse:collapse;width:100%;max-width:520px}
-td,th{padding:6px 8px;border-bottom:1px solid #ddd;text-align:right}td:first-child,th:first-child{text-align:left}h2{margin-top:24px}
-td.bar{width:50%;text-align:left}td.bar span{display:inline-block;height:10px;background:#1aa39a;border-radius:2px}</style>
+td,th{padding:6px 6px;border-bottom:1px solid #ddd;text-align:right;white-space:nowrap}td:first-child,th:first-child{text-align:left}h2{margin-top:28px}h3{font-size:15px;margin:16px 0 4px}
+td.bar{width:50%;text-align:left}td.bar span{display:inline-block;height:10px;background:#1aa39a;border-radius:2px}
+details{max-width:520px;border:1px solid #ddd;border-radius:10px;padding:8px 12px;margin:8px 0}summary{cursor:pointer;font-weight:700;color:#0f7a65}</style>
 <h1>FC Koeppchen · Zahlen</h1><p>Handys = verschiedene Handys am Tag, Öffnungen = Starts (oder zurück nach ≥ 30 min).
 App = vom Home-Bildschirm, Browser = in Safari o. Ä., je „Handys / Öffnungen“. Wer beides benutzt, zählt bei den Handys zweimal.</p>
 <table><tr><th>Tag</th><th>Handys</th><th>Öffnungen</th><th>App</th><th>Browser</th></tr>${tage.map(zeile).join("") || "<tr><td colspan=5>noch nichts gezählt</td></tr>"}</table>
-<h2>Uhrzeit der Öffnungen (dieselben Tage)</h2><table>${h.map(stunde).join("") || "<tr><td>—</td></tr>"}</table>
-<h2>Reiter angesehen (Öffnen und Umschalten, dieselben Tage)</h2><table>${g.map(x => `<tr><td>${x.reiter}</td><td>${x.n}</td></tr>`).join("") || "<tr><td>—</td></tr>"}</table>
-<h2>Reiter beim Öffnen (dieselben Tage)</h2><table>${r.map(x => `<tr><td>${x.reiter}</td><td>${x.n}</td></tr>`).join("") || "<tr><td>—</td></tr>"}</table>`;
+<h2>Je Tag</h2>${jeTag || "<p>—</p>"}
+<h2>Alle 30 Tage zusammen</h2>${teile("", ", dieselben Tage")}`;
 }
 
 export default {

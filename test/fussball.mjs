@@ -463,21 +463,21 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(rei.size === 2 && tage.get("2026-10-24").oeffnungen === 4, "Umschalten zählt nicht als Öffnung");
   const seite = await zahlenSeite(db);
   ok(/Reiter angesehen[^]*<td>U9 1<\/td><td>2<\/td>/.test(seite), "Zahlen-Seite zeigt angesehene Reiter");
-  ok(seite.includes("<td>2026-10-24</td><td>2</td><td>4</td><td>1 / 2</td><td>1 / 1</td>") && seite.includes("U13 1") && seite.includes("<td>16 Uhr</td><td>2</td>") && seite.includes("<td>09 Uhr</td><td>1</td>"), "Zahlen-Seite zeigt Tag, App/Browser, Stunden und Reiter");
+  ok(seite.includes("<td>Sa 24.10.</td><td>2</td><td>4</td><td>1 / 2</td><td>1 / 1</td>") && seite.includes("U13 1") && seite.includes("<td>16 Uhr</td><td>2</td>") && seite.includes("<td>09 Uhr</td><td>1</td>"), "Zahlen-Seite zeigt Tag, App/Browser, Stunden und Reiter");
   // Je Tag getrennt, darunter alle Tage zusammen.
   await zaehlen(db, "2026-10-25", true, "BGL", "web", 20, true);
   await zaehlen(db, "2026-10-25", true, "Woche", "app", 21, true);
   await zaehlen(db, "2026-10-25", false, "Woche", "app", 21);
   const zwei = await zahlenSeite(db);
-  const tag25 = zwei.slice(zwei.indexOf("<summary>2026-10-25"), zwei.indexOf("<summary>2026-10-24"));
-  const tag24 = zwei.slice(zwei.indexOf("<summary>2026-10-24"), zwei.indexOf("Alle 30 Tage"));
+  const tag25 = zwei.slice(zwei.indexOf("<summary>So 25.10."), zwei.indexOf("<summary>Sa 24.10."));
+  const tag24 = zwei.slice(zwei.indexOf("<summary>Sa 24.10."), zwei.indexOf("Alle 30 Tage"));
   const gesamt = zwei.slice(zwei.indexOf("Alle 30 Tage"));
   ok(tag25.includes("<td>20 Uhr</td><td>1</td>") && tag25.includes("<td>BGL</td><td>1</td>") && !tag25.includes("U13 1"), "Zahlen je Tag: 25.10. nur seine Öffnung");
   ok(tag24.includes("<td>16 Uhr</td><td>2</td>") && !tag24.includes("BGL") && tag24.includes("<td>U9 1</td><td>2</td>"), "Zahlen je Tag: 24.10. ohne den 25.");
   ok(gesamt.includes("<td>BGL</td><td>1</td>") && gesamt.includes("<td>U13 1</td><td>2</td>") && gesamt.includes("<td>20 Uhr</td>"), "Zahlen zusammen: beide Tage");
   ok(erste.get("2026-10-25|web") === 1 && erste.get("2026-10-25|app") === 1 && erste.size === 2, "Neue Nutzer: nur mit erst, je App/Browser");
-  ok(zwei.includes("<td>2 <small>(App 1, Browser 1)</small></td>") && zwei.includes("<td>2026-10-24</td><td>2</td><td>4</td><td>1 / 2</td><td>1 / 1</td><td>0</td>") && zwei.includes("Öffnungen, 2 neu</summary>"), "Zahlen-Seite: Spalte Neu");
-  ok(zwei.indexOf("<details open><summary>2026-10-25") > 0 && !zwei.includes("<details open><summary>2026-10-24"), "neuester Tag aufgeklappt, ältere zu");
+  ok(zwei.includes("<td>So 25.10.</td><td>2</td><td>3</td><td>1 / 2</td><td>1 / 1</td><td>2</td>") && zwei.includes("<td>Sa 24.10.</td><td>2</td><td>4</td><td>1 / 2</td><td>1 / 1</td><td>0</td>") && zwei.includes("<td>1 / 1</td><td>0</td>") && zwei.includes("Öffnungen, 2 neu (App 1, Browser 1)</summary>"), "Zahlen-Seite: Spalte Neu");
+  ok(zwei.indexOf("<details open><summary>So 25.10.") > 0 && !zwei.includes("<details open><summary>Sa 24.10."), "neuester Tag aufgeklappt, ältere zu");
   // Eigenes Gerät: nur in der Tabelle ich, nirgends sonst.
   const vorherT = JSON.stringify([...tage, ...rei, ...arten, ...std, ...ges, ...erste]);
   await worker.fetch(new Request("https://w/?zaehle=1&neu=1&erst=1&art=app&reiter=U13%201&ich=1"), { DB: db });

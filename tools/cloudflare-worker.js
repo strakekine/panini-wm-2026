@@ -181,7 +181,7 @@ const TAB_ICH = "CREATE TABLE IF NOT EXISTS ich (tag TEXT NOT NULL, was TEXT NOT
 export async function ichZaehlen(db, tag, was) {
   await db.batch([db.prepare(TAB_ICH), db.prepare("INSERT INTO ich (tag, was, n) VALUES (?1, ?2, 1) ON CONFLICT(tag, was) DO UPDATE SET n = n + 1").bind(tag, was)]);
 }
-export async function zahlenSeite(db) {
+export async function zahlenSeite(db, zusatz = "") {
   const tage = (await db.prepare("SELECT tag, handys, oeffnungen FROM tage ORDER BY tag DESC LIMIT 30").all()).results || [];
   const ab = tage.at(-1)?.tag || "";
   // Ältere Datenbanken haben die Tabellen arten/stunden/angesehen erst nach dem ersten neuen Zählen.
@@ -216,6 +216,7 @@ export async function zahlenSeite(db) {
 td,th{padding:6px 6px;border-bottom:1px solid #ddd;text-align:right;white-space:nowrap}td:first-child,th:first-child{text-align:left}h2{margin-top:28px}h3{font-size:15px;margin:16px 0 4px}
 table.haupt{font-size:14px}table.haupt td,table.haupt th{padding:6px 3px}.breit{overflow-x:auto}
 td.bar{width:50%;text-align:left}td.bar span{display:inline-block;height:10px;background:#1aa39a;border-radius:2px}
+table.mitt td,table.mitt th{white-space:normal;vertical-align:top;font-size:13px;text-align:left}table.mitt small{color:#666}
 details{max-width:520px;border:1px solid #ddd;border-radius:10px;padding:8px 12px;margin:8px 0}summary{cursor:pointer;font-weight:700;color:#0f7a65}</style>
 <h1>FC Koeppchen · Zahlen</h1><p>Handys = verschiedene Handys am Tag, Öffn. = Öffnungen, also Starts (oder zurück nach ≥ 30 min).
 App = vom Home-Bildschirm, Browser = in Safari o. Ä., je „Handys / Öffnungen“. Wer beides benutzt, zählt bei den Handys zweimal.
@@ -224,7 +225,8 @@ Neu = zum allerersten Mal geöffnet (gezählt ab 21.10.2026); wer die App aus Sa
 <h2>Je Tag</h2>${jeTag || "<p>—</p>"}
 <h2>Alle 30 Tage zusammen</h2>${teile("", ", dieselben Tage")}
 <h2>Eigene Geräte (nicht mitgezählt)</h2><p>Geräte, die in der App als eigenes markiert sind (5× auf „Gemacht von …“ tippen). Sie stehen nur hier.</p>
-<table><tr><th>Tag</th><th>Öffnungen</th><th>Umschalten</th></tr>${ichTage.map(t => `<tr><td>${kurz(t)}</td><td>${ichN(t, "oeffnung")}</td><td>${ichN(t, "umschalten")}</td></tr>`).join("") || "<tr><td colspan=3>—</td></tr>"}</table>`;
+<table><tr><th>Tag</th><th>Öffnungen</th><th>Umschalten</th></tr>${ichTage.map(t => `<tr><td>${kurz(t)}</td><td>${ichN(t, "oeffnung")}</td><td>${ichN(t, "umschalten")}</td></tr>`).join("") || "<tr><td colspan=3>—</td></tr>"}</table>
+${zusatz}`;
 }
 
 // ---- Mitteilungen (Web Push), Stufe 1: nur Erlauben und Test-Mitteilung (vom Nutzer, 21.10.2026) ----
@@ -366,6 +368,36 @@ export function liveEreignisse(c, k, now) {
     aus.push({ id: c.ende, reiter: c.reiter, art: "ende", titel: `${c.titel} · Endstand`, text: stand(), ab: now, bis: now + 18 * 3600e3 });
   return aus;
 }
+async function gemeldetSpalten(db) {
+  for (const sp of ["titel TEXT", "ab INTEGER", "an INTEGER", "passend INTEGER", "fehler TEXT", "verpasst INTEGER"])
+    try { await db.prepare("ALTER TABLE gemeldet ADD COLUMN " + sp).run(); } catch (e) { /* gibt es schon */ }
+}
+// Übersicht auf der Zahlen-Seite (vom Nutzer, 21.10.2026): was geplant war, was rausging, an wie viele
+// Handys, was schiefging — nicht nur „was ging raus“, sonst sähe man Lücken nicht.
+const zeitLux = ms => new Date(ms).toLocaleString("de-DE", { timeZone: "Europe/Luxembourg", weekday: "short", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" });
+export function mittStatus(e, g, now) {
+  if (g?.verpasst) return "✗ nicht verschickt (abgelaufen" + (g.ab && !tagzeit(g.ab) ? ", war nachts fällig" : "") + ")";
+  if (g) return `✓ ${zeitLux(g.zeit)} an ${g.an ?? "?"} von ${g.passend ?? "?"} Handys` + (g.passend === 0 ? " (niemand hat es angehakt)" : "") + (g.fehler ? ` · Fehler: ${g.fehler}` : "");
+  if (e.ab > now) return "⏳ wartet";
+  if (!tagzeit(now)) return "🌙 wartet bis 7 Uhr";
+  return "⏳ geht in der nächsten Minute raus";
+}
+export async function mitteilungenStand(db, datei, now = Date.now()) {
+  const alle = async sql => { try { return (await db.prepare(sql).all()).results || []; } catch (e) { return []; } };
+  const abos = await alle("SELECT wahl FROM abos");
+  const offen = (await alle("SELECT ereignis FROM offen")).map(z => JSON.parse(z.ereignis));
+  const gem = new Map((await alle("SELECT * FROM gemeldet")).filter(g => g.zeit > now - 7 * 24 * 3600e3).map(g => [g.id, g]));
+  const ev = new Map();
+  for (const e of [...(datei?.ereignisse || []), ...offen]) ev.set(e.id, e);
+  for (const [id, g] of gem) if (!ev.has(id)) ev.set(id, { id, titel: g.titel || id, ab: g.ab || g.zeit });
+  const zeilen = [...ev.values()].sort((a, b) => b.ab - a.ab).slice(0, 50)
+    .map(e => `<tr><td>${esc(e.titel)}${e.text ? `<br><small>${esc(e.text)}</small>` : ""}</td><td>${zeitLux(e.ab)}</td><td class="st">${esc(mittStatus(e, gem.get(e.id), now))}</td></tr>`).join("");
+  const live = (datei?.live || []).map(c => `<li>${esc(c.titel)}: ${zeitLux(Date.parse(c.d))} gegen ${esc(c.gegner)} — FuPa wird vom Anpfiff bis 3 h danach jede Minute geprüft${c.slug || c.anstoss ? "" : " (noch ohne FuPa-Spiel)"}</li>`).join("");
+  return `<h2>Mitteilungen</h2><p>${abos.length} ${abos.length === 1 ? "Handy" : "Handys"} angemeldet, davon ${abos.filter(a => a.wahl).length} mit Auswahl. Gesendet wird 7–22 Uhr.</p>
+${live ? `<h3>Heute mit Liveticker</h3><ul>${live}</ul>` : ""}
+<table class="mitt"><tr><th>Mitteilung</th><th>fällig ab</th><th>Stand</th></tr>${zeilen || "<tr><td colspan=3>noch nichts geplant</td></tr>"}</table>`;
+}
+const esc = t => String(t ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 export async function mitteilungenSenden(db, now = Date.now()) {
   await abosSpalte(db);
   const abos = (await db.prepare("SELECT endpoint, abo, wahl FROM abos WHERE wahl IS NOT NULL").all()).results || [];
@@ -374,6 +406,7 @@ export async function mitteilungenSenden(db, now = Date.now()) {
     db.prepare("CREATE TABLE IF NOT EXISTS gemeldet (id TEXT PRIMARY KEY, zeit INTEGER NOT NULL)"),
     db.prepare("CREATE TABLE IF NOT EXISTS offen (id TEXT PRIMARY KEY, ereignis TEXT NOT NULL)"),
   ]);
+  await gemeldetSpalten(db);
   let datei = { ereignisse: [], live: [] };
   try { const r = await fetch(MITT_URL, { headers: { "cache-control": "no-cache" } }); if (r.ok) datei = await r.json(); } catch (e) { console.log("Mitteilungen lesen:", e.message); }
   const schon = async id => !!(await db.prepare("SELECT id FROM gemeldet WHERE id = ?1").bind(id).first());
@@ -401,19 +434,30 @@ export async function mitteilungenSenden(db, now = Date.now()) {
   const offen = ((await db.prepare("SELECT ereignis FROM offen").all()).results || []).map(z => JSON.parse(z.ereignis));
   let gesendet = 0;
   for (const e of [...(datei.ereignisse || []), ...offen]) {
-    if (e.bis <= now) { await db.prepare("DELETE FROM offen WHERE id = ?1").bind(e.id).run(); continue; }
+    if (e.bis <= now) {
+      // Abgelaufen, ohne rauszugehen (z. B. nachts fällig und vor 7 Uhr vorbei): für die Übersicht festhalten.
+      if (!(await schon(e.id))) await db.prepare("INSERT OR IGNORE INTO gemeldet (id, zeit, titel, ab, verpasst) VALUES (?1, ?2, ?3, ?4, 1)").bind(e.id, now, e.titel, e.ab).run();
+      await db.prepare("DELETE FROM offen WHERE id = ?1").bind(e.id).run();
+      continue;
+    }
     if (e.ab > now || !tagzeit(now) || await schon(e.id)) continue;
     // Erst als gemeldet eintragen, dann senden: lieber eine Mitteilung verpasst als zehnmal dieselbe.
     await db.batch([db.prepare("INSERT OR IGNORE INTO gemeldet (id, zeit) VALUES (?1, ?2)").bind(e.id, now),
                     db.prepare("DELETE FROM offen WHERE id = ?1").bind(e.id)]);
+    let an = 0, passend = 0; const fehler = [];
     for (const a of abos) {
       let wahl = null; try { wahl = JSON.parse(a.wahl); } catch (x) {}
       if (!passtZu(wahl, e)) continue;
-      const r = await pushSenden(db, JSON.parse(a.abo), { titel: e.titel, text: e.text, tag: e.id, url: "fussball.html" }, Math.max(60, Math.round((e.bis - now) / 1000)));
-      if (r.status === 404 || r.status === 410) await db.prepare("DELETE FROM abos WHERE endpoint = ?1").bind(a.endpoint).run();
-      else if (r.status >= 300) console.log("Push", e.id, r.status);
-      else gesendet++;
+      passend++;
+      try {
+        const r = await pushSenden(db, JSON.parse(a.abo), { titel: e.titel, text: e.text, tag: e.id, url: "fussball.html" }, Math.max(60, Math.round((e.bis - now) / 1000)));
+        if (r.status === 404 || r.status === 410) { fehler.push("Handy abgemeldet (" + r.status + ")"); await db.prepare("DELETE FROM abos WHERE endpoint = ?1").bind(a.endpoint).run(); }
+        else if (r.status >= 300) { fehler.push("Push-Dienst " + r.status); console.log("Push", e.id, r.status); }
+        else { an++; gesendet++; }
+      } catch (x) { fehler.push(x.message.slice(0, 80)); }
     }
+    await db.prepare("UPDATE gemeldet SET titel = ?2, ab = ?3, an = ?4, passend = ?5, fehler = ?6 WHERE id = ?1")
+      .bind(e.id, e.titel, e.ab, an, passend, [...new Set(fehler)].join(", ") || null).run();
   }
   await db.prepare("DELETE FROM gemeldet WHERE zeit < ?1").bind(now - 30 * 24 * 3600e3).run();
   return { gesendet };
@@ -451,7 +495,13 @@ export default {
     }
     if (q.has("zahlen")) {
       if (!env.DB) return new Response("Zähler nicht eingerichtet (D1-Binding „DB“ fehlt).", { status: 503, headers: { "content-type": "text/plain; charset=utf-8" } });
-      return new Response(await zahlenSeite(env.DB), { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
+      let zusatz = "";
+      try {
+        let datei = null;
+        try { const r = await fetch(MITT_URL, { headers: { "cache-control": "no-cache" } }); if (r.ok) datei = await r.json(); } catch (e) {}
+        zusatz = await mitteilungenStand(env.DB, datei);
+      } catch (e) { zusatz = "<p>Mitteilungen: " + esc(e.message) + "</p>"; }
+      return new Response(await zahlenSeite(env.DB, zusatz), { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
     }
     let slug = q.get("slug") || "";
     const anstoss = q.get("anstoss") || "";

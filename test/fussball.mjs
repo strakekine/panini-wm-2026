@@ -9,7 +9,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { aufbereiten, spiel, reiter, ics, eigeneSpiele, CLUB, natiSpiel, natiGruppe, natiTabelle, fupaTabelleMitFlfNamen, reserveSlugs } from "../tools/fussball.mjs";
 import { liveAus, gleich as liveGleich, spielJetzt, naechstesSpiel, passendesSpiel } from "../tools/fussball-live.mjs";
-import worker, { kuerzen, passendesSpiel as wPassend, saisonVon, abrufFaellig, zaehlen, zahlenSeite, stundeLux, ansehen, verschluesseln, vapidKopf, mitteilungenSenden, passtZu, liveEreignisse } from "../tools/cloudflare-worker.js";
+import worker, { kuerzen, passendesSpiel as wPassend, saisonVon, abrufFaellig, zaehlen, zahlenSeite, stundeLux, ansehen, verschluesseln, vapidKopf, mitteilungenSenden, passtZu, liveEreignisse, mittStatus, mitteilungenStand } from "../tools/cloudflare-worker.js";
 import { ereignisse as mEreignisse, umLux } from "../tools/mitteilungen.mjs";
 
 const hier = path.dirname(fileURLToPath(import.meta.url));
@@ -701,6 +701,19 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   await mitteilungenSenden(db, Date.parse("2026-10-25T07:00:00+01:00"));
   ok(an.join() === "U13,SEN,SEN" && !T.offen.has("ende:503") && T.gemeldet.has("ende:503"), "Versand: Endstand morgens um 7");
   globalThis.fetch = echt;
+  // Übersicht: geplant, verschickt (an wie viele), nachts wartend, verpasst.
+  const e0 = { id: "x", titel: "T", ab: Date.parse("2026-10-23T19:00:00+02:00") };
+  ok(mittStatus(e0, null, Date.parse("2026-10-23T12:00:00+02:00")) === "⏳ wartet"
+     && mittStatus(e0, null, Date.parse("2026-10-23T23:00:00+02:00")) === "🌙 wartet bis 7 Uhr"
+     && mittStatus(e0, { zeit: e0.ab, an: 1, passend: 1 }, 0) === "✓ Fr., 23.10., 19:00 an 1 von 1 Handys"
+     && mittStatus(e0, { zeit: e0.ab, an: 0, passend: 0 }, 0).includes("niemand hat es angehakt")
+     && mittStatus(e0, { zeit: e0.ab, an: 0, passend: 1, fehler: "Push-Dienst 403" }, 0).endsWith("Fehler: Push-Dienst 403")
+     && mittStatus(e0, { verpasst: 1, ab: Date.parse("2026-10-23T23:00:00+02:00") }, 0) === "✗ nicht verschickt (abgelaufen, war nachts fällig)", "Übersicht: Stand je Mitteilung");
+  const seite = await mitteilungenStand({ prepare: sql => ({ async all() {
+    if (sql.includes("FROM abos")) return { results: [{ wahl: "{}" }, { wahl: null }] };
+    if (sql.includes("FROM gemeldet")) return { results: [{ id: "heute:103", zeit: Date.parse("2026-10-23T19:00:00+02:00"), an: 1, passend: 1, titel: "U13 1 · Morgen Spiel" }] };
+    return { results: [] }; } }) }, sa, Date.parse("2026-10-24T08:00:00+02:00"));
+  ok(seite.includes("2 Handys angemeldet, davon 1 mit Auswahl") && seite.includes("✓ Fr., 23.10., 19:00 an 1 von 1 Handys") && seite.includes("Heute mit Liveticker") && seite.includes("⏳ wartet"), "Übersicht: Seite mit Abos, Live und Stand");
 }
 console.log(fehler ? `${fehler} von ${n} Prüfungen fehlgeschlagen` : `alle ${n} Prüfungen grün`);
 process.exit(fehler ? 1 : 0);

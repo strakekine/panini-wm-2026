@@ -9,7 +9,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { aufbereiten, spiel, reiter, ics, eigeneSpiele, CLUB, natiSpiel, natiGruppe, natiTabelle, fupaTabelleMitFlfNamen, reserveSlugs } from "../tools/fussball.mjs";
 import { liveAus, gleich as liveGleich, spielJetzt, naechstesSpiel, passendesSpiel } from "../tools/fussball-live.mjs";
-import worker, { kuerzen, passendesSpiel as wPassend, saisonVon, abrufFaellig, zaehlen, zahlenSeite, stundeLux, ansehen, verschluesseln, vapidKopf } from "../tools/cloudflare-worker.js";
+import worker, { kuerzen, passendesSpiel as wPassend, saisonVon, abrufFaellig, zaehlen, zahlenSeite, stundeLux, ansehen, verschluesseln, vapidKopf, mitteilungenSenden, passtZu, liveEreignisse } from "../tools/cloudflare-worker.js";
+import { ereignisse as mEreignisse, umLux } from "../tools/mitteilungen.mjs";
 
 const hier = path.dirname(fileURLToPath(import.meta.url));
 const src = fs.readFileSync(path.join(hier, "..", "fussball.html"), "utf8");
@@ -538,7 +539,7 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   const echtSig = pub && await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, pub, Buffer.from(sig, "base64url"), te.encode(h + "." + c));
   const nutz = JSON.parse((await ent(new Uint8Array(o.body))).text);
   ok(t1.status === 200 && url === abo.endpoint && o.headers["content-encoding"] === "aes128gcm" && o.headers.ttl && k === s1.schluessel && echtSig
-     && JSON.parse(Buffer.from(c, "base64url")).aud === "https://web.push.apple.com" && nutz.titel === "FC Koeppchen" && /Test-Mitteilung/.test(nutz.text), "Push: Test-Mitteilung mit gültiger Unterschrift an Apple");
+     && JSON.parse(Buffer.from(c, "base64url")).aud === "https://web.push.apple.com" && /Test-Mitteilung/.test(nutz.titel) && /So sehen/.test(nutz.text), "Push: Test-Mitteilung mit gültiger Unterschrift an Apple");
   ok((await anfrage("test", { endpoint: abo.endpoint })).status === 429 && gesendet.length === 1, "Push: zweiter Test innerhalb 20 s gebremst");
   // Abo beim Dienst weg (410) → Worker vergisst es.
   const abo2 = { ...abo, endpoint: "https://web.push.apple.com/WEG" };
@@ -561,6 +562,121 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   await Promise.all(warten);
   ok(gezeigt.length === 2 && gezeigt[0][1].body === "Heute Spiel um 10:00" && gezeigt[1][0] === "FC Koeppchen" && geoeffnet[0] === "https://strakekine.github.io/panini-wm-2026/fussball.html", "Service Worker: zeigt jede Mitteilung, Tippen öffnet die App");
   ok(!lauscher.fetch, "Service Worker hat keinen fetch-Teil (lädt und speichert nichts)");
+}
+
+// Mitteilungen Stufe 2: Ereignisse aus dem Vergleich alt/neu (kleine, selbst gebaute Daten).
+{
+  const K = "FC Koeppchen Wormeldange";
+  const sp = (id, d, tag, h, a, hs = null, as = null, x = {}) => ({ id, d, tag, h: { id: h[0], n: h[1] }, a: { id: a[0], n: a[1] }, hs, as, gespielt: hs != null, forfait: false, ...x });
+  const neuD = () => ({
+    saison: { id: 9 }, fupa: { 503: "fc-avenir-beggen-mr1-fc-koeppchen-mr1-261024" },
+    teams: [
+      { id: 1, ids: [1], n: K + " I", kat: "U13", reiter: "U13 1", klassen: ["k1"], mit: [] },
+      { id: 2, ids: [2], n: K + " I", kat: "Seniors", reiter: "Seniors 2", klassen: ["k2"], mit: [] },
+      { id: 3, ids: [3], n: K + " I", kat: "U9", reiter: "U9 1", klassen: ["k3"], mit: [] },
+    ],
+    klassen: {
+      k1: { id: "k1", n: "U13 III", typ: "CC", ergebnisse: true, spiele: [
+        sp(101, "2026-10-18T10:00:00+02:00", 5, [1, K + " I"], [11, "FC Mondorf"], 3, 1),
+        sp(102, "2026-10-18T10:00:00+02:00", 5, [12, "US Hostert"], [13, "FC Remich"], 2, 2),
+        sp(103, "2026-10-24T14:00:00+02:00", 6, [14, "AS Hosingen"], [1, K + " I"], null, null, { ort: "Op der Bleech" }) ],
+        tabelle: [{ pl: 1, id: 12, n: "US Hostert", sp: 5, pkt: 11 }, { pl: 2, id: 1, n: K + " I", sp: 5, pkt: 10 }] },
+      k2: { id: "k2", n: "Promotion", typ: "CC", ergebnisse: true, spiele: [
+        sp(201, "2026-10-19T16:00:00+02:00", 7, [2, K + " I"], [21, "FC Titus"], 2, 1),
+        sp(503, "2026-10-24T20:00:00+02:00", 8, [22, "Avenir Beggen"], [2, K + " I"]) ],
+        tabelle: [{ pl: 3, id: 2, n: K + " I", sp: 7, pkt: 13 }] },
+      k3: { id: "k3", n: "U9", typ: "CC", ergebnisse: false, spiele: [
+        sp(301, "2026-10-31T10:00:00+01:00", 3, [3, K + " I"], [31, "US Berdorf"]),
+        sp(302, "2026-10-25T09:30:00+01:00", 2, [3, K + " I"], [32, "FC Rodange"]) ], tabelle: null },
+    },
+    bgl: { spiele: [sp(901, "2026-10-19T16:00:00+02:00", 11, [91, "F91 Dudelange"], [92, "Swift Hesperange"], 1, 0)] },
+    nati: { spiele: [{ id: 801, d: "2026-11-13T20:45:00+01:00", slug: "luxemburg-m1-estland-m1-261113", h: { id: "Luxemburg", n: "Luxemburg" }, a: { id: "Estland", n: "Estland" }, hs: 2, as: 1, gespielt: true, wett: "UEFA Nations League" }] },
+  });
+  const neu = neuD(), alt = neuD();
+  alt.klassen.k1.spiele[1].hs = alt.klassen.k1.spiele[1].as = null;              // Spieltag 5 war noch offen
+  alt.klassen.k1.tabelle = [{ pl: 1, id: 1, n: K + " I", sp: 4, pkt: 9 }, { pl: 2, id: 12, n: "US Hostert", sp: 4, pkt: 8 }];
+  alt.klassen.k2.spiele[0].hs = alt.klassen.k2.spiele[0].as = null;              // Seniors-Ergebnis neu
+  alt.klassen.k2.tabelle = [{ pl: 3, id: 2, n: K + " I", sp: 6, pkt: 10 }];
+  alt.klassen.k3.spiele[0].d = "2026-10-31T00:00:00+01:00";                       // Uhrzeit war offen
+  alt.bgl.spiele[0].hs = alt.bgl.spiele[0].as = null;
+  alt.nati.spiele[0].hs = alt.nati.spiele[0].as = null;
+  const jetzt = Date.parse("2026-10-20T20:00:00+02:00");
+  const m = mEreignisse(alt, neu, null, jetzt), id = x => m.ereignisse.find(e => e.id.startsWith(x));
+  ok(id("spieltag:k1:5")?.text === "Koeppchen I 3:1 FC Mondorf · alle Ergebnisse in der App" && id("spieltag:k1:5").titel === "U13 1 · Spieltag 5 komplett", "Mitteilung: Spieltag komplett mit unserem Ergebnis");
+  ok(id("tabelle:k1")?.text === "Koeppchen I jetzt 2. Platz (vorher 1.) · 10 Punkte" && id("tabelle:k2")?.text === "Koeppchen I jetzt 3. Platz (wie vorher) · 13 Punkte", "Mitteilung: Tabelle mit Platz und vorher");
+  ok(id("ende:201")?.text === "Koeppchen I 2:1 FC Titus" && id("ende:201").reiter[0] === "Seniors 2", "Mitteilung: Endstand Seniors von der FLF");
+  ok(id("zeit:301")?.text === "Sa., 31.10. um 10:00 gegen US Berdorf", "Mitteilung: Uhrzeit steht fest");
+  ok(id("bgl:9:11") && id("nende:801")?.text === "Luxemburg 2:1 Estland", "Mitteilung: BGL-Spieltag und Länderspiel-Endstand");
+  ok(!m.ereignisse.some(e => e.reiter.includes("U9 1") && e.art !== "uhrzeit" && e.art !== "heute"), "Mitteilung: U9 nie Ergebnis, Spieltag oder Tabelle");
+  ok(!id("heute:") && m.live.length === 0, "Mitteilung: kein Spiel heute → kein Heute Spiel, keine Live-Kandidaten");
+  // Ohne Änderung entsteht nichts Neues; ein zweiter Lauf behält die offenen, ohne sie zu doppeln.
+  ok(mEreignisse(neu, neu, null, jetzt).ereignisse.length === 0, "Mitteilung: gleicher Stand → nichts");
+  const m2 = mEreignisse(alt, neu, m, jetzt + 60e3);
+  ok(m2.ereignisse.length === m.ereignisse.length && m2.ereignisse.every((e, i) => e.ab === m.ereignisse[i].ab), "Mitteilung: zweiter Lauf doppelt nichts");
+  ok(mEreignisse(neu, neu, m, jetzt + 25 * 3600e3).ereignisse.every(e => e.bis > jetzt + 25 * 3600e3), "Mitteilung: abgelaufene fallen raus");
+  // Heute Spiel und Live am Spieltag; Spiel vor 10 Uhr schon am Vorabend um 19 Uhr.
+  const sa = mEreignisse(neu, neu, null, Date.parse("2026-10-24T06:00:00+02:00"));
+  const h = sa.ereignisse.find(e => e.id === "heute:103"), s2 = sa.ereignisse.find(e => e.id === "heute:503"), u9 = sa.ereignisse.find(e => e.id === "heute:302");
+  ok(h?.titel === "U13 1 · Heute Spiel" && h.text === "14:00 gegen AS Hosingen · 📍 Op der Bleech" && h.ab === Date.parse("2026-10-24T07:30:00+02:00") && h.bis === Date.parse("2026-10-24T14:00:00+02:00"), "Mitteilung: Heute Spiel um 7:30, bis Anpfiff");
+  ok(u9?.titel === "U9 1 · Morgen früh Spiel" && u9.ab === Date.parse("2026-10-24T19:00:00+02:00"), "Mitteilung: Spiel um 9:30 schon am Vorabend um 19 Uhr");
+  ok(s2 && sa.live.length === 1 && sa.live[0].slug === "fc-avenir-beggen-mr1-fc-koeppchen-mr1-261024" && sa.live[0].ende === "ende:503" && !sa.live[0].wirHeim, "Mitteilung: Seniors-Spiel heute als Live-Kandidat");
+  const mo = mEreignisse(neu, neu, null, Date.parse("2026-10-25T22:30:00+01:00")).ereignisse.find(e => e.id === "woche:2026-10-26");
+  ok(mo?.text === "Diese Woche 1 Spiel, davon 1 zu Hause" && mo.ab === umLux("2026-10-26", 7, 30), "Mitteilung: Unsere Woche, ab So 22 Uhr für Montag 7:30 vorbereitet");
+  // Live im Worker: Ticker erst mit echtem Inhalt; Endstand nach FLF-Reihenfolge (FuPa hier vertauscht).
+  const c = sa.live[0], t0 = Date.parse(c.d) + 30 * 60e3;
+  ok(liveEreignisse(c, { section: "LIVE", hs: null, as: null, ticker: null, tore: [] }, t0).length === 0, "Live: FuPas automatisches LIVE ohne Tickerer → nichts");
+  const tk = liveEreignisse(c, { section: "LIVE", hs: 0, as: 0, ticker: "Paul", tore: [] }, t0)[0];
+  ok(tk?.id === "ticker:503" && tk.text === "Heute tickert FuPa das Spiel gegen Avenir Beggen – live in der App.", "Live: Liveticker läuft");
+  const en = liveEreignisse({ ...c, wirHeim: true, h: "Koeppchen I", a: "Avenir Beggen" }, { section: "POST", slug: c.slug, hs: 3, as: 1, tore: [] }, t0)[0];
+  ok(en?.text === "Koeppchen I 1:3 Avenir Beggen", "Live: Endstand dreht FuPas Zahlen, wenn FuPa Heim/Gast vertauscht");
+  ok(liveEreignisse(c, { section: "POST", slug: c.slug, hs: 3, as: 1, tore: [] }, t0)[0].text === "Avenir Beggen 3:1 Koeppchen I", "Live: Endstand ohne Vertauschen");
+  ok(passtZu({ teams: ["U13 1"], arten: ["heute"] }, h) && !passtZu({ teams: ["U13 2"], arten: ["heute"] }, h) && !passtZu({ teams: ["U13 1"], arten: ["tabelle"] }, h)
+     && passtZu({ teams: ["Woche"], arten: [] }, mo) && !passtZu(null, h), "Mitteilung: nur an gewählte Mannschaft und Art");
+
+  // Versand im Worker mit nachgebautem D1: gewählt, einmal, nachts nicht, Live aus FuPa.
+  const T = { abos: new Map(), gemeldet: new Map(), offen: new Map(), k: null };
+  const db = { prepare: sql => ({ a: [], bind(...a) { this.a = a; return this; },
+    async run() {
+      const [x, y] = this.a;
+      if (sql.startsWith("INSERT OR IGNORE INTO push_schluessel") && !T.k) T.k = { privat: x, oeffentlich: y };
+      if (sql.startsWith("INSERT OR IGNORE INTO gemeldet")) T.gemeldet.has(x) || T.gemeldet.set(x, y);
+      if (sql.startsWith("INSERT OR IGNORE INTO offen")) T.offen.has(x) || T.offen.set(x, y);
+      if (sql.startsWith("DELETE FROM offen")) T.offen.delete(x);
+      if (sql.startsWith("DELETE FROM abos")) T.abos.delete(x);
+      if (sql.startsWith("DELETE FROM gemeldet")) for (const [k, z] of T.gemeldet) if (z < x) T.gemeldet.delete(k);
+    },
+    async first() { if (sql.includes("push_schluessel")) return T.k; if (sql.includes("FROM gemeldet")) return T.gemeldet.has(this.a[0]) ? { id: this.a[0] } : null; return null; },
+    async all() { if (sql.includes("FROM abos")) return { results: [...T.abos.values()].filter(z => z.wahl) }; if (sql.includes("FROM offen")) return { results: [...T.offen.values()].map(ereignis => ({ ereignis })) }; return { results: [] }; } }),
+    batch: async l => { for (const x of l) await x.run(); } };
+  const b64 = x => Buffer.from(x).toString("base64url");
+  const ua = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]);
+  const schl = { p256dh: b64(await crypto.subtle.exportKey("raw", ua.publicKey)), auth: b64(crypto.getRandomValues(new Uint8Array(16))) };
+  const abo = (e, wahl) => T.abos.set(e, { endpoint: e, abo: JSON.stringify({ endpoint: e, keys: schl }), wahl: wahl && JSON.stringify(wahl) });
+  abo("https://web.push.apple.com/U13", { teams: ["U13 1"], arten: ["heute", "spieltag"] });
+  abo("https://web.push.apple.com/SEN", { teams: ["Seniors 2"], arten: ["ticker", "ende"] });
+  abo("https://web.push.apple.com/OHNE", null);
+  const echt = globalThis.fetch, an = [];
+  let fupa = { slug: c.slug, section: "LIVE", homeGoal: 0, awayGoal: 0, tickerAuthor: { name: "Paul" }, highlights: [] };
+  globalThis.fetch = async (url, o) => {
+    if (String(url).includes("mitteilungen.json")) return new Response(JSON.stringify(sa));
+    if (String(url).includes("api.fupa.net")) return new Response(JSON.stringify(fupa));
+    an.push(url.split("/").pop()); return new Response("", { status: 201 });
+  };
+  const nacht = Date.parse("2026-10-24T06:45:00+02:00"), morgen = Date.parse("2026-10-24T07:30:00+02:00"), spiel = Date.parse("2026-10-24T20:30:00+02:00");
+  await mitteilungenSenden(db, nacht);
+  ok(an.length === 0, "Versand: vor 7:30 nichts (Heute Spiel ab 7:30)");
+  await mitteilungenSenden(db, morgen);
+  ok(an.join() === "U13" && T.gemeldet.has("heute:103") && T.gemeldet.has("heute:503"), "Versand: Heute Spiel nur an U13, Seniors-Abo hat „heute“ nicht gewählt, ohne Auswahl nichts");
+  await mitteilungenSenden(db, morgen + 15 * 60e3);
+  ok(an.length === 1, "Versand: dasselbe nie zweimal");
+  await mitteilungenSenden(db, spiel);
+  ok(an.join() === "U13,SEN" && T.gemeldet.has("ticker:503"), "Versand: Liveticker läuft an Seniors 2");
+  fupa = { ...fupa, section: "POST", homeGoal: 1, awayGoal: 4 };
+  await mitteilungenSenden(db, Date.parse("2026-10-24T22:05:00+02:00"));
+  ok(an.length === 2 && T.offen.has("ende:503"), "Versand: Endstand nach 22 Uhr wartet");
+  await mitteilungenSenden(db, Date.parse("2026-10-25T07:00:00+01:00"));
+  ok(an.join() === "U13,SEN,SEN" && !T.offen.has("ende:503") && T.gemeldet.has("ende:503"), "Versand: Endstand morgens um 7");
+  globalThis.fetch = echt;
 }
 console.log(fehler ? `${fehler} von ${n} Prüfungen fehlgeschlagen` : `alle ${n} Prüfungen grün`);
 process.exit(fehler ? 1 : 0);

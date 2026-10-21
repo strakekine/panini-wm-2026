@@ -127,6 +127,10 @@
   .mitt .knopf{display:block;width:100%;margin-top:8px;background:var(--accent);color:#fff;border:0;border-radius:10px;padding:11px;font-family:inherit;font-weight:700;font-size:14.5px;cursor:pointer}
   .mitt .knopf.zweit{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
   .mitt .stand{font-size:13px;color:var(--muted);margin-top:10px;min-height:1em}
+  .mitt .mh{font-size:14px;margin:14px 0 6px}
+  .mitt .haken{display:block;font-size:14px;padding:5px 0}
+  .mitt .haken input{width:18px;height:18px;vertical-align:-3px;margin-right:6px;accent-color:var(--accent)}
+  .mitt .haken2{display:grid;grid-template-columns:1fr 1fr;column-gap:10px}
 </style>
 </head>
 <body>
@@ -520,7 +524,7 @@ function wocheBilanz(alle) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "21.10.2026 c";
+const FASSUNG = "21.10.2026 d";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -1113,8 +1117,12 @@ async function mittHtml() {
   else {
     const r = await swReg().catch(() => null);
     const abo = r && await r.pushManager.getSubscription().catch(() => null);
+    const w = mWahl(), haken = (gruppe, wert, text, an) =>
+      `<label class="haken"><input type="checkbox" data-g="${gruppe}" value="${esc(wert)}"${an ? " checked" : ""}> ${esc(text)}</label>`;
     h = abo && Notification.permission === "granted"
-      ? `<p>✓ Mitteilungen sind auf diesem Gerät erlaubt.</p>
+      ? `<p>✓ Mitteilungen sind auf diesem Gerät erlaubt. Nachts (22–7 Uhr) kommt nichts, das wartet bis morgens.</p>
+         <h3 class="mh">Meine Mannschaften</h3><div class="haken2">${mReiter().map(r => haken("t", r, r === "Woche" ? "Unsere Woche (montags)" : r, w.teams.includes(r))).join("")}</div>
+         <h3 class="mh">Was soll kommen</h3>${M_ARTEN.map(([k, t]) => haken("a", k, t, w.arten.includes(k))).join("")}
          <button class="knopf" id="mTest">Test-Mitteilung senden</button>
          <button class="knopf zweit" id="mAus">Abmelden</button>`
       : `<p>Probe für Stufe 1: iOS fragt einmal, ob die App Mitteilungen schicken darf. Danach kannst du dir eine Test-Mitteilung schicken.</p>
@@ -1124,6 +1132,32 @@ async function mittHtml() {
     <div class="stand" id="mStand">${esc(MITT_STAND)}</div></div></section>`;
   box.hidden = false;
 }
+// Auswahl (Stufe 2): Mannschaften und Arten, gemerkt auf dem Handy und beim Worker (?push=wahl).
+// Was es bei einer Mannschaft nicht gibt (Spieltag bei den Seniors), kommt dort einfach nicht.
+const M_ARTEN = [["heute", "Heute Spiel (morgens 7:30; vor 10 Uhr am Vorabend)"], ["spieltag", "Spieltag komplett (U13, U15, BGL)"],
+  ["tabelle", "Tabelle aktualisiert (U13, U15, Seniors)"], ["uhrzeit", "Uhrzeit steht fest"],
+  ["ticker", "Liveticker läuft (Seniors, Roude Léiw)"], ["ende", "Endstand (Seniors, Roude Léiw)"]];
+const mReiter = () => [...(D?.teams || []).filter(t => t.reiter).map(t => t.reiter), "BGL", "Roude Léiw", "Woche"];
+function mWahl() {
+  try { const w = JSON.parse(localStorage.getItem(KEY + "_mwahl")); if (w && Array.isArray(w.teams) && Array.isArray(w.arten)) return w; } catch (e) {}
+  return { teams: [], arten: M_ARTEN.map(a => a[0]) };
+}
+async function mWahlSenden() {
+  const reg = await swReg(), abo = reg && await reg.pushManager.getSubscription();
+  if (!abo) return;
+  const a = await pushPost("wahl", { endpoint: abo.endpoint, ...mWahl() }).catch(() => ({ ok: false }));
+  MITT_STAND = a.ok ? "Gespeichert." : "Speichern ging nicht (" + (a.status || "?") + ").";
+  const st = document.getElementById("mStand"); if (st) st.textContent = MITT_STAND;
+}
+document.addEventListener("change", e => {
+  const c = e.target.closest("#mitt input[type=checkbox]");
+  if (!c) return;
+  const w = mWahl(), feld = c.dataset.g === "t" ? "teams" : "arten";
+  w[feld] = w[feld].filter(x => x !== c.value);
+  if (c.checked) w[feld].push(c.value);
+  try { localStorage.setItem(KEY + "_mwahl", JSON.stringify(w)); } catch (x) {}
+  mWahlSenden();
+});
 async function mittAn() {
   // Erst fragen, direkt im Tippen — iOS lässt die Frage nur so zu.
   const erlaubt = await Notification.requestPermission();
@@ -1136,7 +1170,8 @@ async function mittAn() {
     const roh = Uint8Array.from(atob(schluessel.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((schluessel.length + 3) % 4)), c => c.charCodeAt(0));
     const abo = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: roh });
     const a = await pushPost("anmelden", abo.toJSON());
-    MITT_STAND = a.ok ? "Angemeldet. Jetzt „Test-Mitteilung senden“ tippen." : "Anmelden beim Worker ging nicht (" + a.status + ").";
+    if (a.ok) await pushPost("wahl", { endpoint: abo.endpoint, ...mWahl() }).catch(() => {});
+    MITT_STAND = a.ok ? "Angemeldet. Jetzt Mannschaften anhaken und „Test-Mitteilung senden“ tippen." : "Anmelden beim Worker ging nicht (" + a.status + ").";
   } catch (e) { MITT_STAND = "Fehler: " + e.message; }
   mittHtml();
 }

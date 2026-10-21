@@ -5,7 +5,7 @@ Gesammelt, noch nicht gebaut. Wer etwas davon angeht, streicht es hier und träg
 
 ## Vorgemerkt (vom Nutzer, 20.10.2026)
 
-### Mitteilungen (Plan vom Nutzer, 21.10.2026 — Stufe 1 gebaut 21.10., Fassung c, Rest offen)
+### Mitteilungen (Plan vom Nutzer, 21.10.2026 — Stufe 1 und 2 gebaut 21.10., Fassung c/d; Stufe 3 „für alle“ offen)
 
 Ursprünglich vorgemerkt am 20.10. als „Spieltag komplett“ / „Tabelle aktualisiert“; am 21.10. mit dem
 Nutzer ausgearbeitet. Entscheiden, wann gebaut wird, wenn der Zähler zeigt, dass die App genutzt wird

@@ -22,6 +22,7 @@ export const AGES = [
   { id: 9999, kat: "Seniors", n: "Seniors Réserves", plus: 1 },
 ];
 const OUT = new URL("../data/fussball.json", import.meta.url);
+const MITT = new URL("../data/mitteilungen.json", import.meta.url);
 const KAL = new URL("../kalender/", import.meta.url);
 export const VEREIN = "FC Koeppchen Wormeldange";
 
@@ -426,6 +427,15 @@ async function main() {
   try { neu.bgl = await bglHolen(saison, zeit, alt.bgl); } catch (e) { console.error("BGL:", e.message); neu.bgl = alt.bgl || null; }
   try { neu.nati = await natiHolen(); } catch (e) { console.error("Nationalteam:", e.message); neu.nati = alt.nati || null; }
   try { neu.fupa = await reserveHolen(neu, saison); } catch (e) { console.error("FuPa Reserven:", e.message); neu.fupa = alt.fupa || {}; }
+  // Mitteilungen: Ereignisse aus dem Vergleich alt/neu (tools/mitteilungen.mjs). Vor der
+  // „unverändert“-Prüfung, weil „Heute Spiel“ auch ohne neue FLF-Daten fällig wird. Darf den
+  // Abruf nicht kippen.
+  try {
+    const { ereignisse } = await import("./mitteilungen.mjs");
+    const vorher = existsSync(MITT) ? JSON.parse(readFileSync(MITT, "utf8")) : null;
+    const m = ereignisse(alt.teams ? alt : null, neu, vorher, Date.now());
+    if (JSON.stringify(m) !== JSON.stringify(vorher)) { writeFileSync(MITT, JSON.stringify(m, null, 1) + "\n"); console.log("Mitteilungen:", m.ereignisse.map(e => e.id).join(", ") || "keine"); }
+  } catch (e) { console.error("Mitteilungen:", e.message); }
   // Nur schreiben, wenn sich inhaltlich etwas geändert hat — sonst committet die Action alle 2 h
   // eine Datei, in der nur der Zeitstempel neu ist.
   if (existsSync(OUT)) {

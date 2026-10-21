@@ -311,19 +311,105 @@ export async function pushAnfrage(req, db, was) {
     if (!z) return antwort('{"fehler":"nicht angemeldet"}', 404);
     if (Date.now() - (zuletztGetestet.get(x.endpoint) || 0) < 20e3) return antwort('{"fehler":"zu schnell"}', 429);
     zuletztGetestet.set(x.endpoint, Date.now());
-    const r = await pushSenden(db, JSON.parse(z.abo), { titel: "FC Koeppchen", text: "Test-Mitteilung ✓ So sehen Mitteilungen der App aus.", url: "fussball.html" });
+    const r = await pushSenden(db, JSON.parse(z.abo), { titel: "Test-Mitteilung ✓", text: "So sehen Mitteilungen der App aus.", url: "fussball.html" });
     // 404/410: Abo gibt es beim Push-Dienst nicht mehr (abgemeldet, App gelöscht) → vergessen.
     if (r.status === 404 || r.status === 410) await db.prepare("DELETE FROM abos WHERE endpoint = ?1").bind(x.endpoint).run();
     if (r.status >= 300) console.log("Push:", r.status, await r.text());
     return antwort(JSON.stringify({ ok: r.status < 300, status: r.status }), r.status < 300 ? 200 : 502);
   }
+  if (was === "wahl") {
+    if (!z) return antwort('{"fehler":"nicht angemeldet"}', 404);
+    const teams = (Array.isArray(x.teams) ? x.teams : []).filter(t => typeof t === "string" && REITER_OK.test(t)).slice(0, 30);
+    const arten = (Array.isArray(x.arten) ? x.arten : []).filter(a => MITT_ARTEN.includes(a));
+    await abosSpalte(db);
+    await db.prepare("UPDATE abos SET wahl = ?2 WHERE endpoint = ?1").bind(x.endpoint, JSON.stringify({ teams, arten })).run();
+    return antwort('{"ok":true}');
+  }
   return antwort('{"fehler":"push"}', 400);
+}
+
+// ---- Mitteilungen, Stufe 2 (vom Nutzer, 21.10.2026): echte Meldungen ----
+// Alle 15 min (Cron): data/mitteilungen.json lesen (schreibt der FLF-Abruf, tools/mitteilungen.mjs),
+// dazu für die Spiele des Tages mit Ticker selbst bei FuPa nachsehen (Liveticker läuft, Endstand).
+// Gesendet wird nur 7–22 Uhr Luxemburger Zeit; was nachts fällig wird, wartet bis 7 Uhr (solange
+// `bis` nicht vorbei ist). Jede id geht nur einmal raus (Tabelle gemeldet).
+const MITT_URL = "https://raw.githubusercontent.com/strakekine/panini-wm-2026/main/data/mitteilungen.json";
+const MITT_ARTEN = ["heute", "spieltag", "tabelle", "uhrzeit", "ticker", "ende", "woche"];
+async function abosSpalte(db) {
+  await db.prepare(TAB_ABOS).run();
+  try { await db.prepare("ALTER TABLE abos ADD COLUMN wahl TEXT").run(); } catch (e) { /* gibt es schon */ }
+}
+// Wer bekommt ein Ereignis? Mannschaft angehakt und Art angehakt; „Unsere Woche“ hängt nur am Haken „Woche“.
+export function passtZu(wahl, e) {
+  if (!wahl || !e.reiter.some(r => wahl.teams.includes(r))) return false;
+  return e.art === "woche" || wahl.arten.includes(e.art);
+}
+export const tagzeit = ms => { const h = stundeLux(ms); return h >= 7 && h < 22; };
+// Liveticker und Endstand für ein Spiel des Tages (Kandidat aus mitteilungen.json → live).
+export function liveEreignisse(c, k, now) {
+  const aus = [], d = Date.parse(c.d);
+  if (k.section === "LIVE" && (k.hs != null || k.ticker || k.tore.length))
+    aus.push({ id: c.ticker, reiter: c.reiter, art: "ticker", titel: `${c.titel} · Liveticker`,
+               text: `Heute tickert FuPa das Spiel gegen ${c.gegner} – live in der App.`, ab: now, bis: d + 180 * 60e3 });
+  if (k.section === "POST" && k.hs != null && k.as != null) {
+    // FuPa führt Heim/Gast manchmal andersherum als die FLF (Beggen–Koeppchen II): Zahlen nach FLF drehen.
+    const gleich = (k.slug || "").startsWith(c.fupaWir) === c.wirHeim;
+    const [h, a] = gleich ? [k.hs, k.as] : [k.as, k.hs];
+    aus.push({ id: c.ende, reiter: c.reiter, art: "ende", titel: `${c.titel} · Endstand`, text: `${c.h} ${h}:${a} ${c.a}`, ab: now, bis: now + 18 * 3600e3 });
+  }
+  return aus;
+}
+export async function mitteilungenSenden(db, now = Date.now()) {
+  await abosSpalte(db);
+  const abos = (await db.prepare("SELECT endpoint, abo, wahl FROM abos WHERE wahl IS NOT NULL").all()).results || [];
+  if (!abos.length) return { gesendet: 0 };
+  await db.batch([
+    db.prepare("CREATE TABLE IF NOT EXISTS gemeldet (id TEXT PRIMARY KEY, zeit INTEGER NOT NULL)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS offen (id TEXT PRIMARY KEY, ereignis TEXT NOT NULL)"),
+  ]);
+  let datei = { ereignisse: [], live: [] };
+  try { const r = await fetch(MITT_URL, { headers: { "cache-control": "no-cache" } }); if (r.ok) datei = await r.json(); } catch (e) { console.log("Mitteilungen lesen:", e.message); }
+  const schon = async id => !!(await db.prepare("SELECT id FROM gemeldet WHERE id = ?1").bind(id).first());
+  // Live: Spiele vom Anpfiff bis 3 h danach, höchstens eine FuPa-Abfrage je Spiel und Takt.
+  for (const c of datei.live || []) {
+    const d = Date.parse(c.d);
+    if (now < d || now > d + 180 * 60e3) continue;
+    if ((await schon(c.ende))) continue;
+    try {
+      const slug = c.slug || (c.anstoss && await slugZu(c.anstoss));
+      if (!slug) continue;
+      const r = await fetch(API + slug, { headers: { accept: "application/json" } });
+      if (!r.ok) continue;
+      for (const e of liveEreignisse(c, kuerzen(await r.json()), now))
+        await db.prepare("INSERT OR IGNORE INTO offen (id, ereignis) VALUES (?1, ?2)").bind(e.id, JSON.stringify(e)).run();
+    } catch (e) { console.log("Live", c.id, e.message); }
+  }
+  const offen = ((await db.prepare("SELECT ereignis FROM offen").all()).results || []).map(z => JSON.parse(z.ereignis));
+  let gesendet = 0;
+  for (const e of [...(datei.ereignisse || []), ...offen]) {
+    if (e.bis <= now) { await db.prepare("DELETE FROM offen WHERE id = ?1").bind(e.id).run(); continue; }
+    if (e.ab > now || !tagzeit(now) || await schon(e.id)) continue;
+    // Erst als gemeldet eintragen, dann senden: lieber eine Mitteilung verpasst als zehnmal dieselbe.
+    await db.batch([db.prepare("INSERT OR IGNORE INTO gemeldet (id, zeit) VALUES (?1, ?2)").bind(e.id, now),
+                    db.prepare("DELETE FROM offen WHERE id = ?1").bind(e.id)]);
+    for (const a of abos) {
+      let wahl = null; try { wahl = JSON.parse(a.wahl); } catch (x) {}
+      if (!passtZu(wahl, e)) continue;
+      const r = await pushSenden(db, JSON.parse(a.abo), { titel: e.titel, text: e.text, tag: e.id, url: "fussball.html" }, Math.max(60, Math.round((e.bis - now) / 1000)));
+      if (r.status === 404 || r.status === 410) await db.prepare("DELETE FROM abos WHERE endpoint = ?1").bind(a.endpoint).run();
+      else if (r.status >= 300) console.log("Push", e.id, r.status);
+      else gesendet++;
+    }
+  }
+  await db.prepare("DELETE FROM gemeldet WHERE zeit < ?1").bind(now - 30 * 24 * 3600e3).run();
+  return { gesendet };
 }
 
 export default {
   async scheduled(event, env, ctx) {
     // Auf die volle Viertelstunde runden: Cloudflare startet den Takt manchmal ein paar Sekunden später.
     const t = Math.round(event.scheduledTime / 60e3) * 60e3;
+    if (env.DB) ctx.waitUntil(mitteilungenSenden(env.DB, t).catch(e => console.log("Mitteilungen:", e.message)));
     if (!env.GITHUB_TOKEN || !abrufFaellig(t)) return;
     ctx.waitUntil(anstossen(env));
   },

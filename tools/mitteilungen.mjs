@@ -25,7 +25,7 @@ const hatErgebnis = sp => sp.hs != null && sp.as != null;
 // Welche Arten es für welchen Reiter gibt (Tabelle im Plan). Woche hat nur „woche“.
 export const ARTEN = {
   heute: "Heute Spiel", spieltag: "Spieltag komplett", tabelle: "Tabelle aktualisiert",
-  uhrzeit: "Uhrzeit steht fest", ticker: "Liveticker läuft", ende: "Endstand", woche: "Neue Woche",
+  uhrzeit: "Uhrzeit steht fest", ticker: "Liveticker läuft", halbzeit: "Halbzeit", ende: "Endstand", woche: "Neue Woche",
 };
 
 // Die aktuelle Ligaklasse einer Mannschaft (zuletzt begonnen, wie in der App).
@@ -81,7 +81,7 @@ export function ereignisse(alt, neu, vorher, now) {
       if (tag === heute && !hatErgebnis(sp))
         live.push({ id: sp.id, reiter, titel: name, d: sp.d, h: kurz(sp.h.n), a: kurz(sp.a.n), wirHeim: wirH, gegner,
                     slug: neu.fupa?.[sp.id] || undefined, anstoss: reiter.includes("Seniors 1") ? sp.d : undefined,
-                    fupaWir: "fc-koeppchen", ticker: "ticker:" + sp.id, ende: "ende:" + sp.id });
+                    fupaWir: "fc-koeppchen", ticker: "ticker:" + sp.id, halbzeit: "halbzeit:" + sp.id, ende: "ende:" + sp.id });
     }
   }
 
@@ -122,7 +122,7 @@ export function ereignisse(alt, neu, vorher, now) {
       dazu({ ...basis, id: "nheute:" + sp.id, art: "heute", titel: "Roude Léiw · Heute Länderspiel",
              text: `${uhr(sp.d)} gegen ${gegner}` + (sp.wett ? ` · ${sp.wett}` : ""), ab: umLux(heute, 10), bis: d });
       if (sp.slug) live.push({ id: sp.id, reiter: ["Roude Léiw"], titel: "Roude Léiw", d: sp.d, h: sp.h.n, a: sp.a.n, wirHeim: lux,
-                               gegner, slug: sp.slug, fupaWir: "luxemburg-m1", ticker: "nticker:" + sp.id, ende: "nende:" + sp.id });
+                               gegner, slug: sp.slug, fupaWir: "luxemburg-m1", ticker: "nticker:" + sp.id, halbzeit: "nhalbzeit:" + sp.id, ende: "nende:" + sp.id });
     }
     const a = altNati.get(sp.id);
     if (a && !hatErgebnis(a) && hatErgebnis(sp) && d > now - 48 * H)

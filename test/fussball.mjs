@@ -403,6 +403,8 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(f("2026-10-23T22:15:00+02:00") && !f("2026-10-23T21:15:00+02:00"), "Freitag wie Wochentag, Sommerzeit");
   let tage = 0; for (let t = Date.parse("2026-10-24T00:00:00+02:00"); t < Date.parse("2026-10-31T00:00:00+01:00"); t += 15 * 60e3) tage += abrufFaellig(t);
   ok(f("2026-10-21T23:30:00+02:00") && f("2026-10-31T23:30:00+01:00") && !f("2026-10-21T23:15:00+02:00"), "jeden Abend 23:30 (Sommer und Winter)");
+  let minuten = 0; for (let t = Date.parse("2026-10-24T00:00:00+02:00"); t < Date.parse("2026-10-31T00:00:00+01:00"); t += 60e3) minuten += abrufFaellig(t);
+  ok(minuten === tage, "Takt jede Minute: FLF-Abruf trotzdem nur zu denselben Zeiten");
   ok(tage === 2 * 57 + 5 + 7 + 7, "eine Woche: 57 Anstöße je Wochenendtag + 5 Abende + 7× 23:30 + 7× 7:00, waren " + tage);
   ok(f("2026-10-20T07:00:00+02:00") && !f("2026-10-20T07:15:00+02:00") && f("2026-10-27T07:00:00+01:00"), "7:00 Luxemburger Zeit, auch nach der Zeitumstellung");
   // scheduled(): ohne Token nichts, mit Token genau ein POST an GitHub.
@@ -631,6 +633,10 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(liveEreignisse(c, { section: "LIVE", hs: null, as: null, ticker: null, tore: [] }, t0).length === 0, "Live: FuPas automatisches LIVE ohne Tickerer → nichts");
   const tk = liveEreignisse(c, { section: "LIVE", hs: 0, as: 0, ticker: "Paul", tore: [] }, t0)[0];
   ok(tk?.id === "ticker:503" && tk.text === "Heute tickert FuPa das Spiel gegen Avenir Beggen – live in der App.", "Live: Liveticker läuft");
+  const hz = liveEreignisse(c, { section: "LIVE", period: "halftime", slug: c.slug, hs: 1, as: 0, ticker: "Paul", tore: [] }, t0).find(e => e.art === "halbzeit");
+  ok(hz?.id === "halbzeit:503" && hz.titel === "Seniors 2 · Halbzeit" && hz.text === "Avenir Beggen 1:0 Koeppchen I"
+     && !liveEreignisse(c, { section: "LIVE", period: "secondHalf", slug: c.slug, hs: 1, as: 0, ticker: "Paul", tore: [] }, t0).some(e => e.art === "halbzeit")
+     && !liveEreignisse(c, { section: "LIVE", period: "halftime", hs: null, as: null, tore: [] }, t0).length, "Live: Halbzeit nur in der Pause und nur mit Stand");
   const en = liveEreignisse({ ...c, wirHeim: true, h: "Koeppchen I", a: "Avenir Beggen" }, { section: "POST", slug: c.slug, hs: 3, as: 1, tore: [] }, t0)[0];
   ok(en?.text === "Koeppchen I 1:3 Avenir Beggen", "Live: Endstand dreht FuPas Zahlen, wenn FuPa Heim/Gast vertauscht");
   ok(liveEreignisse(c, { section: "POST", slug: c.slug, hs: 3, as: 1, tore: [] }, t0)[0].text === "Avenir Beggen 3:1 Koeppchen I", "Live: Endstand ohne Vertauschen");

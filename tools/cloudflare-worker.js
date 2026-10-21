@@ -16,7 +16,7 @@
 // alle ausgelassen). Darum stößt der Worker den FLF-Abruf selbst an — er holt nichts von der FLF, er
 // drückt nur bei GitHub auf „Abruf starten“ (wie ein Handstart). GitHubs eigener Zeitplan bleibt als
 // Reserve. Einrichten: Settings → Variables and Secrets → Secret GITHUB_TOKEN (Fine-grained Token,
-// nur dieses Repo, Actions: Read and write); Settings → Triggers → Cron Triggers → „*/15 * * * *“.
+// nur dieses Repo, Actions: Read and write); Settings → Triggers → Cron Triggers → „* * * * *“ (jede Minute; bis 21.10.2026 „*/15 * * * *“).
 
 const API = "https://api.fupa.net/v1/matches/";
 const MERKEN_MS = 20e3;
@@ -329,12 +329,12 @@ export async function pushAnfrage(req, db, was) {
 }
 
 // ---- Mitteilungen, Stufe 2 (vom Nutzer, 21.10.2026): echte Meldungen ----
-// Alle 15 min (Cron): data/mitteilungen.json lesen (schreibt der FLF-Abruf, tools/mitteilungen.mjs),
+// Jede Minute (Cron): data/mitteilungen.json lesen (schreibt der FLF-Abruf, tools/mitteilungen.mjs),
 // dazu für die Spiele des Tages mit Ticker selbst bei FuPa nachsehen (Liveticker läuft, Endstand).
 // Gesendet wird nur 7–22 Uhr Luxemburger Zeit; was nachts fällig wird, wartet bis 7 Uhr (solange
 // `bis` nicht vorbei ist). Jede id geht nur einmal raus (Tabelle gemeldet).
 const MITT_URL = "https://raw.githubusercontent.com/strakekine/panini-wm-2026/main/data/mitteilungen.json";
-const MITT_ARTEN = ["heute", "spieltag", "tabelle", "uhrzeit", "ticker", "ende", "woche"];
+const MITT_ARTEN = ["heute", "spieltag", "tabelle", "uhrzeit", "ticker", "halbzeit", "ende", "woche"];
 async function abosSpalte(db) {
   await db.prepare(TAB_ABOS).run();
   try { await db.prepare("ALTER TABLE abos ADD COLUMN wahl TEXT").run(); } catch (e) { /* gibt es schon */ }
@@ -351,12 +351,14 @@ export function liveEreignisse(c, k, now) {
   if (k.section === "LIVE" && (k.hs != null || k.ticker || k.tore.length))
     aus.push({ id: c.ticker, reiter: c.reiter, art: "ticker", titel: `${c.titel} · Liveticker`,
                text: `Heute tickert FuPa das Spiel gegen ${c.gegner} – live in der App.`, ab: now, bis: d + 180 * 60e3 });
-  if (k.section === "POST" && k.hs != null && k.as != null) {
-    // FuPa führt Heim/Gast manchmal andersherum als die FLF (Beggen–Koeppchen II): Zahlen nach FLF drehen.
-    const gleich = (k.slug || "").startsWith(c.fupaWir) === c.wirHeim;
-    const [h, a] = gleich ? [k.hs, k.as] : [k.as, k.hs];
-    aus.push({ id: c.ende, reiter: c.reiter, art: "ende", titel: `${c.titel} · Endstand`, text: `${c.h} ${h}:${a} ${c.a}`, ab: now, bis: now + 18 * 3600e3 });
-  }
+  // FuPa führt Heim/Gast manchmal andersherum als die FLF (Beggen–Koeppchen II): Zahlen nach FLF drehen.
+  const gleich = (k.slug || "").startsWith(c.fupaWir) === c.wirHeim;
+  const stand = () => { const [h, a] = gleich ? [k.hs, k.as] : [k.as, k.hs]; return `${c.h} ${h}:${a} ${c.a}`; };
+  // Halbzeit (vom Nutzer, 21.10.2026): nur mit Stand, also nur wenn wirklich getickert wird.
+  if (k.section === "LIVE" && k.period === "halftime" && k.hs != null && k.as != null)
+    aus.push({ id: c.halbzeit || "halbzeit:" + c.id, reiter: c.reiter, art: "halbzeit", titel: `${c.titel} · Halbzeit`, text: stand(), ab: now, bis: d + 180 * 60e3 });
+  if (k.section === "POST" && k.hs != null && k.as != null)
+    aus.push({ id: c.ende, reiter: c.reiter, art: "ende", titel: `${c.titel} · Endstand`, text: stand(), ab: now, bis: now + 18 * 3600e3 });
   return aus;
 }
 export async function mitteilungenSenden(db, now = Date.now()) {
@@ -370,13 +372,20 @@ export async function mitteilungenSenden(db, now = Date.now()) {
   let datei = { ereignisse: [], live: [] };
   try { const r = await fetch(MITT_URL, { headers: { "cache-control": "no-cache" } }); if (r.ok) datei = await r.json(); } catch (e) { console.log("Mitteilungen lesen:", e.message); }
   const schon = async id => !!(await db.prepare("SELECT id FROM gemeldet WHERE id = ?1").bind(id).first());
-  // Live: Spiele vom Anpfiff bis 3 h danach, höchstens eine FuPa-Abfrage je Spiel und Takt.
+  // Live: Spiele vom Anpfiff bis 3 h danach, eine FuPa-Abfrage je Spiel und Takt (jede Minute, vom
+  // Nutzer: „Ticker läuft“ soll gleich kommen, nicht erst nach 15 min). Den Slug der Seniors 1 sucht
+  // der Worker einmal und merkt ihn in D1 (live_slug), sonst kostete jede Minute zwei Abrufe mehr.
+  await db.prepare("CREATE TABLE IF NOT EXISTS live_slug (anstoss TEXT PRIMARY KEY, slug TEXT NOT NULL)").run();
   for (const c of datei.live || []) {
     const d = Date.parse(c.d);
     if (now < d || now > d + 180 * 60e3) continue;
     if ((await schon(c.ende))) continue;
     try {
-      const slug = c.slug || (c.anstoss && await slugZu(c.anstoss));
+      let slug = c.slug;
+      if (!slug && c.anstoss) {
+        slug = (await db.prepare("SELECT slug FROM live_slug WHERE anstoss = ?1").bind(c.anstoss).first())?.slug;
+        if (!slug && (slug = await slugZu(c.anstoss))) await db.prepare("INSERT OR REPLACE INTO live_slug (anstoss, slug) VALUES (?1, ?2)").bind(c.anstoss, slug).run();
+      }
       if (!slug) continue;
       const r = await fetch(API + slug, { headers: { accept: "application/json" } });
       if (!r.ok) continue;
@@ -407,7 +416,9 @@ export async function mitteilungenSenden(db, now = Date.now()) {
 
 export default {
   async scheduled(event, env, ctx) {
-    // Auf die volle Viertelstunde runden: Cloudflare startet den Takt manchmal ein paar Sekunden später.
+    // Takt jede Minute (Cron „* * * * *“, seit 21.10.2026 für die Mitteilungen). Auf die volle Minute
+    // runden: Cloudflare startet manchmal ein paar Sekunden später. Den FLF-Abruf stößt abrufFaellig()
+    // trotzdem nur zu den Viertelstunden an, die es nennt.
     const t = Math.round(event.scheduledTime / 60e3) * 60e3;
     if (env.DB) ctx.waitUntil(mitteilungenSenden(env.DB, t).catch(e => console.log("Mitteilungen:", e.message)));
     if (!env.GITHUB_TOKEN || !abrufFaellig(t)) return;

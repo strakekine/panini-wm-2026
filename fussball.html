@@ -527,7 +527,7 @@ function wocheBilanz(alle) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "21.10.2026 g";
+const FASSUNG = "21.10.2026 h";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -1165,7 +1165,8 @@ function installHtml() {
 // Was es bei einer Mannschaft nicht gibt (Spieltag bei den Seniors), kommt dort einfach nicht.
 const M_ARTEN = [["heute", "Spiel steht an (Kinder am Vorabend 19 Uhr, Seniors am Spieltag 10 Uhr)"], ["spieltag", "Spieltag komplett (U13, U15, BGL)"],
   ["tabelle", "Tabelle aktualisiert (U13, U15, Seniors)"], ["uhrzeit", "Uhrzeit steht fest"],
-  ["ticker", "Liveticker läuft (Seniors, Roude Léiw)"], ["ende", "Endstand (Seniors, Roude Léiw)"]];
+  ["ticker", "Liveticker läuft (Seniors, Roude Léiw)"], ["halbzeit", "Halbzeitstand (Seniors, Roude Léiw; nur mit Ticker)"],
+  ["ende", "Endstand (Seniors, Roude Léiw)"]];
 const mReiter = () => [...(D?.teams || []).filter(t => t.reiter).map(t => t.reiter), "BGL", "Roude Léiw", "Woche"];
 function mWahl() {
   try { const w = JSON.parse(localStorage.getItem(KEY + "_mwahl")); if (w && Array.isArray(w.teams) && Array.isArray(w.arten)) return w; } catch (e) {}

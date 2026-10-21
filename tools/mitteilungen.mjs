@@ -56,16 +56,17 @@ export function ereignisse(alt, neu, vorher, now) {
     const wo = sp.ort ? ` · 📍 ${sp.ort}` : "";
     const offen = ohneUhrzeit(sp.d);
     const basis = { reiter };
-    // Heute Spiel: morgens 7:30; Spiele vor 10 Uhr schon am Vorabend um 19 Uhr („Morgen früh“).
+    // Heute Spiel (vom Nutzer, 21.10.2026): Kinder am Vorabend um 19 Uhr („Morgen Spiel“), Seniors am
+    // Spieltag um 10 Uhr (Anstoß vor 11 Uhr: 7:30). Kam das Spiel erst am Spieltag in die Daten, gilt
+    // für Kinder „Heute Spiel“ ab 7:30 bzw. sofort — gleiche id, also nie beides.
     if (!hatErgebnis(sp) && !sp.forfait) {
-      const frueh = !offen && +uhr(sp.d).slice(0, 2) < 10;
-      if (tag === morgen && frueh)
-        dazu({ ...basis, id: "heute:" + sp.id, art: "heute", titel: `${name} · Morgen früh Spiel`,
-               text: `${uhr(sp.d)} gegen ${gegner}${wo}`, ab: umLux(heute, 19), bis: d });
+      const was = (offen ? `Uhrzeit noch offen · gegen ${gegner}` : `${uhr(sp.d)} gegen ${gegner}`) + wo;
+      const ende = t => offen ? umLux(t, 22) : d;
+      if (kat !== "Seniors" && tag === morgen)
+        dazu({ ...basis, id: "heute:" + sp.id, art: "heute", titel: `${name} · Morgen Spiel`, text: was, ab: umLux(heute, 19), bis: ende(tag) });
       if (tag === heute)
-        dazu({ ...basis, id: "heute:" + sp.id, art: "heute", titel: `${name} · Heute Spiel`,
-               text: (offen ? `Uhrzeit noch offen · gegen ${gegner}` : `${uhr(sp.d)} gegen ${gegner}`) + wo,
-               ab: frueh ? now : umLux(heute, 7, 30), bis: offen ? umLux(heute, 22) : d });
+        dazu({ ...basis, id: "heute:" + sp.id, art: "heute", titel: `${name} · Heute Spiel`, text: was,
+               ab: kat === "Seniors" && (offen || +uhr(sp.d).slice(0, 2) >= 11) ? umLux(heute, 10) : Math.min(now, umLux(heute, 7, 30)), bis: ende(tag) });
     }
     const a = altSp.get(sp.id);
     // Uhrzeit steht fest: vorher 00:00, jetzt eine echte Zeit, Spiel noch vor uns.
@@ -119,7 +120,7 @@ export function ereignisse(alt, neu, vorher, now) {
     const d = Date.parse(sp.d), lux = sp.h.n === "Luxemburg", gegner = lux ? sp.a.n : sp.h.n, basis = { reiter: ["Roude Léiw"] };
     if (tagLux(d) === heute && !hatErgebnis(sp)) {
       dazu({ ...basis, id: "nheute:" + sp.id, art: "heute", titel: "Roude Léiw · Heute Länderspiel",
-             text: `${uhr(sp.d)} gegen ${gegner}` + (sp.wett ? ` · ${sp.wett}` : ""), ab: umLux(heute, 7, 30), bis: d });
+             text: `${uhr(sp.d)} gegen ${gegner}` + (sp.wett ? ` · ${sp.wett}` : ""), ab: umLux(heute, 10), bis: d });
       if (sp.slug) live.push({ id: sp.id, reiter: ["Roude Léiw"], titel: "Roude Léiw", d: sp.d, h: sp.h.n, a: sp.a.n, wirHeim: lux,
                                gegner, slug: sp.slug, fupaWir: "luxemburg-m1", ticker: "nticker:" + sp.id, ende: "nende:" + sp.id });
     }

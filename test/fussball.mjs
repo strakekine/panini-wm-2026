@@ -616,9 +616,13 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(mEreignisse(neu, neu, m, jetzt + 25 * 3600e3).ereignisse.every(e => e.bis > jetzt + 25 * 3600e3), "Mitteilung: abgelaufene fallen raus");
   // Heute Spiel und Live am Spieltag; Spiel vor 10 Uhr schon am Vorabend um 19 Uhr.
   const sa = mEreignisse(neu, neu, null, Date.parse("2026-10-24T06:00:00+02:00"));
-  const h = sa.ereignisse.find(e => e.id === "heute:103"), s2 = sa.ereignisse.find(e => e.id === "heute:503"), u9 = sa.ereignisse.find(e => e.id === "heute:302");
-  ok(h?.titel === "U13 1 · Heute Spiel" && h.text === "14:00 gegen AS Hosingen · 📍 Op der Bleech" && h.ab === Date.parse("2026-10-24T07:30:00+02:00") && h.bis === Date.parse("2026-10-24T14:00:00+02:00"), "Mitteilung: Heute Spiel um 7:30, bis Anpfiff");
-  ok(u9?.titel === "U9 1 · Morgen früh Spiel" && u9.ab === Date.parse("2026-10-24T19:00:00+02:00"), "Mitteilung: Spiel um 9:30 schon am Vorabend um 19 Uhr");
+  const fr = mEreignisse(neu, neu, null, Date.parse("2026-10-23T07:10:00+02:00"));
+  const h = fr.ereignisse.find(e => e.id === "heute:103"), u9 = sa.ereignisse.find(e => e.id === "heute:302"), s2 = sa.ereignisse.find(e => e.id === "heute:503");
+  ok(h?.titel === "U13 1 · Morgen Spiel" && h.text === "14:00 gegen AS Hosingen · 📍 Op der Bleech" && h.ab === Date.parse("2026-10-23T19:00:00+02:00") && h.bis === Date.parse("2026-10-24T14:00:00+02:00"), "Mitteilung: Kinder am Vorabend um 19 Uhr, bis Anpfiff");
+  ok(u9?.titel === "U9 1 · Morgen Spiel" && u9.ab === Date.parse("2026-10-24T19:00:00+02:00") && !fr.ereignisse.some(e => e.id === "heute:503"), "Mitteilung: Seniors nicht am Vorabend");
+  ok(s2?.titel === "Seniors 2 · Heute Spiel" && s2.ab === Date.parse("2026-10-24T10:00:00+02:00"), "Mitteilung: Seniors am Spieltag um 10 Uhr");
+  const spaet = sa.ereignisse.find(e => e.id === "heute:103");
+  ok(spaet?.titel === "U13 1 · Heute Spiel" && spaet.ab === Date.parse("2026-10-24T06:00:00+02:00"), "Mitteilung: Kinderspiel erst am Spieltag bekannt → Heute Spiel sofort");
   ok(s2 && sa.live.length === 1 && sa.live[0].slug === "fc-avenir-beggen-mr1-fc-koeppchen-mr1-261024" && sa.live[0].ende === "ende:503" && !sa.live[0].wirHeim, "Mitteilung: Seniors-Spiel heute als Live-Kandidat");
   const mo = mEreignisse(neu, neu, null, Date.parse("2026-10-25T22:30:00+01:00")).ereignisse.find(e => e.id === "woche:2026-10-26");
   ok(mo?.text === "Diese Woche 1 Spiel, davon 1 zu Hause" && mo.ab === umLux("2026-10-26", 7, 30), "Mitteilung: Unsere Woche, ab So 22 Uhr für Montag 7:30 vorbereitet");
@@ -664,9 +668,9 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   };
   const nacht = Date.parse("2026-10-24T06:45:00+02:00"), morgen = Date.parse("2026-10-24T07:30:00+02:00"), spiel = Date.parse("2026-10-24T20:30:00+02:00");
   await mitteilungenSenden(db, nacht);
-  ok(an.length === 0, "Versand: vor 7:30 nichts (Heute Spiel ab 7:30)");
+  ok(an.length === 0, "Versand: nachts nichts (vor 7 Uhr)");
   await mitteilungenSenden(db, morgen);
-  ok(an.join() === "U13" && T.gemeldet.has("heute:103") && T.gemeldet.has("heute:503"), "Versand: Heute Spiel nur an U13, Seniors-Abo hat „heute“ nicht gewählt, ohne Auswahl nichts");
+  ok(an.join() === "U13" && T.gemeldet.has("heute:103") && !T.gemeldet.has("heute:503"), "Versand: Spiel nur an U13, ohne Auswahl nichts, Seniors erst um 10");
   await mitteilungenSenden(db, morgen + 15 * 60e3);
   ok(an.length === 1, "Versand: dasselbe nie zweimal");
   await mitteilungenSenden(db, spiel);

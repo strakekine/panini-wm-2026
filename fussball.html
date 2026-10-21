@@ -526,7 +526,7 @@ function wocheBilanz(alle) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "21.10.2026 e";
+const FASSUNG = "21.10.2026 f";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -1120,6 +1120,9 @@ async function mittHtml() {
   if (!box || !MITT_OFFEN) return;
   let h = "";
   // iPhone: nur in der App vom Home-Bildschirm. Android: geht in Chrome direkt. Computer: Anleitung fürs Handy.
+  // Android in Chrome: Mitteilungen gehen auch ohne Installieren — Anleitung oben (empfohlen), Einstellungen darunter.
+  const androidHinweis = ANDROID && !istApp() ? `<p><b>Tipp:</b> Als App installieren (empfohlen) — dann hat FC Koeppchen ein eigenes Symbol:</p>
+    <ol class="schritte"><li>Oben rechts auf <b>⋮</b> tippen.</li><li><b>„App installieren“</b> bzw. <b>„Zum Startbildschirm hinzufügen“</b>.</li></ol>` : "";
   if (!istApp() && !(ANDROID && pushGeht())) h = installHtml();
   else if (!pushGeht()) h = `<p>Hier fehlt die Mitteilungs-Funktion. Lösch die App vom Home-Bildschirm und leg sie neu an
     (Safari → Teilen → „Zum Home-Bildschirm“), dann in der neuen App wieder 5× aufs Logo. Braucht iOS 16.4 oder neuer.</p>`;
@@ -1139,6 +1142,7 @@ async function mittHtml() {
       : `<p>Dein Handy fragt einmal, ob die App Mitteilungen schicken darf. Danach wählst du Mannschaften und Arten aus.</p>
          <button class="knopf" id="mAn">Mitteilungen erlauben</button>`;
   }
+  if (h && !h.includes("schritte")) h = androidHinweis + h;
   box.innerHTML = `<section class="card"><div class="chead"><h2>Mitteilungen</h2></div><div class="cbody">${h}
     <div class="stand" id="mStand">${esc(MITT_STAND)}</div></div></section>`;
 }
@@ -1160,7 +1164,7 @@ function installHtml() {
 }
 // Auswahl (Stufe 2): Mannschaften und Arten, gemerkt auf dem Handy und beim Worker (?push=wahl).
 // Was es bei einer Mannschaft nicht gibt (Spieltag bei den Seniors), kommt dort einfach nicht.
-const M_ARTEN = [["heute", "Heute Spiel (morgens 7:30; vor 10 Uhr am Vorabend)"], ["spieltag", "Spieltag komplett (U13, U15, BGL)"],
+const M_ARTEN = [["heute", "Spiel steht an (Kinder am Vorabend 19 Uhr, Seniors am Spieltag 10 Uhr)"], ["spieltag", "Spieltag komplett (U13, U15, BGL)"],
   ["tabelle", "Tabelle aktualisiert (U13, U15, Seniors)"], ["uhrzeit", "Uhrzeit steht fest"],
   ["ticker", "Liveticker läuft (Seniors, Roude Léiw)"], ["ende", "Endstand (Seniors, Roude Léiw)"]];
 const mReiter = () => [...(D?.teams || []).filter(t => t.reiter).map(t => t.reiter), "BGL", "Roude Léiw", "Woche"];

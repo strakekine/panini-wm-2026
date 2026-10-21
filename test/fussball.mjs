@@ -641,7 +641,11 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(en?.text === "Koeppchen I 1:3 Avenir Beggen", "Live: Endstand dreht FuPas Zahlen, wenn FuPa Heim/Gast vertauscht");
   ok(liveEreignisse(c, { section: "POST", slug: c.slug, hs: 3, as: 1, tore: [] }, t0)[0].text === "Avenir Beggen 3:1 Koeppchen I", "Live: Endstand ohne Vertauschen");
   ok(passtZu({ teams: ["U13 1"], arten: ["heute"] }, h) && !passtZu({ teams: ["U13 2"], arten: ["heute"] }, h) && !passtZu({ teams: ["U13 1"], arten: ["tabelle"] }, h)
-     && passtZu({ teams: ["Woche"], arten: [] }, mo) && !passtZu(null, h), "Mitteilung: nur an gewählte Mannschaft und Art");
+     && passtZu({ teams: ["Woche"], arten: [] }, mo) && !passtZu(null, h), "Mitteilung: alte Auswahl (für alle gleich) gilt weiter");
+  const tab2 = { ...id("tabelle:k1"), reiter: ["U13 2"] };
+  ok(passtZu({ je: { "U13 1": ["heute"], "U13 2": ["tabelle"] } }, h) && passtZu({ je: { "U13 2": ["tabelle"] } }, tab2)
+     && !passtZu({ je: { "U13 1": ["tabelle"], "U13 2": ["heute"] } }, h) && !passtZu({ je: { "U13 2": ["heute"] } }, tab2)
+     && passtZu({ je: { Woche: ["woche"] } }, mo) && !passtZu({ je: {} }, mo), "Mitteilung: je Mannschaft eigene Arten");
 
   // Versand im Worker mit nachgebautem D1: gewählt, einmal, nachts nicht, Live aus FuPa.
   const T = { abos: new Map(), gemeldet: new Map(), offen: new Map(), k: null };
@@ -662,8 +666,8 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   const ua = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]);
   const schl = { p256dh: b64(await crypto.subtle.exportKey("raw", ua.publicKey)), auth: b64(crypto.getRandomValues(new Uint8Array(16))) };
   const abo = (e, wahl) => T.abos.set(e, { endpoint: e, abo: JSON.stringify({ endpoint: e, keys: schl }), wahl: wahl && JSON.stringify(wahl) });
-  abo("https://web.push.apple.com/U13", { teams: ["U13 1"], arten: ["heute", "spieltag"] });
-  abo("https://web.push.apple.com/SEN", { teams: ["Seniors 2"], arten: ["ticker", "ende"] });
+  abo("https://web.push.apple.com/U13", { je: { "U13 1": ["heute", "spieltag"], "Seniors 2": ["tabelle"] } });
+  abo("https://web.push.apple.com/SEN", { je: { "Seniors 2": ["ticker", "ende"] } });
   abo("https://web.push.apple.com/OHNE", null);
   const echt = globalThis.fetch, an = [];
   let fupa = { slug: c.slug, section: "LIVE", homeGoal: 0, awayGoal: 0, tickerAuthor: { name: "Paul" }, highlights: [] };

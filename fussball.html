@@ -134,7 +134,10 @@
   .mitt .mh{font-size:14px;margin:14px 0 6px}
   .mitt .haken{display:block;font-size:14px;padding:5px 0}
   .mitt .haken input{width:18px;height:18px;vertical-align:-3px;margin-right:6px;accent-color:var(--accent)}
-  .mitt .haken2{display:grid;grid-template-columns:1fr 1fr;column-gap:10px}
+  .mitt .mteam{border-top:1px solid var(--line);padding:4px 0}
+  .mitt .haken.team{font-weight:700;font-size:15px}
+  .mitt .marten{padding:0 0 6px 28px}
+  .mitt .marten .haken{font-size:13.5px;padding:3px 0}
 </style>
 </head>
 <body>
@@ -527,7 +530,7 @@ function wocheBilanz(alle) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "21.10.2026 i";
+const FASSUNG = "21.10.2026 j";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -1130,12 +1133,19 @@ async function mittHtml() {
   else {
     const r = await swReg().catch(() => null);
     const abo = r && await r.pushManager.getSubscription().catch(() => null);
-    const w = mWahl(), haken = (gruppe, wert, text, an) =>
-      `<label class="haken"><input type="checkbox" data-g="${gruppe}" value="${esc(wert)}"${an ? " checked" : ""}> ${esc(text)}</label>`;
+    const w = mWahl();
+    // Je Mannschaft ein Haken; angehakt klappen darunter ihre Mitteilungen auf, jede einzeln (vom Nutzer).
+    const mannschaft = r => {
+      const an = !!w.je[r], arten = mArtenFuer(r);
+      const kopf = `<label class="haken team"><input type="checkbox" data-t="${esc(r)}"${an ? " checked" : ""}> ${esc(r === "Woche" ? "Unsere Woche (montags 10 Uhr)" : r)}</label>`;
+      if (!an || r === "Woche") return `<div class="mteam">${kopf}</div>`;
+      return `<div class="mteam">${kopf}<div class="marten">${arten.map(k =>
+        `<label class="haken"><input type="checkbox" data-t="${esc(r)}" data-a="${k}"${w.je[r].includes(k) ? " checked" : ""}> ${esc(mArtText(r, k))}</label>`).join("")}</div></div>`;
+    };
     h = abo && Notification.permission === "granted"
       ? `<p>✓ Mitteilungen sind auf diesem Gerät erlaubt. Nachts (22–7 Uhr) kommt nichts, das wartet bis morgens.</p>
-         <h3 class="mh">Meine Mannschaften</h3><div class="haken2">${mReiter().map(r => haken("t", r, r === "Woche" ? "Unsere Woche (montags 10 Uhr)" : r, w.teams.includes(r))).join("")}</div>
-         <h3 class="mh">Was soll kommen</h3>${M_ARTEN.map(([k, t]) => haken("a", k, t, w.arten.includes(k))).join("")}
+         <h3 class="mh">Meine Mannschaften</h3><p class="klein">Mannschaft anhaken, dann darunter wählen, was von ihr kommen soll.</p>
+         ${mReiter().map(mannschaft).join("")}
          <button class="knopf" id="mTest">Test-Mitteilung senden</button>
          <button class="knopf zweit" id="mAus">Abmelden</button>`
       : `<p>Dein Handy fragt einmal, ob die App Mitteilungen schicken darf. Danach wählst du Mannschaften und Arten aus.</p>
@@ -1161,16 +1171,31 @@ function installHtml() {
   return `<p>Mitteilungen kommen aufs <b>Handy</b>. Um sie zu erhalten, bitte die App dort installieren:</p>
     <h3 class="mh">iPhone</h3>${iphone}<h3 class="mh">Android</h3>${android}`;
 }
-// Auswahl (Stufe 2): Mannschaften und Arten, gemerkt auf dem Handy und beim Worker (?push=wahl).
-// Was es bei einer Mannschaft nicht gibt (Spieltag bei den Seniors), kommt dort einfach nicht.
-const M_ARTEN = [["heute", "Spiel steht an (Kinder am Vorabend 19 Uhr, Seniors am Spieltag 10 Uhr)"], ["spieltag", "Spieltag komplett (U13, U15, BGL)"],
-  ["tabelle", "Tabelle aktualisiert (U13, U15, Seniors)"], ["uhrzeit", "Uhrzeit steht fest"],
-  ["ticker", "Liveticker läuft (Seniors, Roude Léiw)"], ["halbzeit", "Halbzeitstand (Seniors, Roude Léiw; nur mit Ticker)"],
-  ["ende", "Endstand (Seniors, Roude Léiw)"]];
+// Auswahl (Stufe 2, je Mannschaft einzeln, vom Nutzer 21.10.2026): { je: { "U13 2": ["tabelle"], … } },
+// gemerkt auf dem Handy und beim Worker (?push=wahl). Jede Mannschaft zeigt nur, was es bei ihr gibt.
+const M_ART_TEXT = { heute: "Heute Spiel (10 Uhr)", spieltag: "Spieltag komplett", tabelle: "Tabelle aktualisiert",
+  uhrzeit: "Uhrzeit steht fest", ticker: "Liveticker läuft", halbzeit: "Halbzeitstand (nur mit Ticker)", ende: "Endstand", woche: "Neue Woche" };
+const mKat = r => (D?.teams || []).find(t => t.reiter === r)?.kat || r;
+function mArtenFuer(r) {
+  const k = mKat(r);
+  if (r === "Woche") return ["woche"];
+  if (r === "BGL") return ["spieltag"];
+  if (r === "Roude Léiw") return ["heute", "ticker", "halbzeit", "ende"];
+  if (k === "Seniors") return ["heute", "tabelle", "uhrzeit", "ticker", "halbzeit", "ende"];
+  if (k === "U13" || k === "U15") return ["heute", "spieltag", "tabelle", "uhrzeit"];
+  return ["heute", "uhrzeit"];   // U9, U11: die FLF zeigt keine Ergebnisse
+}
+const mArtText = (r, k) => k === "heute" && mKat(r) !== "Seniors" && r !== "Roude Léiw" ? "Morgen Spiel (Vorabend 19 Uhr)" : M_ART_TEXT[k];
 const mReiter = () => [...(D?.teams || []).filter(t => t.reiter).map(t => t.reiter), "BGL", "Roude Léiw", "Woche"];
 function mWahl() {
-  try { const w = JSON.parse(localStorage.getItem(KEY + "_mwahl")); if (w && Array.isArray(w.teams) && Array.isArray(w.arten)) return w; } catch (e) {}
-  return { teams: [], arten: M_ARTEN.map(a => a[0]) };
+  try {
+    const w = JSON.parse(localStorage.getItem(KEY + "_mwahl"));
+    if (w && w.je && typeof w.je === "object") return w;
+    // Alte Auswahl (eine Liste Mannschaften, eine Liste Arten für alle) übernehmen.
+    if (w && Array.isArray(w.teams) && Array.isArray(w.arten))
+      return { je: Object.fromEntries(w.teams.map(r => [r, mArtenFuer(r).filter(k => k === "woche" || w.arten.includes(k))])) };
+  } catch (e) {}
+  return { je: {} };
 }
 async function mWahlSenden() {
   const reg = await swReg(), abo = reg && await reg.pushManager.getSubscription();
@@ -1180,13 +1205,13 @@ async function mWahlSenden() {
   const st = document.getElementById("mStand"); if (st) st.textContent = MITT_STAND;
 }
 document.addEventListener("change", e => {
-  const c = e.target.closest("#mitt input[type=checkbox]");
+  const c = e.target.closest("#mitt input[type=checkbox][data-t]");
   if (!c) return;
-  const w = mWahl(), feld = c.dataset.g === "t" ? "teams" : "arten";
-  w[feld] = w[feld].filter(x => x !== c.value);
-  if (c.checked) w[feld].push(c.value);
+  const w = mWahl(), r = c.dataset.t, k = c.dataset.a;
+  if (!k) { if (c.checked) w.je[r] = mArtenFuer(r); else delete w.je[r]; }   // Mannschaft an: erst einmal alles
+  else { w.je[r] = (w.je[r] || []).filter(x => x !== k); if (c.checked) w.je[r].push(k); }
   try { localStorage.setItem(KEY + "_mwahl", JSON.stringify(w)); } catch (x) {}
-  mWahlSenden();
+  if (!k) mittHtml().then(mWahlSenden); else mWahlSenden();
 });
 async function mittAn() {
   // Erst fragen, direkt im Tippen — iOS lässt die Frage nur so zu.

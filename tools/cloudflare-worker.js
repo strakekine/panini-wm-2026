@@ -319,10 +319,12 @@ export async function pushAnfrage(req, db, was) {
   }
   if (was === "wahl") {
     if (!z) return antwort('{"fehler":"nicht angemeldet"}', 404);
-    const teams = (Array.isArray(x.teams) ? x.teams : []).filter(t => typeof t === "string" && REITER_OK.test(t)).slice(0, 30);
-    const arten = (Array.isArray(x.arten) ? x.arten : []).filter(a => MITT_ARTEN.includes(a));
+    // Je Mannschaft ihre Arten (vom Nutzer, 21.10.2026): { je: { "U13 2": ["tabelle"] } }.
+    const je = {};
+    for (const [t, a] of Object.entries(x.je && typeof x.je === "object" ? x.je : {}).slice(0, 30))
+      if (REITER_OK.test(t) && Array.isArray(a)) je[t] = a.filter(k => MITT_ARTEN.includes(k));
     await abosSpalte(db);
-    await db.prepare("UPDATE abos SET wahl = ?2 WHERE endpoint = ?1").bind(x.endpoint, JSON.stringify({ teams, arten })).run();
+    await db.prepare("UPDATE abos SET wahl = ?2 WHERE endpoint = ?1").bind(x.endpoint, JSON.stringify({ je })).run();
     return antwort('{"ok":true}');
   }
   return antwort('{"fehler":"push"}', 400);
@@ -339,10 +341,13 @@ async function abosSpalte(db) {
   await db.prepare(TAB_ABOS).run();
   try { await db.prepare("ALTER TABLE abos ADD COLUMN wahl TEXT").run(); } catch (e) { /* gibt es schon */ }
 }
-// Wer bekommt ein Ereignis? Mannschaft angehakt und Art angehakt; „Unsere Woche“ hängt nur am Haken „Woche“.
+// Wer bekommt ein Ereignis? Bei einer seiner Mannschaften ist genau diese Art angehakt.
+// Die alte Form (eine Mannschaftsliste, eine Artenliste für alle) gilt weiter, bis die App neu speichert.
 export function passtZu(wahl, e) {
-  if (!wahl || !e.reiter.some(r => wahl.teams.includes(r))) return false;
-  return e.art === "woche" || wahl.arten.includes(e.art);
+  if (!wahl) return false;
+  if (wahl.je) return e.reiter.some(r => (wahl.je[r] || []).includes(e.art));
+  if (!Array.isArray(wahl.teams) || !e.reiter.some(r => wahl.teams.includes(r))) return false;
+  return e.art === "woche" || (wahl.arten || []).includes(e.art);
 }
 export const tagzeit = ms => { const h = stundeLux(ms); return h >= 7 && h < 22; };
 // Liveticker und Endstand für ein Spiel des Tages (Kandidat aus mitteilungen.json → live).

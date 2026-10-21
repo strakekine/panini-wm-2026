@@ -710,10 +710,10 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
      && mittStatus(e0, { zeit: e0.ab, an: 0, passend: 1, fehler: "Push-Dienst 403" }, 0).endsWith("Fehler: Push-Dienst 403")
      && mittStatus(e0, { verpasst: 1, ab: Date.parse("2026-10-23T23:00:00+02:00") }, 0) === "✗ nicht verschickt (abgelaufen, war nachts fällig)", "Übersicht: Stand je Mitteilung");
   const seite = await mitteilungenStand({ prepare: sql => ({ async all() {
-    if (sql.includes("FROM abos")) return { results: [{ wahl: "{}" }, { wahl: null }] };
+    if (sql.includes("FROM abos")) return { results: [{ wahl: '{"je":{"U13 2":["tabelle"],"Seniors 1":["ticker","ende"]}}' }, { wahl: '{"je":{"U13 2":["tabelle","heute"]}}' }] };
     if (sql.includes("FROM gemeldet")) return { results: [{ id: "heute:103", zeit: Date.parse("2026-10-23T19:00:00+02:00"), an: 1, passend: 1, titel: "U13 1 · Morgen Spiel" }] };
     return { results: [] }; } }) }, sa, Date.parse("2026-10-24T08:00:00+02:00"));
-  ok(seite.includes("2 Handys angemeldet, davon 1 mit Auswahl") && seite.includes("✓ Fr., 23.10., 19:00 an 1 von 1 Handys") && seite.includes("Heute mit Liveticker") && seite.includes("⏳ wartet"), "Übersicht: Seite mit Abos, Live und Stand");
+  ok(seite.includes("2 Handys angemeldet, davon 2 mit Auswahl") && seite.includes("<td>U13 2</td><td class=\"st\">Tabelle 2 · Spiel steht an 1</td>") && seite.includes("Ticker 1 · Endstand 1") && seite.includes("✓ Fr., 23.10., 19:00 an 1 von 1 Handys") && seite.includes("Heute mit Liveticker") && seite.includes("⏳ wartet"), "Übersicht: Seite mit Abos, Live und Stand");
 }
 console.log(fehler ? `${fehler} von ${n} Prüfungen fehlgeschlagen` : `alle ${n} Prüfungen grün`);
 process.exit(fehler ? 1 : 0);

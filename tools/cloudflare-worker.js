@@ -392,8 +392,19 @@ export async function mitteilungenStand(db, datei, now = Date.now()) {
   for (const [id, g] of gem) if (!ev.has(id)) ev.set(id, { id, titel: g.titel || id, ab: g.ab || g.zeit });
   const zeilen = [...ev.values()].sort((a, b) => b.ab - a.ab).slice(0, 50)
     .map(e => `<tr><td>${esc(e.titel)}${e.text ? `<br><small>${esc(e.text)}</small>` : ""}</td><td>${zeitLux(e.ab)}</td><td class="st">${esc(mittStatus(e, gem.get(e.id), now))}</td></tr>`).join("");
+  // Gewählt je Mannschaft und Art, als Anzahl Handys (wer was gewählt hat, steht nirgends).
+  const ART_KURZ = { heute: "Spiel steht an", neu: "Neue Phase/Spiel", spieltag: "Spieltag", tabelle: "Tabelle", uhrzeit: "Uhrzeit",
+    ticker: "Ticker", halbzeit: "Halbzeit", ende: "Endstand", woche: "Woche" };
+  const zahl = new Map();
+  for (const a of abos) {
+    let w = null; try { w = JSON.parse(a.wahl); } catch (e) {}
+    const je = w?.je || Object.fromEntries((w?.teams || []).map(t => [t, w.arten || []]));
+    for (const [t, l] of Object.entries(je)) { const m = zahl.get(t) || zahl.set(t, new Map()).get(t); for (const k of l) m.set(k, (m.get(k) || 0) + 1); }
+  }
+  const gewaehlt = [...zahl].map(([t, m]) => `<tr><td>${esc(t)}</td><td class="st">${[...m].map(([k, n]) => esc(ART_KURZ[k] || k) + (abos.length > 1 ? ` ${n}` : "")).join(" · ") || "—"}</td></tr>`).join("");
   const live = (datei?.live || []).map(c => `<li>${esc(c.titel)}: ${zeitLux(Date.parse(c.d))} gegen ${esc(c.gegner)} — FuPa wird vom Anpfiff bis 3 h danach jede Minute geprüft${c.slug || c.anstoss ? "" : " (noch ohne FuPa-Spiel)"}</li>`).join("");
   return `<h2>Mitteilungen</h2><p>${abos.length} ${abos.length === 1 ? "Handy" : "Handys"} angemeldet, davon ${abos.filter(a => a.wahl).length} mit Auswahl. Gesendet wird 7–22 Uhr.</p>
+<h3>Gewählt${abos.length > 1 ? " (Zahl = so viele Handys)" : ""}</h3><table class="mitt">${gewaehlt || "<tr><td>noch nichts</td></tr>"}</table>
 ${live ? `<h3>Heute mit Liveticker</h3><ul>${live}</ul>` : ""}
 <table class="mitt"><tr><th>Mitteilung</th><th>fällig ab</th><th>Stand</th></tr>${zeilen || "<tr><td colspan=3>noch nichts geplant</td></tr>"}</table>`;
 }

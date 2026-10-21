@@ -627,7 +627,7 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(spaet?.titel === "U13 1 · Heute Spiel" && spaet.ab === Date.parse("2026-10-24T06:00:00+02:00"), "Mitteilung: Kinderspiel erst am Spieltag bekannt → Heute Spiel sofort");
   ok(s2 && sa.live.length === 1 && sa.live[0].slug === "fc-avenir-beggen-mr1-fc-koeppchen-mr1-261024" && sa.live[0].ende === "ende:503" && !sa.live[0].wirHeim, "Mitteilung: Seniors-Spiel heute als Live-Kandidat");
   const mo = mEreignisse(neu, neu, null, Date.parse("2026-10-25T22:30:00+01:00")).ereignisse.find(e => e.id === "woche:2026-10-26");
-  ok(mo?.text === "Diese Woche 1 Spiel, davon 1 zu Hause" && mo.ab === umLux("2026-10-26", 7, 30), "Mitteilung: Unsere Woche, ab So 22 Uhr für Montag 7:30 vorbereitet");
+  ok(mo?.text === "Diese Woche 1 Spiel, davon 1 zu Hause" && mo.ab === umLux("2026-10-26", 10), "Mitteilung: Unsere Woche, ab So 22 Uhr für Montag 10:00 vorbereitet");
   // Live im Worker: Ticker erst mit echtem Inhalt; Endstand nach FLF-Reihenfolge (FuPa hier vertauscht).
   const c = sa.live[0], t0 = Date.parse(c.d) + 30 * 60e3;
   ok(liveEreignisse(c, { section: "LIVE", hs: null, as: null, ticker: null, tore: [] }, t0).length === 0, "Live: FuPas automatisches LIVE ohne Tickerer → nichts");

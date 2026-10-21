@@ -130,7 +130,7 @@ export function ereignisse(alt, neu, vorher, now) {
              text: `${sp.h.n} ${sp.hs}:${sp.as} ${sp.a.n}`, ab: now, bis: now + 18 * H });
   }
 
-  // Unsere Woche: montags 7:30 „Diese Woche n Spiele, davon m zu Hause“ (ab So 22 Uhr vorbereitet).
+  // Unsere Woche: montags 10:00 (vom Nutzer, 21.10.2026) „Diese Woche n Spiele, davon m zu Hause“ (ab So 22 Uhr vorbereitet).
   const mo = (() => { const t = tagLux(now + 2 * H); const w = (new Date(t + "T12:00:00Z").getUTCDay() + 6) % 7; return tagLux(Date.parse(t + "T12:00:00Z") - w * 24 * H); })();
   const so = tagLux(Date.parse(mo + "T12:00:00Z") + 6 * 24 * H);
   const woche = [...jeSpiel.values()].filter(({ sp }) => { const t = tagLux(Date.parse(sp.d)); return t >= mo && t <= so; });
@@ -138,7 +138,7 @@ export function ereignisse(alt, neu, vorher, now) {
     const heim = woche.filter(({ sp }) => unsere.has(sp.h.id)).length;
     dazu({ reiter: ["Woche"], id: "woche:" + mo, art: "woche", titel: "Unsere Woche",
            text: `Diese Woche ${woche.length} ${woche.length === 1 ? "Spiel" : "Spiele"}, davon ${heim} zu Hause`,
-           ab: umLux(mo, 7, 30), bis: umLux(mo, 22) });
+           ab: umLux(mo, 10), bis: umLux(mo, 22) });
   }
 
   return { ereignisse: [...aus.values()].sort((x, y) => x.ab - y.ab || x.id.localeCompare(y.id)), live };

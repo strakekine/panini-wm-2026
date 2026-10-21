@@ -527,7 +527,7 @@ function wocheBilanz(alle) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "21.10.2026 h";
+const FASSUNG = "21.10.2026 i";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -1134,7 +1134,7 @@ async function mittHtml() {
       `<label class="haken"><input type="checkbox" data-g="${gruppe}" value="${esc(wert)}"${an ? " checked" : ""}> ${esc(text)}</label>`;
     h = abo && Notification.permission === "granted"
       ? `<p>✓ Mitteilungen sind auf diesem Gerät erlaubt. Nachts (22–7 Uhr) kommt nichts, das wartet bis morgens.</p>
-         <h3 class="mh">Meine Mannschaften</h3><div class="haken2">${mReiter().map(r => haken("t", r, r === "Woche" ? "Unsere Woche (montags)" : r, w.teams.includes(r))).join("")}</div>
+         <h3 class="mh">Meine Mannschaften</h3><div class="haken2">${mReiter().map(r => haken("t", r, r === "Woche" ? "Unsere Woche (montags 10 Uhr)" : r, w.teams.includes(r))).join("")}</div>
          <h3 class="mh">Was soll kommen</h3>${M_ARTEN.map(([k, t]) => haken("a", k, t, w.arten.includes(k))).join("")}
          <button class="knopf" id="mTest">Test-Mitteilung senden</button>
          <button class="knopf zweit" id="mAus">Abmelden</button>`

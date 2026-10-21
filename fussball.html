@@ -530,7 +530,7 @@ function wocheBilanz(alle) {
 
 // Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
 // die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
-const FASSUNG = "21.10.2026 j";
+const FASSUNG = "21.10.2026 k";
 const KEY = "fussball_v1";
 const QUELLEN = [
   // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
@@ -1174,15 +1174,16 @@ function installHtml() {
 // Auswahl (Stufe 2, je Mannschaft einzeln, vom Nutzer 21.10.2026): { je: { "U13 2": ["tabelle"], … } },
 // gemerkt auf dem Handy und beim Worker (?push=wahl). Jede Mannschaft zeigt nur, was es bei ihr gibt.
 const M_ART_TEXT = { heute: "Heute Spiel (10 Uhr)", spieltag: "Spieltag komplett", tabelle: "Tabelle aktualisiert",
-  uhrzeit: "Uhrzeit steht fest", ticker: "Liveticker läuft", halbzeit: "Halbzeitstand (nur mit Ticker)", ende: "Endstand", woche: "Neue Woche" };
+  uhrzeit: "Uhrzeit steht fest (wenn vorher keine eingetragen war)", neu: "Neue Phase / neues Spiel", ticker: "Liveticker läuft", halbzeit: "Halbzeitstand (nur mit Ticker)", ende: "Endstand", woche: "Neue Woche" };
 const mKat = r => (D?.teams || []).find(t => t.reiter === r)?.kat || r;
 function mArtenFuer(r) {
   const k = mKat(r);
   if (r === "Woche") return ["woche"];
   if (r === "BGL") return ["spieltag"];
   if (r === "Roude Léiw") return ["heute", "ticker", "halbzeit", "ende"];
-  if (k === "Seniors") return ["heute", "tabelle", "uhrzeit", "ticker", "halbzeit", "ende"];
-  if (k === "U13" || k === "U15") return ["heute", "spieltag", "tabelle", "uhrzeit"];
+  // Uhrzeit nur bei U9/U11, und nur wenn vorher keine da war (vom Nutzer: geänderte Zeiten gibt der Trainer durch).
+  if (k === "Seniors") return ["heute", "tabelle", "ticker", "halbzeit", "ende"];
+  if (k === "U13" || k === "U15") return ["heute", "neu", "spieltag", "tabelle"];
   return ["heute", "uhrzeit"];   // U9, U11: die FLF zeigt keine Ergebnisse
 }
 const mArtText = (r, k) => k === "heute" && mKat(r) !== "Seniors" && r !== "Roude Léiw" ? "Morgen Spiel (Vorabend 19 Uhr)" : M_ART_TEXT[k];

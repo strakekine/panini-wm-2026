@@ -595,6 +595,12 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
     nati: { spiele: [{ id: 801, d: "2026-11-13T20:45:00+01:00", slug: "luxemburg-m1-estland-m1-261113", h: { id: "Luxemburg", n: "Luxemburg" }, a: { id: "Estland", n: "Estland" }, hs: 2, as: 1, gespielt: true, wett: "UEFA Nations League" }] },
   });
   const neu = neuD(), alt = neuD();
+  // Neue Phase (Klasse k4 neu für U13 1) und ein neues Pokalspiel; Seniors-Uhrzeit vorher 00:00.
+  neu.klassen.k4 = { id: "k4", n: "U13 Klasse II", typ: "CC", ergebnisse: true, tabelle: null, spiele: [
+    sp(401, "2026-11-07T14:00:00+01:00", 1, [1, K + " I"], [41, "FC Mondorf"]), sp(402, "2026-11-14T10:00:00+01:00", 2, [42, "US Hostert"], [1, K + " I"]) ] };
+  neu.klassen.k5 = { id: "k5", n: "Coupe U13", typ: "CUP", ergebnisse: true, tabelle: null, spiele: [sp(501, "2026-11-11T18:00:00+01:00", 1, [51, "FC Wiltz"], [1, K + " I"], null, null, { ort: "Wiltz" })] };
+  neu.teams[0].klassen = ["k1", "k5", "k4"];
+  alt.klassen.k2.spiele[1].d = "2026-10-24T00:00:00+02:00";
   alt.klassen.k1.spiele[1].hs = alt.klassen.k1.spiele[1].as = null;              // Spieltag 5 war noch offen
   alt.klassen.k1.tabelle = [{ pl: 1, id: 1, n: K + " I", sp: 4, pkt: 9 }, { pl: 2, id: 12, n: "US Hostert", sp: 4, pkt: 8 }];
   alt.klassen.k2.spiele[0].hs = alt.klassen.k2.spiele[0].as = null;              // Seniors-Ergebnis neu
@@ -607,7 +613,11 @@ gleich(M.nachSpieltag(D.klassen[19189].spiele).map(([t, s]) => [t, s.length]), [
   ok(id("spieltag:k1:5")?.text === "Koeppchen I 3:1 FC Mondorf · alle Ergebnisse in der App" && id("spieltag:k1:5").titel === "U13 1 · Spieltag 5 komplett", "Mitteilung: Spieltag komplett mit unserem Ergebnis");
   ok(id("tabelle:k1")?.text === "Koeppchen I jetzt 2. Platz (vorher 1.) · 10 Punkte" && id("tabelle:k2")?.text === "Koeppchen I jetzt 3. Platz (wie vorher) · 13 Punkte", "Mitteilung: Tabelle mit Platz und vorher");
   ok(id("ende:201")?.text === "Koeppchen I 2:1 FC Titus" && id("ende:201").reiter[0] === "Seniors 2", "Mitteilung: Endstand Seniors von der FLF");
-  ok(id("zeit:301")?.text === "Sa., 31.10. um 10:00 gegen US Berdorf", "Mitteilung: Uhrzeit steht fest");
+  ok(id("zeit:301")?.text === "Sa., 31.10. um 10:00 gegen US Berdorf" && !id("zeit:503"), "Mitteilung: Uhrzeit steht fest nur bei U9/U11, nie bei den Seniors");
+  ok(id("phase:k4:1")?.text === "Spielplan U13 Klasse II ist da: 2 Spiele, erstes Sa., 7.11. um 14:00 gegen FC Mondorf" && !id("neu:401"), "Mitteilung: neue Phase als eine Mitteilung");
+  ok(id("neu:501")?.titel === "U13 1 · Neues Spiel" && id("neu:501").text === "Mi., 11.11. um 18:00 gegen FC Wiltz · 📍 Wiltz", "Mitteilung: neues Spiel (Pokal)");
+  const umgestellt = neuD(), vorUm = neuD(); vorUm.klassen.k3.spiele[0].d = "2026-10-31T11:00:00+01:00";
+  ok(!mEreignisse(vorUm, umgestellt, null, jetzt).ereignisse.length, "Mitteilung: geänderte Uhrzeit (11 → 10 Uhr) meldet nichts");
   ok(id("bgl:9:11") && id("nende:801")?.text === "Luxemburg 2:1 Estland", "Mitteilung: BGL-Spieltag und Länderspiel-Endstand");
   ok(!m.ereignisse.some(e => e.reiter.includes("U9 1") && e.art !== "uhrzeit" && e.art !== "heute"), "Mitteilung: U9 nie Ergebnis, Spieltag oder Tabelle");
   ok(!id("heute:") && m.live.length === 0, "Mitteilung: kein Spiel heute → kein Heute Spiel, keine Live-Kandidaten");

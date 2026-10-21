@@ -336,7 +336,7 @@ export async function pushAnfrage(req, db, was) {
 // Gesendet wird nur 7–22 Uhr Luxemburger Zeit; was nachts fällig wird, wartet bis 7 Uhr (solange
 // `bis` nicht vorbei ist). Jede id geht nur einmal raus (Tabelle gemeldet).
 const MITT_URL = "https://raw.githubusercontent.com/strakekine/panini-wm-2026/main/data/mitteilungen.json";
-const MITT_ARTEN = ["heute", "spieltag", "tabelle", "uhrzeit", "ticker", "halbzeit", "ende", "woche"];
+const MITT_ARTEN = ["heute", "spieltag", "tabelle", "uhrzeit", "neu", "ticker", "halbzeit", "ende", "woche"];
 async function abosSpalte(db) {
   await db.prepare(TAB_ABOS).run();
   try { await db.prepare("ALTER TABLE abos ADD COLUMN wahl TEXT").run(); } catch (e) { /* gibt es schon */ }

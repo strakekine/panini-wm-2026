@@ -25,11 +25,9 @@ const hatErgebnis = sp => sp.hs != null && sp.as != null;
 // Welche Arten es für welchen Reiter gibt (Tabelle im Plan). Woche hat nur „woche“.
 export const ARTEN = {
   heute: "Heute Spiel", spieltag: "Spieltag komplett", tabelle: "Tabelle aktualisiert",
-  uhrzeit: "Uhrzeit steht fest", ticker: "Liveticker läuft", halbzeit: "Halbzeit", ende: "Endstand", woche: "Neue Woche",
+  uhrzeit: "Uhrzeit steht fest", neu: "Neue Phase / neues Spiel", ticker: "Liveticker läuft", halbzeit: "Halbzeit", ende: "Endstand", woche: "Neue Woche",
 };
 
-// Die aktuelle Ligaklasse einer Mannschaft (zuletzt begonnen, wie in der App).
-const aktuelleKlasse = (D, t) => [...t.klassen].reverse().map(id => D.klassen[id]).find(k => k && k.typ === "CC") || null;
 const spieltagFertig = (spiele, tag) => { const s = spiele.filter(sp => sp.tag === tag); return s.length > 0 && s.every(hatErgebnis); };
 
 export function ereignisse(alt, neu, vorher, now) {
@@ -69,8 +67,9 @@ export function ereignisse(alt, neu, vorher, now) {
                ab: kat === "Seniors" && (offen || +uhr(sp.d).slice(0, 2) >= 11) ? umLux(heute, 10) : Math.min(now, umLux(heute, 7, 30)), bis: ende(tag) });
     }
     const a = altSp.get(sp.id);
-    // Uhrzeit steht fest: vorher 00:00, jetzt eine echte Zeit, Spiel noch vor uns.
-    if (a && ohneUhrzeit(a.d) && !offen && d > now)
+    // Uhrzeit steht fest — nur U9/U11 und nur, wenn vorher gar keine Zeit da war (00:00). Eine geänderte
+    // Uhrzeit meldet die App nie: die gibt der Trainer durch, der kann intern umgestellt haben (vom Nutzer).
+    if (["U9", "U11"].includes(kat) && a && ohneUhrzeit(a.d) && !offen && d > now)
       dazu({ ...basis, id: `zeit:${sp.id}:${sp.d}`, art: "uhrzeit", titel: `${name} · Uhrzeit steht fest`,
              text: `${datum(sp.d)} um ${uhr(sp.d)} gegen ${gegner}${wo}`, ab: now, bis: d });
     if (kat === "Seniors") {
@@ -86,9 +85,11 @@ export function ereignisse(alt, neu, vorher, now) {
   }
 
   // Spieltag komplett (U13, U15) und Tabelle (U13, U15, Seniors) je Mannschaft in ihrer aktuellen Klasse.
-  for (const t of teams) {
-    const k = aktuelleKlasse(neu, t), ka = k && alt?.klassen?.[k.id];
-    if (!k || !ka || !k.ergebnisse) continue;
+  // Alle Ligaklassen der Mannschaft, nicht nur die neueste: beim Phasenwechsel steht die neue Klasse
+  // schon da, während in der alten noch die letzten Ergebnisse kommen.
+  for (const t of teams) for (const k of t.klassen.map(id => neu.klassen[id]).filter(k => k && k.typ === "CC")) {
+    const ka = alt?.klassen?.[k.id];
+    if (!ka || !k.ergebnisse) continue;
     if (["U13", "U15"].includes(t.kat))
       for (const tag of new Set(k.spiele.map(sp => sp.tag))) {
         if (!spieltagFertig(k.spiele, tag) || spieltagFertig(ka.spiele, tag)) continue;
@@ -106,6 +107,33 @@ export function ereignisse(alt, neu, vorher, now) {
                ab: now, bis: now + 24 * H });
     }
   }
+
+  // U13, U15: neue Phase (neue Ligaklasse mit Spielplan → eine Mitteilung) und neues Spiel (z. B. nächste
+  // Pokalrunde). Vom Nutzer, 21.10.2026. Nur mit altem Stand — beim allerersten Lauf wäre sonst alles „neu“.
+  if (alt?.klassen && Object.keys(alt.klassen).length)
+    for (const t of teams.filter(t => ["U13", "U15"].includes(t.kat))) {
+      const altT = (alt.teams || []).find(o => o.id === t.id), altKl = new Set(altT?.klassen || []);
+      if (!altT) continue;
+      const neue = eigeneSpiele(neu, t).filter(sp => !altSp.has(sp.id) && Date.parse(sp.d) > now && !sp.forfait);
+      const phasen = new Map(), einzeln = [];
+      for (const sp of neue) {
+        const k = t.klassen.map(id => neu.klassen[id]).find(k => k && k.spiele.some(x => x.id === sp.id));
+        if (k && k.typ === "CC" && !altKl.has(k.id)) (phasen.get(k) || phasen.set(k, []).get(k)).push(sp);
+        else einzeln.push(sp);
+      }
+      const wann = sp => datum(sp.d) + (ohneUhrzeit(sp.d) ? "" : ` um ${uhr(sp.d)}`);
+      const gegen = sp => kurz(unsere.has(sp.h.id) ? sp.a.n : sp.h.n);
+      for (const [k, l] of phasen)
+        dazu({ reiter: [t.reiter], id: `phase:${k.id}:${t.id}`, art: "neu", titel: `${t.reiter} · Neue Phase`,
+               text: `Spielplan ${k.n.replace(t.alter || "", "").trim() || k.n} ist da: ${l.length} ${l.length === 1 ? "Spiel" : "Spiele"}, erstes ${wann(l[0])} gegen ${gegen(l[0])}`,
+               ab: now, bis: now + 48 * H });
+      if (einzeln.length > 3)
+        dazu({ reiter: [t.reiter], id: `neu:${t.id}:${einzeln.map(sp => sp.id).join(",")}`, art: "neu", titel: `${t.reiter} · ${einzeln.length} neue Spiele`,
+               text: `Erstes ${wann(einzeln[0])} gegen ${gegen(einzeln[0])} · alle in der App`, ab: now, bis: now + 48 * H });
+      else for (const sp of einzeln)
+        dazu({ reiter: [t.reiter], id: `neu:${sp.id}`, art: "neu", titel: `${t.reiter} · Neues Spiel`,
+               text: `${wann(sp)} gegen ${gegen(sp)}` + (sp.ort ? ` · 📍 ${sp.ort}` : ""), ab: now, bis: Math.min(now + 48 * H, Date.parse(sp.d)) });
+    }
 
   // BGL: Spieltag komplett.
   if (neu.bgl?.spiele && alt?.bgl?.spiele)

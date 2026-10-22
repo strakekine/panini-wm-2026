@@ -764,7 +764,14 @@ nachgetragen aus `DAYS` per `sterneNachtragen`, nie entfernt — `DAYS` hält nu
 unter `_stars` = `{w:[Montage], red:[{t,n,was}]}`, in der Sicherung mit drin, „Lernstand löschen“
 lässt sie stehen. Eingelöst wird in der echten Welt; „EINLÖSEN“ fragt per `prompt()` Anzahl und
 wofür und schreibt den Kontoauszug. **Kein Papa-Code** — der könnte nur abziehen, schützt also vor
-nichts (Einwand des Vaters). Ergebnisseite: „🌟 Wochenstern verdient!“. Offen als
+nichts (Einwand des Vaters). Ergebnisseite: „🌟 Wochenstern verdient!“.
+**Papa-Geheimknopf** (Fassung t, vom Vater gewünscht): 5× innerhalb 3 s auf „VOKABELN“ (nur
+im Startbild, `titelTipp`) → `prompt("Code:")`. **STERN** = Bonusstern (`stars.b` = Zeitpunkte,
+zählt in `sterneStand`, im Kontoauszug „+ 1 ⭐ Bonus von Papa“). **TAG** = ein Tag dieser Woche
+bis heute zählt als Lerntag (`days[k].g`, `dayDone` → true, übersteht `pruneDays` auch ohne
+Antworten, `countDay` behält `g`); macht das die Woche voll, kommt der Wochenstern von selbst.
+Codes im Klartext (`PAPA_CODES`) — Hürde, kein Schloss. Falscher Code: „Diesen Code gibt es
+nicht.“ `#title` hat `touch-action:manipulation`, sonst zoomt iOS beim schnellen Tippen. Offen als
 zweiter Schritt: Klassenarbeit-Modus (Datum je Lektion, „Bereit: x %“).
 
 **Fassung:** `FASSUNG` (z. B. „15.10.2026 e“) steht unten im Startbild und als erste Zeile der

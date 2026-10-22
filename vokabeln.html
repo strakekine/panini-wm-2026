@@ -28,6 +28,7 @@
   .wrap{max-width:720px;margin:0 auto;padding:12px 14px 10px}
   h1{font-family:'Bebas Neue',sans-serif;letter-spacing:1.5px;margin:0;font-size:26px;color:var(--gold);line-height:1.1}
   h1 small{color:var(--muted);font-size:20px}
+  #title{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}   /* Geheimknopf: 5× tippen ohne Zoom/Markieren */
   main{max-width:720px;margin:0 auto;padding:10px 12px 90px}
   .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 
@@ -699,6 +700,7 @@ const DAY_MIN = 40, DAY_RIGHT = 20, WEEK_GOAL = 5;
 const pct = st => Math.floor(100 * st.sicher / Math.max(1, st.n));   /* abrunden: 100 % nur, wenn alles sicher */
 function dayKey(t){ const d = new Date(t); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
 const dayDone = e => !e ? false
+  : e.g ? true                     /* von Papa geschenkt (Code TAG) */
   : e.v >= 2 ? e.n >= DAY_MIN && e.r >= DAY_RIGHT
   : e.n >= 10 && (e.r == null || e.r >= 5);
 /* Eine Antwort in die Tageszählung: n = erste Antworten, r = davon richtig */
@@ -706,6 +708,7 @@ function countDay(e, ok){
   const n = e ? e.n : 0, r = e ? (e.r == null ? e.n : e.r) : 0;
   const out = { n:n + 1, r:r + (ok ? 1 : 0) };
   if(!e || e.v >= 2) out.v = 2;   /* ein heute schon angefangener Tag behält seine Regel */
+  if(e && e.g) out.g = 1;
   return out;
 }
 /* Woche Montag bis Sonntag: je Tag {label, done, today, future}, dazu die Zahl der Lerntage */
@@ -721,8 +724,9 @@ function weekStatus(days, now){
 /* Nur die letzten 60 Tage aufheben */
 function pruneDays(days, now){
   const out = {}, min = dayKey(now - 60 * DAY);
-  for(const k in days) if(k >= min && days[k] && days[k].n > 0){
+  for(const k in days) if(k >= min && days[k] && (days[k].n > 0 || days[k].g)){
     out[k] = { n:days[k].n|0 };
+    if(days[k].g) out[k].g = 1;
     if(days[k].r != null) out[k].r = Math.min(days[k].r|0, out[k].n);
     if(days[k].v >= 2 && out[k].r != null) out[k].v = 2;
   }
@@ -749,13 +753,24 @@ function sanitizeStars(x){
   const w = x && Array.isArray(x.w) ? [...new Set(x.w.filter(k => /^\d{4}-\d\d-\d\d$/.test(k)))].sort() : [];
   const red = x && Array.isArray(x.red) ? x.red.filter(r => r && r.n > 0 && r.t > 0)
     .map(r => ({ t:+r.t, n:Math.floor(r.n), was:String(r.was || "").slice(0, 80) })) : [];
-  return { w, red };
+  const b = x && Array.isArray(x.b) ? x.b.filter(t => t > 0).map(Number) : [];
+  return { w, red, b };
 }
 function sterneNachtragen(stars, days){
   const neu = sternWochen(days).filter(w => !stars.w.includes(w));
   return neu.length ? { ...stars, w:[...stars.w, ...neu].sort() } : stars;
 }
-function sterneStand(stars){ return stars.w.length - stars.red.reduce((a, r) => a + r.n, 0); }
+function sterneStand(stars){ return stars.w.length + (stars.b || []).length - stars.red.reduce((a, r) => a + r.n, 0); }
+
+/* ----- Papa-Geheimknopf (vom Vater gewünscht) -----
+   Fünfmal schnell auf „VOKABELN“ → Code. STERN = ein Bonusstern (stars.b, Zeitpunkt), TAG = ein
+   Tag dieser Woche zählt als Lerntag (days[k].g), wenn es knapp nicht gereicht hat. Ein so
+   vollgemachter Wochenstern kommt über sterneNachtragen von selbst. Der Code steht im Klartext
+   in der Datei — eine Hürde, kein Schloss; die Jungs müssten dafür den Quelltext lesen. */
+const PAPA_CODES = { STERN:"stern", TAG:"tag" };
+function papaCode(eingabe){ return PAPA_CODES[String(eingabe || "").trim().toUpperCase()] || null; }
+function tagSchenken(days, k){ return { ...days, [k]:{ ...(days[k] || { n:0 }), g:1 } }; }
+function bonusStern(stars, t){ return { ...stars, b:[...(stars.b || []), t] }; }
 
 /* Erinnerung an die Sicherung. dirty = Zeitpunkt der ersten Antwort seit der letzten
    Sicherung (null = nichts Ungesichertes), snooze = "Später" bis. Erinnert wird, wenn das
@@ -770,7 +785,7 @@ function needBackup(dirty, snooze, now){
 /* Fassung — bei JEDER Änderung hochzählen. Steht unten im Startbild und als erste Zeile der
    Mitschrift; am iPhone lief einmal noch die alte Datei aus dem Zwischenspeicher, und die
    Mitschrift sah aus wie ein neuer Fehler. */
-const FASSUNG = "16.10.2026 s";
+const FASSUNG = "22.10.2026 t";
 const KEY = "vokabeln_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
@@ -874,8 +889,10 @@ function renderHome(){
     $("starBox").innerHTML = '<div class="sterne"><div><b>⭐ '+st+'</b> '+(st === 1 ? "Stern" : "Sterne")+
       '<small>1 Stern für jede Woche mit '+WEEK_GOAL+' Lerntagen. Einlösen bei Papa.</small></div>'+
       (st > 0 ? '<button class="btn ghost sm" id="starRedeem">EINLÖSEN</button>' : '')+'</div>'+
-      (STARS.red.length ? '<details class="sterneLog"><summary>Eingelöst ('+STARS.red.length+')</summary>'+
-        STARS.red.slice().reverse().map(r => '<div>'+new Date(r.t).toLocaleDateString("de-DE")+' · '+r.n+' ⭐'+(r.was ? ' · '+esc(r.was) : '')+'</div>').join("")+
+      (STARS.red.length || STARS.b.length ? '<details class="sterneLog"><summary>Kontoauszug</summary>'+
+        [...STARS.red.map(r => ({ t:r.t, h:'− '+r.n+' ⭐ eingelöst'+(r.was ? ' · '+esc(r.was) : '') })),
+         ...STARS.b.map(t => ({ t, h:'+ 1 ⭐ Bonus von Papa' }))]
+          .sort((a, b) => b.t - a.t).map(x => '<div>'+new Date(x.t).toLocaleDateString("de-DE")+' · '+x.h+'</div>').join("")+
         '</details>' : '');
   }
   const all = LEKTIONEN.length > 1 && S.sel.length === LEKTIONEN.length;
@@ -1279,6 +1296,34 @@ function sterneEinloesen(){
   persist(); markDirty(); renderHome();
 }
 
+/* Geheimknopf: fünf Tipper auf den Titel innerhalb von 3 s, nur im Startbild */
+let TITEL_TIPPS = [];
+function titelTipp(){
+  if(VIEW !== "home") return;
+  const now = Date.now();
+  TITEL_TIPPS = TITEL_TIPPS.filter(t => now - t < 3000).concat(now);
+  if(TITEL_TIPPS.length < 5) return;
+  TITEL_TIPPS = [];
+  const ein = prompt("Code:", ""); if(ein == null || !ein.trim()) return;
+  const was = papaCode(ein);
+  if(was === "stern"){
+    STARS = bonusStern(STARS, Date.now());
+    persist(); markDirty(); renderHome();
+    alert("⭐ Ein Bonusstern ist gutgeschrieben.");
+  } else if(was === "tag"){
+    const labels = ["MO","DI","MI","DO","FR","SA","SO"], heute = (new Date().getDay() + 6) % 7;
+    const a = prompt("Welcher Tag dieser Woche soll als Lerntag zählen? (Mo bis " + labels[heute].charAt(0) + labels[heute].slice(1).toLowerCase() + ")", labels[heute].charAt(0) + labels[heute].slice(1).toLowerCase());
+    if(a == null) return;
+    const i = labels.indexOf(String(a).trim().slice(0, 2).toUpperCase());
+    if(i < 0 || i > heute){ alert("Bitte einen Tag dieser Woche bis heute angeben (Mo, Di, …)."); return; }
+    const k = dayKey(wochenStart(Date.now()) + i * DAY + 12 * 3600e3);
+    const vorher = STARS.w.length;
+    DAYS = tagSchenken(DAYS, k); STARS = sterneNachtragen(STARS, DAYS);
+    persist(); markDirty(); renderHome();
+    alert("📅 " + a.trim() + " zählt als Lerntag." + (STARS.w.length > vorher ? " Damit ist der Wochenstern verdient 🌟" : ""));
+  } else alert("Diesen Code gibt es nicht.");
+}
+
 /* ----- Sicherung ----- */
 async function backup(btn){
   const d = { app:"vokabeln", v:1, exported:new Date().toISOString(), state:S, p:P, days:DAYS, stars:STARS };
@@ -1312,6 +1357,7 @@ function restore(text){
 }
 
 /* ----- Ereignisse ----- */
+$("title").addEventListener("click", titelTipp);
 document.addEventListener("click", ev => {
   const b = ev.target.closest("button"); if(!b) return;
   if(b.dataset.les){

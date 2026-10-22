@@ -188,12 +188,41 @@ async function spielen(pg, falsch = []){
   ok((await pg.textContent("#starBox")).includes("⭐ 1"), "ein Stern für die volle Woche");
   await pg.click("#starRedeem");      /* Dialoge: 1 Stern (Vorgabe), Wofür leer */
   ok((await pg.textContent("#starBox")).includes("⭐ 0"), "nach Einlösen 0");
-  ok((await pg.textContent("#starBox")).includes("Eingelöst (1)"), "Kontoauszug zeigt die Einlösung");
+  ok((await pg.textContent("#starBox")).includes("1 ⭐ eingelöst"), "Kontoauszug zeigt die Einlösung");
   const sich = await pg.evaluate(() => JSON.stringify({ app:"vokabeln", v:1, exported:new Date().toISOString(), state:S, p:P, days:{}, stars:STARS }));
   await pg.evaluate(() => { localStorage.clear(); });
   await pg.reload();
   await pg.evaluate(t => restore(t), sich);
-  ok((await pg.textContent("#starBox")).includes("Eingelöst (1)") && (await pg.textContent("#starBox")).includes("⭐ 0"), "Wiederherstellen bringt Sterne und Einlösungen mit");
+  ok((await pg.textContent("#starBox")).includes("1 ⭐ eingelöst") && (await pg.textContent("#starBox")).includes("⭐ 0"), "Wiederherstellen bringt Sterne und Einlösungen mit");
+  ok(!pg.errs.length, "keine Fehler auf der Seite: " + pg.errs.join(" | "));
+  await pg.close();
+}
+
+/* --- 3f. Papa-Geheimknopf: 5× auf den Titel, Code STERN / TAG --- */
+{
+  const pg = await seite();
+  const antworten = [];
+  pg.removeAllListeners("dialog");
+  pg.on("dialog", d => d.type() === "prompt" ? d.accept(antworten.length ? antworten.shift() : d.defaultValue()) : d.accept());
+  const tippen = async n => { for(let i = 0; i < n; i++) await pg.click("#title"); };
+  antworten.push("STERN");
+  await tippen(4);
+  ok((await pg.textContent("#starBox")).includes("⭐ 0"), "4 Tipper: nichts passiert");
+  await tippen(1);
+  ok((await pg.textContent("#starBox")).includes("⭐ 1"), "5. Tipper + STERN → Bonusstern");
+  ok((await pg.textContent("#starBox")).includes("Bonus von Papa"), "Bonus steht im Kontoauszug");
+  antworten.push("falsch");
+  await tippen(5);
+  ok((await pg.textContent("#starBox")).includes("⭐ 1"), "falscher Code ändert nichts");
+  /* TAG: Mo–(heute-1) schon Lerntage bis auf einen, heute geschenkt → je nach Wochentag ggf. Stern */
+  antworten.push("tag");   /* zweite Nachfrage: Vorgabe = heute */
+  await tippen(5);
+  ok(await pg.evaluate(() => dayDone(DAYS[dayKey(Date.now())]) && weekStatus(DAYS, Date.now()).cells.find(c => c.today).done), "TAG → heute zählt als Lerntag, auch im Wochenkalender");
+  await pg.reload();
+  ok(await pg.evaluate(() => dayDone(DAYS[dayKey(Date.now())])), "geschenkter Tag übersteht Neuladen");
+  await pg.evaluate(() => { VIEW = "quiz"; });
+  antworten.push("STERN"); await tippen(5);
+  ok(await pg.evaluate(() => sterneStand(STARS)) === 1, "Geheimknopf nur im Startbild");
   ok(!pg.errs.length, "keine Fehler auf der Seite: " + pg.errs.join(" | "));
   await pg.close();
 }

@@ -15,7 +15,7 @@ if(i < 0 || j < 0) throw new Error("Abschnittsmarken Lektionen/Oberfläche nicht
 const quelle = src.slice(src.lastIndexOf("/*", i), src.lastIndexOf("/*", j));
 const M = new Function(quelle + `
   return { LEKTIONEN, DAY, FACH, clean, variants, check, cardsOf, grade, review, isDue, buildSession,
-           lessonStats, startOfDay, key, needBackup, klang, klingtWie, reviewAnswer, SICHER, tippKandidaten, ausgeschrieben, weekStatus, dayKey, dayDone, pruneDays, pct, DAY_MIN, DAY_RIGHT, countDay, sternWochen, sanitizeStars, sterneNachtragen, sterneStand, wochenStart };`)();
+           lessonStats, startOfDay, key, needBackup, klang, klingtWie, reviewAnswer, SICHER, tippKandidaten, ausgeschrieben, weekStatus, dayKey, dayDone, pruneDays, pct, DAY_MIN, DAY_RIGHT, countDay, sternWochen, sanitizeStars, sterneNachtragen, sterneStand, wochenStart, papaCode, tagSchenken, bonusStern };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text){ n++; if(!bed){ fehler++; console.log("✗ " + text); } }
@@ -284,6 +284,15 @@ for(const d of ["fd", "df", "mix"]){
   ok(M.sterneNachtragen(st, d5) === st, "derselbe Stern nicht doppelt");
   st = { ...st, red:[{ t:mi, n:1, was:"Kino" }] };
   ok(M.sterneStand(st) === 0, "Einlösen zieht ab");
+  /* Papa-Geheimknopf: STERN = Bonusstern, TAG = geschenkter Lerntag */
+  ok(M.papaCode(" stern ") === "stern" && M.papaCode("Tag") === "tag" && M.papaCode("STERNE") === null && M.papaCode("") === null, "Codes STERN und TAG, sonst nichts");
+  ok(M.sterneStand(M.bonusStern(M.sanitizeStars(null), mi)) === 1, "Bonusstern zählt");
+  ok(M.sanitizeStars({ b:[mi, 0, "x"] }).b.length === 1, "sanitizeStars behält Bonussterne");
+  const d4g = M.tagSchenken(d4, M.dayKey(mo + 12 * 3600e3));
+  ok(M.sternWochen(d4g).join() === "2026-10-12", "4 Lerntage + 1 geschenkter → Wochenstern");
+  const leer = M.tagSchenken({}, M.dayKey(mi));
+  ok(M.dayDone(leer[M.dayKey(mi)]) && M.pruneDays(leer, mi)[M.dayKey(mi)].g === 1, "geschenkter Tag ohne Antworten zählt und überlebt pruneDays");
+  ok(M.countDay({ n:3, r:2, v:2, g:1 }, true).g === 1, "Weiterlernen nimmt das Geschenk nicht weg");
   ok(M.sanitizeStars({ w:["2026-10-12", "2026-10-12", "kaputt"], red:[{ t:1, n:0 }, { t:1, n:2.7, was:"x" }] }).w.length === 1 &&
      M.sanitizeStars({ red:[{ t:1, n:0 }, { t:1, n:2.7, was:"x" }] }).red[0].n === 2, "sanitizeStars räumt auf");
   ok(M.pct({ sicher:25, n:26 }) === 96 && M.pct({ sicher:26, n:26 }) === 100 && M.pct({ sicher:0, n:0 }) === 0, "Prozent abgerundet, 100 nur wenn alles sicher");

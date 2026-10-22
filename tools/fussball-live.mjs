@@ -1,0 +1,188 @@
+// Live-Stand der Seniors 1 von FuPa → data/live.json für fussball.html.
+// Die FLF trägt während des Spiels nichts ein (am 18.10.2026 geprüft), FuPa hat den Stand,
+// sobald jemand am Platz tickert. FuPa hat keine offizielle Schnittstelle: nur während eines
+// Spiels abfragen.
+//
+//   node tools/fussball-live.mjs           einmal abfragen (falls gerade ein Spiel läuft)
+//   node tools/fussball-live.mjs --wache   so läuft es in der Action (fussball-live.yml, 3× am
+//       Tag): liegt in den nächsten Stunden ein Anstoß, bis 15 min davor warten, dann alle 2 min
+//       abfragen und jede Änderung sofort committen, bis 180 min nach Anstoß. Sonst sofort fertig.
+//       Ein GitHub-Lauf darf höchstens 6 h dauern — darum nur Anstöße bis WACHE_MAX voraus.
+// Lokal in der Cloud-Umgebung: NODE_USE_ENV_PROXY=1 davor.
+
+import { writeFileSync, readFileSync, existsSync } from "node:fs";
+import { execSync } from "node:child_process";
+import { eigeneSpiele } from "./fussball.mjs";
+
+const DATEN = new URL("../data/fussball.json", import.meta.url);
+const OUT = new URL("../data/live.json", import.meta.url);
+const API = "https://api.fupa.net/v1/matches/";
+export const REITER = "Seniors 1";           // Reserven: App fragt den Worker direkt (D.fupa), ohne diesen Lauf
+// Zeitfenster um den Anstoß. 180 statt 150 min: Pokal mit Verlängerung und Elfmeterschießen
+// dauert 155–165 min ab Anpfiff (vom Nutzer gefragt). Normale Spiele enden früher, weil der Lauf
+// nach zweimal „POST“ aufhört.
+export const VOR_MIN = 15, NACH_MIN = 180;
+export const TAKT_S = 120;                   // Abfrage-Abstand während des Spiels
+export const WACHE_MAX_MIN = 170;            // so weit voraus darf ein Anstoß liegen (170 + 180 < 6 h)
+
+// Das Spiel der Mannschaft, das gerade im Zeitfenster liegt, oder null.
+export function spielJetzt(D, now) {
+  const t = D.teams.find(t => t.reiter === REITER);
+  if (!t) return null;
+  return eigeneSpiele(D, t).find(sp => {
+    const a = Date.parse(sp.d);
+    return now >= a - VOR_MIN * 60e3 && now <= a + NACH_MIN * 60e3;
+  }) || null;
+}
+
+// FuPa-Spiel zum FLF-Anstoß: genau gleiche Zeit, sonst das nächste am selben Tag (Luxemburg)
+// mit höchstens 3 h Abstand — eine Verlegung trägt oft nur eine der beiden Seiten nach.
+const tagLux = ms => new Date(ms).toLocaleDateString("sv-SE", { timeZone: "Europe/Luxembourg" });
+export function passendesSpiel(fupaSpiele, anstoss) {
+  const a = Date.parse(anstoss);
+  const genau = fupaSpiele.find(x => Date.parse(x.kickoff) === a);
+  if (genau) return genau;
+  return fupaSpiele
+    .filter(x => tagLux(Date.parse(x.kickoff)) === tagLux(a) && Math.abs(Date.parse(x.kickoff) - a) <= 3 * 3600e3)
+    .sort((x, y) => Math.abs(Date.parse(x.kickoff) - a) - Math.abs(Date.parse(y.kickoff) - a))[0] || null;
+}
+
+// Für --wache: das nächste Spiel, dessen Fenster noch nicht vorbei ist und dessen Anstoß
+// höchstens WACHE_MAX_MIN voraus liegt (spätere übernimmt der nächste Lauf).
+export function naechstesSpiel(D, now) {
+  const t = D.teams.find(t => t.reiter === REITER);
+  if (!t) return null;
+  return eigeneSpiele(D, t).find(sp => {
+    const a = Date.parse(sp.d);
+    return now <= a + NACH_MIN * 60e3 && a - now <= WACHE_MAX_MIN * 60e3;
+  }) || null;
+}
+
+// Tore oder Karten aus FuPas `highlights` (type goal | card, subtype z. B. goal_headed,
+// penalty_foul, card_red). Gleiches Format für beide, nach Minute sortiert. Kopie in
+// tools/cloudflare-worker.js — der Test prüft, dass beide gleich rechnen.
+function ereignisse(f, typ) {
+  const heim = f.homeTeam?.slug;
+  return (f.highlights || []).filter(x => x.type === typ).map(x => ({
+    min: x.minute, plus: x.additionalMinute || 0,
+    heim: x.team?.teamSlug === heim,
+    name: [x.primaryRole?.firstName, x.primaryRole?.lastName].filter(Boolean).join(" ") || null,
+    art: x.subtype || "",
+  })).sort((a, b) => a.min - b.min || a.plus - b.plus);
+}
+
+// FuPa-Spiel (API-Antwort) → schlankes Format der App. `minute` gilt zum Zeitpunkt `minuteAt`;
+// die App zählt selbst weiter, sonst änderte sich die Datei bei jedem Lauf (ein Commit je 5 min).
+export function liveAus(f, flf) {
+  const l = f.live || {};
+  return {
+    flfId: flf.id,
+    slug: f.slug,
+    url: "https://www.fupa.net/match/" + f.slug,
+    anstoss: flf.d,
+    h: flf.h.n, a: flf.a.n,
+    hs: f.homeGoal ?? null, as: f.awayGoal ?? null,
+    section: f.section || "",             // PRE, LIVE, POST
+    period: l.period || "",               // started (1. Hz), halftime, secondHalf, …
+    running: !!l.running,
+    minute: l.minute ?? null,
+    minuteAt: l.lastTimestamp || null,
+    tore: ereignisse(f, "goal"),
+    karten: ereignisse(f, "card"),
+    ticker: f.tickerAuthor?.name || null,
+  };
+}
+
+// Inhaltlich gleich? `minute`/`minuteAt` zählen nur, wenn sich sonst etwas geändert hat — solange
+// die Uhr läuft, bleibt das alte Paar richtig, und die App rechnet von dort weiter.
+export function gleich(alt, neu) {
+  const ohne = x => x && JSON.stringify({ ...x, minute: 0, minuteAt: 0 });
+  return !!alt && ohne(alt) === ohne(neu);
+}
+
+// Spiele der Seniors 1 über die Schnittstelle (`flavor=current`, Rückfall `past`). Früher über
+// die Webseite (Vereinsseite + REDUX_DATA); die Schnittstelle ist einfacher und dieselbe, die der
+// Worker nimmt. Saison „20262027“ → Teamslug „fc-koeppchen-m1-2026-27“.
+export async function fupaSpiele(saisonId) {
+  const team = "fc-koeppchen-m1-" + saisonId.slice(0, 4) + "-" + saisonId.slice(6, 8);
+  const aus = [];
+  for (const flavor of ["current", "past"]) {
+    const r = await fetch(`${API.replace("matches/", "")}teams/${team}/matches?flavor=${flavor}`);
+    if (r.ok) { const j = await r.json(); if (Array.isArray(j)) aus.push(...j); }
+  }
+  if (!aus.length) throw new Error("FuPa-Spiele für " + team + " nicht gefunden");
+  return aus;
+}
+
+// Eine Abfrage; true, wenn live.json neu geschrieben wurde.
+async function einmal(D, sp) {
+  const alt = existsSync(OUT) ? JSON.parse(readFileSync(OUT, "utf8")) : null;
+
+  let slug = alt?.flfId === sp.id ? alt.slug : null;
+  if (!slug) {
+    const spiele = await fupaSpiele(D.saison.id);
+    slug = passendesSpiel(spiele, sp.d)?.slug;
+    // Nicht gemerkt: der nächste Takt (2 min) sucht von vorn.
+    if (!slug) { console.log("Spiel bei FuPa (noch) nicht gefunden:", sp.d); return false; }
+  }
+  const r = await fetch(API + slug);
+  if (!r.ok) throw new Error("FuPa HTTP " + r.status);
+  const neu = liveAus(await r.json(), sp);
+  if (gleich(alt, neu)) { console.log("unverändert", neu.hs, ":", neu.as, neu.period); return false; }
+  writeFileSync(OUT, JSON.stringify(neu, null, 1) + "\n");
+  console.log("geschrieben:", neu.hs, ":", neu.as, neu.section, neu.period, neu.minute + "'");
+  return true;
+}
+
+// Commit + Push aus der Action heraus, in JEDEM Takt aufgerufen: committet eine Änderung und
+// schiebt alles nach, was noch nicht oben ist. Am 18.10.2026 scheiterte ein Push (Name fehlte
+// beim Rebase, weil er nur per `-c` am Commit hing), danach hielt der Lauf den Abpfiff für
+// gespeichert — so ein Fehler heilt sich jetzt beim nächsten Takt.
+let identitaet = false;
+export function sync() {
+  const sh = c => execSync(c, { stdio: "inherit" });
+  if (!identitaet) {
+    sh("git config user.name fussball-live");
+    sh("git config user.email 41898282+github-actions[bot]@users.noreply.github.com");
+    identitaet = true;
+  }
+  sh("git add data/live.json");
+  try { execSync("git diff --cached --quiet"); } catch (e) { sh('git commit -q -m "Fußball: Live-Stand"'); }
+  sh("git fetch -q origin main");
+  if (execSync("git rev-list --count origin/main..HEAD").toString().trim() === "0") return;
+  try { sh("git pull -q --rebase origin main && git push -q origin HEAD:main"); }
+  catch (e) { try { execSync("git rebase --abort", { stdio: "ignore" }); } catch (e2) {} throw e; }
+}
+
+const schlafen = ms => new Promise(r => setTimeout(r, Math.max(0, ms)));
+
+async function wache() {
+  const D = JSON.parse(readFileSync(DATEN, "utf8"));
+  const sp = naechstesSpiel(D, Date.now());
+  if (!sp) { console.log("kein Spiel in den nächsten", WACHE_MAX_MIN, "min"); return; }
+  const a = Date.parse(sp.d), ende = a + NACH_MIN * 60e3;
+  console.log("Spiel", sp.h.n, "–", sp.a.n, sp.d, "· warte bis", new Date(a - VOR_MIN * 60e3).toISOString());
+  await schlafen(a - VOR_MIN * 60e3 - Date.now());
+  let nachAbpfiff = 0;
+  while (Date.now() <= ende) {
+    try { await einmal(D, sp); } catch (e) { console.error("Abfrage fehlgeschlagen:", e.message); }
+    try { sync(); } catch (e) { console.error("Push fehlgeschlagen, nächster Takt versucht es wieder:", e.message); }
+    // Nach Abpfiff noch zwei Abfragen (Korrekturen des Tickerers), dann Schluss.
+    try {
+      const L = JSON.parse(readFileSync(OUT, "utf8"));
+      if (L.flfId === sp.id && L.section === "POST" && ++nachAbpfiff > 2) break;
+    } catch (e) {}
+    await schlafen(TAKT_S * 1e3);
+  }
+  console.log("fertig");
+}
+
+async function main() {
+  const D = JSON.parse(readFileSync(DATEN, "utf8"));
+  const sp = spielJetzt(D, Date.now());
+  if (!sp) { console.log("kein Spiel im Zeitfenster"); return; }
+  await einmal(D, sp);
+}
+
+if (import.meta.url === `file://${process.argv[1]}`)
+  (process.argv.includes("--wache") ? wache() : main()).catch(e => { console.error(e); process.exit(1); });

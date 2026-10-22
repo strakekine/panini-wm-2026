@@ -1,0 +1,1287 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<!-- KEIN viewport-fit=cover — siehe pizza.html und CLAUDE.md (iPhone-Regeln). -->
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FC Koeppchen</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FC Koeppchen">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#111111">
+<!-- Manifest: nötig für Mitteilungen (Web Push). Symbole für Android (Installieren als App); das iPhone
+     nimmt weiter das apple-touch-icon. -->
+<link rel="manifest" href="fussball.webmanifest">
+<!-- iOS nimmt für das Home-Icon nur PNG, kein SVG -->
+<link rel="icon" href="data:image/png;base64,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">
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,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">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Vereinsfarben: weiss, schwarz, ein bisschen Grün (das Türkis aus dem Logo). */
+    --bg:#f3f4f3; --panel:#ffffff; --panel2:#f6f7f6; --line:#e1e4e2;
+    --text:#111111; --muted:#6b716e; --accent:#1fa88c; --accentT:#0f7a65;
+    --head:#111111; --good:#1fa88c; --bad:#d9485a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Barlow,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  header{position:sticky;top:0;z-index:20;background:var(--head);color:#fff;border-bottom:3px solid var(--accent)}
+  .wrap{max-width:720px;margin:0 auto;padding:10px 14px}
+  .top{display:flex;align-items:center;gap:10px}
+  .top img{width:42px;height:42px;border-radius:50%;background:#fff;flex:none}
+  h1{font-family:'Bebas Neue',sans-serif;letter-spacing:1.5px;margin:0;font-size:28px;color:#fff;line-height:1.05}
+  .sub{color:#b9bfbc;font-size:12.5px;margin-top:1px}
+  /* Reiter im Raster: acht passen in zwei Reihen à vier, auch auf dem kleinen iPhone. */
+  .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#333;border:1px solid #333;border-radius:10px;overflow:hidden;margin-top:9px}
+  .seg button{background:#222;white-space:nowrap;color:#b9bfbc;border:0;padding:9px 10px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:.3px}
+  .seg button img{height:28px;display:block;margin:-6px auto}
+  .seg button.on{background:#fff;color:#111}
+  @media (min-width:600px){.seg{grid-template-columns:repeat(6,1fr)}}
+  .seg button.woche{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:10px;text-transform:uppercase;letter-spacing:.6px}
+  .seg button.woche img{height:22px;margin:-4px 0;display:inline-block}
+  .wzus{font-size:15px;font-weight:600;text-align:center}
+  .wzeile{cursor:pointer}
+  .pill.wteam{margin-left:0;background:#111;font-size:14px;padding:3px 10px;vertical-align:1px}
+  .wzugleich{color:#b45309;font-weight:600}
+  .wlive .sc{background:#d4001a !important;color:#fff !important}
+  .wlivetxt{color:#d4001a;font-weight:700}
+  main{max-width:720px;margin:0 auto;padding:4px 12px 60px}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin:12px 0;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  .chead,details.card>summary{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--panel2);border-bottom:1px solid var(--line)}
+  details.card>summary{cursor:pointer;list-style:none}
+  details.card>summary::-webkit-details-marker{display:none}
+  /* Aufklappbare Karten (Alle Spiele der Klasse, Früher): deutlich als Knopf (vom Nutzer, 20.10.2026). */
+  details.card>summary::after{content:"Anzeigen ▾";flex:none;font-size:13px;font-weight:700;color:#fff;background:var(--accentT);padding:5px 11px;border-radius:20px}
+  details.card[open]>summary::after{content:"Zuklappen ▴";background:#fff;color:var(--accentT);box-shadow:inset 0 0 0 1.5px var(--accentT)}
+  details.card:not([open])>summary{border-bottom:0}
+  h2{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1px;margin:0;flex:1}
+  .hint{font-size:12px;color:var(--muted);text-align:right}
+  .hint.tagdatum{font-size:15px;font-weight:600;color:var(--text)}
+  .cbody{padding:10px 12px}
+  .heute{border:2px solid var(--accent)}
+  .heute .chead{background:#e6f6f2}
+  .heute .wann{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;text-align:center;line-height:1.1}
+  .heute .wo{text-align:center;font-size:13px;color:var(--muted);margin-top:4px}
+  .heute .zusatz{text-align:center;font-size:13px;margin-top:8px}
+  .live{border:2px solid var(--bad)}
+  .live .chead{background:#fff4f5}
+  .live .punkt{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--bad);margin-right:6px;vertical-align:1px;animation:puls 1.6s infinite}
+  @keyframes puls{50%{opacity:.25}}
+  .live .stand{font-family:'Bebas Neue',sans-serif;font-size:44px;letter-spacing:2px;text-align:center;line-height:1}
+  .live .zeit{text-align:center;font-weight:700;color:var(--bad);margin-top:2px}
+  .live .tore{list-style:none;padding:0;margin:10px 0 0;font-size:13.5px}
+  .live .tore li{padding:3px 0}
+  .live .quelle{font-size:11.5px;color:var(--muted);text-align:center;margin-top:8px}
+  .live .quelle a{color:var(--accentT)}
+  .note{font-size:13.5px;line-height:1.4;padding:10px 12px;border-radius:10px;margin:12px 0;background:var(--panel);border:1px solid var(--line)}
+  .note.up{border-color:var(--accent);background:#e6f6f2}
+  .note.down{border-color:#e9a3ac;background:#fbecee}
+  .muted{color:var(--muted)}
+
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th{font-size:11px;color:var(--muted);font-weight:700;text-align:right;padding:4px 3px;letter-spacing:.4px}
+  th:nth-child(2){text-align:left}
+  td{padding:7px 3px;text-align:right;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+  td.tm{text-align:left;width:99%;line-height:1.2}
+  td.pl{text-align:center;width:26px;font-weight:700;border-left:3px solid transparent}
+  tr.auf td.pl{border-left-color:var(--good)}
+  tr.ab td.pl{border-left-color:var(--bad)}
+  tr.wir td{background:#e6f6f2;font-weight:700}
+  td.pk{font-weight:700}
+  .leg{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:8px;flex-wrap:wrap}
+  .leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+  .narrow{display:none}
+  @media (max-width:420px){ .wide{display:none} .narrow{display:table-cell} }
+
+  .m{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+  .m:first-child{border-top:0}
+  .m .t{font-size:14px;line-height:1.2;overflow-wrap:break-word}
+  .m .t.h{text-align:right}
+  .m .t.wir{font-weight:700}
+  .m .sc{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;min-width:62px;text-align:center;border-radius:8px;padding:2px 6px;background:var(--panel2);border:1px solid var(--line);white-space:nowrap}
+  /* Sieg grün, Unentschieden neutral, Niederlage schwarz — ohne Rot, das liest sich zu hart. */
+  .m .sc.s{background:var(--accent);border-color:var(--accent);color:#fff} .m .sc.u{background:#e4e7e5} .m .sc.n{background:#111;border-color:#111;color:#fff}
+  .m .sc.offen{font-family:Barlow,sans-serif;font-size:13px;font-weight:700;color:var(--muted)}
+  .m .meta{grid-column:1/-1;font-size:12px;color:var(--muted);text-align:center;margin-top:-3px}
+  .tag{font-size:14px;font-weight:800;letter-spacing:.5px;color:var(--accentT);text-transform:uppercase;margin:16px 0 4px;padding-bottom:3px;border-bottom:2px solid var(--accent)}
+  .tag:first-child{margin-top:0}
+  .next{font-size:15px}
+  .next .when{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;color:var(--text)}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--accent);border:0;color:#fff;margin-left:6px;vertical-align:2px}
+  .kal{display:block;text-align:center;margin-top:12px;padding:11px 12px;border-radius:10px;background:var(--head);color:#fff;font-weight:700;font-size:14.5px;text-decoration:none}
+  .kalhilfe{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.45}
+  .kalhilfe summary{cursor:pointer;text-align:center;color:var(--accentT);font-weight:600}
+  .kalhilfe code{display:block;word-break:break-all;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 9px;margin:6px 0;font-size:12px;color:var(--text)}
+  .kopie{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-family:inherit;font-weight:700;font-size:13px;color:var(--text);cursor:pointer}
+  footer{font-size:12px;color:var(--muted);text-align:center;line-height:1.6}
+  .teilen{margin-top:16px;background:var(--accent);color:#fff;border:0;border-radius:10px;padding:11px 18px;font-family:inherit;font-weight:700;font-size:14.5px;cursor:pointer}
+  footer .von{margin-top:14px;font-size:12.5px;color:var(--text);display:flex;align-items:center;justify-content:center;gap:7px}
+  footer .von img{width:30px;height:30px;border-radius:50%;background:#fff}
+  footer a{color:var(--accentT)}
+  .zahnrad{background:none;border:0;font-size:24px;padding:4px 6px;cursor:pointer;flex:none;border-radius:10px}
+  .zahnrad.on{background:#fff}
+  .mitt .schritte{margin:0 0 10px;padding-left:22px;font-size:14px;line-height:1.5}
+  .mitt .schritte li{margin-bottom:4px}
+  .mitt .klein{font-size:12.5px;color:var(--muted)}
+  .mitt .cbody p{margin:0 0 10px;font-size:14px;line-height:1.45}
+  .mitt .knopf{display:block;width:100%;margin-top:8px;background:var(--accent);color:#fff;border:0;border-radius:10px;padding:11px;font-family:inherit;font-weight:700;font-size:14.5px;cursor:pointer}
+  .mitt .knopf.zweit{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+  .mitt .stand{font-size:13px;color:var(--muted);margin-top:10px;min-height:1em}
+  .mitt .mh{font-size:14px;margin:14px 0 6px}
+  .mitt .haken{display:block;font-size:14px;padding:5px 0}
+  .mitt .haken input{width:18px;height:18px;vertical-align:-3px;margin-right:6px;accent-color:var(--accent)}
+  .mitt .mteam{border-top:1px solid var(--line);padding:4px 0}
+  .mitt .haken.team{font-weight:700;font-size:15px}
+  .mitt .marten{padding:0 0 6px 28px}
+  .mitt .marten .haken{font-size:13.5px;padding:3px 0}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="top">
+    <img alt="" id="logo">
+    <div style="flex:1"><h1>FC Koeppchen</h1><div class="sub" id="sub">U13 Minimes</div></div>
+    <button id="zahnrad" class="zahnrad" hidden aria-label="Mitteilungen">⚙️</button>
+  </div>
+  <div class="seg" id="seg"></div>
+</div></header>
+<main id="main"><div class="note">Lade …</div></main>
+
+<script>
+// ==== Logik (ohne DOM, wird von test/fussball.mjs ausgeschnitten) ====
+
+// Auf- und Abstieg nach Phase 1 2026-2027, Rundschreiben der FLF (vom Nutzer als Bild):
+// Klasse I: 5./6. runter. II und III: 1. hoch, 5./6. runter. IV: 1./2. hoch, 5./6. runter.
+// V: 1. jeder Serie und der beste 2. hoch. Die letzte Klasse (bei U13 Klasse VI) hängt von
+// den Anmeldungen ab — dort wird nichts markiert, statt etwas zu behaupten.
+// Für Phase 2 gibt es noch keine Regeln: neue Phase → neue Zeilen hier.
+// Gilt für U13 und U15 (U15: derselbe Wortlaut, vom Nutzer als Text nachgereicht). Für die
+// anderen Altersklassen liegt kein Rundschreiben vor, dort wird nichts markiert.
+// Schlüssel: Saison, Altersklasse, Phase.
+const PHASE1_2026 = {
+  1: { auf: [], ab: [5, 6] },
+  2: { auf: [1], ab: [5, 6] },
+  3: { auf: [1], ab: [5, 6] },
+  4: { auf: [1, 2], ab: [5, 6] },
+  5: { auf: [1], ab: [], extra: "dazu der beste Zweite aller Serien" },
+};
+const REGELN = {
+  "20262027 U13 Phase 1": PHASE1_2026,
+  "20262027 U15 Phase 1": PHASE1_2026,
+};
+
+function klasseVon(name) {
+  const k = /\bCl\s*(\d+)/i.exec(name), p = /Phase\s*(\d+)/i.exec(name), a = /^(W?U\d+)\b/.exec(name);
+  return { nr: k ? +k[1] : null, phase: p ? +p[1] : null, kat: a ? a[1] : null };
+}
+
+// Regeln der ganzen Phase (alle Klassen) oder null.
+function regelnVon(saisonId, name) {
+  const { kat, phase } = klasseVon(name);
+  return REGELN[`${saisonId} ${kat} Phase ${phase}`] || null;
+}
+
+// → {auf, ab, extra} oder null, wenn für diese Klasse keine Regel bekannt ist.
+function zonen(saisonId, name) {
+  const r = regelnVon(saisonId, name), { nr } = klasseVon(name);
+  return (r && nr && r[nr]) || null;
+}
+
+// Sicht einer Mannschaft auf ein Spiel: s/u/n oder null, solange kein Ergebnis da ist.
+function ausgang(sp, tid) {
+  if (!sp.gespielt || sp.hs == null || sp.as == null) return null;
+  const wir = sp.h.id === tid ? sp.hs : sp.as, die = sp.h.id === tid ? sp.as : sp.hs;
+  return wir > die ? "s" : wir < die ? "n" : "u";
+}
+
+const istLiga = k => k.typ === "CC";
+const ROEM = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
+const roem = n => ROEM[n] || String(n);
+
+// Mannschaften mit Ligaspielen bekommen einen Reiter. Welche Pokalmannschaften (ohne Liga)
+// zu welchem Reiter gehören, legt der Abruf fest (`mit`, tools/fussball.mjs) — dieselbe
+// Regel gilt dort für den Kalender.
+function aufteilen(D) {
+  const tabs = D.teams.filter(t => t.klassen.some(id => istLiga(D.klassen[id])));
+  const verein = D.teams.filter(t => !tabs.includes(t));
+  return { tabs, verein };
+}
+
+// In Zeilen und Tabelle: „FC Koeppchen Wormeldange I“ → „Koeppchen I“, sonst bricht
+// das Ergebnis auf dem iPhone um. Gegner bleiben, wie die FLF sie schreibt.
+const anzeige = n => n.replace(/^FC Koeppchen Wormeldange\b/, "Koeppchen");
+// Umbruch nach „/“ statt mitten im Wort (ENT Mensdorf/Canach/Munsbach I).
+const umbruch = s => esc(s).replace(/\//g, "/<wbr>");
+
+// Alles, was ein Reiter zeigt — reine Daten, gerendert wird unten.
+function sicht(D, tid, now) {
+  const team = D.teams.find(t => t.id === tid);
+  const verein = D.teams.filter(t => (team.mit || []).includes(t.id));
+  // Alle FLF-Nummern: die Mannschaft kann je Phase eine andere haben (tools/fussball.mjs).
+  const nr = t => t.ids || [t.id];
+  const eigen = new Set(nr(team));
+  const ids = new Set([...eigen, ...verein.flatMap(nr)]);
+  const liga = team.klassen.map(id => D.klassen[id]).filter(istLiga);
+  const aktuell = liga[liga.length - 1] || null;
+  const eigene = [];
+  for (const id of new Set([...team.klassen, ...verein.flatMap(t => t.klassen)])) {
+    const k = D.klassen[id];
+    for (const sp of k.spiele)
+      if (ids.has(sp.h.id) || ids.has(sp.a.id))
+        eigene.push({ ...sp, klasse: k.n, typ: k.typ, erg: k.ergebnisse, wir: ids.has(sp.h.id) ? sp.h.id : sp.a.id });
+  }
+  eigene.sort((a, b) => a.d.localeCompare(b.d));
+  // Ein Spiel ohne Ergebnis gilt bis 3 h nach Anpfiff als „kommt noch“, danach als
+  // „Ergebnis fehlt noch“ — sonst stünde ein gestriges Spiel ewig oben als nächstes.
+  const grenze = now - 3 * 3600e3;
+  const kommend = eigene.filter(sp => !sp.gespielt && Date.parse(sp.d) >= grenze);
+  const gespielt = eigene.filter(sp => sp.gespielt || Date.parse(sp.d) < grenze).reverse();
+
+  let status = null;
+  if (aktuell) {
+    const fertig = aktuell.spiele.length > 0 && aktuell.spiele.every(sp => sp.gespielt);
+    const z = zonen(D.saison.id, aktuell.n);
+    const zeile = aktuell.tabelle && aktuell.tabelle.find(r => eigen.has(r.id));
+    if (fertig) {
+      const { nr } = klasseVon(aktuell.n);
+      let was = "";
+      if (z && zeile && z.auf.includes(zeile.pl)) was = { art: "up", txt: `Platz ${zeile.pl} — Aufstieg in Klasse ${roem(nr - 1)}! 🎉` };
+      else if (z && zeile && z.ab.includes(zeile.pl)) was = { art: "down", txt: `Platz ${zeile.pl} — es geht in Klasse ${roem(nr + 1)}.` };
+      else if (z && zeile) was = { art: "", txt: `Platz ${zeile.pl} — bleibt in Klasse ${roem(nr)}.` };
+      // Regeln für die Phase da, aber nicht für diese Klasse = letzte Klasse (Rundschreiben).
+      else if (zeile && regelnVon(D.saison.id, aktuell.n)) was = { art: "", txt: `Platz ${zeile.pl}. Für diese Klasse hängen Auf- und Abstieg von den Anmeldungen ab.` };
+      else if (zeile) was = { art: "", txt: `Platz ${zeile.pl}.` };
+      const neuFehlt = !kommend.some(sp => sp.typ === "CC");
+      status = { fertig, was, neuFehlt };
+    }
+  }
+  return { team, ids, eigen, aktuell, frueher: liga.slice(0, -1).reverse(), kommend, gespielt, status };
+}
+
+// ---- Live (FuPa, data/live.json aus tools/fussball-live.mjs) ----
+// Kasten nur, wenn das Live-Spiel zu diesem Reiter gehört, FuPa es als laufend oder beendet
+// führt und die FLF noch kein Ergebnis hat — danach steht es normal bei den Ergebnissen.
+// Höchstens 4 h nach Anstoß, falls die Action einmal hängen bleibt.
+const LIVE_FENSTER = { vor: 15 * 60e3, nach: 180 * 60e3 };   // wie tools/fussball-live.mjs
+function liveAnzeige(L, v, now) {
+  if (!L || !v) return null;
+  const sp = [...v.kommend, ...v.gespielt].find(s => s.id === L.flfId);
+  if (!sp || (sp.gespielt && sp.hs != null)) return null;
+  if (now > Date.parse(L.anstoss) + 4 * 3600e3) return null;
+  if (L.section !== "LIVE" && L.section !== "POST") return null;
+  // FuPa setzt ab Anpfiff von selbst „LIVE“, auch ohne Tickerer (19.10.2026, Seniors 2 gegen Titus:
+  // kein Stand, kein Name). Dann bleibt der Spieltag-Kasten „Spiel läuft“ stehen.
+  if (L.hs == null && L.as == null && !L.ticker && !(L.tore || []).length) return null;
+  return { ...L, zeit: liveZeit(L, now), laeuft: L.section === "LIVE" };
+}
+
+// Minute aus dem letzten Abruf weitergezählt; über 45/90/105/120 hinaus „45+“ usw. (Nachspielzeit
+// kennt nur der Tickerer, und das Weiterzählen soll nicht bei 97' stehen, wenn die Action hängt).
+// Gesehen hat FuPa bisher „started“, „halftime“, „secondHalf“; für Verlängerung und
+// Elfmeterschießen kennen wir die Namen noch nicht — darum nach Wortteilen statt genau.
+function liveZeit(L, now) {
+  if (L.section === "POST") return "Abpfiff";
+  const p = String(L.period || "").toLowerCase();
+  if (/penal|shoot/.test(p)) return "Elfmeterschießen";
+  if (p.includes("halftime") || p.includes("break") || p.includes("pause")) return p === "halftime" ? "Halbzeit" : "Pause";
+  if (L.minute == null) return "läuft";
+  let m = L.minute;
+  if (L.running && L.minuteAt) m += Math.max(0, Math.floor((now - Date.parse(L.minuteAt)) / 60e3));
+  const verl = /overtime|extra/.test(p) || L.minute > 90;
+  const deckel = p === "started" || p === "firsthalf" ? 45 : !verl ? 90 : L.minute <= 105 && !/second/.test(p) ? 105 : 120;
+  const txt = m > deckel ? deckel + "+" : m + "'";
+  return verl ? "Verlängerung " + txt : txt;
+}
+
+// Art des Tors aus FuPas `subtype`. Am 18.10.2026 in 11 Koeppchen-Spielen gesehen: goal_shoot
+// (34×, normaler Schuss, kein Zusatz), goal_headed, penalty_foul, goal_scrounger, goal_free_kick,
+// goal_own_goal, penalty_shootout, goal_distance_shoot. Nach Wortteilen, falls FuPa mehr kennt;
+// Elfmeterschießen vor Elfmeter prüfen (beide enthalten „penalty“).
+function torArt(art) {
+  const a = String(art || "").toLowerCase();
+  if (a.includes("own")) return "Eigentor";
+  if (a.includes("shootout")) return "Elfmeterschießen";
+  if (a.includes("penalty")) return "Elfmeter";
+  if (a.includes("free")) return "Freistoß";
+  if (a.includes("head")) return "Kopfball";
+  if (a.includes("scrounger")) return "Abstauber";
+  if (a.includes("distance")) return "Fernschuss";
+  return "";
+}
+
+// Karten aus FuPas `subtype` (gesehen: card_red). Gelb-Rot vor Rot prüfen, der Name enthält beides.
+// In 11 Spielen kam nur card_red vor — FuPa führt in `highlights` wohl nur Platzverweise.
+function kartenArt(art) {
+  const a = String(art || "").toLowerCase();
+  if (a.includes("yellow") && a.includes("red")) return { zeichen: "🟨🟥", text: "Gelb-Rot" };
+  if (a.includes("red")) return { zeichen: "🟥", text: "Rot" };
+  if (a.includes("yellow")) return { zeichen: "🟨", text: "Gelb" };
+  return { zeichen: "🃏", text: "Karte" };
+}
+
+// Tore und Karten in einer Liste, nach Minute (bei gleicher Minute Tor zuerst).
+function ereignisListe(lv) {
+  const tore = (lv.tore || []).map(t => ({ ...t, typ: "tor" }));
+  const karten = (lv.karten || []).map(k => ({ ...k, typ: "karte" }));
+  return [...tore, ...karten].sort((x, y) => x.min - y.min || x.plus - y.plus || (x.typ === "tor" ? -1 : 1));
+}
+
+// „Heute Spieltag“ (vom Nutzer gewünscht, für alle Reiter): das erste eigene Spiel heute (Tag in
+// Luxemburg), solange es kein Ergebnis hat — längstens 3 h nach Anstoß. `begonnen` ab Anstoß.
+const tagLux = ms => new Date(ms).toLocaleDateString("sv-SE", { timeZone: "Europe/Luxembourg" });
+function spieltagHeute(v, now) {
+  if (!v) return null;
+  const sp = [...v.kommend, ...v.gespielt]
+    .filter(s => tagLux(Date.parse(s.d)) === tagLux(now))
+    .filter(s => !(s.gespielt && s.hs != null) && now <= Date.parse(s.d) + 3 * 3600e3)
+    .sort((a, b) => a.d.localeCompare(b.d))[0];
+  return sp ? { sp, begonnen: now >= Date.parse(sp.d) } : null;
+}
+
+// Countdown in den letzten 15 min vor Anpfiff (vom Nutzer, 19.10.2026, für alle Reiter): Minuten,
+// aufgerundet; null außerhalb und bei „Uhrzeit noch offen“ (00:00 bei der FLF).
+const COUNTDOWN_MS = 15 * 60e3;
+function minutenBisAnpfiff(sp, now) {
+  const a = Date.parse(sp.d), rest = a - now;
+  if (!(rest > 0) || rest > COUNTDOWN_MS) return null;
+  const zeit = new Date(a).toLocaleTimeString("de-DE", { timeZone: "Europe/Luxembourg", hour: "2-digit", minute: "2-digit" });
+  return zeit === "00:00" ? null : Math.ceil(rest / 60e3);
+}
+const countdownText = m => `Anpfiff in ${m} ${m === 1 ? "Minute" : "Minuten"}`;
+
+// Liegt bei diesem Reiter gerade ein Spiel im Live-Fenster? Dann fragt die App jede Minute nach.
+// Stand vom Cloudflare-Worker (tools/cloudflare-worker.js, ~20 s alt) über den von GitHub legen
+// (data/live.json, bis zu 7 min alt). Vom Worker kommt nur der Stand; welches Spiel, Anstoß und
+// Mannschaftsnamen bleiben aus live.json. Passt der Slug nicht (anderes Spiel), gilt GitHub.
+const WORKER_FELDER = ["hs", "as", "section", "period", "running", "minute", "minuteAt", "tore", "karten", "ticker"];
+// Passt W zu L? Über den FuPa-Slug, oder — wenn der GitHub-Lauf noch keinen geliefert hat — über
+// das FLF-Spiel, für das die App den Worker per Anstoßzeit gefragt hat (`W.fuer`).
+function mitWorker(L, W) {
+  if (!L || !W) return L;
+  if (L.slug ? W.slug !== L.slug : W.fuer !== L.flfId) return L;
+  const neu = { ...L };
+  for (const k of WORKER_FELDER) if (k in W) neu[k] = W[k];
+  if (!L.slug && W.slug) { neu.slug = W.slug; neu.url = "https://www.fupa.net/match/" + W.slug; }
+  return neu;
+}
+
+// Live gibt es nur bei den Seniors (FuPa führt keine Jugend). Seniors 1: der Worker sucht das Spiel
+// selbst (per Anstoßzeit). Seniors 2/3 (seit 19.10.2026): nur mit FuPa-Slug, den der Abruf vorab
+// holt (`D.fupa`, FLF-Spiel-ID → Slug) — die Suche im Worker kennt nur die Seniors 1.
+const LIVE_REITER = "Seniors 1", LIVE_RESERVE = ["Seniors 2", "Seniors 3"];
+function hatLive(v) {
+  return !!v && (v.team.reiter === LIVE_REITER || LIVE_RESERVE.includes(v.team.reiter));
+}
+
+// Das Spiel dieses Reiters, das gerade im Live-Fenster liegt, oder null.
+function liveSpiel(v, now, fupa = {}) {
+  if (!hatLive(v)) return null;
+  const sp = [...v.kommend, ...v.gespielt].find(sp => {
+    const a = Date.parse(sp.d);
+    return now >= a - LIVE_FENSTER.vor && now <= a + LIVE_FENSTER.nach;
+  }) || null;
+  if (!sp || v.team.reiter === LIVE_REITER) return sp;
+  const slug = fupa[sp.id];
+  if (!slug) return null;
+  // Heim/Gast wie bei FuPa (der Stand kommt von dort). Gesehen: Beggen–Koeppchen II am 23.10.2026
+  // führt die FLF mit Beggen als Heim, FuPa mit Koeppchen. Der Slug beginnt mit der Heimmannschaft.
+  const fupaWirHeim = slug.startsWith("fc-koeppchen-"), flfWirHeim = v.ids.has(sp.h.id);
+  return fupaWirHeim === flfWirHeim ? { ...sp, slug } : { ...sp, slug, h: sp.a, a: sp.h };
+}
+
+// Grundlage für den Kasten: live.json, wenn sie dieses Spiel meint — sonst ein leeres Gerüst aus
+// dem FLF-Spielplan, das der Worker füllt. So braucht der Kasten den GitHub-Lauf nicht.
+function liveBasis(L, sp) {
+  if (!sp) return L;
+  if (L && L.flfId === sp.id) return L;
+  // Länderspiele bringen ihren FuPa-Slug mit (tools/fussball.mjs), dort fragt die App den Worker direkt.
+  return { flfId: sp.id, slug: sp.slug || null, url: sp.slug ? "https://www.fupa.net/match/" + sp.slug : null,
+           anstoss: sp.d, h: sp.h.n, a: sp.a.n, section: "", tore: [], karten: [] };
+}
+
+function imLiveFenster(v, now) {
+  return [...v.kommend, ...v.gespielt].some(sp => {
+    const a = Date.parse(sp.d);
+    return now >= a - LIVE_FENSTER.vor && now <= a + LIVE_FENSTER.nach;
+  });
+}
+
+// ---- BGL Ligue und Nationalteam (eigene Reiter, vom Nutzer 19.10.2026) ----
+// Zusätzliche Reiter hinter den Mannschaften; `id` ist Text, die Mannschaften haben Zahlen.
+function extraReiter(D) {
+  return [D.bgl && { id: "bgl", reiter: "BGL" }, D.nati && { id: "nati", reiter: "Roude Léiw", bild: true }].filter(Boolean);
+}
+
+// BGL: letzter Spieltag = der höchste, an dem schon gespielt wurde (auch angefangen — die offenen
+// Spiele stehen dann mit Uhrzeit drin), dahinter die zwei nächsten (vom Nutzer: beide nächsten).
+// Ein einzelnes verlegtes Spiel bleibt in seinem Spieltag, verschiebt also nichts.
+function bglSicht(bgl, now) {
+  const tage = nachSpieltag(bgl.spiele);
+  const grenze = now - 3 * 3600e3;
+  let i = -1;
+  tage.forEach(([, sp], k) => { if (sp.some(s => s.gespielt || Date.parse(s.d) < grenze)) i = k; });
+  return { letzter: i >= 0 ? tage[i] : null, naechste: tage.slice(i + 1, i + 3) };
+}
+
+// Die FLF rechnet ihre Tabelle erst nach der Freigabe der Ergebnisse (19.10.2026: BGL-Tabelle
+// nach 8 Spielen, gespielt waren 10). Liegt sie zurück, rechnen wir selbst: Punkte, Tordifferenz,
+// Tore. Bei Punktgleichheit kann die FLF anders sortieren — das steht dann unter der Tabelle.
+function bglTabelle(bgl) {
+  const z = new Map();
+  // Punktabzüge (Swift Hesperange 2026-27: −12) stehen nur in der FLF-Tabelle. Abzug = FLF-Punkte
+  // minus das, was die ersten `sp` Spiele der Mannschaft ergeben — so weit hat die FLF gezählt.
+  const flf = new Map((bgl.tabelle || []).map(r => [r.id, r]));
+  for (const sp of [...bgl.spiele].sort((a, b) => a.d.localeCompare(b.d))) {
+    if (!sp.gespielt || sp.hs == null || sp.as == null) continue;
+    for (const [t, f, g] of [[sp.h, sp.hs, sp.as], [sp.a, sp.as, sp.hs]]) {
+      const r = z.get(t.id) || { id: t.id, n: t.n, sp: 0, s: 0, u: 0, nl: 0, t: 0, g: 0, pkt: 0, bisFlf: 0 };
+      r.sp++; r.t += f; r.g += g;
+      const p = f > g ? 3 : f === g ? 1 : 0;
+      if (p === 3) r.s++; else if (p === 1) r.u++; else r.nl++;
+      r.pkt += p;
+      if (r.sp <= (flf.get(t.id)?.sp ?? 0)) r.bisFlf += p;
+      z.set(t.id, r);
+    }
+  }
+  for (const r of z.values()) {
+    const f = flf.get(r.id);
+    r.abzug = f ? Math.min(0, f.pkt - r.bisFlf) : 0;
+    r.pkt += r.abzug;
+    delete r.bisFlf;
+  }
+  const flfSp = Math.max(0, ...(bgl.tabelle || []).map(r => r.sp)), unsSp = Math.max(0, ...[...z.values()].map(r => r.sp));
+  if (bgl.tabelle?.length && flfSp >= unsSp) return { tabelle: bgl.tabelle, selbst: false };
+  const tab = [...z.values()].sort((a, b) => b.pkt - a.pkt || (b.t - b.g) - (a.t - a.g) || b.t - a.t || a.n.localeCompare(b.n));
+  tab.forEach((r, i) => r.pl = i + 1);
+  return { tabelle: tab, selbst: true, flfSp };
+}
+
+// Länderspiel im Live-Fenster (wie bei den Seniors 1), nur mit FuPa-Slug.
+function natiLiveSpiel(v, now) {
+  return [...v.kommend, ...v.gespielt].find(sp => sp.slug && now >= Date.parse(sp.d) - LIVE_FENSTER.vor
+    && now <= Date.parse(sp.d) + LIVE_FENSTER.nach) || null;
+}
+
+// Nationalteam: kommend/gespielt wie bei einer Mannschaft (3-h-Grenze).
+function natiSicht(nati, now) {
+  const grenze = now - 3 * 3600e3;
+  const kommend = nati.spiele.filter(sp => !sp.gespielt && Date.parse(sp.d) >= grenze);
+  const gespielt = nati.spiele.filter(sp => sp.gespielt || Date.parse(sp.d) < grenze).reverse();
+  return { kommend, gespielt, gruppe: nati.gruppe };
+}
+
+// Spieltage einer Klasse, für „Alle Spiele“.
+function nachSpieltag(spiele) {
+  const m = new Map();
+  for (const sp of spiele) {
+    const k = sp.tag ?? 0;
+    if (!m.has(k)) m.set(k, []);
+    m.get(k).push(sp);
+  }
+  return [...m.entries()].sort((a, b) => a[0] - b[0]);
+}
+
+// ---- Unsere Woche (vom Nutzer, 20.10.2026) ----
+// Alle Spiele aller Koeppchen-Reiter Mo–So (Luxemburger Zeit). Ab Sonntag 22 Uhr die nächste Woche.
+// Ein Spiel steht einmal da, auch wenn es bei zwei Reitern hängt (Pokal U13 ohne I/II → „U13“).
+const LUX_TAG = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+function wocheTage(now) {
+  const wt = new Date(now).toLocaleDateString("en-GB", { timeZone: "Europe/Luxembourg", weekday: "short" });
+  const i = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(wt);
+  const h = +new Date(now).toLocaleTimeString("en-GB", { timeZone: "Europe/Luxembourg", hour: "2-digit", hourCycle: "h23" });
+  const start = now - i * 864e5 + (i === 6 && h >= 22 ? 7 * 864e5 : 0);
+  return [0, 1, 2, 3, 4, 5, 6].map(k => tagLux(start + k * 864e5));
+}
+function wocheSpiele(D, tage, now) {
+  const { tabs } = aufteilen(D);
+  const zuTeam = new Map();
+  for (const t of D.teams) for (const id of (t.ids || [t.id])) zuTeam.set(id, t);
+  const seen = new Map();
+  for (const t of tabs) {
+    const v = sicht(D, t.id, now);
+    for (const sp of [...v.kommend, ...v.gespielt]) {
+      if (seen.has(sp.id) || !tage.includes(tagLux(Date.parse(sp.d)))) continue;
+      const wt = zuTeam.get(sp.wir);
+      seen.set(sp.id, { ...sp, reiter: wt?.reiter || wt?.kat || t.reiter, tab: wt?.reiter ? wt.id : t.id, heim: sp.h.id === sp.wir });
+    }
+  }
+  const alle = [...seen.values()].sort((a, b) => a.d.localeCompare(b.d) || a.reiter.localeCompare(b.reiter));
+  // Gleichzeitig: zwei eigene Spiele am selben Tag, Anstoß < 90 min auseinander, anderer Platz.
+  for (const a of alle) a.zugleich = alle.filter(b => b !== a && tagLux(Date.parse(b.d)) === tagLux(Date.parse(a.d))
+    && !zeitOffen(a) && !zeitOffen(b) && Math.abs(Date.parse(a.d) - Date.parse(b.d)) < 90 * 60e3 && a.ort !== b.ort).map(b => b.reiter);
+  return alle;
+}
+const zeitOffen = sp => new Date(sp.d).toLocaleTimeString("de-DE", { timeZone: "Europe/Luxembourg", hour: "2-digit", minute: "2-digit" }) === "00:00";
+function wocheBilanz(alle) {
+  const b = { s: 0, u: 0, n: 0 };
+  for (const sp of alle) {
+    if (!sp.gespielt || sp.hs == null || sp.erg === false) continue;
+    const f = sp.heim ? sp.hs - sp.as : sp.as - sp.hs;
+    b[f > 0 ? "s" : f < 0 ? "n" : "u"]++;
+  }
+  return b;
+}
+
+// ==== Oberfläche ====
+
+// Bei jeder Änderung hochzählen: steht unten in der App. Am iPhone läuft nach einem Push oft noch
+// die alte Datei aus dem Zwischenspeicher (wie beim Vokabeltrainer) — erst Fassung prüfen lassen.
+const FASSUNG = "22.10.2026 a";
+const KEY = "fussball_v1";
+const QUELLEN = [
+  // raw.githubusercontent schickt CORS-Freigabe und ist nach einem Commit der Action
+  // nach wenigen Minuten aktuell, ohne auf den Neuaufbau von GitHub Pages zu warten.
+  "https://raw.githubusercontent.com/strakekine/panini-wm-2026/main/data/fussball.json",
+  "data/fussball.json",
+];
+const TZ = "Europe/Luxembourg";
+// Kalender liegen auf GitHub Pages (text/calendar), nicht auf raw.githubusercontent (text/plain).
+const KALENDER = "https://strakekine.github.io/panini-wm-2026/kalender/";
+// Immer die öffentliche Adresse teilen, auch wenn die App vom Home-Bildschirm oder lokal läuft.
+const APP_URL = "https://strakekine.github.io/panini-wm-2026/fussball.html";
+// Text vom Nutzer (so verschickt er ihn auch selbst). Der Link steht IM Text und wird nicht
+// zusätzlich als `url` übergeben: Mit `url` zeigt iMessage nur die Link-Vorschau und lässt den
+// Text weg (am iPhone gemeldet; WhatsApp nahm beides).
+const TEILEN_TEXT = `FC Koeppchen – die App
+
+Alle Spiele, Ergebnisse und Tabellen unserer Mannschaften (Seniors, U15, U13, U11, U9) auf einen Blick, direkt von der FLF und automatisch aktuell:
+
+👉 ${APP_URL}
+
+So kommt sie auf den Home-Bildschirm (iPhone):
+1. Den Link in Safari öffnen.
+2. Unten auf das Teilen-Symbol tippen (Quadrat mit Pfeil nach oben).
+3. „Zum Home-Bildschirm“ wählen und auf „Hinzufügen“ tippen.
+
+Jetzt ist die App mit dem Koeppchen-Logo auf dem Home-Bildschirm.
+
+Android: Link in Chrome öffnen → oben rechts ⋮ → „App installieren“ (oder „Zum Startbildschirm hinzufügen“ → „Installieren“).
+
+Tipp: Oben die Mannschaft wählen. Mit dem Knopf „📅 … im Kalender abonnieren“ kommen alle Spiele in den eigenen Kalender und bleiben dort von selbst aktuell.`;
+
+// Teilen-Leiste des iPhones; ohne sie (Desktop-Browser) in die Zwischenablage.
+async function appTeilen(b) {
+  if (navigator.share) {
+    try { await navigator.share({ text: TEILEN_TEXT }); } catch (e) {}
+    return;
+  }
+  try { await navigator.clipboard.writeText(TEILEN_TEXT); b.textContent = "Text kopiert ✓"; }
+  catch (e) { prompt("Link zum Kopieren:", APP_URL); }
+}
+let D = null, ST = { team: null }, L = null;
+// Adresse des Cloudflare-Workers; leer = nur GitHub (langsamer, aber ohne eigenes Konto).
+const WORKER_URL = "https://koeppchen-live.rjtp6r9s9h.workers.dev/";
+let W = null;
+// Mit Slug, wenn live.json schon einen fürs laufende Spiel hat, sonst mit der Anstoßzeit aus dem
+// FLF-Spielplan (der Worker sucht dann selbst bei FuPa).
+let LIVE_SP = null;
+async function holenWorker() {
+  if (!WORKER_URL || !LIVE_SP) return null;
+  const sp = LIVE_SP, b = liveBasis(L, sp);
+  const q = b.slug ? "?slug=" + encodeURIComponent(b.slug) : "?anstoss=" + encodeURIComponent(sp.d);
+  try {
+    const r = await fetch(WORKER_URL + q, { cache: "no-store" });
+    if (r.ok) return { ...(await r.json()), fuer: sp.id };
+  } catch (e) {}
+  return null;   // Worker weg → es bleibt beim Stand von GitHub
+}
+const QUELLEN_LIVE = [
+  "https://raw.githubusercontent.com/strakekine/panini-wm-2026/main/data/live.json",
+  "data/live.json",
+];
+// Logo nur einmal eingebettet (im Home-Icon), Kopf und Fußzeile nehmen es von dort.
+const LOGO = document.querySelector('link[rel="apple-touch-icon"]').href;
+// FLF-Logo für den Reiter „Roude Léiw“ (vom Nutzer als Bild, 55×72, 32 Farben).
+const FLF_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADcAAABICAMAAABlcZ1gAAAAYFBMVEXfKC+oHiLQ4OoAAACZ0/DnrK357u5yHx5lZWdTsN////8dYY+ooqObXV3iU1gZFRZzxe02iLbRo6OOsMZdjK05ms2xsbHfPUJGep+qf3//AACKQT/+/f1Rtuj06eqEPDuQAeA8AAAAIHRSTlP+/vwA//8F/f//uP////////8F////Bv//BgH////9/l20T9cAAAJ7SURBVHjandfroqIgEABgnEAltLTLOe0u4vu/5Q4XBU0FnF9ZfjmoMAy5mCgvJah4XH/K0gIysSsj0SjY9eEgCVgRjQrh33JyjlVjOx5FOxIN/1xK6ybWKnkc6mbgQ0PimYyHhySHTfDnUpI9Bg0cQbLNoMZo9mFJgOGHTVbXah8SuZVkYx3sjXFURCFf/6+yrNp+MGpyo9x090ZmOlnfMRqZ6kCHsgNsQSY69mvf+t8bY0ev3MqpIpwyiFWiq4rVdLsxSMpzrKppoh3Rr/uiWNO6GD3/SvjgOeCPwPS/jAbfINl53mh8YwkOKOcdDb9gbSD3HAw26PJbxiKuc27o8t5PTXoh+mHgOU6nKYT4aMnzHBcCpHoKwbss9xZP8+klOM1xvXCnP8WbZtyX2UkqeLLjOL75KvAN9xxF9/Rp9zTDvYLx8tR1ST+/8LxU1+GNgVWxaFTcLQeoFa6LfvHen398WAwQF1KlUuYtXSRaIzVrqorO9zBRHJpZ8pv7PeroID6zk4CLPmgH0fUFX20IXW2KRtxRf2ewXjemZquU9azr50e/Lp+HDi/4nIuvrcBJ15O0/wRbC7wpiU4OfjLp9wxS12v6fmXXaTfX4ZST/HXOSQ7nHPBzToI6506OL+ogJ7xTQ04EjmewbsdRsMWF2nrdQVC6l+7fIk8qKcYwgHSHYA438qwU5aGzB851vt6b4NQ6u08OILUrqL+emcWeuX2y25d7aPIcAhemaZnel099wAypPR8dAo6H3fubBX3HBKkbkMs3HN/MHmGfQ2NPcWa2z/Ew4mjYV4V9XCwWfdwEiyrSpeK2fdE3zjC3T3WwqMZIVKu++EQf/h/Q40g3HHy04AAAAABJRU5ErkJggg==";
+
+function load() { try { ST = { ...ST, ...JSON.parse(localStorage.getItem(KEY) || "{}") }; } catch (e) {} }
+function persist() { try { localStorage.setItem(KEY, JSON.stringify(ST)); } catch (e) {} }
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function wann(iso, mitZeit = true) {
+  const d = new Date(iso);
+  const tag = d.toLocaleDateString("de-DE", { timeZone: TZ, weekday: "short", day: "numeric", month: "numeric" });
+  const zeit = d.toLocaleTimeString("de-DE", { timeZone: TZ, hour: "2-digit", minute: "2-digit" });
+  // 00:00 heißt bei der FLF „Uhrzeit noch nicht festgelegt“.
+  return mitZeit && zeit !== "00:00" ? `${tag} · ${zeit}` : tag;
+}
+
+function bisDahin(iso, now) {
+  const tage = Math.round((new Date(iso).setHours(0, 0, 0, 0) - new Date(now).setHours(0, 0, 0, 0)) / 864e5);
+  return tage === 0 ? "heute" : tage === 1 ? "morgen" : tage > 1 ? `in ${tage} Tagen` : "";
+}
+
+function spielZeile(sp, ids, meta) {
+  // Gefärbt (Sieg/Unentschieden/Niederlage) wird nur, wo eine eigene Mannschaft spielt.
+  const tid = ids && (ids.has(sp.h.id) ? sp.h.id : ids.has(sp.a.id) ? sp.a.id : null);
+  // Bei U9/U11 veröffentlicht die FLF keine Ergebnisse (showResult) — dann zeigen wir auch
+  // keine, selbst wenn die Schnittstelle eins liefern sollte.
+  const ohne = sp.erg === false;
+  const a = !ohne && tid != null && ausgang(sp, tid);
+  const sc = !ohne && sp.gespielt && sp.hs != null ? `${sp.hs} : ${sp.as}` : "";
+  const wirH = ids && ids.has(sp.h.id), wirA = ids && ids.has(sp.a.id);
+  return `<div class="m">
+    <div class="t h${wirH ? " wir" : ""}">${umbruch(anzeige(sp.h.n))}</div>
+    <div class="sc ${sc ? (a || "") : "offen"}">${sc || (sp.gespielt ? (ohne ? "gespielt" : "–") : Date.parse(sp.d) < Date.now() ? "–" : "offen")}</div>
+    <div class="t${wirA ? " wir" : ""}">${umbruch(anzeige(sp.a.n))}</div>
+    ${meta ? `<div class="meta">${meta}</div>` : ""}
+  </div>`;
+}
+
+function tabelleHtml(k, eigen) {
+  if (!k.tabelle || !k.tabelle.length) return `<div class="muted">Für diese Klasse veröffentlicht die FLF keine Tabelle.</div>`;
+  const z = zonen(D.saison.id, k.n);
+  const rows = k.tabelle.map(r => {
+    const cls = [eigen.has(r.id) ? "wir" : "", z && z.auf.includes(r.pl) ? "auf" : "", z && z.ab.includes(r.pl) ? "ab" : ""].join(" ");
+    return `<tr class="${cls}"><td class="pl">${r.pl}</td><td class="tm">${umbruch(anzeige(r.n))}</td><td>${r.sp}</td>
+      <td class="wide">${r.s}</td><td class="wide">${r.u}</td><td class="wide">${r.nl}</td>
+      <td>${r.t}:${r.g}</td><td class="narrow">${r.t - r.g > 0 ? "+" : ""}${r.t - r.g}</td><td class="pk">${r.pkt}</td></tr>`;
+  }).join("");
+  const leg = z ? `<div class="leg">${z.auf.length ? `<span><i style="background:var(--good)"></i>Aufstieg${z.extra ? " (" + esc(z.extra) + ")" : ""}</span>` : ""}
+      ${z.ab.length ? `<span><i style="background:var(--bad)"></i>Abstieg</span>` : ""}</div>` : "";
+  return `<table><thead><tr><th>#</th><th>Mannschaft</th><th>Sp</th><th class="wide">S</th><th class="wide">U</th><th class="wide">N</th>
+    <th>Tore</th><th class="narrow">±</th><th>Pkt</th></tr></thead><tbody>${rows}</tbody></table>${leg}`;
+}
+
+function alleSpieleHtml(k, ids) {
+  return nachSpieltag(k.spiele).map(([tag, sp]) =>
+    `<div class="tag">${tag ? "Spieltag " + tag : "Spiele"} · ${wann(sp[0].d, false)}</div>` +
+    sp.map(s => spielZeile({ ...s, erg: k.ergebnisse }, ids)).join("")).join("");
+}
+
+function render() {
+  const main = document.getElementById("main");
+  if (!D) return;
+  UMSCHALT = null;   // setzt heuteHtml, wenn ein Spieltag-Kasten steht
+  const { tabs } = aufteilen(D);
+  // Beim allerersten Öffnen „Unsere Woche“ (vom Nutzer, 20.10.2026), danach der zuletzt gewählte
+  // Reiter (persist beim Umschalten). Gibt es den gemerkten Reiter nicht mehr, auch die Woche.
+  const extra = extraReiter(D);
+  if (!tabs.some(t => t.id === ST.team) && !extra.some(t => t.id === ST.team)) ST.team = "woche";
+  const wTage = wocheTage(Date.now()), wAlle = wocheSpiele(D, wTage, Date.now());
+  const heuteN = wAlle.filter(sp => tagLux(Date.parse(sp.d)) === tagLux(Date.now())).length;
+  const liveN = liveZahl(Date.now());
+  const wZahl = liveN ? `🔴 ${liveN} ${liveN === 1 ? "Spiel" : "Spiele"} gerade LIVE` : heuteN ? `heute ${heuteN} ${heuteN === 1 ? "Spiel" : "Spiele"}` : `${wAlle.length} ${wAlle.length === 1 ? "Spiel" : "Spiele"}`;
+  document.getElementById("seg").innerHTML = `<button data-t="woche" class="woche${ST.team === "woche" ? " on" : ""}"><img alt="" src="${LOGO}">Unsere Woche · ${wZahl}<img alt="" src="${LOGO}"></button>` + [...tabs, ...extra].map(t =>
+    `<button data-t="${t.id}" class="${t.id === ST.team ? "on" : ""}">${t.bild ? `<img alt="${esc(t.reiter)}" src="${FLF_LOGO}">` : esc(t.reiter || t.n)}</button>`).join("");
+  if (ST.team == null) { main.innerHTML = `<div class="note">Keine Spiele gefunden.</div>`; return; }
+  // Zahnrad = eigener Reiter (vom Nutzer, 21.10.2026). Wird nicht bei jedem Takt neu gebaut, damit
+  // Haken und Knöpfe stehen bleiben; der gewählte Mannschafts-Reiter bleibt gemerkt.
+  document.getElementById("zahnrad").classList.toggle("on", MITT_OFFEN);
+  if (MITT_OFFEN) {
+    document.querySelectorAll("#seg button.on").forEach(b => b.classList.remove("on"));
+    document.getElementById("sub").textContent = "Mitteilungen";
+    if (!document.getElementById("mitt")) { main.innerHTML = `<div id="mitt" class="mitt"></div>` + fuss(); mittHtml(); }
+    return;
+  }
+
+  const now = Date.now();
+  if (ST.team === "woche") {
+    LIVE_SP = null; LIVE_POLL = false;
+    document.getElementById("sub").textContent = "Unsere Woche · " + D.saison.n.replace("Saison ", "");
+    main.innerHTML = wocheHtml(wTage, wAlle, now) + fuss();
+    return;
+  }
+  if (ST.team === "bgl" || ST.team === "nati") {
+    LIVE_SP = null; LIVE_POLL = false;   // natiHtml setzt beide, wenn ein Länderspiel läuft
+    main.innerHTML = (ST.team === "bgl" ? bglHtml(now) : natiHtml(now)) + fuss();
+    return;
+  }
+  const v = sicht(D, ST.team, now);
+  const ids = v.ids, alter = v.team.alter || "";
+  document.getElementById("sub").textContent = (alter ? alter + " · " : "") + D.saison.n.replace("Saison ", "");
+  const art = sp => sp.typ === "CUP" ? "Pokal" : sp.typ === "FM" ? "Freundschaftsspiel" : "";
+  let h = "";
+
+  LIVE_SP = liveSpiel(v, now, D.fupa || {});
+  const lv = liveAnzeige(mitWorker(liveBasis(L, LIVE_SP), W), v, now);
+  LIVE_POLL = !!lv || imLiveFenster(v, now);
+  // Spieltag-Kasten, solange (noch) kein LIVE-Kasten da ist.
+  const heute = !lv && spieltagHeute(v, now);
+  if (heute) h += heuteHtml(heute, v.ids, { live: v.team.reiter === LIVE_REITER || !!(D.fupa || {})[heute.sp.id], pill: sp => sp.typ === "CUP" ? "Pokal" : "",
+    ohneLive: "Das Ergebnis erscheint, sobald es eingetragen ist." });
+  if (lv) h += liveHtml(lv, n => anzeige(n).startsWith("Koeppchen"), "offiziell zählt die FLF");
+
+  if (v.status && v.status.was) {
+    h += `<div class="note ${v.status.was.art}"><b>${esc(v.aktuell.n)} ist beendet.</b> ${esc(v.status.was.txt)}` +
+      (v.status.neuFehlt ? `<br><span class="muted">Die neue Klasse ist bei der FLF noch nicht eingetragen. Sobald das erste Spiel drinsteht, erscheint sie hier von selbst.</span>` : "") + `</div>`;
+  }
+
+  h += `<section class="card"><div class="chead"><h2>Nächste Spiele</h2></div><div class="cbody">`;
+  if (!v.kommend.length) h += `<div class="muted">Noch keine Termine eingetragen.</div>`;
+  // Höchstens fünf — bei den Seniors stünde sonst die halbe Saison hier.
+  const ZEIG = 5;
+  v.kommend.slice(0, ZEIG).forEach((sp, i) => {
+    const pokal = art(sp) ? `<span class="pill">${art(sp)}</span>` : "";
+    if (i === 0) {
+      h += `<div class="next"><div class="when">${esc(wann(sp.d))} <span class="muted" style="font-family:Barlow;font-size:14px;letter-spacing:0">${bisDahin(sp.d, now)}</span></div>
+        ${spielZeile(sp, ids, `${sp.ort ? "📍 " + esc(sp.ort) : ""}${pokal}<br>${esc(sp.klasse)}`)}</div>`;
+    } else h += spielZeile(sp, ids, `${esc(wann(sp.d))}${sp.ort ? " · 📍 " + esc(sp.ort) : ""}${pokal}`);
+  });
+  if (v.kommend.length > ZEIG)
+    h += `<div class="muted" style="text-align:center;font-size:12.5px;margin-top:8px">+ ${v.kommend.length - ZEIG} weitere unter „Alle Spiele der Klasse“</div>`;
+  if (v.team.datei) {
+    // Abo statt Export: die Action schreibt kalender/<reiter>.ics bei jedem Lauf neu, das iPhone
+    // holt sie selbst ab — verschobene Spiele wandern mit. webcal:// öffnet die Kalender-App.
+    const url = KALENDER + v.team.datei;
+    h += `<a class="kal" href="${esc(url.replace(/^https:/, "webcal:"))}">📅 ${esc(v.team.reiter)} im Kalender abonnieren</a>
+      <details class="kalhilfe"><summary>Klappt nicht?</summary>
+        Einstellungen → Kalender → Accounts → Account hinzufügen → Andere → <b>Kalenderabo hinzufügen</b>, dann diese Adresse:
+        <code>${esc(url)}</code><button class="kopie" data-copy="${esc(url)}">Adresse kopieren</button>
+      </details>`;
+  }
+  h += `</div></section>`;
+
+  if (v.aktuell && !v.aktuell.ergebnisse && !v.aktuell.tabelle) {
+    h += `<div class="note">In der ${esc(v.team.kat)} veröffentlicht die FLF keine Ergebnisse und keine Tabelle — hier stehen darum nur die Termine.</div>`;
+  } else if (v.aktuell) {
+    h += `<section class="card"><div class="chead"><h2>Tabelle</h2><div class="hint">${esc(v.aktuell.n)}</div></div>
+      <div class="cbody">${tabelleHtml(v.aktuell, v.eigen)}</div></section>`;
+  }
+
+  h += `<section class="card"><div class="chead"><h2>${v.aktuell && !v.aktuell.ergebnisse ? "Bisherige Spiele" : "Unsere Ergebnisse"}</h2></div><div class="cbody">`;
+  if (!v.gespielt.length) h += `<div class="muted">Noch nichts gespielt.</div>`;
+  for (const sp of v.gespielt) {
+    const pokal = art(sp) ? " · " + art(sp) : "";
+    const fehlt = !sp.gespielt && sp.erg !== false ? " · Ergebnis noch nicht eingetragen" : "";
+    h += spielZeile(sp, ids, `${esc(wann(sp.d, false))}${pokal}${sp.forfait ? (Date.parse(sp.d) > now ? " · Forfait, im Voraus gewertet" : " · Forfait") : ""}${fehlt}`);
+  }
+  h += `</div></section>`;
+
+  if (v.aktuell) {
+    h += `<details class="card"><summary><h2>Alle Spiele der Klasse</h2><span class="hint">${v.aktuell.spiele.length} Spiele</span></summary>
+      <div class="cbody">${alleSpieleHtml(v.aktuell, ids)}</div></details>`;
+  }
+  for (const k of v.frueher) {
+    h += `<details class="card"><summary><h2>Früher: ${esc(k.n.replace(alter, "").trim() || k.n)}</h2></summary>
+      <div class="cbody">${tabelleHtml(k, v.eigen)}<div style="margin-top:10px">${alleSpieleHtml(k, ids)}</div></div></details>`;
+  }
+
+  main.innerHTML = h + fuss();
+}
+
+function fuss() {
+  const stand = new Date(D.stand).toLocaleString("de-DE", { timeZone: TZ, weekday: "short", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" });
+  const quelle = ST.team === "nati" ? `<a href="https://www.fupa.net/team/luxemburg-m1" target="_blank" rel="noopener">FuPa</a>`
+    : `<a href="https://extranet.flf.lu/match" target="_blank" rel="noopener">extranet.flf.lu</a>`;
+  return `<footer>Daten von ${quelle}, zuletzt geändert ${esc(stand)}<br>
+    Aktualisiert jeden Tag um 7:00 und 23:30 Uhr, Mo–Fr zusätzlich um 22:15 Uhr, Sa/So von 8 bis 22 Uhr alle 15 Minuten.
+    <br><button class="teilen" id="teilen">↗︎ App teilen</button>
+    <div class="von" id="von">Gemacht von Laurent R. <img alt="" src="${LOGO}"></div>${eigenesGeraet() ? `<div style="font-size:11px">Dieses Gerät zählt nicht in der Statistik mit.</div>` : ""}
+    <div style="margin-top:6px;font-size:11px">Fassung ${FASSUNG}</div></footer>`;
+}
+
+// „Heute Spieltag“ (Mannschaften und Roude Léiw).
+function heuteHtml(heute, ids, { live, pill, ohneLive }) {
+  const sp = heute.sp, zeit = wann(sp.d).split(" · ")[1];
+  const min = !heute.begonnen && minutenBisAnpfiff(sp, Date.now());
+  // Nächster Wechsel des Kastens (Countdown an, Anpfiff) — der Takt unten baut dann neu.
+  if (!heute.begonnen && zeit) UMSCHALT = Date.parse(sp.d) - (min ? 0 : COUNTDOWN_MS);
+  // 15 min nach Anpfiff ohne Tickerer: nicht weiter auf den Ticker vertrösten (vom Nutzer, 19.10.2026).
+  const keinTicker = heute.begonnen && Date.now() >= Date.parse(sp.d) + 15 * 60e3;
+  if (heute.begonnen && live && !keinTicker) UMSCHALT = Date.parse(sp.d) + 15 * 60e3;
+  const titel = heute.begonnen ? "Spiel läuft" : min ? "Gleich geht's los! ⚽" : "Heute Spieltag! ⚽";
+  const oben = heute.begonnen ? esc(zeit ? "seit " + zeit : "heute")
+    : min ? `<span id="countdown" data-d="${esc(sp.d)}">${countdownText(min)}</span> · ${esc(zeit)}`
+    : esc(zeit ? "Anstoß " + zeit : "Uhrzeit noch offen");
+  // Nicht „startet mit dem Anpfiff“: bei den Reserven tickert nicht immer jemand (vom Nutzer).
+  const unten = heute.begonnen
+    ? (!live ? ohneLive : keinTicker
+        ? "Bisher tickert niemand bei FuPa – heute gibt es wohl keinen Liveticker. Das Ergebnis kommt, sobald die FLF es einträgt."
+        : "Der Liveticker erscheint hier, falls bei FuPa jemand tickert.")
+    : (live ? "Liveticker, wenn verfügbar — sobald bei FuPa jemand tickert." : "");
+  const p = pill(sp);
+  return `<section class="card heute"><div class="chead"><h2>${titel}</h2>${p ? `<span class="pill">${esc(p)}</span>` : ""}</div><div class="cbody">
+    <div class="wann">${oben}</div>
+    <div class="m" style="border:0"><div class="t h${ids.has(sp.h.id) ? " wir" : ""}">${umbruch(anzeige(sp.h.n))}</div>
+    <div class="sc offen">–</div><div class="t${ids.has(sp.a.id) ? " wir" : ""}">${umbruch(anzeige(sp.a.n))}</div></div>
+    ${sp.ort ? `<div class="wo">📍 ${esc(sp.ort)}</div>` : ""}
+    ${unten ? `<div class="zusatz">${esc(unten)}</div>` : ""}
+    </div></section>`;
+}
+
+// LIVE-Kasten (Seniors 1–3 und Roude Léiw). `wir(name)`: welche Seite fett steht.
+function liveHtml(lv, wir, zusatz) {
+  const tore = ereignisListe(lv).map(e => {
+    const min = `${e.min}${e.plus ? "+" + e.plus : ""}.`;
+    const wer = `<span class="muted">(${esc(anzeige(e.heim ? lv.h : lv.a))})</span>`;
+    if (e.typ === "karte") {
+      const k = kartenArt(e.art);
+      return `<li>${k.zeichen} ${min} ${esc(e.name || "")} · <b>${k.text}</b> ${wer}</li>`;
+    }
+    const art = torArt(e.art);
+    return `<li>⚽ ${min} ${esc(e.name || "Tor")}${art ? ` · <b>${art}</b>` : ""} ${wer}</li>`;
+  }).join("");
+  return `<section class="card live"><div class="chead"><h2>${lv.laeuft ? `<span class="punkt"></span>Live` : "Endstand laut FuPa"}</h2>
+    <div class="hint">${esc(wann(lv.anstoss))}</div></div><div class="cbody">
+    <div class="m" style="border:0"><div class="t h${wir(lv.h) ? " wir" : ""}">${umbruch(anzeige(lv.h))}</div>
+    <div class="stand">${lv.hs ?? "–"} : ${lv.as ?? "–"}</div><div class="t${wir(lv.a) ? " wir" : ""}">${umbruch(anzeige(lv.a))}</div></div>
+    <div class="zeit" id="liveZeit">${esc(lv.zeit)}</div>
+    ${tore ? `<ul class="tore">${tore}</ul>` : ""}
+    <div class="quelle">Liveticker von <a href="${esc(lv.url)}" target="_blank" rel="noopener">FuPa</a>${lv.ticker ? " (" + esc(lv.ticker) + ")" : ""} · ${WORKER_URL && W ? "fast live" : "bis zu 7 min Verzögerung"}${zusatz ? " · " + zusatz : ""}</div>
+    </div></section>`;
+}
+
+// Live in der Woche und im Knopf: alle Spiele mit möglichem Ticker im Live-Fenster (Seniors 1–3),
+// je Spiel ein Worker-Stand in WS (FLF-Spiel-ID → Antwort). Unabhängig vom offenen Reiter.
+const WS = new Map();
+function liveKandidaten(now) {
+  if (!D) return [];
+  return aufteilen(D).tabs.map(t => {
+    const v = sicht(D, t.id, now), sp = liveSpiel(v, now, D.fupa || {});
+    return sp && { sp, v };
+  }).filter(Boolean);
+}
+function liveStand(k, now) {
+  return liveAnzeige(mitWorker(liveBasis(L, k.sp), WS.get(k.sp.id) || (W && W.fuer === k.sp.id ? W : null)), k.v, now);
+}
+function liveZahl(now) { return liveKandidaten(now).filter(k => liveStand(k, now)?.laeuft).length; }
+async function holenWorkerAlle() {
+  if (!WORKER_URL) return false;
+  let neu = false;
+  await Promise.all(liveKandidaten(Date.now()).map(async k => {
+    const b = liveBasis(L, k.sp);
+    const q = b.slug ? "?slug=" + encodeURIComponent(b.slug) : "?anstoss=" + encodeURIComponent(k.sp.d);
+    try {
+      const r = await fetch(WORKER_URL + q, { cache: "no-store" });
+      if (!r.ok) return;
+      const w = { ...(await r.json()), fuer: k.sp.id };
+      if (JSON.stringify(WS.get(k.sp.id)) !== JSON.stringify(w)) { WS.set(k.sp.id, w); neu = true; }
+    } catch (e) {}
+  }));
+  return neu;
+}
+
+function wocheHtml(tage, alle, now) {
+  const kurz = d => { const x = new Date(d + "T12:00:00"); return x.getDate() + "." + (x.getMonth() + 1) + "."; };
+  const heim = alle.filter(sp => sp.heim).length;
+  const vorbei = alle.length && alle.every(sp => sp.gespielt || Date.parse(sp.d) < now - 3 * 3600e3);
+  const b = wocheBilanz(alle);
+  const zus = !alle.length ? "Diese Woche keine Spiele."
+    : vorbei && b.s + b.u + b.n ? `${b.s} ${b.s === 1 ? "Sieg" : "Siege"}, ${b.u} Remis, ${b.n} ${b.n === 1 ? "Niederlage" : "Niederlagen"}`
+    : `${alle.length} ${alle.length === 1 ? "Spiel" : "Spiele"}, davon ${heim} zu Hause`;
+  let h = `<section class="card"><div class="chead"><h2>Unsere Woche</h2><div class="hint tagdatum">${kurz(tage[0])} – ${kurz(tage[6])}</div></div>
+    <div class="cbody"><div class="wzus">${esc(zus)}</div></div></section>`;
+  if (!alle.length) {
+    const naechstes = aufteilen(D).tabs.flatMap(t => sicht(D, t.id, now).kommend.map(sp => ({ ...sp, reiter: t.reiter })))
+      .sort((a, b) => a.d.localeCompare(b.d))[0];
+    if (naechstes) h += `<div class="note">Nächstes Spiel: ${esc(wann(naechstes.d))} · ${esc(naechstes.reiter)} gegen ${esc(anzeige(naechstes.heim === false ? naechstes.h.n : naechstes.a.n))}</div>`;
+    return h;
+  }
+  for (const tag of tage) {
+    const sp = alle.filter(s => tagLux(Date.parse(s.d)) === tag);
+    if (!sp.length) continue;
+    const istHeute = tag === tagLux(now);
+    const titel = new Date(tag + "T12:00:00").toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "numeric" });
+    h += `<section class="card${istHeute ? " heute" : ""}"><div class="chead"><h2>${istHeute ? "Heute · " : ""}${esc(titel)}</h2></div><div class="cbody">`;
+    const kand = liveKandidaten(now);
+    for (const s0 of [...sp.filter(x => !zeitOffen(x)), ...sp.filter(zeitOffen)]) {
+      const k = kand.find(k => k.sp.id === s0.id), lv = k && liveStand(k, now);
+      // Live-Stand vom Ticker, bis die FLF das Ergebnis hat; ohne Ticker nur „läuft“.
+      // FuPa kann Heim/Gast andersherum führen (liveSpiel dreht dann k.sp) — hier gilt die FLF-Reihenfolge.
+      const gedreht = k && k.sp.h.id !== s0.h.id;
+      const s = lv ? { ...s0, gespielt: true, hs: gedreht ? lv.as : lv.hs, as: gedreht ? lv.hs : lv.as } : s0;
+      const laeuft = !lv && !s0.gespielt && now >= Date.parse(s0.d) && now <= Date.parse(s0.d) + 3 * 3600e3 && !zeitOffen(s0);
+      const ids = new Set([s.wir]);
+      const teile = [`<span class="pill wteam">${esc(s.reiter)}</span>`, s.heim ? "🏠" : "✈️",
+        lv ? `<span class="wlivetxt">${lv.laeuft ? "🔴 LIVE · " + esc(lv.zeit) : "Abpfiff · laut Ticker"}</span>`
+          : laeuft ? `<span class="wlivetxt">läuft</span>`
+          : s.gespielt ? "" : esc(zeitOffen(s) ? "Uhrzeit offen" : wann(s.d).split(" · ")[1]),
+        // Stadion, solange die FLF kein Ergebnis hat — auch während das Spiel läuft (vom Nutzer).
+        !s0.gespielt && s.ort ? "📍 " + esc(s.ort) : "",
+        s.typ === "CUP" ? "Pokal" : s.typ === "FM" ? "Test" : "",
+        s.forfait ? "Forfait" : "",
+        s.zugleich.length ? `<span class="wzugleich">gleichzeitig mit ${esc(s.zugleich.join(", "))}</span>` : ""];
+      h += `<div class="wzeile${lv?.laeuft ? " wlive" : ""}" data-gehe="${s.tab}">${spielZeile(s, ids, teile.filter(Boolean).join(" · "))}</div>`;
+    }
+    h += `</div></section>`;
+  }
+  return h;
+}
+
+function bglHtml(now) {
+  const b = D.bgl, v = bglSicht(b, now);
+  document.getElementById("sub").textContent = "BGL League · " + D.saison.n.replace("Saison ", "");
+  const tag = ([nr, sp], titel) => `<section class="card"><div class="chead"><h2>${titel} ${nr}</h2><div class="hint tagdatum">${esc(wann(sp[0].d, false))}</div></div>
+    <div class="cbody">${sp.map(s => spielZeile(s, null, s.gespielt ? [] : [esc(wann(s.d)), s.ort ? "📍 " + esc(s.ort) : ""].filter(Boolean).join(" · "))).join("")}</div></section>`;
+  const t = bglTabelle(b);
+  const abz = t.selbst ? t.tabelle.filter(r => r.abzug).map(r => `${esc(r.n)} ${r.abzug}`).join(", ") : "";
+  // FuPa begründet Punktabzüge in einem Satz (`text`), den zeigen wir mit.
+  const grund = b.text ? `<div class="muted" style="font-size:12px;margin-top:8px">${esc(b.text)}</div>` : "";
+  const quelle = b.quelle === "FuPa" ? `<div class="muted" style="font-size:12px;margin-top:8px">Tabelle von FuPa (aktueller als die der FLF), Spiele von der FLF.</div>` : "";
+  const hinweis = grund + quelle + (t.selbst ? `<div class="muted" style="font-size:12px;margin-top:8px">Aus den Ergebnissen gerechnet — die FLF-Tabelle steht noch auf ${t.flfSp} Spielen. Bei Punktgleichheit kann die FLF anders sortieren.${abz ? ` Punktabzug laut FLF: ${abz}.` : ""}</div>` : "");
+  // Tabelle zuerst, dann letzter und nächste Spieltage — anders als bei den Mannschaften, mit Absicht
+  // (vom Nutzer, 20.10.2026: so ist man schneller bei der Tabelle). Stadion nur bei Spielen, die noch kommen.
+  let h = `<section class="card"><div class="chead"><h2>Tabelle</h2><div class="hint">BGL League</div></div>
+    <div class="cbody">${tabelleHtml({ n: b.n, tabelle: t.tabelle }, new Set())}${hinweis}</div></section>`;
+  if (v.letzter) h += tag(v.letzter, "Zuletzt: Spieltag");
+  for (const t of v.naechste) h += tag(t, "Nächster: Spieltag");
+  if (!v.naechste.length) h += `<div class="note">Keine weiteren Spieltage eingetragen.</div>`;
+  return h;
+}
+
+function natiHtml(now) {
+  const v = natiSicht(D.nati, now), ids = new Set(["Luxemburg"]);
+  document.getElementById("sub").textContent = "Roude Léiw" + (v.gruppe ? " · " + v.gruppe.n : "");
+  const meta = sp => [esc(wann(sp.d)), esc(sp.wett + (sp.runde && !/^\d+$/.test(sp.runde) ? " " + sp.runde : ""))].filter(Boolean).join(" · ");
+  let h = "";
+  // Liveticker über den Worker (FuPa tickert die Länderspiele), Slug aus den Daten — ohne GitHub-Lauf.
+  LIVE_SP = natiLiveSpiel(v, now);
+  LIVE_POLL = !!LIVE_SP && !!WORKER_URL;
+  const lv = LIVE_SP && liveAnzeige(mitWorker(liveBasis(null, LIVE_SP), W), v, now);
+  const heute = !lv && spieltagHeute(v, now);
+  if (heute) h += heuteHtml(heute, ids, { live: !!WORKER_URL && !!heute.sp.slug, pill: sp => sp.wett === "Testspiele" ? "Testspiel" : "",
+    ohneLive: "Das Ergebnis erscheint, sobald FuPa es hat." });
+  if (lv) h += liveHtml(lv, n => n === "Luxemburg", "");
+  h += `<section class="card"><div class="chead"><h2>Nächste Spiele</h2></div><div class="cbody">`;
+  h += v.kommend.length ? v.kommend.map(sp => spielZeile(sp, ids, meta(sp))).join("") : `<div class="muted">Noch keine Länderspiele angesetzt.</div>`;
+  h += `</div></section>`;
+  if (v.gruppe) h += `<section class="card"><div class="chead"><h2>Tabelle</h2><div class="hint">${esc(v.gruppe.n)}</div></div>
+    <div class="cbody">${tabelleHtml(v.gruppe, ids)}</div></section>`;
+  h += `<section class="card"><div class="chead"><h2>Ergebnisse</h2></div><div class="cbody">`;
+  // Die letzten acht — FuPa liefert auch das Vorjahr mit, das wäre eine lange Liste.
+  h += v.gespielt.length ? v.gespielt.slice(0, 8).map(sp => spielZeile(sp, ids, meta(sp))).join("") : `<div class="muted">Noch nichts gespielt.</div>`;
+  return h + `</div></section>`;
+}
+
+async function holen() {
+  for (const url of QUELLEN) {
+    try {
+      const r = await fetch(url + "?t=" + Date.now(), { cache: "no-store" });
+      if (!r.ok) continue;
+      const d = await r.json();
+      if (d && d.teams) return d;
+    } catch (e) {}
+  }
+  return null;
+}
+
+// live.json fehlt, solange es nie ein Live-Spiel gab — dann einfach kein Kasten.
+async function holenLive() {
+  for (const url of QUELLEN_LIVE) {
+    try {
+      const r = await fetch(url + "?t=" + Date.now(), { cache: "no-store" });
+      if (r.ok) return await r.json();
+    } catch (e) {}
+  }
+  return null;
+}
+
+async function aktualisieren() {
+  const [d, l] = await Promise.all([holen(), holenLive()]);
+  if (l) L = l;
+  if (d) {
+    D = d;
+    try { localStorage.setItem(KEY + "_data", JSON.stringify(d)); } catch (e) {}
+  } else if (!D) {
+    document.getElementById("main").innerHTML = `<div class="note down">Keine Verbindung und noch kein gespeicherter Stand.</div>`;
+    return;
+  }
+  render();   // setzt LIVE_SP für den Reiter, der gerade offen ist
+  if (LIVE_SP) { const w = await holenWorker(); if (w) { W = w; render(); } }
+  if (await holenWorkerAlle()) render();
+}
+
+document.addEventListener("click", e => {
+  const z = e.target.closest("[data-gehe]");
+  if (z) { MITT_OFFEN = false; ST.team = +z.dataset.gehe; persist(); render(); window.scrollTo(0, 0); angesehen(); return; }
+  const b = e.target.closest("button");
+  if (!b) return;
+  if (b.dataset.t) {
+    MITT_OFFEN = false; ST.team = /^\d+$/.test(b.dataset.t) ? +b.dataset.t : b.dataset.t; persist(); render(); window.scrollTo(0, 0); angesehen();
+    // Live-Reiter gewählt: Worker sofort fragen, nicht erst beim nächsten 20-s-Takt.
+    if (LIVE_SP) holenWorker().then(w => { if (w) { W = w; render(); } });
+  }
+  else if (b.id === "teilen") appTeilen(b);
+  else if (b.dataset.copy) {
+    const fertig = () => { b.textContent = "Kopiert ✓"; };
+    navigator.clipboard?.writeText(b.dataset.copy).then(fertig, () => {});
+  }
+});
+// Kein „Neu laden“-Knopf (vom Nutzer gestrichen): Er hätte nur die Datei neu gelesen, und das
+// passiert ohnehin beim Öffnen und beim Zurückholen aus dem Hintergrund.
+document.addEventListener("visibilitychange", () => { if (!document.hidden) aktualisieren(); });
+
+// Während eines Spiels jede Minute den Live-Stand holen (nur, wenn die App sichtbar ist).
+// Neu gebaut wird nur, wenn sich der Stand geändert hat; sonst nur die Minute, damit nichts
+// Aufgeklapptes (z. B. „Klappt nicht?“) jede Minute wieder zuklappt.
+// Mit Worker alle 20 s (so lange merkt er sich den Stand), sonst jede Minute.
+let LIVE_POLL = false;
+// Woche und Knopf: alle laufenden Spiele mit Ticker, egal welcher Reiter offen ist.
+setInterval(async () => {
+  if (document.hidden || !D || !liveKandidaten(Date.now()).length) return;
+  if (await holenWorkerAlle()) render();
+}, 20e3);
+// Countdown: jede 10 s die Minuten nachführen; zum Beginn des Countdowns und beim Anpfiff neu bauen.
+let UMSCHALT = null;
+setInterval(() => {
+  if (document.hidden || !D) return;
+  if (UMSCHALT && Date.now() >= UMSCHALT) { render(); return; }
+  const el = document.getElementById("countdown"), m = el && minutenBisAnpfiff({ d: el.dataset.d }, Date.now());
+  if (m) el.textContent = countdownText(m);
+}, 10e3);
+setInterval(async () => {
+  if (!LIVE_POLL || document.hidden || !D) return;
+  const vorher = JSON.stringify(mitWorker(liveBasis(L, LIVE_SP), W));
+  const [l, w] = await Promise.all([holenLive(), holenWorker()]);
+  if (l) L = l;
+  if (w) W = w;
+  const jetzt = mitWorker(liveBasis(L, LIVE_SP), W);
+  if (JSON.stringify(jetzt) !== vorher) { render(); return; }
+  const el = document.getElementById("liveZeit");
+  if (el && jetzt) el.textContent = liveZeit(jetzt, Date.now());
+}, WORKER_URL ? 20e3 : 60e3);
+
+// Anonymer Zähler (Worker, ?zahlen): beim Start und nach ≥ 30 min im Hintergrund eine Meldung.
+// „neu“ beim ersten Mal am Tag — das merkt sich nur dieses Handy, der Worker bekommt keine Kennung.
+let VERSTECKT_SEIT = 0, ZULETZT_GESEHEN = "", ZAEHLT = false;
+// Neue Nutzer (vom Nutzer, 21.10.2026): beim allerersten Öffnen auf diesem Gerät erst=1. Läuft vor
+// load() und dem ersten Abruf — wer schon Daten der App hat, war vorher da und zählt nicht als neu.
+let ERSTMALS = false;
+try {
+  if (!localStorage.getItem(KEY + "_erst")) {
+    if ([KEY, KEY + "_data", KEY + "_gezaehlt"].some(k => localStorage.getItem(k) != null)) localStorage.setItem(KEY + "_erst", "vorher");
+    else ERSTMALS = true;
+  }
+} catch (e) {}
+// Eigenes Gerät (vom Nutzer, 21.10.2026): 5× auf „Gemacht von …“ tippen. Dann gehen Öffnen und
+// Umschalten mit ich=1 an den Worker, der sie getrennt von allen anderen führt. Safari und
+// Home-Bildschirm haben getrennte Speicher — in beiden einzeln einschalten.
+const eigenesGeraet = () => { try { return localStorage.getItem(KEY + "_ich") === "1"; } catch (e) { return false; } };
+const ICH = () => eigenesGeraet() ? "&ich=1" : "";
+let VON_TIPPS = [];
+document.addEventListener("click", e => {
+  if (!e.target.closest("#von")) return;
+  const t = Date.now();
+  VON_TIPPS = [...VON_TIPPS.filter(x => t - x < 4000), t];
+  if (VON_TIPPS.length < 5) return;
+  VON_TIPPS = [];
+  const an = !eigenesGeraet();
+  if (!confirm(an ? "Dieses Gerät ab jetzt nicht mehr in der Statistik mitzählen (nur noch getrennt als eigenes Gerät)?" : "Dieses Gerät wieder normal mitzählen?")) return;
+  try { if (an) localStorage.setItem(KEY + "_ich", "1"); else localStorage.removeItem(KEY + "_ich"); } catch (e) {}
+  render();
+});
+const reiterName = () => typeof ST.team === "number" ? (D?.teams.find(t => t.id === ST.team)?.reiter || "") : ST.team === "woche" ? "Woche" : ST.team === "bgl" ? "BGL" : ST.team === "nati" ? "Roude Léiw" : "";
+// Umschalten auf einen anderen Reiter (Reiter-Knopf oder Tippen auf ein Spiel in der Woche).
+// Derselbe Reiter zweimal hintereinander zählt einmal.
+function angesehen() {
+  const r = reiterName();
+  if (!WORKER_URL || !r || r === ZULETZT_GESEHEN) return;
+  ZULETZT_GESEHEN = r;
+  fetch(WORKER_URL + "?angesehen=1&reiter=" + encodeURIComponent(r) + ICH(), { mode: "no-cors", keepalive: true }).catch(() => {});
+}
+// Zwei Sperren gegen doppeltes Zählen (vom Nutzer am Computer gesehen: +2 je Öffnen): Chrome und
+// Edge laden Seiten beim Tippen der Adresse unsichtbar vor (prerender) — dort erst beim echten
+// Anzeigen zählen; und höchstens eine Öffnung je Minute (auch über zwei Ladevorgänge hinweg).
+function zaehle() {
+  if (!WORKER_URL) return;
+  if (document.prerendering) { document.addEventListener("prerenderingchange", zaehle, { once: true }); return; }
+  if (document.visibilityState !== "visible") return;   // kommt beim Sichtbarwerden über visibilitychange
+  try { const z = +localStorage.getItem(KEY + "_zuletztGezaehlt") || 0; if (Date.now() - z < 60e3) { ZAEHLT = true; ZULETZT_GESEHEN = reiterName(); return; } localStorage.setItem(KEY + "_zuletztGezaehlt", String(Date.now())); } catch (e) {}
+  ZAEHLT = true;
+  let neu = "0";
+  try { const t = tagLux(Date.now()); if (localStorage.getItem(KEY + "_gezaehlt") !== t) { localStorage.setItem(KEY + "_gezaehlt", t); neu = "1"; } } catch (e) {}
+  const r = reiterName();
+  ZULETZT_GESEHEN = r;
+  let erst = "";
+  if (ERSTMALS) { ERSTMALS = false; erst = "&erst=1"; try { localStorage.setItem(KEY + "_erst", tagLux(Date.now())); } catch (e) {} }
+  const app = navigator.standalone === true || matchMedia("(display-mode: standalone)").matches;
+  fetch(WORKER_URL + "?zaehle=1&neu=" + neu + erst + "&art=" + (app ? "app" : "web") + "&reiter=" + encodeURIComponent(r) + ICH(), { mode: "no-cors", keepalive: true }).catch(() => {});
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) VERSTECKT_SEIT = Date.now();
+  else if (!ZAEHLT || (VERSTECKT_SEIT && Date.now() - VERSTECKT_SEIT >= 30 * 60e3)) zaehle();
+});
+
+// ---- Mitteilungen, Stufe 1 (vom Nutzer, 21.10.2026): nur für ihn zum Ausprobieren ----
+// 5× aufs Logo oben schaltet das Zahnrad ein (Merker fussball_v1_mtest, je Speicher). Dahinter:
+// Erlauben, Test-Mitteilung, Abmelden. Der Service Worker (fussball-sw.js, nur push/notificationclick)
+// wird nur mit Merker eingerichtet; ohne Merker wird ein vorhandener wieder entfernt — so ist
+// 5× Tippen zum Ausschalten auch der Weg zurück. SPÄTER WIEDER AUSBAUEN (CLAUDE.md, 5×-Schalter).
+const SW_SCOPE = "./fussball.html";
+const mtest = () => { try { return localStorage.getItem(KEY + "_mtest") === "1"; } catch (e) { return false; } };
+const pushGeht = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+const istApp = () => navigator.standalone === true || matchMedia("(display-mode: standalone)").matches;
+let MITT_OFFEN = false, MITT_STAND = "";
+async function swReg() {
+  if (!("serviceWorker" in navigator)) return null;
+  return (await navigator.serviceWorker.getRegistration(SW_SCOPE)) || null;
+}
+async function swAufraeumen() {
+  const r = await swReg().catch(() => null);
+  if (!r) return;
+  try { const a = await r.pushManager.getSubscription(); if (a) { await pushPost("abmelden", { endpoint: a.endpoint }).catch(() => {}); await a.unsubscribe(); } } catch (e) {}
+  await r.unregister().catch(() => {});
+}
+const pushPost = (was, daten) => fetch(WORKER_URL + "?push=" + was, { method: "POST", body: JSON.stringify(daten) })
+  .then(async r => ({ ok: r.ok, status: r.status, ...(await r.json().catch(() => ({}))) }));
+async function mittHtml() {
+  const box = document.getElementById("mitt");
+  if (!box || !MITT_OFFEN) return;
+  let h = "";
+  // iPhone: nur in der App vom Home-Bildschirm. Android: geht in Chrome direkt. Computer: Anleitung fürs Handy.
+  // Mitteilungen nur in der installierten App, auf jedem Gerät (vom Nutzer, 21.10.2026) — im Browser die Anleitung.
+  if (!istApp()) h = installHtml();
+  else if (!pushGeht()) h = `<p>Hier fehlt die Mitteilungs-Funktion. Lösch die App vom Home-Bildschirm und leg sie neu an
+    (Safari → Teilen → „Zum Home-Bildschirm“), dann in der neuen App wieder 5× aufs Logo. Braucht iOS 16.4 oder neuer.</p>`;
+  else if (Notification.permission === "denied") h = `<p>Mitteilungen sind für die App ausgeschaltet. Einschalten unter
+    Einstellungen → Mitteilungen → FC Koeppchen.</p>`;
+  else {
+    const r = await swReg().catch(() => null);
+    const abo = r && await r.pushManager.getSubscription().catch(() => null);
+    const w = mWahl();
+    // Je Mannschaft ein Haken; angehakt klappen darunter ihre Mitteilungen auf, jede einzeln (vom Nutzer).
+    const mannschaft = r => {
+      const an = !!w.je[r], arten = mArtenFuer(r);
+      const kopf = `<label class="haken team"><input type="checkbox" data-t="${esc(r)}"${an ? " checked" : ""}> ${esc(r === "Woche" ? "Unsere Woche (montags 10 Uhr)" : r)}</label>`;
+      if (!an || r === "Woche") return `<div class="mteam">${kopf}</div>`;
+      return `<div class="mteam">${kopf}<div class="marten">${arten.map(k =>
+        `<label class="haken"><input type="checkbox" data-t="${esc(r)}" data-a="${k}"${w.je[r].includes(k) ? " checked" : ""}> ${esc(mArtText(r, k))}</label>`).join("")}</div></div>`;
+    };
+    h = abo && Notification.permission === "granted"
+      ? `<p>✓ Mitteilungen sind auf diesem Gerät erlaubt. Nachts (22–7 Uhr) kommt nichts, das wartet bis morgens.</p>
+         ${mAufraeumen()}<h3 class="mh">Meine Mannschaften</h3><p class="klein">Mannschaft anhaken, dann darunter wählen, was von ihr kommen soll.</p>
+         ${mReiter().map(mannschaft).join("")}
+         <button class="knopf" id="mTest">Test-Mitteilung senden</button>
+         <button class="knopf zweit" id="mAus">Abmelden</button>`
+      : `<p>Dein Handy fragt einmal, ob die App Mitteilungen schicken darf. Danach wählst du Mannschaften und Arten aus.</p>
+         <button class="knopf" id="mAn">Mitteilungen erlauben</button>`;
+  }
+  box.innerHTML = `<section class="card"><div class="chead"><h2>Mitteilungen</h2></div><div class="cbody">${h}
+    <div class="stand" id="mStand">${esc(MITT_STAND)}</div></div></section>`;
+}
+const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const ANDROID = /Android/.test(navigator.userAgent);
+const APP_ADRESSE = "strakekine.github.io/panini-wm-2026/fussball.html";
+function installHtml() {
+  const iphone = `<ol class="schritte"><li>Die App in <b>Safari</b> öffnen${IOS ? "" : `: <b>${APP_ADRESSE}</b>`}.</li>
+    <li>Unten auf <b>Teilen</b> tippen (Viereck mit Pfeil nach oben ⬆︎).</li>
+    <li><b>„Zum Home-Bildschirm“</b> wählen (evtl. erst „Mehr“ antippen), dann <b>„Hinzufügen“</b>.</li>
+    <li>FC Koeppchen ab jetzt <b>vom Home-Bildschirm</b> öffnen und dort auf ⚙️ tippen.</li></ol>`;
+  const android = `<ol class="schritte"><li>Die App in <b>Chrome</b> öffnen${ANDROID ? "" : `: <b>${APP_ADRESSE}</b>`}.</li>
+    <li>Oben rechts auf <b>⋮</b> tippen, dann <b>„App installieren“</b> (oder „Zum Startbildschirm hinzufügen“ → „Installieren“).</li>
+    <li>FC Koeppchen ab jetzt <b>vom Startbildschirm</b> öffnen und dort auf ⚙️ tippen.</li></ol>`;
+  if (ANDROID) return `<p>Um Mitteilungen zu erhalten, bitte die App auf dem Handy <b>installieren</b> — im Browser gibt es keine. So geht's:</p>${android}`;
+  if (IOS) return `<p>Um Mitteilungen zu erhalten, bitte die App auf dem iPhone <b>installieren</b> — im Browser gibt es keine. So geht's:</p>${iphone}
+    <p class="klein">Braucht iOS 16.4 oder neuer. Die App vom Home-Bildschirm hat einen eigenen Speicher: gewählter Reiter usw. fangen dort neu an.</p>`;
+  return `<p>Mitteilungen kommen aufs <b>Handy</b>. Um sie zu erhalten, bitte die App dort installieren:</p>
+    <h3 class="mh">iPhone</h3>${iphone}<h3 class="mh">Android</h3>${android}`;
+}
+// Auswahl (Stufe 2, je Mannschaft einzeln, vom Nutzer 21.10.2026): { je: { "U13 2": ["tabelle"], … } },
+// gemerkt auf dem Handy und beim Worker (?push=wahl). Jede Mannschaft zeigt nur, was es bei ihr gibt.
+const M_ART_TEXT = { heute: "Heute Spiel (10 Uhr)", spieltag: "Spieltag komplett", tabelle: "Tabelle aktualisiert",
+  uhrzeit: "Uhrzeit steht fest (wenn vorher keine eingetragen war)", neu: "Neue Phase / neues Spiel", ticker: "Liveticker läuft", halbzeit: "Halbzeitstand (nur mit Ticker)", ende: "Endstand", woche: "Neue Woche" };
+const mKat = r => (D?.teams || []).find(t => t.reiter === r)?.kat || r;
+function mArtenFuer(r) {
+  const k = mKat(r);
+  if (r === "Woche") return ["woche"];
+  if (r === "BGL") return ["spieltag"];
+  if (r === "Roude Léiw") return ["heute", "ticker", "halbzeit", "ende"];
+  // Uhrzeit nur bei U9/U11, und nur wenn vorher keine da war (vom Nutzer: geänderte Zeiten gibt der Trainer durch).
+  if (k === "Seniors") return ["heute", "tabelle", "ticker", "halbzeit", "ende"];
+  if (k === "U13" || k === "U15") return ["heute", "neu", "spieltag", "tabelle"];
+  return ["heute", "uhrzeit"];   // U9, U11: die FLF zeigt keine Ergebnisse
+}
+const mArtText = (r, k) => k === "heute" && mKat(r) !== "Seniors" && r !== "Roude Léiw" ? "Morgen Spiel (Vorabend 19 Uhr)" : M_ART_TEXT[k];
+const mReiter = () => [...(D?.teams || []).filter(t => t.reiter).map(t => t.reiter), "BGL", "Roude Léiw", "Woche"];
+function mWahl() {
+  try {
+    const w = JSON.parse(localStorage.getItem(KEY + "_mwahl"));
+    // Haken, die es bei einer Mannschaft nicht (mehr) gibt (z. B. Uhrzeit bei den Seniors bis Fassung k), fallen weg.
+    if (w && w.je && typeof w.je === "object")
+      return { je: Object.fromEntries(Object.entries(w.je).map(([r, l]) => [r, l.filter(k => mArtenFuer(r).includes(k))])) };
+    // Alte Auswahl (eine Liste Mannschaften, eine Liste Arten für alle) übernehmen.
+    if (w && Array.isArray(w.teams) && Array.isArray(w.arten))
+      return { je: Object.fromEntries(w.teams.map(r => [r, mArtenFuer(r).filter(k => k === "woche" || w.arten.includes(k))])) };
+  } catch (e) {}
+  return { je: {} };
+}
+// Weicht die gespeicherte Auswahl von der bereinigten ab, einmal neu speichern (auch beim Worker).
+function mAufraeumen() {
+  let roh = null; try { roh = localStorage.getItem(KEY + "_mwahl"); } catch (e) {}
+  const sauber = JSON.stringify(mWahl());
+  if (roh && roh !== sauber) { try { localStorage.setItem(KEY + "_mwahl", sauber); } catch (e) {} setTimeout(mWahlSenden, 0); }
+  return "";
+}
+async function mWahlSenden() {
+  const reg = await swReg(), abo = reg && await reg.pushManager.getSubscription();
+  if (!abo) return;
+  const a = await pushPost("wahl", { endpoint: abo.endpoint, ...mWahl() }).catch(() => ({ ok: false }));
+  MITT_STAND = a.ok ? "Gespeichert." : "Speichern ging nicht (" + (a.status || "?") + ").";
+  const st = document.getElementById("mStand"); if (st) st.textContent = MITT_STAND;
+}
+document.addEventListener("change", e => {
+  const c = e.target.closest("#mitt input[type=checkbox][data-t]");
+  if (!c) return;
+  const w = mWahl(), r = c.dataset.t, k = c.dataset.a;
+  if (!k) { if (c.checked) w.je[r] = mArtenFuer(r); else delete w.je[r]; }   // Mannschaft an: erst einmal alles
+  else { w.je[r] = (w.je[r] || []).filter(x => x !== k); if (c.checked) w.je[r].push(k); }
+  try { localStorage.setItem(KEY + "_mwahl", JSON.stringify(w)); } catch (x) {}
+  if (!k) mittHtml().then(mWahlSenden); else mWahlSenden();
+});
+async function mittAn() {
+  // Erst fragen, direkt im Tippen — iOS lässt die Frage nur so zu.
+  const erlaubt = await Notification.requestPermission();
+  if (erlaubt !== "granted") { MITT_STAND = "Nicht erlaubt."; return mittHtml(); }
+  MITT_STAND = "Melde an …"; mittHtml();
+  try {
+    const reg = await navigator.serviceWorker.register("fussball-sw.js", { scope: SW_SCOPE });
+    await navigator.serviceWorker.ready;
+    const { schluessel } = await fetch(WORKER_URL + "?push=schluessel").then(r => r.json());
+    const roh = Uint8Array.from(atob(schluessel.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((schluessel.length + 3) % 4)), c => c.charCodeAt(0));
+    const abo = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: roh });
+    const a = await pushPost("anmelden", abo.toJSON());
+    if (a.ok) await pushPost("wahl", { endpoint: abo.endpoint, ...mWahl() }).catch(() => {});
+    MITT_STAND = a.ok ? "Angemeldet. Jetzt Mannschaften anhaken und „Test-Mitteilung senden“ tippen." : "Anmelden beim Worker ging nicht (" + a.status + ").";
+  } catch (e) { MITT_STAND = "Fehler: " + e.message; }
+  mittHtml();
+}
+async function mittTest() {
+  MITT_STAND = "Sende …"; mittHtml();
+  try {
+    const abo = await (await swReg()).pushManager.getSubscription();
+    const a = await pushPost("test", { endpoint: abo.endpoint });
+    MITT_STAND = a.ok ? "Gesendet — sollte gleich oben erscheinen. Tipp sie an, dann öffnet sich die App."
+      : a.status === 429 ? "Bitte 20 Sekunden warten." : a.status === 404 ? "Worker kennt dieses Gerät nicht — einmal Abmelden und neu erlauben."
+      : "Senden ging nicht (" + (a.status || "?") + ").";
+  } catch (e) { MITT_STAND = "Fehler: " + e.message; }
+  mittHtml();
+}
+document.addEventListener("click", e => {
+  if (e.target.closest("#zahnrad")) { MITT_OFFEN = !MITT_OFFEN; MITT_STAND = ""; render(); window.scrollTo(0, 0); return; }
+  const b = e.target.closest("#mAn, #mTest, #mAus");
+  if (!b) return;
+  if (b.id === "mAn") mittAn();
+  else if (b.id === "mTest") mittTest();
+  else { MITT_STAND = "Abgemeldet."; swAufraeumen().then(mittHtml); }
+});
+function zahnradZeigen() { document.getElementById("zahnrad").hidden = !mtest(); }
+let LOGO_TIPPS = [];
+document.getElementById("logo").addEventListener("click", () => {
+  const t = Date.now();
+  LOGO_TIPPS = [...LOGO_TIPPS.filter(x => t - x < 4000), t];
+  if (LOGO_TIPPS.length < 5) return;
+  LOGO_TIPPS = [];
+  const an = !mtest();
+  if (!confirm(an ? "Mitteilungen zum Ausprobieren einschalten (nur auf diesem Gerät)?" : "Mitteilungen-Test ausschalten und auf diesem Gerät abmelden?")) return;
+  try { if (an) localStorage.setItem(KEY + "_mtest", "1"); else localStorage.removeItem(KEY + "_mtest"); } catch (e) {}
+  MITT_OFFEN = an; MITT_STAND = "";
+  zahnradZeigen();
+  if (!an) swAufraeumen();
+  render(); window.scrollTo(0, 0);
+});
+zahnradZeigen();
+if (!mtest()) swAufraeumen();   // Rückweg: ohne Merker kein Service Worker, kein Abo
+
+document.getElementById("logo").src = LOGO;
+load();
+try { D = JSON.parse(localStorage.getItem(KEY + "_data") || "null"); } catch (e) {}
+render();
+aktualisieren().finally(zaehle);   // nach dem Laden, damit der Reiter bekannt ist
+</script>
+</body>
+</html>

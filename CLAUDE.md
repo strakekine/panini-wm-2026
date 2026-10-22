@@ -173,7 +173,7 @@ verkehrt (Slug beginnt mit der Heimmannschaft). Im Browser mit nachgebautem Work
 
 **Live-Ticker Seniors 1 (gebaut 18.10.2026, vom Nutzer gewünscht).** Test am 18.10. gegen Beggen:
 **die FLF trägt während des Spiels nichts ein** (alle Felder leer), **FuPa liefert live** Stand,
-Minute, Halbzeit und Torschützen, sobald jemand am Platz tickert (bei Koeppchen: Paul Krier).
+Minute, Halbzeit und Torschützen, sobald jemand am Platz tickert (am 18.10. Paul Krier, CEO von FuPa Luxemburg — sonst wechselnd: 2026-27 bei Seniors 1 zwölf verschiedene Tickerer in 19 Spielen, oft vom Gegner; Stand 22.10.). FuPa Luxemburg = Luxembourg Sports Network (LSN) sàrl, luxemburg@fupa.net; Mutter FuPa GmbH, Fürstenstein bei Passau.
 `tools/fussball-live.mjs --wache` + `.github/workflows/fussball-live.yml`: **startet nur 4× am
 Tag** (11:23, 14:23, 17:23, 19:23 Winterzeit; der letzte für Abendspiele bis ~22:40). Liegt in den nächsten 170 min ein Anstoß des Reiters
 „Seniors 1“ (aus `data/fussball.json`), bleibt der Lauf an, wartet bis 15 min vorher, fragt dann

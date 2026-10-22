@@ -1,4 +1,79 @@
 {
- "ereignisse": [],
- "live": []
+ "ereignisse": [
+  {
+   "reiter": [
+    "Seniors 3"
+   ],
+   "id": "heute:1015062",
+   "art": "heute",
+   "titel": "Seniors 3 · Heute Spiel",
+   "text": "20:00 gegen Avenir Beggen · 📍 Terrain 2 (Beggen, synth.)",
+   "ab": 1792742400000,
+   "bis": 1792778400000
+  },
+  {
+   "reiter": [
+    "U15"
+   ],
+   "id": "heute:13775",
+   "art": "heute",
+   "titel": "U15 · Morgen Spiel",
+   "text": "16:00 gegen CS Oberkorn · 📍 Am Ga (Wormeldange, synth.)",
+   "ab": 1792774800000,
+   "bis": 1792850400000
+  },
+  {
+   "reiter": [
+    "U13 1",
+    "U13 2"
+   ],
+   "id": "heute:13833",
+   "art": "heute",
+   "titel": "U13 · Morgen Spiel",
+   "text": "14:00 gegen AS Hosingen · 📍 Am Ga (Wormeldange, synth.)",
+   "ab": 1792774800000,
+   "bis": 1792843200000
+  },
+  {
+   "reiter": [
+    "U9 1"
+   ],
+   "id": "heute:6716055",
+   "art": "heute",
+   "titel": "U9 1 · Morgen Spiel",
+   "text": "11:30 gegen Union Mertert-Wasserbillig I · 📍 Am Ga (Wormeldange, synth.)",
+   "ab": 1792774800000,
+   "bis": 1792834200000
+  },
+  {
+   "reiter": [
+    "U9 2"
+   ],
+   "id": "heute:6717055",
+   "art": "heute",
+   "titel": "U9 2 · Morgen Spiel",
+   "text": "09:30 gegen US Berdorf-Consdorf 01 · 📍 Am Ga (Wormeldange, synth.)",
+   "ab": 1792774800000,
+   "bis": 1792827000000
+  }
+ ],
+ "live": [
+  {
+   "id": 1015062,
+   "reiter": [
+    "Seniors 3"
+   ],
+   "titel": "Seniors 3",
+   "d": "2026-10-23T20:00:00+02:00",
+   "h": "Avenir Beggen",
+   "a": "Koeppchen II",
+   "wirHeim": false,
+   "gegner": "Avenir Beggen",
+   "slug": "fc-avenir-beggen-mr1-fc-koeppchen-mr2-261023",
+   "fupaWir": "fc-koeppchen",
+   "ticker": "ticker:1015062",
+   "halbzeit": "halbzeit:1015062",
+   "ende": "ende:1015062"
+  }
+ ]
 }

@@ -56,6 +56,16 @@ Adresszeile, Mitteilungen gehen aber nur dort; merkt sich das Handy). Service Wo
 eingerichtet, alle anderen merken nichts. Stufe 1: Erlauben + Test-Mitteilung. Stufe 2: echte Meldungen nur für ihn, ein, zwei
 Wochenenden. Stufe 3: für alle — **dabei das 5×-Tippen aufs Logo wieder ausbauen**. Aufwand Stufe 1+2 etwa ein Tag, beim Nutzer ~10 min Cloudflare.
 
+### FuPa um Erlaubnis fragen — wenn der Verein die App übernimmt (vom Nutzer, 22.10.2026)
+
+Solange nur er und ein paar Freunde die App nutzen, bleibt es so (private Nutzung, kein Geld, FuPa als
+Quelle mit Link und Tickerer-Namen im LIVE-Kasten). Übernimmt der Verein die App: kurze Mail an
+FuPa Luxemburg (LSN sàrl, luxemburg@fupa.net, CEO Paul Krier) — „kostenlose Vereins-App ohne Werbung
+zeigt bei unseren Spielen euren Liveticker mit Link, ok?“. Grund: FuPas eigene Schnittstelle ist nicht
+als offizielles Angebot gedacht; EU-Datenbankschutz bei systematischer Übernahme ist eine Grauzone.
+In den Nutzungsbedingungen: Vergütung erst bei kommerzieller Nutzung, kein ausdrückliches Verbot
+automatischer Abrufe gefunden.
+
 ## Vorschläge von Claude (20.10.2026, noch nicht besprochen)
 
 - **„Dieses Wochenende“**: alle Spiele aller Koeppchen-Mannschaften von Freitag bis Sonntag auf

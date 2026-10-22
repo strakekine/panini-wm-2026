@@ -64,7 +64,10 @@ FuPa Luxemburg (LSN sàrl, luxemburg@fupa.net, CEO Paul Krier) — „kostenlose
 zeigt bei unseren Spielen euren Liveticker mit Link, ok?“. Grund: FuPas eigene Schnittstelle ist nicht
 als offizielles Angebot gedacht; EU-Datenbankschutz bei systematischer Übernahme ist eine Grauzone.
 In den Nutzungsbedingungen: Vergütung erst bei kommerzieller Nutzung, kein ausdrückliches Verbot
-automatischer Abrufe gefunden.
+automatischer Abrufe gefunden. **Sagt FuPa nein** (vom Nutzer): Liveticker, Halbzeit und Ticker-Endstand
+raus, Ergebnisse nur noch von der FLF. Achtung, FuPa steckt auch in der BGL-Tabelle (Rückfall: FLF-Tabelle
+bzw. selbst gerechnet, gibt es schon) und im ganzen Reiter Roude Léiw (Spiele, Tabelle — dafür bräuchte es
+eine andere Quelle oder der Reiter entfällt).
 
 ## Vorschläge von Claude (20.10.2026, noch nicht besprochen)
 

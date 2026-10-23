@@ -44,25 +44,18 @@
    "text": "09:30 gegen US Berdorf-Consdorf 01 · 📍 Am Ga (Wormeldange, synth.)",
    "ab": 1792774800000,
    "bis": 1792827000000
-  }
- ],
- "live": [
+  },
   {
-   "id": 1015062,
    "reiter": [
     "Seniors 3"
    ],
-   "titel": "Seniors 3",
-   "d": "2026-10-23T20:00:00+02:00",
-   "h": "Avenir Beggen",
-   "a": "Koeppchen II",
-   "wirHeim": false,
-   "gegner": "Avenir Beggen",
-   "slug": "fc-avenir-beggen-mr1-fc-koeppchen-mr2-261023",
-   "fupaWir": "fc-koeppchen",
-   "ticker": "ticker:1015062",
-   "halbzeit": "halbzeit:1015062",
-   "ende": "ende:1015062"
+   "id": "ende:1015062",
+   "art": "ende",
+   "titel": "Seniors 3 · Endstand",
+   "text": "Avenir Beggen 2:2 Koeppchen II",
+   "ab": 1792791110931,
+   "bis": 1792855910931
   }
- ]
+ ],
+ "live": []
 }

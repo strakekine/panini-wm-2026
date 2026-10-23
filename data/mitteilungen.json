@@ -55,6 +55,39 @@
    "text": "Avenir Beggen 2:2 Koeppchen II",
    "ab": 1792791110931,
    "bis": 1792855910931
+  },
+  {
+   "reiter": [
+    "Seniors 3"
+   ],
+   "id": "tabelle:18936:45404:5",
+   "art": "tabelle",
+   "titel": "Seniors 3 · Tabelle",
+   "text": "Koeppchen II jetzt 7. Platz (vorher 8.) · 7 Punkte",
+   "ab": 1792794006299,
+   "bis": 1792880406299
+  },
+  {
+   "reiter": [
+    "U11 1"
+   ],
+   "id": "heute:6685053",
+   "art": "heute",
+   "titel": "U11 1 · Morgen Spiel",
+   "text": "10:30 gegen ENT Canach/Mensdorf I · 📍 Am Ga (Wormeldange, synth.)",
+   "ab": 1792861200000,
+   "bis": 1792920600000
+  },
+  {
+   "reiter": [
+    "U11 2"
+   ],
+   "id": "heute:6687053",
+   "art": "heute",
+   "titel": "U11 2 · Morgen Spiel",
+   "text": "10:30 gegen US Moutfort-Medingen · 📍 Am Ga (Wormeldange, synth.)",
+   "ab": 1792861200000,
+   "bis": 1792920600000
   }
  ],
  "live": []

@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-23T22:19:58.447Z",
+ "stand": "2026-10-24T01:02:46.235Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -7268,6 +7268,18 @@
    "tabelle": [
     {
      "pl": 1,
+     "id": 44743,
+     "n": "Jeunesse Biwer",
+     "sp": 6,
+     "s": 5,
+     "u": 1,
+     "nl": 0,
+     "t": 35,
+     "g": 7,
+     "pkt": 16
+    },
+    {
+     "pl": 2,
      "id": 46227,
      "n": "Avenir Beggen",
      "sp": 6,
@@ -7277,18 +7289,6 @@
      "t": 28,
      "g": 7,
      "pkt": 16
-    },
-    {
-     "pl": 2,
-     "id": 44743,
-     "n": "Jeunesse Biwer",
-     "sp": 5,
-     "s": 5,
-     "u": 0,
-     "nl": 0,
-     "t": 35,
-     "g": 7,
-     "pkt": 15
     },
     {
      "pl": 3,
@@ -7318,13 +7318,13 @@
      "pl": 5,
      "id": 46587,
      "n": "Olympia Christnach-Waldbillig I",
-     "sp": 5,
+     "sp": 6,
      "s": 3,
-     "u": 0,
+     "u": 1,
      "nl": 2,
      "t": 12,
      "g": 12,
-     "pkt": 9
+     "pkt": 10
     },
     {
      "pl": 6,
@@ -8039,9 +8039,9 @@
       "id": 44743,
       "n": "Jeunesse Biwer"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 0,
+     "as": 0,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain Am Lahr (Christnach)"
     },

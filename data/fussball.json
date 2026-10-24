@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-24T17:46:42.242Z",
+ "stand": "2026-10-24T18:01:42.644Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -17652,9 +17652,9 @@
       "id": 45516,
       "n": "Red Star Merl-Belair"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 3,
+     "as": 1,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain 2 (Kehlen, synth.)"
     },
@@ -22116,12 +22116,12 @@
    },
    {
     "pl": 7,
-    "sp": 10,
+    "sp": 11,
     "s": 6,
     "u": 1,
-    "nl": 3,
+    "nl": 4,
     "t": 16,
-    "g": 7,
+    "g": 9,
     "pkt": 19,
     "id": 44975,
     "n": "Progrès Niederkorn"
@@ -22188,6 +22188,18 @@
    },
    {
     "pl": 13,
+    "sp": 11,
+    "s": 2,
+    "u": 2,
+    "nl": 7,
+    "t": 9,
+    "g": 19,
+    "pkt": 8,
+    "id": 44690,
+    "n": "Etzella Ettelbruck"
+   },
+   {
+    "pl": 14,
     "sp": 10,
     "s": 2,
     "u": 1,
@@ -22197,18 +22209,6 @@
     "pkt": 7,
     "id": 44823,
     "n": "US Rumelange"
-   },
-   {
-    "pl": 14,
-    "sp": 10,
-    "s": 1,
-    "u": 2,
-    "nl": 7,
-    "t": 7,
-    "g": 19,
-    "pkt": 5,
-    "id": 44690,
-    "n": "Etzella Ettelbruck"
    },
    {
     "pl": 15,
@@ -22676,7 +22676,6 @@
  },
  "fupa": {
   "1011066": "fc-victoria-rosport-mr1-fc-koeppchen-mr1-261026",
-  "1015062": "fc-avenir-beggen-mr1-fc-koeppchen-mr2-261023",
   "1015075": "us-moutfort-medingen-mr1-fc-koeppchen-mr2-261030"
  }
 }

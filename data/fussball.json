@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-24T15:16:40.530Z",
+ "stand": "2026-10-24T15:46:43.142Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -16627,9 +16627,9 @@
       "id": 45515,
       "n": "Red Star Merl-Belair"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 0,
+     "as": 2,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain 2 (Grevenmacher, synth.)"
     },
@@ -16681,9 +16681,9 @@
       "id": 45794,
       "n": "Sporting Mertzig"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 9,
+     "as": 1,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain synth. Lallange (Esch, synth.)"
     },
@@ -17523,9 +17523,9 @@
       "id": 46383,
       "n": "Olympia Christnach-Waldbillig"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 24,
+     "as": 0,
+     "gespielt": true,
      "forfait": false,
      "ort": "Stade Klengbousbierg 2 (Bissen, synth.)"
     },
@@ -17577,9 +17577,9 @@
       "id": 45280,
       "n": "FC Ehlerange"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 14,
+     "as": 0,
+     "gespielt": true,
      "forfait": false,
      "ort": "Plaine des Jeux André Wolff (Bertrange, synth.)"
     },

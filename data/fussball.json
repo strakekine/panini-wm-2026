@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-24T18:46:42.521Z",
+ "stand": "2026-10-24T19:46:40.726Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -17079,9 +17079,9 @@
       "id": 46119,
       "n": "ENT Colmarberg/Schieren"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 6,
+     "as": 0,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain 2 (Lorentzweiler, synth.)"
     },
@@ -17562,9 +17562,9 @@
       "id": 46120,
       "n": "ENT Colmarberg/Schieren"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 4,
+     "as": 0,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain 2 (Mersch, synth.)"
     },

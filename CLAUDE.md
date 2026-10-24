@@ -893,6 +893,17 @@ l'aise), steht die **deutsche Übersetzung von Claude** im Eintrag und die Erkl�
 (im Code `/* Ü */`). Die Nomen zu den Adjektiven („→ la motivation“) stehen auf dem Blatt ohne
 Deutsch und sind **eigene Einträge mit Claudes Übersetzung** (`/* N */`). Beides dem Vater
 gesagt, er kann es streichen lassen. Beim ersten Start sind **alle** Lektionen angehakt.
+**Eingetragen (24.10.2026):** Blatt „Le portrait physique“ (5 Seiten, handgeschrieben), nur Abschnitte
+1–3: `portrait-1` Silhouette/Corpulence 30, `portrait-2` Taille 7, `portrait-3` Allure 13 = 50. **Ab „Le visage“
+bewusst nicht** — die Klasse arbeitet dort mit Bildern (vom Vater). Neue Lektionen sind für Geräte mit
+altem Lernstand **nicht** angehakt (`sanitize` filtert `S.sel`), nur beim ersten Start sind alle an.
+Das Blatt gibt mehreren Wörtern dieselbe deutsche Übersetzung (mince/maigre, squelettique/décharné);
+in DE → FR wären das zwei gleiche Fragen. **Regel: gleiche Bedeutung = eine Karte mit `|`** (wie
+nervös/ruhelos), und der Test erzwingt es (`Doppelte Frage …`: angezeigter Text je Richtung eindeutig).
+Doppelt aufgeführte Wörter (massif, élancé) einmal mit beiden Übersetzungen. Adjektive in der
+männlichen Form wie auf dem Blatt (kein `;`). Lesefehler von Claude berichtigt: sattlich → stattlich,
+keputt → kaputt, „seltsamen Aussehen“ → seltsamem. „large – groß“ steht so auf dem Blatt, gemeint
+breit: beides gilt, Hinweis „≠ grand“.
 
 **Prüfung — vom Vater so festgelegt, nicht weicher machen:** Tippfehler sind Fehler, kein
 „fast richtig“. Akzent falsch = Fehler. Steht ein Artikel da, muss er mit. Die Begründung

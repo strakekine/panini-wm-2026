@@ -414,6 +414,72 @@ const LEKTIONEN = [
     ["rendre visite (à qn)", "(jdn) besuchen", "Person besuchen — ≠ visiter (Ort)"],
     ["les vacances", "die Ferien", "n.f."],
   ]},
+
+  /* Blatt „Le portrait physique“, 5 Seiten, handgeschrieben, eingescannt vom Vater (24.10.2026).
+     Eingetragen sind nur die Abschnitte 1–3 (Silhouette, Taille, Allure); ab „Le visage“ arbeitet
+     die Klasse mit Bildern. Das Blatt führt die Adjektive in der männlichen Grundform — so
+     stehen sie auch hier. Gleiche deutsche Übersetzung für verschiedene Wörter würde in Richtung
+     DE → FR zwei gleiche Fragen ergeben, darum sind solche Wörter eine Karte (mince|maigre,
+     squelettique|décharné). Doppelt aufgeführte Wörter (massif, élancé) stehen einmal, mit
+     beiden Übersetzungen. Lesefehler vom Blatt, von Claude berichtigt: sattlich → stattlich,
+     keputt → kaputt, „mit seltsamen Aussehen“ → mit seltsamem Aussehen. „large – groß“ steht
+     so auf dem Blatt, gemeint ist breit: beides gilt, der Hinweis trennt es von grand. */
+  { id:"portrait-1", titel:"Portrait 1 · La silhouette, la corpulence", vok:[
+    ["gros", "dick"],
+    ["large", "breit|groß", "breit gebaut, nicht die Größe — ≠ grand"],
+    ["ventru", "bäuchig"],
+    ["charnu", "fleischig"],
+    ["dodu", "pummelig"],
+    ["grassouillet", "dicklich"],
+    ["massif", "massiv|massig|schwer"],
+    ["trapu", "gedrungen"],
+    ["gras", "fett|fettig"],
+    ["rondelet", "rundlich"],
+    ["obèse", "fettleibig|übergewichtig"],
+    ["corpulent", "korpulent|füllig"],
+    ["fort", "kräftig|dick|stark"],
+    ["avoir une large carrure", "breitschultrig sein"],
+    ["avoir de larges épaules", "breite Schultern haben"],
+    ["élancé", "schlank|hochgewachsen"],
+    ["imposant", "stattlich"],
+    ["monumental", "monumental"],
+    ["gigantesque", "gigantisch"],
+    ["droit", "gerade"],
+    ["penché", "geneigt"],
+    ["cassé", "kaputt"],
+    ["bossu", "bucklig"],
+    ["mince|maigre", "dünn|schlank"],
+    ["squelettique|décharné", "abgemagert"],
+    ["osseux", "knochig"],
+    ["svelte", "schlank"],
+    ["menu", "zierlich"],
+    ["fluet", "zart|schmächtig"],
+    ["chétif", "schwächlich"],
+  ]},
+  { id:"portrait-2", titel:"Portrait 2 · La taille", vok:[
+    ["grand", "groß"],
+    ["petit", "klein"],
+    ["de taille moyenne", "mittelgroß"],
+    ["minuscule", "winzig"],
+    ["haut comme trois pommes", "sehr klein|Dreikäsehoch"],
+    ["être un géant", "ein Riese sein"],
+    ["être un nain", "ein Zwerg sein"],
+  ]},
+  { id:"portrait-3", titel:"Portrait 3 · L'allure", vok:[
+    ["jeune", "jung"],
+    ["vieux", "alt"],
+    ["beau", "schön"],
+    ["laid", "hässlich"],
+    ["propre", "sauber|gepflegt"],
+    ["sale", "schmutzig|ungepflegt"],
+    ["élégant", "elegant"],
+    ["maladif", "kränklich"],
+    ["sportif", "sportlich"],
+    ["voûté", "gebeugt"],
+    ["raide comme un piquet", "steif wie ein Stock"],
+    ["avec de l'allure", "mit Stil"],
+    ["avec une drôle d'allure", "mit seltsamem Aussehen"],
+  ]},
 ];
 
 /* ===================== Logik =====================
@@ -785,7 +851,7 @@ function needBackup(dirty, snooze, now){
 /* Fassung — bei JEDER Änderung hochzählen. Steht unten im Startbild und als erste Zeile der
    Mitschrift; am iPhone lief einmal noch die alte Datei aus dem Zwischenspeicher, und die
    Mitschrift sah aus wie ein neuer Fehler. */
-const FASSUNG = "22.10.2026 t";
+const FASSUNG = "24.10.2026 u";
 const KEY = "vokabeln_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }

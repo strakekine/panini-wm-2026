@@ -15,7 +15,7 @@ if(i < 0 || j < 0) throw new Error("Abschnittsmarken Lektionen/Oberfläche nicht
 const quelle = src.slice(src.lastIndexOf("/*", i), src.lastIndexOf("/*", j));
 const M = new Function(quelle + `
   return { LEKTIONEN, DAY, FACH, clean, variants, check, cardsOf, grade, review, isDue, buildSession,
-           lessonStats, startOfDay, key, needBackup, klang, klingtWie, reviewAnswer, SICHER, tippKandidaten, ausgeschrieben, weekStatus, dayKey, dayDone, pruneDays, pct, DAY_MIN, DAY_RIGHT, countDay, sternWochen, sanitizeStars, sterneNachtragen, sterneStand, wochenStart, papaCode, tagSchenken, bonusStern };`)();
+           lessonStats, startOfDay, key, needBackup, klang, klingtWie, reviewAnswer, SICHER, tippKandidaten, ausgeschrieben, weekStatus, dayKey, dayDone, pruneDays, pct, DAY_MIN, DAY_RIGHT, countDay, sternWochen, sanitizeStars, sterneNachtragen, sterneStand, wochenStart, papaCode, tagSchenken, bonusStern, shown };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text){ n++; if(!bed){ fehler++; console.log("✗ " + text); } }
@@ -325,6 +325,21 @@ for(const d of ["fd", "df", "mix"]){
     const k = M.klang(v), alt = seen.get(k);
     ok(!alt || alt === c.f, `Klang-Kollision: "${alt}" und "${c.f}" klingen für die App gleich („${k}“)`);
     seen.set(k, c.f);
+  }
+}
+
+/* --- Jede Frage ist eindeutig (vom Vater, Blatt „Le portrait physique“: gleiche deutsche
+   Übersetzung für mince und maigre hätte in DE → FR zwei gleiche Fragen ergeben) ---
+   Der angezeigte Text einer Karte darf in keiner Richtung bei zwei Karten gleich sein, sonst
+   ist die Antwort Glückssache. Gleiche Bedeutung → eine Karte mit „|“ (wie nervös/ruhelos). */
+{
+  for(const [seite, name] of [["d", "Deutsch (Frage in DE → FR)"], ["f", "Französisch (Frage in FR → DE)"]]){
+    const seen = new Map();
+    for(const c of M.cardsOf(M.LEKTIONEN)){
+      const t = M.shown(c[seite]).toLocaleLowerCase("fr"), alt = seen.get(t);
+      ok(!alt, `Doppelte Frage auf ${name}: „${M.shown(c[seite])}“ — ${alt} und ${c.f}. Zu einer Karte zusammenfassen oder unterscheiden.`);
+      seen.set(t, c.f);
+    }
   }
 }
 

@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-24T18:01:42.644Z",
+ "stand": "2026-10-24T18:09:51.784Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -16827,9 +16827,9 @@
       "id": 44837,
       "n": "AS La Jeunesse d'Esch/Alzette"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 5,
+     "as": 2,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain 3 (Weidingen, synth.)"
     },
@@ -17061,9 +17061,9 @@
       "id": 44736,
       "n": "Jeunesse Junglinster"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 3,
+     "as": 0,
+     "gespielt": true,
      "forfait": false,
      "ort": "Stade Klengbousbierg 2 (Bissen, synth.)"
     },
@@ -17097,9 +17097,9 @@
       "id": 45961,
       "n": "Swift Hesperange"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 4,
+     "as": 2,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain 2 (Mersch, synth.)"
     },
@@ -17115,9 +17115,9 @@
       "id": 45859,
       "n": "ENT Progrès/Luna"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 4,
+     "as": 3,
+     "gespielt": true,
      "forfait": false,
      "ort": "Plaine des Jeux André Wolff (Bertrange, synth.)"
     }
@@ -17598,9 +17598,9 @@
       "id": 46573,
       "n": "Etzella Ettelbruck"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 0,
+     "as": 2,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain synth. (Wincrange)"
     },

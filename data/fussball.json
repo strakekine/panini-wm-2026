@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-24T14:31:40.379Z",
+ "stand": "2026-10-24T14:46:41.425Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -16609,9 +16609,9 @@
       "id": 46062,
       "n": "FC Rodange 91"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 2,
+     "as": 0,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain 2 (Beggen, synth.)"
     },
@@ -17253,9 +17253,9 @@
       "id": 45580,
       "n": "AS Hosingen"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 5,
+     "as": 2,
+     "gespielt": true,
      "forfait": false,
      "ort": "Am Ga (Wormeldange, synth.)"
     },
@@ -17307,9 +17307,9 @@
       "id": 45272,
       "n": "Racing FC Union Luxembourg"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 1,
+     "as": 13,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain 2 (Mensdorf, synth.)"
     },
@@ -17325,9 +17325,9 @@
       "id": 46191,
       "n": "CS Grevenmacher"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 11,
+     "as": 0,
+     "gespielt": true,
      "forfait": false,
      "ort": "Stade Municipal (Bettembourg, synth.)"
     },
@@ -17361,9 +17361,9 @@
       "id": 45422,
       "n": "CS Fola Esch-Alzette"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 0,
+     "as": 6,
+     "gespielt": true,
      "forfait": false,
      "ort": "Stade Emile Müller (Kayl)"
     },
@@ -17379,9 +17379,9 @@
       "id": 44740,
       "n": "Jeunesse Junglinster"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 2,
+     "as": 8,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain Breil (Echternach)"
     },

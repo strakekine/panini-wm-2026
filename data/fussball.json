@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-24T13:46:46.781Z",
+ "stand": "2026-10-24T14:16:43.802Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -16573,9 +16573,9 @@
       "id": 45721,
       "n": "US Rumelange"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 7,
+     "as": 4,
+     "gespielt": true,
      "forfait": false,
      "ort": "Stade CS Sanem (Sanem, synth.)"
     },
@@ -17216,10 +17216,11 @@
       "id": 45857,
       "n": "ENT Progrès/Luna"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 3,
+     "as": 2,
+     "gespielt": true,
      "forfait": false,
+     "bem": "t.a.b. 3 - 2",
      "ort": "Stade Aloyse Meyer (Dudelange, synth.)"
     },
     {
@@ -17234,9 +17235,9 @@
       "id": 44968,
       "n": "Alliance Äischdall Hobscheid-Eischen"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 8,
+     "as": 1,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain 2 (Itzig, synth.)"
     },
@@ -17270,9 +17271,9 @@
       "id": 46132,
       "n": "ENT Heiderscheid/Feulen/Grevels"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 6,
+     "as": 3,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain 3 (Weidingen, synth.)"
     },
@@ -17288,9 +17289,9 @@
       "id": 46023,
       "n": "Union Remich/Bous"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 7,
+     "as": 1,
+     "gespielt": true,
      "forfait": false,
      "ort": "Stade Emile Bintner (Luxembourg, synth.)"
     },
@@ -17432,9 +17433,9 @@
       "id": 46478,
       "n": "Young Boys Diekirch"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 0,
+     "as": 3,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain Kierlingerstrooss (Dalheim)"
     },

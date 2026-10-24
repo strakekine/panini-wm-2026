@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-24T16:46:43.368Z",
+ "stand": "2026-10-24T17:16:39.174Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -16753,9 +16753,9 @@
       "id": 45938,
       "n": "FC Brouch"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 13,
+     "as": 0,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain 2 (Itzig, synth.)"
     },
@@ -16881,9 +16881,9 @@
       "id": 45172,
       "n": "ENT Jeunesse Atertdaul"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 10,
+     "as": 0,
+     "gespielt": true,
      "forfait": false,
      "ort": "Stade Am Dieltchen (Weiler, synth.)"
     },
@@ -17043,9 +17043,9 @@
       "id": 44857,
       "n": "FC Schifflange 95"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 5,
+     "as": 1,
+     "gespielt": true,
      "forfait": false,
      "ort": "Stade FC The Belval (Belvaux, synth.)"
     },

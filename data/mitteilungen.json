@@ -2,17 +2,6 @@
  "ereignisse": [
   {
    "reiter": [
-    "U15"
-   ],
-   "id": "heute:13775",
-   "art": "heute",
-   "titel": "U15 · Morgen Spiel",
-   "text": "16:00 gegen CS Oberkorn · 📍 Am Ga (Wormeldange, synth.)",
-   "ab": 1792774800000,
-   "bis": 1792850400000
-  },
-  {
-   "reiter": [
     "Seniors 3"
    ],
    "id": "ende:1015062",

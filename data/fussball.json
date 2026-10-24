@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-24T13:01:38.806Z",
+ "stand": "2026-10-24T13:46:46.781Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -17198,9 +17198,9 @@
       "id": 45248,
       "n": "U.N. Käerjeng 97"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 1,
+     "as": 8,
+     "gespielt": true,
      "forfait": false,
      "ort": "Stade Am Duerf (Harlange, synth.)"
     },

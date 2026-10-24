@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-24T17:16:39.174Z",
+ "stand": "2026-10-24T17:46:42.242Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -16717,9 +16717,9 @@
       "id": 46405,
       "n": "AS Red Black Luxembourg"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 1,
+     "as": 2,
+     "gespielt": true,
      "forfait": false,
      "ort": "Parc des Sports (Diekirch, synth.)"
     },
@@ -16899,9 +16899,9 @@
       "id": 46385,
       "n": "ENT Christnach/USBC"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 0,
+     "as": 7,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain 2 (Hobscheid)"
     },
@@ -16953,9 +16953,9 @@
       "id": 44775,
       "n": "ENT Rambrouch/Perlé"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 11,
+     "as": 2,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain synth. Hamm"
     },
@@ -17007,9 +17007,9 @@
       "id": 46529,
       "n": "Jeunesse Useldange"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 16,
+     "as": 0,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain Carrière (Senningerberg, synth.)"
     },
@@ -17025,9 +17025,9 @@
       "id": 45276,
       "n": "Racing FC Union Luxembourg"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 1,
+     "as": 3,
+     "gespielt": true,
      "forfait": false,
      "ort": "Stade Municipal Differdange - Terrain 2 (synth.)"
     },

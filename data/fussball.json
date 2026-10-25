@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-25T18:16:36.464Z",
+ "stand": "2026-10-25T18:46:41.544Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -19193,7 +19193,7 @@
     },
     "hs": 2,
     "as": 1,
-    "gespielt": false,
+    "gespielt": true,
     "forfait": false,
     "ort": "Stade Municipal de la Ville de Differdange"
    },

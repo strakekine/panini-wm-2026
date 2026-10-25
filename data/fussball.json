@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-25T17:46:38.451Z",
+ "stand": "2026-10-25T18:16:36.464Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -214,18 +214,6 @@
    "tabelle": [
     {
      "pl": 1,
-     "id": 44892,
-     "n": "FC Lorentzweiler",
-     "sp": 9,
-     "s": 5,
-     "u": 4,
-     "nl": 0,
-     "t": 19,
-     "g": 9,
-     "pkt": 19
-    },
-    {
-     "pl": 2,
      "id": 45070,
      "n": "FC Mamer 32",
      "sp": 9,
@@ -237,31 +225,67 @@
      "pkt": 19
     },
     {
-     "pl": 3,
-     "id": 45113,
-     "n": "CS Fola Esch-Alzette",
-     "sp": 9,
+     "pl": 2,
+     "id": 44560,
+     "n": "Union Titus Pétange",
+     "sp": 10,
      "s": 5,
-     "u": 3,
+     "u": 4,
      "nl": 1,
-     "t": 17,
-     "g": 7,
-     "pkt": 18
+     "t": 29,
+     "g": 23,
+     "pkt": 19
+    },
+    {
+     "pl": 3,
+     "id": 44892,
+     "n": "FC Lorentzweiler",
+     "sp": 10,
+     "s": 5,
+     "u": 4,
+     "nl": 1,
+     "t": 20,
+     "g": 14,
+     "pkt": 19
     },
     {
      "pl": 4,
-     "id": 44560,
-     "n": "Union Titus Pétange",
-     "sp": 9,
-     "s": 4,
-     "u": 4,
-     "nl": 1,
-     "t": 25,
-     "g": 21,
-     "pkt": 16
+     "id": 45041,
+     "n": "FC Rodange 91",
+     "sp": 10,
+     "s": 5,
+     "u": 3,
+     "nl": 2,
+     "t": 20,
+     "g": 11,
+     "pkt": 18
     },
     {
      "pl": 5,
+     "id": 45113,
+     "n": "CS Fola Esch-Alzette",
+     "sp": 10,
+     "s": 5,
+     "u": 3,
+     "nl": 2,
+     "t": 18,
+     "g": 9,
+     "pkt": 18
+    },
+    {
+     "pl": 6,
+     "id": 45002,
+     "n": "SC Bettembourg",
+     "sp": 10,
+     "s": 4,
+     "u": 3,
+     "nl": 3,
+     "t": 23,
+     "g": 15,
+     "pkt": 15
+    },
+    {
+     "pl": 7,
      "id": 44587,
      "n": "Berdenia Berbourg",
      "sp": 9,
@@ -273,67 +297,67 @@
      "pkt": 15
     },
     {
-     "pl": 6,
-     "id": 45041,
-     "n": "FC Rodange 91",
-     "sp": 9,
-     "s": 4,
-     "u": 3,
-     "nl": 2,
-     "t": 15,
-     "g": 10,
-     "pkt": 15
-    },
-    {
-     "pl": 7,
-     "id": 45002,
-     "n": "SC Bettembourg",
-     "sp": 9,
-     "s": 3,
-     "u": 3,
-     "nl": 3,
-     "t": 21,
-     "g": 14,
-     "pkt": 12
-    },
-    {
      "pl": 8,
      "id": 44799,
      "n": "FC The Belval Belvaux",
-     "sp": 9,
-     "s": 3,
+     "sp": 10,
+     "s": 4,
      "u": 3,
      "nl": 3,
-     "t": 12,
-     "g": 15,
-     "pkt": 12
+     "t": 15,
+     "g": 16,
+     "pkt": 15
     },
     {
      "pl": 9,
-     "id": 44831,
-     "n": "FC Koeppchen Wormeldange",
-     "sp": 9,
+     "id": 45208,
+     "n": "FC Luxembourg City",
+     "sp": 10,
      "s": 3,
-     "u": 2,
+     "u": 3,
      "nl": 4,
      "t": 15,
      "g": 17,
-     "pkt": 11
+     "pkt": 12
     },
     {
      "pl": 10,
-     "id": 45031,
-     "n": "Jeunesse Canach",
-     "sp": 9,
+     "id": 44991,
+     "n": "FC Mondercange",
+     "sp": 10,
      "s": 3,
-     "u": 2,
+     "u": 3,
      "nl": 4,
-     "t": 18,
-     "g": 22,
-     "pkt": 11
+     "t": 15,
+     "g": 19,
+     "pkt": 12
     },
     {
      "pl": 11,
+     "id": 44831,
+     "n": "FC Koeppchen Wormeldange",
+     "sp": 10,
+     "s": 3,
+     "u": 2,
+     "nl": 5,
+     "t": 16,
+     "g": 19,
+     "pkt": 11
+    },
+    {
+     "pl": 12,
+     "id": 45031,
+     "n": "Jeunesse Canach",
+     "sp": 10,
+     "s": 3,
+     "u": 2,
+     "nl": 5,
+     "t": 19,
+     "g": 25,
+     "pkt": 11
+    },
+    {
+     "pl": 13,
      "id": 44694,
      "n": "US Feulen",
      "sp": 9,
@@ -345,7 +369,7 @@
      "pkt": 10
     },
     {
-     "pl": 12,
+     "pl": 14,
      "id": 44914,
      "n": "Avenir Beggen",
      "sp": 9,
@@ -357,51 +381,27 @@
      "pkt": 9
     },
     {
-     "pl": 13,
-     "id": 45208,
-     "n": "FC Luxembourg City",
-     "sp": 9,
-     "s": 2,
-     "u": 3,
-     "nl": 4,
-     "t": 13,
-     "g": 16,
-     "pkt": 9
-    },
-    {
-     "pl": 14,
-     "id": 44991,
-     "n": "FC Mondercange",
-     "sp": 9,
-     "s": 2,
-     "u": 3,
-     "nl": 4,
-     "t": 12,
-     "g": 19,
-     "pkt": 9
-    },
-    {
      "pl": 15,
      "id": 44810,
      "n": "Union Remich/Bous",
-     "sp": 9,
+     "sp": 10,
      "s": 2,
      "u": 2,
-     "nl": 5,
-     "t": 8,
-     "g": 20,
+     "nl": 6,
+     "t": 10,
+     "g": 24,
      "pkt": 8
     },
     {
      "pl": 16,
      "id": 44650,
      "n": "Marisca Mersch",
-     "sp": 9,
+     "sp": 10,
      "s": 0,
      "u": 1,
-     "nl": 8,
+     "nl": 9,
      "t": 6,
-     "g": 22,
+     "g": 25,
      "pkt": 1
     }
    ],
@@ -19191,8 +19191,8 @@
      "id": 44586,
      "n": "F91 Dudelange"
     },
-    "hs": null,
-    "as": null,
+    "hs": 2,
+    "as": 1,
     "gespielt": false,
     "forfait": false,
     "ort": "Stade Municipal de la Ville de Differdange"

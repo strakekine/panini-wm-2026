@@ -5,14 +5,22 @@
  "anstoss": "2026-10-25T16:00:00+01:00",
  "h": "SC Bettembourg",
  "a": "FC Koeppchen Wormeldange",
- "hs": 0,
+ "hs": 1,
  "as": 0,
  "section": "LIVE",
  "period": "started",
  "running": true,
  "minute": 8,
- "minuteAt": "2026-10-25T16:09:09+01:00",
- "tore": [],
+ "minuteAt": "2026-10-25T16:13:11+01:00",
+ "tore": [
+  {
+   "min": 8,
+   "plus": 0,
+   "heim": true,
+   "name": "Ricardo Couto",
+   "art": "goal_shoot"
+  }
+ ],
  "karten": [],
  "ticker": "Pit Sadler"
 }

@@ -2,17 +2,6 @@
  "ereignisse": [
   {
    "reiter": [
-    "Seniors 3"
-   ],
-   "id": "tabelle:18936:45404:5",
-   "art": "tabelle",
-   "titel": "Seniors 3 · Tabelle",
-   "text": "Koeppchen II jetzt 7. Platz (vorher 8.) · 7 Punkte",
-   "ab": 1792794006299,
-   "bis": 1792880406299
-  },
-  {
-   "reiter": [
     "U11 1"
    ],
    "id": "heute:6685053",
@@ -32,7 +21,36 @@
    "text": "10:30 gegen US Moutfort-Medingen · 📍 Am Ga (Wormeldange, synth.)",
    "ab": 1792861200000,
    "bis": 1792920600000
+  },
+  {
+   "reiter": [
+    "Seniors 1"
+   ],
+   "id": "heute:1002108",
+   "art": "heute",
+   "titel": "Seniors 1 · Heute Spiel",
+   "text": "16:00 gegen SC Bettembourg · 📍 Stade Municipal (Bettembourg, synth.)",
+   "ab": 1792918800000,
+   "bis": 1792940400000
   }
  ],
- "live": []
+ "live": [
+  {
+   "id": 1002108,
+   "reiter": [
+    "Seniors 1"
+   ],
+   "titel": "Seniors 1",
+   "d": "2026-10-25T16:00:00+01:00",
+   "h": "SC Bettembourg",
+   "a": "Koeppchen",
+   "wirHeim": false,
+   "gegner": "SC Bettembourg",
+   "anstoss": "2026-10-25T16:00:00+01:00",
+   "fupaWir": "fc-koeppchen",
+   "ticker": "ticker:1002108",
+   "halbzeit": "halbzeit:1002108",
+   "ende": "ende:1002108"
+  }
+ ]
 }

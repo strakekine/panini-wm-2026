@@ -1,39 +1,18 @@
 {
- "flfId": 1002091,
- "slug": "fc-koeppchen-m1-fc-avenir-beggen-m1-261018",
- "url": "https://www.fupa.net/match/fc-koeppchen-m1-fc-avenir-beggen-m1-261018",
- "anstoss": "2026-10-18T16:00:00+02:00",
- "h": "FC Koeppchen Wormeldange",
- "a": "Avenir Beggen",
- "hs": 2,
- "as": 1,
- "section": "POST",
+ "flfId": 1002108,
+ "slug": "sc-bettemburg-m1-fc-koeppchen-m1-261025",
+ "url": "https://www.fupa.net/match/sc-bettemburg-m1-fc-koeppchen-m1-261025",
+ "anstoss": "2026-10-25T16:00:00+01:00",
+ "h": "SC Bettembourg",
+ "a": "FC Koeppchen Wormeldange",
+ "hs": null,
+ "as": null,
+ "section": "PRE",
  "period": "",
  "running": false,
  "minute": null,
  "minuteAt": null,
- "tore": [
-  {
-   "min": 12,
-   "plus": 0,
-   "heim": true,
-   "name": "Pedro Neves Costa",
-   "art": "goal_headed"
-  },
-  {
-   "min": 78,
-   "plus": 0,
-   "heim": true,
-   "name": "Théo Fournier",
-   "art": "goal_shoot"
-  },
-  {
-   "min": 88,
-   "plus": 0,
-   "heim": false,
-   "name": "Robin Moreira",
-   "art": "penalty_foul"
-  }
- ],
- "ticker": "Paul Krier"
+ "tore": [],
+ "karten": [],
+ "ticker": "Pit Sadler"
 }

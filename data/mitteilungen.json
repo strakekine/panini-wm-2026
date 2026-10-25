@@ -1,22 +1,16 @@
 {
- "ereignisse": [],
- "live": [
+ "ereignisse": [
   {
-   "id": 1002108,
    "reiter": [
     "Seniors 1"
    ],
-   "titel": "Seniors 1",
-   "d": "2026-10-25T16:00:00+01:00",
-   "h": "SC Bettembourg",
-   "a": "Koeppchen",
-   "wirHeim": false,
-   "gegner": "SC Bettembourg",
-   "anstoss": "2026-10-25T16:00:00+01:00",
-   "fupaWir": "fc-koeppchen",
-   "ticker": "ticker:1002108",
-   "halbzeit": "halbzeit:1002108",
-   "ende": "ende:1002108"
+   "id": "ende:1002108",
+   "art": "ende",
+   "titel": "Seniors 1 · Endstand",
+   "text": "SC Bettembourg 2:1 Koeppchen",
+   "ab": 1792950404807,
+   "bis": 1793015204807
   }
- ]
+ ],
+ "live": []
 }

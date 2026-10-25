@@ -21,6 +21,17 @@
    "text": "Koeppchen jetzt 11. Platz (vorher 9.) · 11 Punkte",
    "ab": 1792952203964,
    "bis": 1793038603964
+  },
+  {
+   "reiter": [
+    "Woche"
+   ],
+   "id": "woche:2026-10-26",
+   "art": "woche",
+   "titel": "Unsere Woche",
+   "text": "Diese Woche 3 Spiele, davon 1 zu Hause",
+   "ab": 1793005200000,
+   "bis": 1793048400000
   }
  ],
  "live": []

@@ -8,10 +8,10 @@
  "hs": 1,
  "as": 1,
  "section": "LIVE",
- "period": "halftime",
- "running": false,
- "minute": 46,
- "minuteAt": "2026-10-25T16:49:23+01:00",
+ "period": "secondHalf",
+ "running": true,
+ "minute": 47,
+ "minuteAt": "2026-10-25T17:09:30+01:00",
  "tore": [
   {
    "min": 8,

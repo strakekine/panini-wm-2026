@@ -5,13 +5,13 @@
  "anstoss": "2026-10-25T16:00:00+01:00",
  "h": "SC Bettembourg",
  "a": "FC Koeppchen Wormeldange",
- "hs": 1,
+ "hs": 2,
  "as": 1,
  "section": "LIVE",
  "period": "secondHalf",
  "running": true,
- "minute": 47,
- "minuteAt": "2026-10-25T17:09:30+01:00",
+ "minute": 55,
+ "minuteAt": "2026-10-25T17:17:33+01:00",
  "tore": [
   {
    "min": 8,
@@ -25,6 +25,13 @@
    "plus": 0,
    "heim": false,
    "name": "Joao Tomas Ferreira Borges",
+   "art": "goal_shoot"
+  },
+  {
+   "min": 55,
+   "plus": 0,
+   "heim": true,
+   "name": "Lissander Da Costa Ramos",
    "art": "goal_shoot"
   }
  ],

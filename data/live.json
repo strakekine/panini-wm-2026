@@ -7,11 +7,11 @@
  "a": "FC Koeppchen Wormeldange",
  "hs": 2,
  "as": 1,
- "section": "LIVE",
- "period": "secondHalf",
- "running": true,
- "minute": 55,
- "minuteAt": "2026-10-25T17:17:33+01:00",
+ "section": "POST",
+ "period": "",
+ "running": false,
+ "minute": null,
+ "minuteAt": null,
  "tore": [
   {
    "min": 8,

@@ -2,28 +2,6 @@
  "ereignisse": [
   {
    "reiter": [
-    "U11 1"
-   ],
-   "id": "heute:6685053",
-   "art": "heute",
-   "titel": "U11 1 · Morgen Spiel",
-   "text": "10:30 gegen ENT Canach/Mensdorf I · 📍 Am Ga (Wormeldange, synth.)",
-   "ab": 1792861200000,
-   "bis": 1792920600000
-  },
-  {
-   "reiter": [
-    "U11 2"
-   ],
-   "id": "heute:6687053",
-   "art": "heute",
-   "titel": "U11 2 · Morgen Spiel",
-   "text": "10:30 gegen US Moutfort-Medingen · 📍 Am Ga (Wormeldange, synth.)",
-   "ab": 1792861200000,
-   "bis": 1792920600000
-  },
-  {
-   "reiter": [
     "Seniors 1"
    ],
    "id": "heute:1002108",

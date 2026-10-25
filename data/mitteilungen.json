@@ -1,17 +1,5 @@
 {
- "ereignisse": [
-  {
-   "reiter": [
-    "Seniors 1"
-   ],
-   "id": "heute:1002108",
-   "art": "heute",
-   "titel": "Seniors 1 · Heute Spiel",
-   "text": "16:00 gegen SC Bettembourg · 📍 Stade Municipal (Bettembourg, synth.)",
-   "ab": 1792918800000,
-   "bis": 1792940400000
-  }
- ],
+ "ereignisse": [],
  "live": [
   {
    "id": 1002108,

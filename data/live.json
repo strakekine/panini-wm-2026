@@ -6,18 +6,25 @@
  "h": "SC Bettembourg",
  "a": "FC Koeppchen Wormeldange",
  "hs": 1,
- "as": 0,
+ "as": 1,
  "section": "LIVE",
- "period": "started",
- "running": true,
- "minute": 8,
- "minuteAt": "2026-10-25T16:13:11+01:00",
+ "period": "halftime",
+ "running": false,
+ "minute": 46,
+ "minuteAt": "2026-10-25T16:49:23+01:00",
  "tore": [
   {
    "min": 8,
    "plus": 0,
    "heim": true,
    "name": "Ricardo Couto",
+   "art": "goal_shoot"
+  },
+  {
+   "min": 42,
+   "plus": 0,
+   "heim": false,
+   "name": "Joao Tomas Ferreira Borges",
    "art": "goal_shoot"
   }
  ],

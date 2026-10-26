@@ -35,6 +35,17 @@
   },
   {
    "reiter": [
+    "Seniors 2"
+   ],
+   "id": "heute:1011066",
+   "art": "heute",
+   "titel": "Seniors 2 · Heute Spiel",
+   "text": "19:30 gegen Victoria Rosport · 📍 Terrain Ralingen (synth.)",
+   "ab": 1793005200000,
+   "bis": 1793039400000
+  },
+  {
+   "reiter": [
     "Woche"
    ],
    "id": "woche:2026-10-26",
@@ -45,5 +56,23 @@
    "bis": 1793048400000
   }
  ],
- "live": []
+ "live": [
+  {
+   "id": 1011066,
+   "reiter": [
+    "Seniors 2"
+   ],
+   "titel": "Seniors 2",
+   "d": "2026-10-26T19:30:00+01:00",
+   "h": "Victoria Rosport",
+   "a": "Koeppchen I",
+   "wirHeim": false,
+   "gegner": "Victoria Rosport",
+   "slug": "fc-victoria-rosport-mr1-fc-koeppchen-mr1-261026",
+   "fupaWir": "fc-koeppchen",
+   "ticker": "ticker:1011066",
+   "halbzeit": "halbzeit:1011066",
+   "ende": "ende:1011066"
+  }
+ ]
 }

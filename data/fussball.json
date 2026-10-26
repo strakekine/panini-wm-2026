@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-25T22:31:37.265Z",
+ "stand": "2026-10-26T21:16:43.749Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -2279,6 +2279,24 @@
      "ort": "Stade Op der Millen (Remich)"
     },
     {
+     "id": 1002148,
+     "d": "2026-11-28T16:00:00+01:00",
+     "tag": 14,
+     "h": {
+      "id": 44560,
+      "n": "Union Titus Pétange"
+     },
+     "a": {
+      "id": 44991,
+      "n": "FC Mondercange"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Stade Municipal (Pétange)"
+    },
+    {
      "id": 1002141,
      "d": "2026-11-29T16:00:00+01:00",
      "tag": 14,
@@ -2385,24 +2403,6 @@
      "gespielt": false,
      "forfait": false,
      "ort": "Stade Fernand Weber (Canach)"
-    },
-    {
-     "id": 1002148,
-     "d": "2026-11-29T16:00:00+01:00",
-     "tag": 14,
-     "h": {
-      "id": 44560,
-      "n": "Union Titus Pétange"
-     },
-     "a": {
-      "id": 44991,
-      "n": "FC Mondercange"
-     },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
-     "forfait": false,
-     "ort": "Stade Municipal (Pétange)"
     },
     {
      "id": 1002143,
@@ -5433,9 +5433,9 @@
       "id": 45403,
       "n": "FC Koeppchen Wormeldange I"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 2,
+     "as": 2,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain Ralingen (synth.)"
     },
@@ -11751,9 +11751,9 @@
       "id": 46351,
       "n": "ENT Biwer/Berbourg II"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 6,
+     "as": 12,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain 2 (Mensdorf, synth.)"
     },
@@ -15901,6 +15901,24 @@
    "tabelle": null,
    "spiele": [
     {
+     "id": 13605,
+     "d": "2026-11-07T18:00:00+01:00",
+     "tag": 1,
+     "h": {
+      "id": 44975,
+      "n": "Progrès Niederkorn"
+     },
+     "a": {
+      "id": 44884,
+      "n": "FC Wiltz 71"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Stade Jos Haupert (Niederkorn)"
+    },
+    {
      "id": 13611,
      "d": "2026-11-07T18:30:00+01:00",
      "tag": 1,
@@ -16097,24 +16115,6 @@
      "gespielt": false,
      "forfait": false,
      "ort": "Stade Jean Donnersbach (Lintgen)"
-    },
-    {
-     "id": 13605,
-     "d": "2026-11-08T16:00:00+01:00",
-     "tag": 1,
-     "h": {
-      "id": 44975,
-      "n": "Progrès Niederkorn"
-     },
-     "a": {
-      "id": 44884,
-      "n": "FC Wiltz 71"
-     },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
-     "forfait": false,
-     "ort": "Stade Jos Haupert (Niederkorn)"
     },
     {
      "id": 13601,
@@ -16663,9 +16663,9 @@
       "id": 45885,
       "n": "ENT FF Norden/Wincrange"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 0,
+     "as": 2,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain Munsbach (synth.)"
     },
@@ -16791,9 +16791,8 @@
      },
      "hs": 2,
      "as": 0,
-     "gespielt": false,
+     "gespielt": true,
      "forfait": false,
-     "bem": "Arr�t�",
      "ort": "Am Ga (Wormeldange, synth.)"
     },
     {
@@ -17399,8 +17398,8 @@
       "id": 46404,
       "n": "AS Red Black Luxembourg"
      },
-     "hs": 7,
-     "as": 1,
+     "hs": 1,
+     "as": 7,
      "gespielt": true,
      "forfait": false,
      "ort": "Terrain 2 (Koerich, synth.)"
@@ -17511,7 +17510,6 @@
      "as": 2,
      "gespielt": true,
      "forfait": false,
-     "bem": "t.a.b. 1 - 2",
      "ort": "Stade Henri Bausch (Steinsel, synth.)"
     },
     {
@@ -17616,9 +17614,9 @@
       "id": 45646,
       "n": "FC Differdange 03"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 3,
+     "as": 5,
+     "gespielt": true,
      "forfait": false,
      "ort": "Heiligen Wiese (Bastendorf, synth)"
     },

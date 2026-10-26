@@ -2,28 +2,6 @@
  "ereignisse": [
   {
    "reiter": [
-    "Seniors 1"
-   ],
-   "id": "ende:1002108",
-   "art": "ende",
-   "titel": "Seniors 1 · Endstand",
-   "text": "SC Bettembourg 2:1 Koeppchen",
-   "ab": 1792950404807,
-   "bis": 1793015204807
-  },
-  {
-   "reiter": [
-    "Seniors 1"
-   ],
-   "id": "tabelle:18888:44831:10",
-   "art": "tabelle",
-   "titel": "Seniors 1 · Tabelle",
-   "text": "Koeppchen jetzt 11. Platz (vorher 9.) · 11 Punkte",
-   "ab": 1792952203964,
-   "bis": 1793038603964
-  },
-  {
-   "reiter": [
     "BGL"
    ],
    "id": "bgl:20262027:11",
@@ -37,42 +15,13 @@
    "reiter": [
     "Seniors 2"
    ],
-   "id": "heute:1011066",
-   "art": "heute",
-   "titel": "Seniors 2 · Heute Spiel",
-   "text": "19:30 gegen Victoria Rosport · 📍 Terrain Ralingen (synth.)",
-   "ab": 1793005200000,
-   "bis": 1793039400000
-  },
-  {
-   "reiter": [
-    "Woche"
-   ],
-   "id": "woche:2026-10-26",
-   "art": "woche",
-   "titel": "Unsere Woche",
-   "text": "Diese Woche 3 Spiele, davon 1 zu Hause",
-   "ab": 1793005200000,
-   "bis": 1793048400000
+   "id": "ende:1011066",
+   "art": "ende",
+   "titel": "Seniors 2 · Endstand",
+   "text": "Victoria Rosport 2:2 Koeppchen I",
+   "ab": 1793049409581,
+   "bis": 1793114209581
   }
  ],
- "live": [
-  {
-   "id": 1011066,
-   "reiter": [
-    "Seniors 2"
-   ],
-   "titel": "Seniors 2",
-   "d": "2026-10-26T19:30:00+01:00",
-   "h": "Victoria Rosport",
-   "a": "Koeppchen I",
-   "wirHeim": false,
-   "gegner": "Victoria Rosport",
-   "slug": "fc-victoria-rosport-mr1-fc-koeppchen-mr1-261026",
-   "fupaWir": "fc-koeppchen",
-   "ticker": "ticker:1011066",
-   "halbzeit": "halbzeit:1011066",
-   "ende": "ende:1011066"
-  }
- ]
+ "live": []
 }

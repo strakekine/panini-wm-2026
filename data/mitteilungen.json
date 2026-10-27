@@ -4,23 +4,34 @@
    "reiter": [
     "Seniors 2"
    ],
-   "id": "ende:1011066",
-   "art": "ende",
-   "titel": "Seniors 2 · Endstand",
-   "text": "Victoria Rosport 2:2 Koeppchen I",
-   "ab": 1793049409581,
-   "bis": 1793114209581
-  },
-  {
-   "reiter": [
-    "Seniors 2"
-   ],
    "id": "tabelle:18918:45403:6",
    "art": "tabelle",
    "titel": "Seniors 2 · Tabelle",
    "text": "Koeppchen I jetzt 8. Platz (wie vorher) · 7 Punkte",
    "ab": 1793053903443,
    "bis": 1793140303443
+  },
+  {
+   "reiter": [
+    "U15"
+   ],
+   "id": "neu:13806",
+   "art": "neu",
+   "titel": "U15 · Neues Spiel",
+   "text": "Sa., 7.11. gegen ENT Bastendorf/Vianden · 📍 Am Ga (Wormeldange, synth.)",
+   "ab": 1793135807984,
+   "bis": 1793308607984
+  },
+  {
+   "reiter": [
+    "U13 1"
+   ],
+   "id": "neu:13875",
+   "art": "neu",
+   "titel": "U13 1 · Neues Spiel",
+   "text": "Sa., 7.11. gegen Jeunesse Junglinster · 📍 Am Ga (Wormeldange, synth.)",
+   "ab": 1793135807984,
+   "bis": 1793308607984
   }
  ],
  "live": []

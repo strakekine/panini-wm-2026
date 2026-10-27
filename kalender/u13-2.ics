@@ -52,4 +52,13 @@ SUMMARY:⚽ Koeppchen U13 – AS Hosingen 5:2 (Pokal)
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:Coupe U13 Minimes - 1/32 de Finale\, Spieltag 1
 END:VEVENT
+BEGIN:VEVENT
+UID:flf-13875@fc-koeppchen
+DTSTAMP:20260701T000000Z
+DTSTART:20261106T230001Z
+DTEND:20261107T004501Z
+SUMMARY:⚽ Koeppchen U13 – Jeunesse Junglinster (Pokal)
+LOCATION:Am Ga (Wormeldange\, synth.)
+DESCRIPTION:Coupe U13 Minimes - 1/16 de Finale\, Spieltag 1
+END:VEVENT
 END:VCALENDAR

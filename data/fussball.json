@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-27T21:16:41.643Z",
+ "stand": "2026-10-27T22:31:42.237Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -7296,13 +7296,13 @@
      "pl": 3,
      "id": 45006,
      "n": "US Moutfort-Medingen",
-     "sp": 5,
-     "s": 3,
+     "sp": 6,
+     "s": 4,
      "u": 1,
      "nl": 1,
-     "t": 22,
-     "g": 9,
-     "pkt": 10
+     "t": 26,
+     "g": 10,
+     "pkt": 13
     },
     {
      "pl": 4,
@@ -7356,12 +7356,12 @@
      "pl": 8,
      "id": 44609,
      "n": "Syra Mensdorf",
-     "sp": 4,
+     "sp": 5,
      "s": 2,
      "u": 0,
-     "nl": 2,
-     "t": 14,
-     "g": 9,
+     "nl": 3,
+     "t": 15,
+     "g": 13,
      "pkt": 6
     },
     {
@@ -8059,9 +8059,9 @@
       "id": 45006,
       "n": "US Moutfort-Medingen"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 1,
+     "as": 4,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain 2 (Mensdorf, synth.)"
     },

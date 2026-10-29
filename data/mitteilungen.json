@@ -1,27 +1,4 @@
 {
- "ereignisse": [
-  {
-   "reiter": [
-    "U15"
-   ],
-   "id": "neu:13806",
-   "art": "neu",
-   "titel": "U15 · Neues Spiel",
-   "text": "Sa., 7.11. gegen ENT Bastendorf/Vianden · 📍 Am Ga (Wormeldange, synth.)",
-   "ab": 1793135807984,
-   "bis": 1793308607984
-  },
-  {
-   "reiter": [
-    "U13 1"
-   ],
-   "id": "neu:13875",
-   "art": "neu",
-   "titel": "U13 1 · Neues Spiel",
-   "text": "Sa., 7.11. gegen Jeunesse Junglinster · 📍 Am Ga (Wormeldange, synth.)",
-   "ab": 1793135807984,
-   "bis": 1793308607984
-  }
- ],
+ "ereignisse": [],
  "live": []
 }

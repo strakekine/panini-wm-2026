@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-28T21:16:41.482Z",
+ "stand": "2026-10-29T21:16:46.488Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -17349,24 +17349,6 @@
      "ort": "Am Ga (Wormeldange, synth.)"
     },
     {
-     "id": 13796,
-     "d": "2026-11-07T16:30:00+01:00",
-     "tag": 1,
-     "h": {
-      "id": 46218,
-      "n": "FC Lorentzweiler"
-     },
-     "a": {
-      "id": 46356,
-      "n": "ENT Biwer/Berbourg/UMW"
-     },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
-     "forfait": false,
-     "ort": "Terrain 2 (Lorentzweiler, synth.)"
-    },
-    {
      "id": 13793,
      "d": "2026-11-07T16:30:00+01:00",
      "tag": 1,
@@ -17419,6 +17401,24 @@
      "gespielt": false,
      "forfait": false,
      "ort": "Terrain Carrière (Senningerberg, synth.)"
+    },
+    {
+     "id": 13796,
+     "d": "2026-11-10T19:00:00+01:00",
+     "tag": 1,
+     "h": {
+      "id": 46218,
+      "n": "FC Lorentzweiler"
+     },
+     "a": {
+      "id": 46356,
+      "n": "ENT Biwer/Berbourg/UMW"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain 2 (Lorentzweiler, synth.)"
     }
    ],
    "start": "2026-11-07T16:30:00+01:00"

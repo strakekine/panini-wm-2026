@@ -1,60 +1,47 @@
-# Holt Spiele und Tabellen der U13 Minimes des FC Koeppchen von der FLF
-# und legt sie als data/fussball.json ab (gelesen von fussball.html), dazu je Mannschaft
-# ein Kalender-Abo unter kalender/*.ics.
+# Nach dem Umzug der App „FC Koeppchen“ nach https://fckoeppchen.github.io/ (vom Nutzer, 22.10.2026; vorbereitet 30.10.2026):
+# kein FLF-Abruf mehr hier. Nur noch der Kalender-Spiegel — alte Abos (kalender/*.ics hier) bekommen bis Ende 2026 die
+# Spiele der neuen App, mit Hinweis „bitte neu abonnieren“ (tools/kalender-spiegel.mjs). Danach abschalten.
+# Der alte Worker (koeppchen-live) stößt diesen Workflow weiter an, das schadet nicht.
 name: Fussball-Daten
 
 on:
   schedule:
-    # Zeiten in UTC (GitHub kennt keine Zeitzone). Luxemburg ist UTC+1, im Sommer UTC+2.
-    # Samstag und Sonntag stündlich (7:17–21:17 Winterzeit). Das ist nur noch die Reserve: GitHub
-    # startet geplante Läufe unzuverlässig (18.10.2026 fast alle ausgelassen, sonst ~20 min zu spät).
-    # Den Viertelstunden-Takt am Wochenende gibt der Cloudflare-Worker (tools/cloudflare-worker.js),
-    # der diesen Workflow per workflow_dispatch anstößt. Öffentliches Repo: Minuten kosten nichts.
-    - cron: "17 6-20 * * 0,6"
-    # Montag bis Freitag einmal abends: 20 Uhr Winterzeit, 21 Uhr Sommerzeit — lieber
-    # etwas später als vor 20 Uhr, falls unter der Woche ein Ergebnis nachgetragen wird.
-    # Der Worker stößt um 20:15 UTC noch einmal an (Reserve, falls dieser Lauf ausfällt).
-    - cron: "17 19 * * 1-5"
-    # Jeden Abend spät (23:37 Winterzeit, 0:37 Sommerzeit): Länderspiele um 20:45 und Abendspiele
-    # sind dann vorbei. Reserve zum Worker-Anstoß um 23:30 (vom Nutzer, 19.10.2026).
-    - cron: "37 22 * * *"
+    - cron: "23 */3 * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
-  actions: write   # für das Wach-halten unten
+  actions: write
 
 concurrency:
   group: fussball
   cancel-in-progress: false
 
 jobs:
-  abruf:
+  spiegel:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node test/fussball.mjs
-      - run: node tools/fussball.mjs
+      - run: node tools/kalender-spiegel.mjs
       - name: Commit, falls sich etwas geändert hat
         run: |
-          git add data/fussball.json data/mitteilungen.json kalender
+          git add kalender
           if git diff --cached --quiet; then echo "keine Änderung"; exit 0; fi
           git config user.name "fussball-abruf"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Fußball: Daten aktualisiert"
+          git commit -m "Kalender-Spiegel: Stand der neuen App"
           for i in 1 2 3; do
-            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            git pull --rebase -X theirs origin main && git push origin HEAD:main && exit 0
+            git rebase --abort 2>/dev/null || true
             sleep $((i * 10))
           done
           exit 1
-      # GitHub schaltet Zeitpläne nach 60 Tagen ohne Repo-Aktivität ab, und Abfragen allein
-      # zählt nicht — in der Winterpause ändert sich bei der FLF nichts, also kein Commit.
-      # Selbst wieder einschalten setzt die Frist zurück (wie gautamkrishnar/keepalive-workflow),
-      # ohne Leer-Commits.
       - name: Zeitplan wach halten
         if: always()
         env:

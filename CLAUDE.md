@@ -41,6 +41,14 @@ sortieren: was hier liegt, steht in dieser Liste.
 
 ## Fußball (`fussball.html`) — Stand und Regeln
 
+**UMGEZOGEN (Branch `umzug-vorbereitet`, vorbereitet 30.10.2026, gilt erst nach dem Go des Vereins und dem Merge auf `main`):** Die App
+liegt jetzt im Repo `fckoeppchen/fckoeppchen.github.io` (https://fckoeppchen.github.io/), dort steht alles Weitere. Hier ist
+`fussball.html` nur noch eine **Umzugsseite** (Link zur neuen App mit `?reiter=<zuletzt gewählter Reiter>`, Anleitung iPhone/Android,
+Kalender neu abonnieren, alter Service Worker wird entfernt). `fussball.yml` ist ein **Kalender-Spiegel** (`tools/kalender-spiegel.mjs`,
+alle 3 h): holt die `.ics` gleichen Namens von der neuen Adresse, hängt an jedes Spiel „bitte neu abonnieren“ und setzt an die nächsten
+drei Spieltage einen eigenen Termin; ab 2027 bleibt der letzte Stand → **Workflow dann abschalten**. `fussball-live.yml` ist gelöscht.
+`tools/fussball*.mjs` und `test/fussball.mjs` sind tot (der Test passt nicht mehr zur Umzugsseite). Was unten steht, ist der alte Stand.
+
 Nutzer: Laurent; seine Kinder spielen bei den **U13 Minimes des FC Koeppchen Wormeldange**
 (Luxemburg). App-Name „FC Koeppchen“, Logo vom Nutzer (eingebettet als PNG, 180 px, 32 Farben).
 **Vereinsfarben**: weiss, schwarz, ein bisschen Grün (Türkis aus dem Logo) — vom Nutzer so

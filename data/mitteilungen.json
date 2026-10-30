@@ -4,31 +4,13 @@
    "reiter": [
     "Seniors 3"
    ],
-   "id": "heute:1015075",
-   "art": "heute",
-   "titel": "Seniors 3 · Heute Spiel",
-   "text": "20:00 gegen US Moutfort-Medingen · 📍 Terrain Am Brill (Moutfort, synth.)",
-   "ab": 1793350800000,
-   "bis": 1793386800000
+   "id": "ende:1015075",
+   "art": "ende",
+   "titel": "Seniors 3 · Endstand",
+   "text": "US Moutfort-Medingen 1:2 Koeppchen II",
+   "ab": 1793395011647,
+   "bis": 1793459811647
   }
  ],
- "live": [
-  {
-   "id": 1015075,
-   "reiter": [
-    "Seniors 3"
-   ],
-   "titel": "Seniors 3",
-   "d": "2026-10-30T20:00:00+01:00",
-   "h": "US Moutfort-Medingen",
-   "a": "Koeppchen II",
-   "wirHeim": false,
-   "gegner": "US Moutfort-Medingen",
-   "slug": "us-moutfort-medingen-mr1-fc-koeppchen-mr2-261030",
-   "fupaWir": "fc-koeppchen",
-   "ticker": "ticker:1015075",
-   "halbzeit": "halbzeit:1015075",
-   "ende": "ende:1015075"
-  }
- ]
+ "live": []
 }

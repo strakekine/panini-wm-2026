@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-29T21:16:46.488Z",
+ "stand": "2026-10-30T21:16:44.704Z",
  "saison": {
   "id": "20262027",
   "n": "Saison 2026-2027"
@@ -8095,9 +8095,9 @@
       "id": 45708,
       "n": "Alisontia Steinsel"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 1,
+     "as": 1,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain 2 (Stegen, synth.)"
     },
@@ -8149,9 +8149,9 @@
       "id": 45404,
       "n": "FC Koeppchen Wormeldange II"
      },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
+     "hs": 1,
+     "as": 2,
+     "gespielt": true,
      "forfait": false,
      "ort": "Terrain Am Brill (Moutfort, synth.)"
     },
@@ -15281,7 +15281,7 @@
      "as": null,
      "gespielt": false,
      "forfait": false,
-     "ort": "Terrain 2 (Mensdorf, synth.)"
+     "ort": "Stade Op Biirk (Mensdorf)"
     },
     {
      "id": 13510,
@@ -17133,6 +17133,24 @@
    "tabelle": null,
    "spiele": [
     {
+     "id": 13800,
+     "d": "2026-11-07T14:30:00+01:00",
+     "tag": 1,
+     "h": {
+      "id": 45770,
+      "n": "ENT Izeg/Sandweiler"
+     },
+     "a": {
+      "id": 45747,
+      "n": "Tricolore Gasperich"
+     },
+     "hs": null,
+     "as": null,
+     "gespielt": false,
+     "forfait": false,
+     "ort": "Terrain 2 (Itzig, synth.)"
+    },
+    {
      "id": 13802,
      "d": "2026-11-07T14:30:00+01:00",
      "tag": 1,
@@ -17311,24 +17329,6 @@
      "gespielt": false,
      "forfait": false,
      "ort": "Terrain Hollerich (synth.)"
-    },
-    {
-     "id": 13800,
-     "d": "2026-11-07T16:30:00+01:00",
-     "tag": 1,
-     "h": {
-      "id": 45770,
-      "n": "ENT Izeg/Sandweiler"
-     },
-     "a": {
-      "id": 45747,
-      "n": "Tricolore Gasperich"
-     },
-     "hs": null,
-     "as": null,
-     "gespielt": false,
-     "forfait": false,
-     "ort": "Terrain 2 (Itzig, synth.)"
     },
     {
      "id": 13806,

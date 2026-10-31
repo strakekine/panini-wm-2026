@@ -35,6 +35,7 @@ Sieben voneinander unabhängige Dinge (Übersicht für Menschen: `README.md`) li
   alle). Von dort aus wird `fussball.html` nie angefasst — und umgekehrt: Verbesserungen hier
   wandern nicht von selbst dorthin. Die Vorlage lag vorher als `vorlage-verein/` auf dem Branch
   `claude/trusting-cannon-s4bpz7`; gültig ist der Stand im neuen Repo.
+  **Seit 31.10.2026 erledigt und archiviert** (vom Nutzer): Repo `fussball-vereine` archiviert, sein Worker und sein GitHub-Token gelöscht.
 
 Der Repo-Name passt damit nur noch zum ersten Punkt. Nicht wundern und nichts danach
 sortieren: was hier liegt, steht in dieser Liste.

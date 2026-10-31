@@ -3,7 +3,7 @@ VERSION:2.0
 PRODID:-//FC Koeppchen//fussball.html//DE
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
-X-WR-CALNAME:FC Koeppchen U11 2
+X-WR-CALNAME:FC Koeppchen POU 2 (alt – bitte neu abonnieren)
 X-WR-TIMEZONE:Europe/Luxembourg
 REFRESH-INTERVAL;VALUE=DURATION:PT3H
 X-PUBLISHED-TTL:PT3H
@@ -12,71 +12,128 @@ UID:flf-6687011@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20260927T083000Z
 DTEND:20260927T100000Z
-SUMMARY:⚽ ENT Biwer/Berbourg II – Koeppchen U11 2
+SUMMARY:⚽ ENT Biwer/Berbourg II – Koeppchen POU 2
 LOCATION:Terrain 2 (Berbourg\, synth.)
-DESCRIPTION:U11 Poussins S7 Tour 1\, Spieltag 1
+DESCRIPTION:U11 Poussins S7 Tour 1\, Spieltag 1\n\n⚠️ Dieser Kalender z
+ ieht um und wird nur noch bis Ende 2026 aktualisiert. Bitte neu abonnieren
+ : App öffnen (https://fckoeppchen.github.io/)\, Mannschaft antippen\, „
+ 📅 … im Kalender abonnieren“. Danach diesen alten Kalender löschen.
 END:VEVENT
 BEGIN:VEVENT
 UID:flf-6687025@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261004T083000Z
 DTEND:20261004T100000Z
-SUMMARY:⚽ Olympia Christnach-Waldbillig – Koeppchen U11 2
+SUMMARY:⚽ Olympia Christnach-Waldbillig – Koeppchen POU 2
 LOCATION:Terrain 2 (Christnach\, synth)
-DESCRIPTION:U11 Poussins S7 Tour 1\, Spieltag 2
+DESCRIPTION:U11 Poussins S7 Tour 1\, Spieltag 2\n\n⚠️ Dieser Kalender z
+ ieht um und wird nur noch bis Ende 2026 aktualisiert. Bitte neu abonnieren
+ : App öffnen (https://fckoeppchen.github.io/)\, Mannschaft antippen\, „
+ 📅 … im Kalender abonnieren“. Danach diesen alten Kalender löschen.
 END:VEVENT
 BEGIN:VEVENT
 UID:flf-6687034@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261011T083000Z
 DTEND:20261011T100000Z
-SUMMARY:⚽ Koeppchen U11 2 – ENT Mensdorf/Canach II
+SUMMARY:⚽ Koeppchen POU 2 – ENT Mensdorf/Canach II
 LOCATION:Am Ga (Wormeldange\, synth.)
-DESCRIPTION:U11 Poussins S7 Tour 1\, Spieltag 3
+DESCRIPTION:U11 Poussins S7 Tour 1\, Spieltag 3\n\n⚠️ Dieser Kalender z
+ ieht um und wird nur noch bis Ende 2026 aktualisiert. Bitte neu abonnieren
+ : App öffnen (https://fckoeppchen.github.io/)\, Mannschaft antippen\, „
+ 📅 … im Kalender abonnieren“. Danach diesen alten Kalender löschen.
 END:VEVENT
 BEGIN:VEVENT
 UID:flf-6687045@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261018T083000Z
 DTEND:20261018T100000Z
-SUMMARY:⚽ CS Grevenmacher II – Koeppchen U11 2
+SUMMARY:⚽ CS Grevenmacher II – Koeppchen POU 2
 LOCATION:Terrain 2 (Grevenmacher\, synth.)
-DESCRIPTION:U11 Poussins S7 Tour 1\, Spieltag 4
+DESCRIPTION:U11 Poussins S7 Tour 1\, Spieltag 4\n\n⚠️ Dieser Kalender z
+ ieht um und wird nur noch bis Ende 2026 aktualisiert. Bitte neu abonnieren
+ : App öffnen (https://fckoeppchen.github.io/)\, Mannschaft antippen\, „
+ 📅 … im Kalender abonnieren“. Danach diesen alten Kalender löschen.
 END:VEVENT
 BEGIN:VEVENT
 UID:flf-6687053@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261025T093000Z
 DTEND:20261025T110000Z
-SUMMARY:⚽ Koeppchen U11 2 – US Moutfort-Medingen
+SUMMARY:⚽ Koeppchen POU 2 – US Moutfort-Medingen
 LOCATION:Am Ga (Wormeldange\, synth.)
-DESCRIPTION:U11 Poussins S7 Tour 1\, Spieltag 5
+DESCRIPTION:U11 Poussins S7 Tour 1\, Spieltag 5\n\n⚠️ Dieser Kalender z
+ ieht um und wird nur noch bis Ende 2026 aktualisiert. Bitte neu abonnieren
+ : App öffnen (https://fckoeppchen.github.io/)\, Mannschaft antippen\, „
+ 📅 … im Kalender abonnieren“. Danach diesen alten Kalender löschen.
 END:VEVENT
 BEGIN:VEVENT
 UID:flf-6687062@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261114T230001Z
 DTEND:20261115T003001Z
-SUMMARY:⚽ US Berdorf-Consdorf 01 II – Koeppchen U11 2
+SUMMARY:⚽ US Berdorf-Consdorf 01 II – Koeppchen POU 2 · Uhrzeit offen
 LOCATION:Terrain Maartbësch (Berdorf)
-DESCRIPTION:U11 Poussins S7 Tour 1\, Spieltag 6
+DESCRIPTION:U11 Poussins S7 Tour 1\, Spieltag 6\n\n⚠️ Dieser Kalender z
+ ieht um und wird nur noch bis Ende 2026 aktualisiert. Bitte neu abonnieren
+ : App öffnen (https://fckoeppchen.github.io/)\, Mannschaft antippen\, „
+ 📅 … im Kalender abonnieren“. Danach diesen alten Kalender löschen.
 END:VEVENT
 BEGIN:VEVENT
 UID:flf-6687072@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261121T230001Z
 DTEND:20261122T003001Z
-SUMMARY:⚽ Koeppchen U11 2 – FC Munsbach II
+SUMMARY:⚽ Koeppchen POU 2 – FC Munsbach II · Uhrzeit offen
 LOCATION:Am Ga (Wormeldange\, synth.)
-DESCRIPTION:U11 Poussins S7 Tour 1\, Spieltag 7
+DESCRIPTION:U11 Poussins S7 Tour 1\, Spieltag 7\n\n⚠️ Dieser Kalender z
+ ieht um und wird nur noch bis Ende 2026 aktualisiert. Bitte neu abonnieren
+ : App öffnen (https://fckoeppchen.github.io/)\, Mannschaft antippen\, „
+ 📅 … im Kalender abonnieren“. Danach diesen alten Kalender löschen.
 END:VEVENT
 BEGIN:VEVENT
 UID:flf-6687085@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261128T230001Z
 DTEND:20261129T003001Z
-SUMMARY:⚽ Daring Echternach II – Koeppchen U11 2
+SUMMARY:⚽ Daring Echternach II – Koeppchen POU 2 · Uhrzeit offen
 LOCATION:Terrain Breil (Echternach\, synth.)
-DESCRIPTION:U11 Poussins S7 Tour 1\, Spieltag 8
+DESCRIPTION:U11 Poussins S7 Tour 1\, Spieltag 8\n\n⚠️ Dieser Kalender z
+ ieht um und wird nur noch bis Ende 2026 aktualisiert. Bitte neu abonnieren
+ : App öffnen (https://fckoeppchen.github.io/)\, Mannschaft antippen\, „
+ 📅 … im Kalender abonnieren“. Danach diesen alten Kalender löschen.
+END:VEVENT
+BEGIN:VEVENT
+UID:umzug-20261114@fc-koeppchen
+DTSTAMP:20261030T000000Z
+DTSTART;VALUE=DATE:20261114
+DTEND;VALUE=DATE:20261115
+SUMMARY:⚠️ FC Koeppchen: Kalender bitte neu abonnieren
+DESCRIPTION:⚠️ Dieser Kalender zieht um und wird nur noch bis Ende 2026
+  aktualisiert. Bitte neu abonnieren: App öffnen (https://fckoeppchen.gith
+ ub.io/)\, Mannschaft antippen\, „📅 … im Kalender abonnieren“. Dan
+ ach diesen alten Kalender löschen.
+END:VEVENT
+BEGIN:VEVENT
+UID:umzug-20261121@fc-koeppchen
+DTSTAMP:20261030T000000Z
+DTSTART;VALUE=DATE:20261121
+DTEND;VALUE=DATE:20261122
+SUMMARY:⚠️ FC Koeppchen: Kalender bitte neu abonnieren
+DESCRIPTION:⚠️ Dieser Kalender zieht um und wird nur noch bis Ende 2026
+  aktualisiert. Bitte neu abonnieren: App öffnen (https://fckoeppchen.gith
+ ub.io/)\, Mannschaft antippen\, „📅 … im Kalender abonnieren“. Dan
+ ach diesen alten Kalender löschen.
+END:VEVENT
+BEGIN:VEVENT
+UID:umzug-20261128@fc-koeppchen
+DTSTAMP:20261030T000000Z
+DTSTART;VALUE=DATE:20261128
+DTEND;VALUE=DATE:20261129
+SUMMARY:⚠️ FC Koeppchen: Kalender bitte neu abonnieren
+DESCRIPTION:⚠️ Dieser Kalender zieht um und wird nur noch bis Ende 2026
+  aktualisiert. Bitte neu abonnieren: App öffnen (https://fckoeppchen.gith
+ ub.io/)\, Mannschaft antippen\, „📅 … im Kalender abonnieren“. Dan
+ ach diesen alten Kalender löschen.
 END:VEVENT
 END:VCALENDAR

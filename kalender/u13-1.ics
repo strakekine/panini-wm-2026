@@ -77,7 +77,7 @@ UID:flf-13833@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261024T120000Z
 DTEND:20261024T134500Z
-SUMMARY:⚽ Koeppchen MIN – AS Hosingen 5:2 (Pokal)
+SUMMARY:⚽ Koeppchen MIN 1 – AS Hosingen 5:2 (Pokal)
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:Coupe U13 Minimes - 1/32 de Finale\, Spieltag 1\n\n⚠️ Diese
  r Kalender zieht um und wird nur noch bis Ende 2026 aktualisiert. Bitte ne
@@ -90,7 +90,7 @@ UID:flf-13875@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261107T133000Z
 DTEND:20261107T151500Z
-SUMMARY:⚽ Koeppchen MIN – Jeunesse Junglinster (Pokal)
+SUMMARY:⚽ Koeppchen MIN 1 – Jeunesse Junglinster (Pokal)
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:Coupe U13 Minimes - 1/16 de Finale\, Spieltag 1\n\n⚠️ Diese
  r Kalender zieht um und wird nur noch bis Ende 2026 aktualisiert. Bitte ne
@@ -99,10 +99,97 @@ DESCRIPTION:Coupe U13 Minimes - 1/16 de Finale\, Spieltag 1\n\n⚠️ Diese
  er löschen.
 END:VEVENT
 BEGIN:VEVENT
+UID:flf-6345012@fc-koeppchen
+DTSTAMP:20260701T000000Z
+DTSTART:20261114T150000Z
+DTEND:20261114T164500Z
+SUMMARY:⚽ Victoria Rosport I – Koeppchen MIN 1
+LOCATION:Terrain Ralingen (synth.)
+DESCRIPTION:U13 Minimes Cl3 S2 Phase 2\, Spieltag 1\n\n⚠️ Dieser Kalend
+ er zieht um und wird nur noch bis Ende 2026 aktualisiert. Bitte neu abonni
+ eren: App öffnen (https://fckoeppchen.github.io/)\, Mannschaft antippen\,
+  „📅 … im Kalender abonnieren“. Danach diesen alten Kalender lösc
+ hen.
+END:VEVENT
+BEGIN:VEVENT
+UID:flf-6345023@fc-koeppchen
+DTSTAMP:20260701T000000Z
+DTSTART:20261120T230001Z
+DTEND:20261121T004501Z
+SUMMARY:⚽ Koeppchen MIN 1 – Jeunesse Junglinster I · Uhrzeit offen
+LOCATION:Am Ga (Wormeldange\, synth.)
+DESCRIPTION:U13 Minimes Cl3 S2 Phase 2\, Spieltag 2\n\n⚠️ Dieser Kalend
+ er zieht um und wird nur noch bis Ende 2026 aktualisiert. Bitte neu abonni
+ eren: App öffnen (https://fckoeppchen.github.io/)\, Mannschaft antippen\,
+  „📅 … im Kalender abonnieren“. Danach diesen alten Kalender lösc
+ hen.
+END:VEVENT
+BEGIN:VEVENT
+UID:flf-6345031@fc-koeppchen
+DTSTAMP:20260701T000000Z
+DTSTART:20261127T230001Z
+DTEND:20261128T004501Z
+SUMMARY:⚽ Koeppchen MIN 1 – Union Remich/Bous I · Uhrzeit offen
+LOCATION:Am Ga (Wormeldange\, synth.)
+DESCRIPTION:U13 Minimes Cl3 S2 Phase 2\, Spieltag 3\n\n⚠️ Dieser Kalend
+ er zieht um und wird nur noch bis Ende 2026 aktualisiert. Bitte neu abonni
+ eren: App öffnen (https://fckoeppchen.github.io/)\, Mannschaft antippen\,
+  „📅 … im Kalender abonnieren“. Danach diesen alten Kalender lösc
+ hen.
+END:VEVENT
+BEGIN:VEVENT
+UID:flf-6345043@fc-koeppchen
+DTSTAMP:20260701T000000Z
+DTSTART:20261204T230001Z
+DTEND:20261205T004501Z
+SUMMARY:⚽ ENT Biwer/Berbourg/UMW I – Koeppchen MIN 1 · Uhrzeit offen
+LOCATION:Streetwheels Arena (Berbourg)
+DESCRIPTION:U13 Minimes Cl3 S2 Phase 2\, Spieltag 4\n\n⚠️ Dieser Kalend
+ er zieht um und wird nur noch bis Ende 2026 aktualisiert. Bitte neu abonni
+ eren: App öffnen (https://fckoeppchen.github.io/)\, Mannschaft antippen\,
+  „📅 … im Kalender abonnieren“. Danach diesen alten Kalender lösc
+ hen.
+END:VEVENT
+BEGIN:VEVENT
+UID:flf-6345052@fc-koeppchen
+DTSTAMP:20260701T000000Z
+DTSTART:20261211T230001Z
+DTEND:20261212T004501Z
+SUMMARY:⚽ Koeppchen MIN 1 – CS Grevenmacher I · Uhrzeit offen
+LOCATION:Am Ga (Wormeldange\, synth.)
+DESCRIPTION:U13 Minimes Cl3 S2 Phase 2\, Spieltag 5\n\n⚠️ Dieser Kalend
+ er zieht um und wird nur noch bis Ende 2026 aktualisiert. Bitte neu abonni
+ eren: App öffnen (https://fckoeppchen.github.io/)\, Mannschaft antippen\,
+  „📅 … im Kalender abonnieren“. Danach diesen alten Kalender lösc
+ hen.
+END:VEVENT
+BEGIN:VEVENT
 UID:umzug-20261107@fc-koeppchen
 DTSTAMP:20261030T000000Z
 DTSTART;VALUE=DATE:20261107
 DTEND;VALUE=DATE:20261108
+SUMMARY:⚠️ FC Koeppchen: Kalender bitte neu abonnieren
+DESCRIPTION:⚠️ Dieser Kalender zieht um und wird nur noch bis Ende 2026
+  aktualisiert. Bitte neu abonnieren: App öffnen (https://fckoeppchen.gith
+ ub.io/)\, Mannschaft antippen\, „📅 … im Kalender abonnieren“. Dan
+ ach diesen alten Kalender löschen.
+END:VEVENT
+BEGIN:VEVENT
+UID:umzug-20261114@fc-koeppchen
+DTSTAMP:20261030T000000Z
+DTSTART;VALUE=DATE:20261114
+DTEND;VALUE=DATE:20261115
+SUMMARY:⚠️ FC Koeppchen: Kalender bitte neu abonnieren
+DESCRIPTION:⚠️ Dieser Kalender zieht um und wird nur noch bis Ende 2026
+  aktualisiert. Bitte neu abonnieren: App öffnen (https://fckoeppchen.gith
+ ub.io/)\, Mannschaft antippen\, „📅 … im Kalender abonnieren“. Dan
+ ach diesen alten Kalender löschen.
+END:VEVENT
+BEGIN:VEVENT
+UID:umzug-20261120@fc-koeppchen
+DTSTAMP:20261030T000000Z
+DTSTART;VALUE=DATE:20261120
+DTEND;VALUE=DATE:20261121
 SUMMARY:⚠️ FC Koeppchen: Kalender bitte neu abonnieren
 DESCRIPTION:⚠️ Dieser Kalender zieht um und wird nur noch bis Ende 2026
   aktualisiert. Bitte neu abonnieren: App öffnen (https://fckoeppchen.gith

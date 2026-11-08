@@ -129,7 +129,19 @@ ok(ue.d?.rezept?.titel === "Cremige Gnocchi" && ue.d.modell === "gemini-flash-li
 ok((await call("/api/protokoll")).d.eintraege.some(e => e.was.startsWith("↻") && e.was.includes("high demand")), "Wiederholung steht im Protokoll");
 G.ueberlastet = false;
 const genBody = JSON.parse(G.aufrufe.filter(a => a.url.includes(":streamGenerateContent")).at(-1).opt.body);
-ok(genBody.generationConfig.mediaResolution === "MEDIA_RESOLUTION_LOW" && genBody.generationConfig.thinkingConfig.includeThoughts === true, "niedrige Videoauflösung, Denken wird gestreamt");
+ok(genBody.generationConfig.mediaResolution === "MEDIA_RESOLUTION_LOW" && genBody.generationConfig.thinkingConfig.thinkingBudget === 0, "niedrige Videoauflösung, Denken aus");
+
+// Modell lehnt thinkingBudget 0 ab → derselbe Versuch ohne Einstellung
+const vorher = globalThis.fetch; let ohne = 0;
+globalThis.fetch = async (u, o) => {
+  if(String(u).includes(":streamGenerateContent") && JSON.parse(o.body).generationConfig.thinkingConfig)
+    return Response.json({ error: { message: "Budget 0 is invalid. This model only works in thinking mode." } }, { status: 400 });
+  if(String(u).includes(":streamGenerateContent")) ohne++;
+  return vorher(u, o);
+};
+const td = await call("/api/rezept", { ...auftrag, body: JSON.stringify({ text: "Rezepttext" }) });
+ok(td.d?.rezept && ohne === 1 && td.d.modell === "gemini-flash-latest", "400 wegen Denken → ohne Einstellung, gleiches Modell");
+globalThis.fetch = vorher;
 
 // KI-Fehler kommt im Strom als {fehler}, nicht als Absturz
 const echtFetch = globalThis.fetch;

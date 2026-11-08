@@ -1122,7 +1122,10 @@ Schlüssel und Direkt-Upload gehen; Gemini antwortete einmal 503 „high demand�
 Abrufe, die 100 s nichts liefern; das Modell dachte so lange). Seit Fassung e: `streamGenerateContent?alt=sse` mit
 `thinkingConfig.includeThoughts` (Denk-Teile halten die Leitung aktiv, gezählt wird nur Text ohne `thought`),
 `mediaResolution: MEDIA_RESOLUTION_LOW` (Rezept steckt im Ton und in Einblendungen) und bei 429/5xx/524 ein zweiter
-Versuch mit `gemini-flash-lite-latest` (`ERSATZ_MODELL`, „↻“ im Protokoll). Gegen das echte Gemini noch nicht bestätigt. YouTube-Links im Text gehen als Video an
+Versuch mit `gemini-flash-lite-latest` (`ERSATZ_MODELL`, „↻“ im Protokoll). **Fassung e (Denk-Teile mitstreamen) scheiterte am
+08.11.:** nach ~2 min „Load failed“ am Handy (25 Leerzeichen angekommen), im Protokoll nur „KI gestartet“, kein Ende — der
+Worker wurde mit abgebrochen. Seit Fassung f: **Denken aus** (`thinkingBudget: 0`; lehnt ein Modell das mit 400 ab, derselbe
+Versuch ohne Einstellung, „↻“), `includeThoughts` raus, Protokoll nennt Modell und „erste Antwort nach n s“. YouTube-Links im Text gehen als Video an
 Gemini. Höchstens 30 Importe je Tag (`importe`). Zugang nur mit `x-code` = Secret `FAMILIEN_CODE`; CORS nur
 für `https://strakekine.github.io`.
 **Bring!:** `POST /api/bring` legt die Liste 24 h als öffentliche Seite `/bring/<id>` mit schema.org/Recipe ab

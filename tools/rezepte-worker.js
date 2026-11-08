@@ -114,6 +114,7 @@ async function tabellen(db){
   await db.prepare("CREATE TABLE IF NOT EXISTS bring (id TEXT PRIMARY KEY, daten TEXT NOT NULL, bis INTEGER NOT NULL)").run();
   await db.prepare("CREATE TABLE IF NOT EXISTS importe (tag TEXT PRIMARY KEY, n INTEGER NOT NULL)").run();
   await db.prepare("CREATE TABLE IF NOT EXISTS protokoll (t INTEGER NOT NULL, was TEXT NOT NULL)").run();
+  await db.prepare("CREATE TABLE IF NOT EXISTS ergebnisse (id TEXT PRIMARY KEY, daten TEXT NOT NULL, t INTEGER NOT NULL)").run();
 }
 
 /* Kurzes Protokoll der Importe (sichtbar unten auf der Testseite): zeigt, ob die KI fertig
@@ -131,7 +132,12 @@ async function notiere(env, was){
 const DATEIART = /^(image\/|video\/|application\/pdf$|audio\/)/;
 const MAX_DIREKT = 1024 * 1024 * 1024;   // direkt vom Handy zu Gemini: bis 1 GB
 
+/* Am 08.11. lehnte Gemini ein gekürztes iPhone-Video (.mov = video/quicktime) mit „invalid argument“ ab,
+   das ungekürzte .mp4 nicht. Gemini führt .mov als video/mov. */
+export const geminiMime = m => ({ "video/quicktime": "video/mov", "video/x-m4v": "video/mp4", "image/jpg": "image/jpeg" })[m] || m;
+
 async function uploadSitzung(env, len, mime, name){
+  mime = geminiMime(mime);
   const start = await fetch(GEMINI + "/upload/v1beta/files", { method: "POST", headers: {
     "x-goog-api-key": env.GEMINI_KEY, "X-Goog-Upload-Protocol": "resumable", "X-Goog-Upload-Command": "start",
     "X-Goog-Upload-Header-Content-Length": String(len), "X-Goog-Upload-Header-Content-Type": mime,
@@ -202,7 +208,9 @@ async function rezeptMachen(env, request, ctx){
     await db.prepare("INSERT INTO importe (tag, n) VALUES (?, 1) ON CONFLICT(tag) DO UPDATE SET n = n + 1").bind(tag).run();
   }
 
-  const parts = dateien.map(d => ({ file_data: { mime_type: d.mime, file_uri: d.uri } }));
+  const parts = dateien.map(d => ({ file_data: { mime_type: geminiMime(d.mime), file_uri: d.uri } }));
+  const video = dateien.some(d => /^video\//.test(d.mime));
+  const auftrag = /^[\w-]{8,40}$/.test(e.auftrag || "") ? e.auftrag : "";
   const yt = text.match(YOUTUBE);
   if(yt) parts.push({ file_data: { file_uri: yt[0] } });     // YouTube kann Gemini selbst ansehen
   parts.push({ text: AUFTRAG + (text ? "\n\nText vom Nutzer (Beschreibung, Link oder Rezept):\n" + text : "") });
@@ -221,11 +229,19 @@ async function rezeptMachen(env, request, ctx){
   await notiere(env, "KI gestartet (" + modell + ", " + was + ")");
   const arbeit = (async () => {
     let aus;
-    try { aus = await generieren(env, modell, parts, text); }
+    try { aus = await generieren(env, modell, parts, text, video); }
     catch(err){ aus = { fehler: "Fehler im Worker: " + String(err?.message || err).slice(0, 300) }; }
     clearInterval(takt);
     const s = Math.round((Date.now() - t0) / 1000);
     await notiere(env, aus.fehler ? "✗ nach " + s + " s: " + aus.fehler : "✓ nach " + s + " s (" + aus.modell + ", erste Antwort nach " + aus.erstes + " s): " + (aus.rezept?.titel || "(ohne Titel)") + ", " + (aus.rezept?.zutaten?.length || 0) + " Zutaten");
+    /* Das Ergebnis bleibt einen Tag abholbar: Reißt die Verbindung zum Handy ab (am 08.11. nach ~2 min
+       „Load failed“, während der Worker das Rezept noch fertig bekam), fragt die Seite hier nach. */
+    if(auftrag && env.DB){
+      try {
+        await env.DB.prepare("INSERT OR REPLACE INTO ergebnisse (id, daten, t) VALUES (?, ?, ?)").bind(auftrag, JSON.stringify(aus), Date.now()).run();
+        await env.DB.prepare("DELETE FROM ergebnisse WHERE t < ?").bind(Date.now() - 864e5).run();
+      } catch {}
+    }
     try { await w.write(enc.encode(JSON.stringify(aus))); await w.close(); }
     catch(err){ await notiere(env, "✗ Antwort ging nicht mehr ans Handy raus: " + String(err?.message || err).slice(0, 200)); }
   })();
@@ -258,8 +274,8 @@ async function einVersuch(env, modell, parts, ohneDenken = true){
   if(!g.ok){
     const a = await g.json().catch(() => null);
     const text = str(a?.error?.message || a?.[0]?.error?.message, 300);
-    if(g.status === 400 && ohneDenken && /think/i.test(text)){
-      await notiere(env, "↻ " + modell + " will Denken nicht abschalten (" + text.slice(0, 120) + ") → ohne Einstellung");
+    if(g.status === 400 && ohneDenken){
+      await notiere(env, "↻ " + modell + ": 400 (" + text.slice(0, 120) + ") → nochmal ohne Denk-Einstellung");
       return einVersuch(env, modell, parts, false);
     }
     return { status: g.status, fehler: "Gemini-Fehler (" + g.status + ", " + modell + "): " + text };
@@ -285,8 +301,10 @@ async function einVersuch(env, modell, parts, ohneDenken = true){
   return { roh, grund, erstes };
 }
 
-async function generieren(env, modell, parts, text){
-  const modelle = [...new Set([modell, ERSATZ_MODELL])];
+/* Befund 08.11.: bei einem 50-MB-Reel lief gemini-flash-latest zweimal über 100 s in den 524, das leichte
+   Modell lieferte danach in rund 14 s ein brauchbares Rezept (9 Zutaten). Darum bei Videos das leichte zuerst. */
+async function generieren(env, modell, parts, text, video){
+  const modelle = [...new Set(video ? [ERSATZ_MODELL, modell] : [modell, ERSATZ_MODELL])];
   let r;
   for(const [i, m] of modelle.entries()){
     try { r = await einVersuch(env, m, parts); }
@@ -385,6 +403,12 @@ export default {
     if(!gleich(request.headers.get("x-code") || "", env.FAMILIEN_CODE)) return mit(fehler("Falscher Familien-Code.", 401));
 
     try {
+      const erg = url.pathname.match(/^\/api\/ergebnis\/([\w-]{8,40})$/);
+      if(erg && env.DB){
+        await tabellen(env.DB);
+        const r = await env.DB.prepare("SELECT daten FROM ergebnisse WHERE id = ?").bind(erg[1]).first();
+        return mit(r ? new Response(r.daten, { headers: { "content-type": "application/json; charset=utf-8" } }) : json({ warten: true }, 202));
+      }
       if(url.pathname === "/api/protokoll" && env.DB){
         await tabellen(env.DB);
         const r = await env.DB.prepare("SELECT t, was FROM protokoll ORDER BY t DESC LIMIT 30").all();
@@ -444,7 +468,7 @@ label.file{display:block;border:2px dashed var(--l);border-radius:12px;padding:1
 <div class="k" id="ergebnis" hidden></div>
 <div class="k"><b>Gespeichert</b><div id="liste" class="s">–</div></div>
 <details class="k" id="protK"><summary><b>Protokoll</b> <span class="s">(was der Worker zuletzt gemacht hat)</span></summary><div id="prot" class="s">–</div></details>
-<div class="s" style="text-align:center">Fassung 08.11.2026 f</div>
+<div class="s" style="text-align:center">Fassung 08.11.2026 g</div>
 </main><script>
 const $=id=>document.getElementById(id);
 let CODE="";try{CODE=localStorage.getItem("recipes_code")||""}catch{}
@@ -471,12 +495,21 @@ $("los").onclick=async()=>{const files=[...$("datei").files],text=$("text").valu
  $("los").disabled=true;const dateien=[];
  try{for(const[i,f]of files.entries()){$("stand").textContent="Lade hoch "+(i+1)+"/"+files.length+" ("+(f.size/1048576).toFixed(0)+" MB) …";
    dateien.push(await hoch(f))}
-  const t0=Date.now();
-  for(;;){$("stand").textContent="KI schaut sich das an … "+Math.round((Date.now()-t0)/1000)+" s";
-   const{status,d}=await api("/api/rezept",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({dateien,text})});
-   if(status===202||d.warten){if(Date.now()-t0>180000)throw new Error("Gemini braucht zu lange für das Video.");await warte(3000);continue}
-   R={...d.rezept,id:null};P=R.portionen||2;$("stand").textContent="Fertig ("+Math.round((Date.now()-t0)/1000)+" s, "+esc(d.modell)+")";zeigen();break}}
+  const t0=Date.now(),auftrag="a"+Date.now().toString(36)+Math.random().toString(36).slice(2,8);let TXT="KI schaut sich das an";
+  const uhr=setInterval(()=>{$("stand").textContent=TXT+" … "+Math.round((Date.now()-t0)/1000)+" s"},1000);
+  try{for(;;){let status,d;
+   try{({status,d}=await api("/api/rezept",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({dateien,text,auftrag})}))}
+   catch(e){if(!/nicht lesbar|Load failed|network|Netzwerk|fetch/i.test(e.message))throw e;
+    /* Verbindung abgerissen: der Worker arbeitet weiter und legt das Ergebnis ab. */
+    TXT="Verbindung kurz weg, hole das Ergebnis";
+    for(;;){if(Date.now()-t0>360000)throw new Error("Kein Ergebnis nach 6 Minuten. Bitte nochmal versuchen.");
+     await warte(5000);try{({status,d}=await api("/api/ergebnis/"+auftrag))}catch(e2){if(!/nicht lesbar|Load failed|network|fetch/i.test(e2.message))throw e2;continue}
+     if(status!==202)break}}
+   if(status===202||d.warten){if(Date.now()-t0>300000)throw new Error("Gemini braucht zu lange für das Video.");TXT="Gemini bereitet das Video vor";await warte(3000);TXT="KI schaut sich das an";continue}
+   R={...d.rezept,id:null};P=R.portionen||2;clearInterval(uhr);$("stand").textContent="Fertig ("+Math.round((Date.now()-t0)/1000)+" s, "+esc(d.modell)+")";zeigen();break}}
+  finally{clearInterval(uhr)}}
  catch(e){$("stand").innerHTML='<span class="f">'+esc(e.message)+"</span>"}
+ if($("protK").open)$("protK").ontoggle();
  $("los").disabled=false};
 function fmt(x,e){if(x==null)return"";if(["g","ml"].includes(e)&&x>=100)x=Math.round(x/5)*5;
  else if(["Stück","EL","TL","Zehe","Dose","Bund","Becher","Pck","Scheibe",""].includes(e))x=Math.round(x*2)/2;else x=Math.round(x*10)/10;

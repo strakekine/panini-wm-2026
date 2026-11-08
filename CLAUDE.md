@@ -1125,7 +1125,14 @@ Abrufe, die 100 s nichts liefern; das Modell dachte so lange). Seit Fassung e: `
 Versuch mit `gemini-flash-lite-latest` (`ERSATZ_MODELL`, „↻“ im Protokoll). **Fassung e (Denk-Teile mitstreamen) scheiterte am
 08.11.:** nach ~2 min „Load failed“ am Handy (25 Leerzeichen angekommen), im Protokoll nur „KI gestartet“, kein Ende — der
 Worker wurde mit abgebrochen. Seit Fassung f: **Denken aus** (`thinkingBudget: 0`; lehnt ein Modell das mit 400 ab, derselbe
-Versuch ohne Einstellung, „↻“), `includeThoughts` raus, Protokoll nennt Modell und „erste Antwort nach n s“. YouTube-Links im Text gehen als Video an
+Versuch ohne Einstellung, „↻“), `includeThoughts` raus, Protokoll nennt Modell und „erste Antwort nach n s“. **Befund danach (Protokoll 08.11.):** der Lauf
+von Fassung e kam doch noch an — flash-latest 524, dann `gemini-flash-lite-latest` in ~14 s, „Schnelles Croissant-Mozzarella-
+Sandwich, 9 Zutaten“; nur das Handy hatte die Verbindung schon verloren. Fassung f scheiterte mit 400 „invalid argument“ beim
+gekürzten Video (.mov = `video/quicktime`, Gemini kennt `video/mov`). Seit **Fassung g**: `geminiMime()` (quicktime → mov,
+beim Upload und in `file_data`), **bei Videos das leichte Modell zuerst** (flash-latest als zweiter Versuch), jeder 400 mit
+Denk-Einstellung → einmal ohne, und **Abholen nach Abriss**: Die Seite schickt eine `auftrag`-id mit, der Worker legt das
+Ergebnis einen Tag in `ergebnisse` ab, `GET /api/ergebnis/<id>` (202 = noch nicht da). Reißt die Verbindung ab, fragt die Seite
+dort alle 5 s nach (bis 6 min). Browser-Test mit gekappter Verbindung nach 2 s: Rezept kommt an. YouTube-Links im Text gehen als Video an
 Gemini. Höchstens 30 Importe je Tag (`importe`). Zugang nur mit `x-code` = Secret `FAMILIEN_CODE`; CORS nur
 für `https://strakekine.github.io`.
 **Bring!:** `POST /api/bring` legt die Liste 24 h als öffentliche Seite `/bring/<id>` mit schema.org/Recipe ab

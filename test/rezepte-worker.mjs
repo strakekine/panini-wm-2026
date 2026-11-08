@@ -143,6 +143,33 @@ const td = await call("/api/rezept", { ...auftrag, body: JSON.stringify({ text: 
 ok(td.d?.rezept && ohne === 1 && td.d.modell === "gemini-flash-latest", "400 wegen Denken → ohne Einstellung, gleiches Modell");
 globalThis.fetch = vorher;
 
+// Video: zuerst das schnelle Modell; .mov heißt bei Gemini video/mov; Ergebnis bleibt abholbar
+G.modelle = []; G.aufrufe = [];
+const mov = { name: "files/abc123", uri: "https://generativelanguage.googleapis.com/v1beta/files/abc123", mime: "video/quicktime" };
+const vr = await call("/api/rezept", { ...auftrag, body: JSON.stringify({ dateien: [mov], auftrag: "a-test-123" }) });
+ok(vr.d?.modell === "gemini-flash-lite-latest" && G.modelle[0] === "gemini-flash-lite-latest", "Video: leichtes Modell zuerst");
+const vBody = JSON.parse(G.aufrufe.find(a => a.url.includes(":streamGenerateContent")).opt.body);
+ok(vBody.contents[0].parts[0].file_data.mime_type === "video/mov", "video/quicktime → video/mov");
+ok(W.geminiMime("video/mp4") === "video/mp4", "mp4 bleibt");
+const ab = await call("/api/ergebnis/a-test-123");
+ok(ab.r.status === 200 && ab.d?.rezept?.titel === "Cremige Gnocchi", "Ergebnis per Auftrag abholbar");
+ok((await call("/api/ergebnis/a-gibts-nicht")).r.status === 202, "unbekannter Auftrag: 202 warten");
+ok((await worker.fetch(new Request("https://w/api/ergebnis/a-test-123"), env)).status === 401, "Abholen nur mit Code");
+G.aufrufe = [];
+await call("/api/datei-start?name=x.mov&groesse=10&typ=video%2Fquicktime", { method: "POST" });
+ok(G.aufrufe[0].opt.headers["X-Goog-Upload-Header-Content-Type"] === "video/mov", "Upload meldet video/mov");
+
+// Irgendein 400 mit Denk-Einstellung → einmal ohne
+const vor2 = globalThis.fetch; let zweiter = 0;
+globalThis.fetch = async (u, o) => {
+  if(String(u).includes(":streamGenerateContent") && JSON.parse(o.body).generationConfig.thinkingConfig)
+    return Response.json({ error: { message: "Request contains an invalid argument." } }, { status: 400 });
+  if(String(u).includes(":streamGenerateContent")) zweiter++;
+  return vor2(u, o);
+};
+ok((await call("/api/rezept", { ...auftrag, body: JSON.stringify({ text: "Rezepttext" }) })).d?.rezept && zweiter === 1, "allgemeiner 400 → ohne Denk-Einstellung");
+globalThis.fetch = vor2;
+
 // KI-Fehler kommt im Strom als {fehler}, nicht als Absturz
 const echtFetch = globalThis.fetch;
 globalThis.fetch = async (u, o) => String(u).includes(":streamGenerateContent") ? Response.json({ error: { message: "Kontingent" } }, { status: 429 }) : echtFetch(u, o);

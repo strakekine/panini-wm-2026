@@ -38,7 +38,16 @@ globalThis.fetch = async (url, opt = {}) => {
     return Response.json({ file: { name: "files/abc123", uri: "https://generativelanguage.googleapis.com/v1beta/files/abc123", mimeType: "video/mp4", state: "PROCESSING", groesse: body.length } });
   }
   if(url.endsWith("/v1beta/files/abc123")) return Response.json({ state: G.state });
-  if(url.includes(":generateContent")) return Response.json({ candidates: [{ content: { parts: [{ text: JSON.stringify(G.antwort) }] } }] });
+  if(url.includes(":streamGenerateContent")){
+    G.modelle = [...(G.modelle || []), url.match(/models\/([^:]+)/)[1]];
+    if(G.ueberlastet && G.modelle.length === 1) return Response.json({ error: { message: "high demand" } }, { status: 503 });
+    const j = JSON.stringify(G.antwort), mitte = Math.floor(j.length / 2);
+    const sse = [{ candidates: [{ content: { parts: [{ text: "Ich denke nach …", thought: true }] } }] },
+      { candidates: [{ content: { parts: [{ text: j.slice(0, mitte) }] } }] },
+      { candidates: [{ content: { parts: [{ text: j.slice(mitte) }] }, finishReason: "STOP" }] }]
+      .map(o => "data: " + JSON.stringify(o) + "\r\n\r\n").join("");
+    return new Response(sse, { headers: { "content-type": "text/event-stream" } });
+  }
   if(/\/v1beta\/models\/[^:]+$/.test(url)) return Response.json({ name: "models/x" });
   return new Response("?", { status: 404 });
 };
@@ -102,7 +111,7 @@ G.aufrufe = [];
 const rz = await call("/api/rezept", { ...auftrag, body: JSON.stringify({ dateien: [datei, { name: "../x", uri: "https://boese/" }], text: "Schau https://www.facebook.com/share/r/abc und https://youtu.be/dQw4w9WgXcQ" }) });
 const r = rz.d?.rezept;
 ok(rz.r.status === 200 && r?.titel === "Cremige Gnocchi", "Rezept kommt an");
-const gen = G.aufrufe.find(a => a.url.includes(":generateContent"));
+const gen = G.aufrufe.find(a => a.url.includes(":streamGenerateContent"));
 const teile = JSON.parse(gen.opt.body).contents[0].parts;
 ok(teile.filter(x => x.file_data).length === 2 && teile.some(x => x.file_data?.file_uri?.includes("youtu.be")), "fremde Datei verworfen, YouTube-Link als Video mitgegeben");
 ok(teile.at(-1).text.includes("Niemals Mengen erfinden"), "Auftrag geht mit");
@@ -113,9 +122,18 @@ ok(r.zutaten[4].einheit === "" && r.zutaten[4].gruppe === "Für die Sauce", "unb
 ok(r.schritte.length === 2, "leere Schritte weg");
 ok(r.quelle === "https://www.facebook.com/share/r/abc", "erster Link wird Quelle");
 
+// Überlastet → zweiter Versuch mit dem leichteren Modell, im Protokoll vermerkt
+G.ueberlastet = true; G.modelle = [];
+const ue = await call("/api/rezept", { ...auftrag, body: JSON.stringify({ text: "Rezepttext" }) });
+ok(ue.d?.rezept?.titel === "Cremige Gnocchi" && ue.d.modell === "gemini-flash-lite-latest" && G.modelle.join() === "gemini-flash-latest,gemini-flash-lite-latest", "503 → Ersatzmodell liefert");
+ok((await call("/api/protokoll")).d.eintraege.some(e => e.was.startsWith("↻") && e.was.includes("high demand")), "Wiederholung steht im Protokoll");
+G.ueberlastet = false;
+const genBody = JSON.parse(G.aufrufe.filter(a => a.url.includes(":streamGenerateContent")).at(-1).opt.body);
+ok(genBody.generationConfig.mediaResolution === "MEDIA_RESOLUTION_LOW" && genBody.generationConfig.thinkingConfig.includeThoughts === true, "niedrige Videoauflösung, Denken wird gestreamt");
+
 // KI-Fehler kommt im Strom als {fehler}, nicht als Absturz
 const echtFetch = globalThis.fetch;
-globalThis.fetch = async (u, o) => String(u).includes(":generateContent") ? Response.json({ error: { message: "Kontingent" } }, { status: 429 }) : echtFetch(u, o);
+globalThis.fetch = async (u, o) => String(u).includes(":streamGenerateContent") ? Response.json({ error: { message: "Kontingent" } }, { status: 429 }) : echtFetch(u, o);
 const kf = await call("/api/rezept", { ...auftrag, body: JSON.stringify({ text: "Rezepttext" }) });
 ok(kf.d?.fehler?.includes("Kontingent") && !kf.d.rezept, "Gemini-Fehler kommt als Fehlertext an");
 globalThis.fetch = echtFetch;

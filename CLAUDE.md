@@ -1117,7 +1117,12 @@ alle 10 s ein Leerzeichen, am Ende das JSON (`{rezept}` oder `{fehler}`, dann mi
 langer KI-Zeit. Erstes Byte sofort, dann alle 5 s; `no-transform`. **Protokoll** (`notiere`, Tabelle `protokoll`,
 14 Tage, `GET /api/protokoll`, aufklappbar unten auf der Testseite): „KI gestartet“, „✓/✗ nach n s“, „Antwort ging
 nicht mehr raus“ — Anlass: am 08.11. kam beim echten Reel „Antwort nicht lesbar (200)“, Ursache noch unbekannt; die
-Seite zeigt seitdem Pfad, Länge und die ersten 150 Zeichen der Antwort. YouTube-Links im Text gehen als Video an
+Seite zeigt seitdem Pfad, Länge und die ersten 150 Zeichen der Antwort. **Befund aus dem Protokoll (08.11., 50-MB-Reel):**
+Schlüssel und Direkt-Upload gehen; Gemini antwortete einmal 503 „high demand“, einmal **524 nach 125 s** (Cloudflare kappt
+Abrufe, die 100 s nichts liefern; das Modell dachte so lange). Seit Fassung e: `streamGenerateContent?alt=sse` mit
+`thinkingConfig.includeThoughts` (Denk-Teile halten die Leitung aktiv, gezählt wird nur Text ohne `thought`),
+`mediaResolution: MEDIA_RESOLUTION_LOW` (Rezept steckt im Ton und in Einblendungen) und bei 429/5xx/524 ein zweiter
+Versuch mit `gemini-flash-lite-latest` (`ERSATZ_MODELL`, „↻“ im Protokoll). Gegen das echte Gemini noch nicht bestätigt. YouTube-Links im Text gehen als Video an
 Gemini. Höchstens 30 Importe je Tag (`importe`). Zugang nur mit `x-code` = Secret `FAMILIEN_CODE`; CORS nur
 für `https://strakekine.github.io`.
 **Bring!:** `POST /api/bring` legt die Liste 24 h als öffentliche Seite `/bring/<id>` mit schema.org/Recipe ab
@@ -1127,7 +1132,8 @@ gesperrt; erster Test vom iPhone über die Testseite. Klappt es nicht: Erinnerun
 **Testseite:** `GET /` des Workers (Code, Datei/Text → Rezept, Personen ±, Speichern, Bring!), bis
 `rezepte.html` steht. Fassung unten auf der Seite.
 **Einrichtung (Nutzer):** Worker bei Cloudflare, Secrets `GEMINI_KEY` (aistudio.google.com) und
-`FAMILIEN_CODE`, D1-Binding `DB` (Tabellen legt der Worker an). Stand 08.11.2026: Code fertig, **noch nicht
-eingerichtet, nichts gegen das echte Gemini geprüft** (nur nachgebaut).
+`FAMILIEN_CODE`, D1-Binding `DB` (Tabellen legt der Worker an). Stand 08.11.2026: **vom Nutzer eingerichtet**
+(`recipes.rjtp6r9s9h.workers.dev`), Gemini-Schlüssel beginnt mit `AQ.` (neues Format, funktioniert mit
+`x-goog-api-key`), Direkt-Upload eines 50-MB-Reels geklappt; ein fertiges Rezept vom echten Gemini steht noch aus.
 **Testen:** `node test/rezepte-worker.mjs` (Gemini nachgebaut, D1 über `node:sqlite`): Zugang, Upload-Kopfzeilen,
 202, Säubern, Tagesgrenze, Speichern, Bring!-Seite. Gegenprobe gemacht.

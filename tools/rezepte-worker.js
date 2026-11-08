@@ -234,15 +234,58 @@ async function rezeptMachen(env, request, ctx){
     "cache-control": "no-store, no-transform" } });
 }
 
-async function generieren(env, modell, parts, text){
-  const g = await fetch(GEMINI + "/v1beta/models/" + encodeURIComponent(modell) + ":generateContent", {
+/* Erfahrung vom 08.11. (erstes echtes Reel, 50 MB): einmal 503 „high demand“, einmal 524 nach 125 s —
+   Cloudflare bricht einen Abruf ab, der 100 s lang keine Daten liefert, und das Modell dachte bei einem
+   Video so lange nach. Darum:
+   - streamGenerateContent (SSE) mit includeThoughts: Gemini schickt seine Denk-Zusammenfassungen laufend,
+     die Verbindung bleibt so aktiv; gezählt wird nur der Text ohne thought.
+   - mediaResolution LOW: weniger Bildpunkte je Videobild, der Ton bleibt gleich. Bei Kochvideos steckt
+     das Rezept im Ton und in eingeblendeten Texten, die auch niedrig aufgelöst lesbar sind.
+   - Ist das Modell überlastet oder bricht ab, ein zweiter Versuch mit dem leichteren Modell. */
+const ERSATZ_MODELL = "gemini-flash-lite-latest";
+const NOCHMAL = [429, 500, 502, 503, 504, 524];
+
+async function einVersuch(env, modell, parts){
+  const g = await fetch(GEMINI + "/v1beta/models/" + encodeURIComponent(modell) + ":streamGenerateContent?alt=sse", {
     method: "POST", headers: { "x-goog-api-key": env.GEMINI_KEY, "content-type": "application/json" },
     body: JSON.stringify({ contents: [{ role: "user", parts }],
-      generationConfig: { temperature: 0.2, responseMimeType: "application/json", responseSchema: SCHEMA } }) });
-  const a = await g.json().catch(() => null);
-  if(!g.ok) return { fehler: "Gemini-Fehler (" + g.status + "): " + str(a?.error?.message, 300) };
-  const roh = a?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("") || "";
-  let o; try { o = JSON.parse(roh); } catch { return { fehler: "Gemini hat kein lesbares Rezept geliefert." }; }
+      generationConfig: { temperature: 0.2, responseMimeType: "application/json", responseSchema: SCHEMA,
+        mediaResolution: "MEDIA_RESOLUTION_LOW", thinkingConfig: { includeThoughts: true } } }) });
+  if(!g.ok){
+    const a = await g.json().catch(() => null);
+    return { status: g.status, fehler: "Gemini-Fehler (" + g.status + ", " + modell + "): " + str(a?.error?.message || a?.[0]?.error?.message, 300) };
+  }
+  const leser = g.body.getReader(), dec = new TextDecoder();
+  let puffer = "", roh = "", grund = "";
+  const zeile = l => {
+    if(!l.startsWith("data:")) return;
+    let o; try { o = JSON.parse(l.slice(5).trim()); } catch { return; }
+    if(o.error) throw new Error(str(o.error.message, 300));
+    const k = o.candidates?.[0];
+    for(const t of k?.content?.parts || []) if(!t.thought && typeof t.text === "string") roh += t.text;
+    if(k?.finishReason) grund = k.finishReason;
+  };
+  for(;;){
+    const { done, value } = await leser.read();
+    if(value) puffer += dec.decode(value, { stream: true });
+    let i; while((i = puffer.indexOf("\n")) >= 0){ zeile(puffer.slice(0, i).trim()); puffer = puffer.slice(i + 1); }
+    if(done){ zeile(puffer.trim()); break; }
+  }
+  return { roh, grund };
+}
+
+async function generieren(env, modell, parts, text){
+  const modelle = [...new Set([modell, ERSATZ_MODELL])];
+  let r;
+  for(const [i, m] of modelle.entries()){
+    try { r = await einVersuch(env, m, parts); }
+    catch(err){ r = { status: 500, fehler: "Gemini brach ab (" + m + "): " + String(err?.message || err).slice(0, 200) }; }
+    if(!r.fehler){ modell = m; break; }
+    if(!NOCHMAL.includes(r.status) || i === modelle.length - 1) return { fehler: r.fehler };
+    await notiere(env, "↻ " + r.fehler.slice(0, 160) + " → nochmal mit " + modelle[i + 1]);
+  }
+  let o; try { o = JSON.parse(r.roh); }
+  catch { return { fehler: "Gemini hat kein lesbares Rezept geliefert" + (r.grund && r.grund !== "STOP" ? " (" + r.grund + ")" : "") + "." }; }
   const rezept = saeubern(o);
   if(!rezept) return { fehler: "Gemini hat kein lesbares Rezept geliefert." };
   const quelle = text.match(/https?:\/\/\S+/);
@@ -390,7 +433,7 @@ label.file{display:block;border:2px dashed var(--l);border-radius:12px;padding:1
 <div class="k" id="ergebnis" hidden></div>
 <div class="k"><b>Gespeichert</b><div id="liste" class="s">–</div></div>
 <details class="k" id="protK"><summary><b>Protokoll</b> <span class="s">(was der Worker zuletzt gemacht hat)</span></summary><div id="prot" class="s">–</div></details>
-<div class="s" style="text-align:center">Fassung 08.11.2026 d</div>
+<div class="s" style="text-align:center">Fassung 08.11.2026 e</div>
 </main><script>
 const $=id=>document.getElementById(id);
 let CODE="";try{CODE=localStorage.getItem("recipes_code")||""}catch{}

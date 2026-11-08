@@ -176,17 +176,6 @@ DESCRIPTION:U15 Scolaires Cl4 S3 Phase 2\, Spieltag 5\n\n⚠️ Dieser Kale
  schen.
 END:VEVENT
 BEGIN:VEVENT
-UID:umzug-20261107@fc-koeppchen
-DTSTAMP:20261030T000000Z
-DTSTART;VALUE=DATE:20261107
-DTEND;VALUE=DATE:20261108
-SUMMARY:⚠️ FC Koeppchen: Kalender bitte neu abonnieren
-DESCRIPTION:⚠️ Dieser Kalender zieht um und wird nur noch bis Ende 2026
-  aktualisiert. Bitte neu abonnieren: App öffnen (https://fckoeppchen.gith
- ub.io/)\, Mannschaft antippen\, „📅 … im Kalender abonnieren“. Dan
- ach diesen alten Kalender löschen.
-END:VEVENT
-BEGIN:VEVENT
 UID:umzug-20261114@fc-koeppchen
 DTSTAMP:20261030T000000Z
 DTSTART;VALUE=DATE:20261114
@@ -202,6 +191,17 @@ UID:umzug-20261121@fc-koeppchen
 DTSTAMP:20261030T000000Z
 DTSTART;VALUE=DATE:20261121
 DTEND;VALUE=DATE:20261122
+SUMMARY:⚠️ FC Koeppchen: Kalender bitte neu abonnieren
+DESCRIPTION:⚠️ Dieser Kalender zieht um und wird nur noch bis Ende 2026
+  aktualisiert. Bitte neu abonnieren: App öffnen (https://fckoeppchen.gith
+ ub.io/)\, Mannschaft antippen\, „📅 … im Kalender abonnieren“. Dan
+ ach diesen alten Kalender löschen.
+END:VEVENT
+BEGIN:VEVENT
+UID:umzug-20261128@fc-koeppchen
+DTSTAMP:20261030T000000Z
+DTSTART;VALUE=DATE:20261128
+DTEND;VALUE=DATE:20261129
 SUMMARY:⚠️ FC Koeppchen: Kalender bitte neu abonnieren
 DESCRIPTION:⚠️ Dieser Kalender zieht um und wird nur noch bis Ende 2026
   aktualisiert. Bitte neu abonnieren: App öffnen (https://fckoeppchen.gith

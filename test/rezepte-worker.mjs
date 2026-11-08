@@ -120,6 +120,10 @@ const kf = await call("/api/rezept", { ...auftrag, body: JSON.stringify({ text: 
 ok(kf.d?.fehler?.includes("Kontingent") && !kf.d.rezept, "Gemini-Fehler kommt als Fehlertext an");
 globalThis.fetch = echtFetch;
 
+// Protokoll: Start und Ende jedes KI-Laufs
+const pr = await call("/api/protokoll");
+ok(pr.d?.eintraege?.some(e => e.was.startsWith("KI gestartet")) && pr.d.eintraege.some(e => e.was.startsWith("✓ nach")) && pr.d.eintraege.some(e => e.was.includes("Kontingent")), "Protokoll hat Start, Erfolg und Fehler");
+
 // Tagesgrenze
 const env2 = { ...env, DB: d1() };
 let letzte;

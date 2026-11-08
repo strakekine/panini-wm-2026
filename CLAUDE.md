@@ -1114,7 +1114,10 @@ ersten echten Reel (Cloudflare bricht nach 100 s ohne Antwort ab). Rückfall bis
 (`POST /api/datei`, `FixedLengthStream`). Dann `POST /api/rezept`; solange Gemini ein Video verarbeitet →
 **202**, der Browser fragt alle 3 s neu. Die KI-Antwort selbst geht **als Strom** zurück: sofort Kopfzeilen,
 alle 10 s ein Leerzeichen, am Ende das JSON (`{rezept}` oder `{fehler}`, dann mit Status 200) — sonst 524 bei
-langer KI-Zeit. YouTube-Links im Text gehen als Video an
+langer KI-Zeit. Erstes Byte sofort, dann alle 5 s; `no-transform`. **Protokoll** (`notiere`, Tabelle `protokoll`,
+14 Tage, `GET /api/protokoll`, aufklappbar unten auf der Testseite): „KI gestartet“, „✓/✗ nach n s“, „Antwort ging
+nicht mehr raus“ — Anlass: am 08.11. kam beim echten Reel „Antwort nicht lesbar (200)“, Ursache noch unbekannt; die
+Seite zeigt seitdem Pfad, Länge und die ersten 150 Zeichen der Antwort. YouTube-Links im Text gehen als Video an
 Gemini. Höchstens 30 Importe je Tag (`importe`). Zugang nur mit `x-code` = Secret `FAMILIEN_CODE`; CORS nur
 für `https://strakekine.github.io`.
 **Bring!:** `POST /api/bring` legt die Liste 24 h als öffentliche Seite `/bring/<id>` mit schema.org/Recipe ab

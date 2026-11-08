@@ -113,6 +113,18 @@ async function tabellen(db){
   await db.prepare("CREATE TABLE IF NOT EXISTS rezepte (id TEXT PRIMARY KEY, daten TEXT NOT NULL, geaendert INTEGER NOT NULL)").run();
   await db.prepare("CREATE TABLE IF NOT EXISTS bring (id TEXT PRIMARY KEY, daten TEXT NOT NULL, bis INTEGER NOT NULL)").run();
   await db.prepare("CREATE TABLE IF NOT EXISTS importe (tag TEXT PRIMARY KEY, n INTEGER NOT NULL)").run();
+  await db.prepare("CREATE TABLE IF NOT EXISTS protokoll (t INTEGER NOT NULL, was TEXT NOT NULL)").run();
+}
+
+/* Kurzes Protokoll der Importe (sichtbar unten auf der Testseite): zeigt, ob die KI fertig
+   wurde, wie lange sie brauchte und was schiefging — ohne Cloudflare-Logs. */
+async function notiere(env, was){
+  if(!env.DB) return;
+  try {
+    await tabellen(env.DB);
+    await env.DB.prepare("INSERT INTO protokoll (t, was) VALUES (?, ?)").bind(Date.now(), String(was).slice(0, 500)).run();
+    await env.DB.prepare("DELETE FROM protokoll WHERE t < ?").bind(Date.now() - 14 * 864e5).run();
+  } catch {}
 }
 
 /* ---------- Gemini ---------- */
@@ -201,16 +213,25 @@ async function rezeptMachen(env, request, ctx){
      als Lebenszeichen; das Rezept (oder {fehler}) folgt am Ende. JSON verträgt Leerzeichen davor. */
   const { readable, writable } = new TransformStream();
   const w = writable.getWriter(), enc = new TextEncoder();
-  const takt = setInterval(() => { w.write(enc.encode(" ")).catch(() => {}); }, 10000);
+  const lebe = () => { w.write(enc.encode(" ")).catch(() => {}); };
+  lebe();                                           // erstes Byte sofort
+  const takt = setInterval(lebe, 5000);
+  const t0 = Date.now();
+  const was = dateien.map(d => d.mime).join(", ") || "nur Text";
+  await notiere(env, "KI gestartet (" + modell + ", " + was + ")");
   const arbeit = (async () => {
     let aus;
     try { aus = await generieren(env, modell, parts, text); }
     catch(err){ aus = { fehler: "Fehler im Worker: " + String(err?.message || err).slice(0, 300) }; }
     clearInterval(takt);
-    try { await w.write(enc.encode(JSON.stringify(aus))); await w.close(); } catch {}
+    const s = Math.round((Date.now() - t0) / 1000);
+    await notiere(env, aus.fehler ? "✗ nach " + s + " s: " + aus.fehler : "✓ nach " + s + " s: " + (aus.rezept?.titel || "(ohne Titel)") + ", " + (aus.rezept?.zutaten?.length || 0) + " Zutaten");
+    try { await w.write(enc.encode(JSON.stringify(aus))); await w.close(); }
+    catch(err){ await notiere(env, "✗ Antwort ging nicht mehr ans Handy raus: " + String(err?.message || err).slice(0, 200)); }
   })();
   if(ctx?.waitUntil) ctx.waitUntil(arbeit);
-  return new Response(readable, { headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
+  return new Response(readable, { headers: { "content-type": "application/json; charset=utf-8",
+    "cache-control": "no-store, no-transform" } });
 }
 
 async function generieren(env, modell, parts, text){
@@ -310,6 +331,11 @@ export default {
     if(!gleich(request.headers.get("x-code") || "", env.FAMILIEN_CODE)) return mit(fehler("Falscher Familien-Code.", 401));
 
     try {
+      if(url.pathname === "/api/protokoll" && env.DB){
+        await tabellen(env.DB);
+        const r = await env.DB.prepare("SELECT t, was FROM protokoll ORDER BY t DESC LIMIT 30").all();
+        return mit(json({ eintraege: r.results || [] }));
+      }
       if(url.pathname === "/api/pruefen"){
         const r = { db: !!env.DB, gemini: false, modell: str(env.MODELL, 80) || "gemini-flash-latest" };
         if(env.GEMINI_KEY){
@@ -363,14 +389,16 @@ label.file{display:block;border:2px dashed var(--l);border-radius:12px;padding:1
 <div class="r"><button id="los">Rezept machen</button><span id="stand" class="s"></span></div></div>
 <div class="k" id="ergebnis" hidden></div>
 <div class="k"><b>Gespeichert</b><div id="liste" class="s">–</div></div>
-<div class="s" style="text-align:center">Fassung 08.11.2026 c</div>
+<details class="k" id="protK"><summary><b>Protokoll</b> <span class="s">(was der Worker zuletzt gemacht hat)</span></summary><div id="prot" class="s">–</div></details>
+<div class="s" style="text-align:center">Fassung 08.11.2026 d</div>
 </main><script>
 const $=id=>document.getElementById(id);
 let CODE="";try{CODE=localStorage.getItem("recipes_code")||""}catch{}
 $("code").value=CODE;
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 async function api(pfad,opt={}){const r=await fetch(pfad,{...opt,headers:{"x-code":CODE,...(opt.headers||{})}});
- const d=await r.json().catch(()=>({fehler:"Antwort nicht lesbar ("+r.status+")"}));if(d.fehler||(!r.ok&&r.status!==202))throw new Error(d.fehler||("Fehler "+r.status));return{status:r.status,d}}
+ const roh=await r.text().catch(e=>"[Lesefehler: "+e.message+"]");let d;
+ try{d=JSON.parse(roh.trim())}catch{const k=roh.trim();d={fehler:"Antwort nicht lesbar ("+r.status+", "+pfad.split("?")[0]+", "+roh.length+" Zeichen): "+(k?k.slice(0,150):"leer")}}if(d.fehler||(!r.ok&&r.status!==202))throw new Error(d.fehler||("Fehler "+r.status));return{status:r.status,d}}
 async function hoch(f){const typ=f.type||"application/octet-stream";
  try{const{d}=await api("/api/datei-start?name="+encodeURIComponent(f.name)+"&groesse="+f.size+"&typ="+encodeURIComponent(typ),{method:"POST"});
   const r=await fetch(d.url,{method:"POST",headers:{"X-Goog-Upload-Command":"upload, finalize","X-Goog-Upload-Offset":"0"},body:f});
@@ -423,5 +451,7 @@ let ALLE=[];
 async function laden(){try{const{d}=await api("/api/rezepte");ALLE=d.rezepte;
  $("liste").innerHTML=ALLE.length?ALLE.map((r,i)=>'<div class="li" data-i="'+i+'"><b>'+esc(r.titel)+"</b> · "+r.zutaten.length+" Zutaten</div>").join(""):"Noch nichts gespeichert.";
  document.querySelectorAll(".li").forEach(el=>el.onclick=()=>{R=ALLE[+el.dataset.i];P=R.portionen||2;zeigen();$("ergebnis").scrollIntoView({behavior:"smooth"})})}catch{}}
+$("protK").ontoggle=async()=>{if(!$("protK").open)return;try{const{d}=await api("/api/protokoll");
+ $("prot").innerHTML=d.eintraege.length?d.eintraege.map(e=>"<div>"+new Date(e.t).toLocaleString("de-DE",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit"})+" · "+esc(e.was)+"</div>").join(""):"Noch nichts."}catch(e){$("prot").textContent=e.message}};
 if(CODE)$("codeOk").click();
 </script></body></html>`;

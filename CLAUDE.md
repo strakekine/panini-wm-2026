@@ -1,6 +1,6 @@
 # panini-wm-2026
 
-Sieben voneinander unabhängige Dinge (Übersicht für Menschen: `README.md`) liegen in diesem Repo, alle auf `main`:
+Acht voneinander unabhängige Dinge (Übersicht für Menschen: `README.md`) liegen in diesem Repo, alle auf `main`:
 
 - **`panini*.html`** — Sticker-Tracker für die Panini WM 2026 (Emil, Leo, generisch).
   Reine Einzeldatei-Webapps, kein Build, kein Framework.
@@ -26,6 +26,9 @@ Sieben voneinander unabhängige Dinge (Übersicht für Menschen: `README.md`) li
   Anstellgut-Fütterung, laufender Teig mit echten Zeiten. Einzeldatei. Details unten.
 - **`vokabeln.html`** — Französisch-Vokabeltrainer für Emil und Leo (jeder sein iPhone).
   Lektionen kommen aus eingescannten PDFs, die Claude abtippt. Einzeldatei. Details unten.
+- **Recipes** (`tools/rezepte-worker.js`, App folgt als `rezepte.html`) — Rezepte aus PDF,
+  Screenshot, Foto oder Reel (Bildschirmaufnahme mit Ton) per KI auseinandernehmen, Personen
+  umrechnen, Einkaufsliste nach Bring!. Details unten.
 - **`pine/`** — TradingView Pine-Script-Indikatoren. Eigener Kontext, eigene Regeln:
   siehe **`pine/CLAUDE.md`**, bevor dort etwas geändert wird.
 - **`fussball.html`** — „FC Koeppchen“: Tabelle, Ergebnisse und nächste Spiele der Jugend
@@ -1088,3 +1091,36 @@ verketten, das hat einmal einen roten Test verschluckt):
   Fehler in `review()` wird gefunden. Wer etwas am Ablauf ändert, ergänzt es hier statt in
   einem Wegwerf-Skript.
 - `node test/vokabeln-sprechen.mjs` — Spracherkennung mit iOS-Attrappe (siehe Sprechen).
+
+## Recipes (`tools/rezepte-worker.js`) — Stand und Regeln
+
+Nutzer: Laurent (Familie). Name vom Nutzer: „Recipes“ (zuerst „Recipies“ geschrieben, auf seinen Wunsch korrigiert).
+**Kern, vom Nutzer so festgelegt (08.11.2026):** PDF, Screenshot/Foto oder Reel einsetzen → Standardrezept;
+Personenzahl einstellen → Mengen; Einkaufsliste → **Bring!** zum Teilen mit der Familie. Alles andere
+(Küchenmodus, Woche, Bewertung, Kurzbefehl in der Teilen-Leiste) erst, wenn er es vermisst.
+**Rezepte liegen auf dem Server** (vom Nutzer gewählt: Cloudflare D1), nicht nur im Handy — anders als
+Pizza/Brot, weil eine Sammlung der Datenschatz selbst ist. Bewusst nicht: Nährwerte, Vorrat mit Ablaufdatum,
+Sprachsteuerung, Video-Download bei Facebook/Instagram (Meta sperrt; das Handy liefert das Video selbst als
+Bildschirmaufnahme). Erstes Rezept: ein Facebook-Reel, in dem nur gesprochen wird — darum der Video-Weg.
+
+**KI: Gemini** (eine KI für PDF, Bild, Video mit Ton; Claude-Schnittstelle kann kein Video). Modell über
+`MODELL`, Standard `gemini-flash-latest` (Alias, wandert mit). Auftrag `AUFTRAG` + `responseSchema`:
+**Mengen nie erfinden** (`menge: null` + `hinweis`), Gesprochenes zählt, US-Maße umrechnen, Gang aus `GAENGE`,
+Einheit aus `EINHEITEN`. `saeubern()` prüft jede KI-Antwort und jedes gespeicherte Rezept.
+**Ablauf:** Browser lädt jede Datei einzeln über den Worker hoch (`POST /api/datei`, Gemini Files API
+resumable, durchgereicht per `FixedLengthStream`, max. 95 MB wegen Cloudflare-Grenze 100 MB), dann
+`POST /api/rezept` mit Dateien und/oder Text; solange Gemini ein Video verarbeitet → **202**, der Browser
+fragt alle 3 s neu (nicht im Worker warten: Abruf-Grenze je Aufruf). YouTube-Links im Text gehen als Video an
+Gemini. Höchstens 30 Importe je Tag (`importe`). Zugang nur mit `x-code` = Secret `FAMILIEN_CODE`; CORS nur
+für `https://strakekine.github.io`.
+**Bring!:** `POST /api/bring` legt die Liste 24 h als öffentliche Seite `/bring/<id>` mit schema.org/Recipe ab
+und gibt den Deeplink `api.getbring.com/rest/bringrecipes/deeplink?url=…&source=web` zurück (Bring!s Import
+für Rezeptseiten, Doku von 2020/2022). **Noch nie echt ausprobiert** — Bring! ist in der Claude-Umgebung
+gesperrt; erster Test vom iPhone über die Testseite. Klappt es nicht: Erinnerungen per Kurzbefehl.
+**Testseite:** `GET /` des Workers (Code, Datei/Text → Rezept, Personen ±, Speichern, Bring!), bis
+`rezepte.html` steht. Fassung unten auf der Seite.
+**Einrichtung (Nutzer):** Worker bei Cloudflare, Secrets `GEMINI_KEY` (aistudio.google.com) und
+`FAMILIEN_CODE`, D1-Binding `DB` (Tabellen legt der Worker an). Stand 08.11.2026: Code fertig, **noch nicht
+eingerichtet, nichts gegen das echte Gemini geprüft** (nur nachgebaut).
+**Testen:** `node test/rezepte-worker.mjs` (Gemini nachgebaut, D1 über `node:sqlite`): Zugang, Upload-Kopfzeilen,
+202, Säubern, Tagesgrenze, Speichern, Bring!-Seite. Gegenprobe gemacht.

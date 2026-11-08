@@ -12,6 +12,7 @@ in dieser Liste.
 | **Brotplaner** — Backvorgang, Anstellgut, Rückwärtsplanung | `brot.html` | [öffnen](https://strakekine.github.io/panini-wm-2026/brot.html) |
 | **Vokabeltrainer** — Französisch für Emil und Leo | `vokabeln.html` | [öffnen](https://strakekine.github.io/panini-wm-2026/vokabeln.html) |
 | **FC Koeppchen** — Spiele, Tabellen, Kalender, Liveticker, automatisch von der FLF | `fussball.html` | [öffnen](https://strakekine.github.io/panini-wm-2026/fussball.html) |
+| **Recipes** — Rezepte aus PDF, Screenshot oder Reel, Personen umrechnen, Einkauf nach Bring! (im Aufbau) | `tools/rezepte-worker.js` | Cloudflare Worker |
 | **Pine-Script-Indikatoren** für TradingView | `pine/` | siehe [`pine/README.md`](pine/README.md) |
 
 ## Fußball-Apps für andere Vereine
@@ -38,6 +39,7 @@ node test/fussball.mjs
 node test/modell.mjs                 # Teigplaner, Gärmodell
 node test/brot.mjs
 node test/vokabeln.mjs
+node test/rezepte-worker.mjs        # Recipes, Worker
 node test/vokabeln-oberflaeche.mjs   # Browser (Playwright)
 node test/vokabeln-sprechen.mjs      # Browser (Playwright)
 ```

@@ -272,7 +272,9 @@ export default {
         const r = { db: !!env.DB, gemini: false, modell: str(env.MODELL, 80) || "gemini-flash-latest" };
         if(env.GEMINI_KEY){
           const g = await fetch(GEMINI + "/v1beta/models/" + encodeURIComponent(r.modell), { headers: { "x-goog-api-key": env.GEMINI_KEY } });
-          r.gemini = g.ok; if(!g.ok) r.geminiFehler = g.status;
+          r.gemini = g.ok;
+          if(!g.ok){ const t = await g.json().catch(() => null);
+            r.geminiFehler = g.status + (t?.error?.status ? " " + t.error.status : "") + (t?.error?.message ? ": " + str(t.error.message, 200) : ""); }
         }
         if(env.DB) await tabellen(env.DB);
         return mit(json(r));
@@ -318,7 +320,7 @@ label.file{display:block;border:2px dashed var(--l);border-radius:12px;padding:1
 <div class="r"><button id="los">Rezept machen</button><span id="stand" class="s"></span></div></div>
 <div class="k" id="ergebnis" hidden></div>
 <div class="k"><b>Gespeichert</b><div id="liste" class="s">–</div></div>
-<div class="s" style="text-align:center">Fassung 08.11.2026 a</div>
+<div class="s" style="text-align:center">Fassung 08.11.2026 b</div>
 </main><script>
 const $=id=>document.getElementById(id);
 let CODE="";try{CODE=localStorage.getItem("recipes_code")||""}catch{}

@@ -1144,6 +1144,8 @@ gesperrt; erster Test vom iPhone über die Testseite. Klappt es nicht: Erinnerun
 **Einrichtung (Nutzer):** Worker bei Cloudflare, Secrets `GEMINI_KEY` (aistudio.google.com) und
 `FAMILIEN_CODE`, D1-Binding `DB` (Tabellen legt der Worker an). Stand 08.11.2026: **vom Nutzer eingerichtet**
 (`recipes.rjtp6r9s9h.workers.dev`), Gemini-Schlüssel beginnt mit `AQ.` (neues Format, funktioniert mit
-`x-goog-api-key`), Direkt-Upload eines 50-MB-Reels geklappt; ein fertiges Rezept vom echten Gemini steht noch aus.
+`x-goog-api-key`), Direkt-Upload eines 50-MB-Reels geklappt. **Erstes echtes Rezept am 08.11. um 21:50 mit Fassung g angekommen**
+(gekürzte .mov-Aufnahme des Facebook-Reels): „Croissant Mozzarella-Sandwich“, 9 Zutaten, 5 Schritte, nur das Croissant mit
+Menge — der Koch nennt keine Mengen, also alles gelb statt erfunden, wie gewollt. Bring!-Test steht noch aus.
 **Testen:** `node test/rezepte-worker.mjs` (Gemini nachgebaut, D1 über `node:sqlite`): Zugang, Upload-Kopfzeilen,
 202, Säubern, Tagesgrenze, Speichern, Bring!-Seite. Gegenprobe gemacht.

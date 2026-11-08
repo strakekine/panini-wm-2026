@@ -74,6 +74,14 @@ ok(start?.opt.headers["X-Goog-Upload-Header-Content-Length"] === "10" && start.o
 const fertig = G.aufrufe.find(a => a.url.endsWith("/upload/xyz"));
 ok(fertig?.opt.headers["X-Goog-Upload-Command"] === "upload, finalize" && !("x-goog-api-key" in fertig.opt.headers), "Upload ohne Schlüssel, finalize");
 
+// Direkt-Upload: Worker gibt nur die Upload-Adresse heraus
+const ds = await call("/api/datei-start?name=reel.mov&groesse=300000000&typ=video%2Fquicktime", { method: "POST" });
+ok(ds.d?.url === "https://generativelanguage.googleapis.com/upload/xyz", "Direkt-Upload: Adresse auch für 300 MB");
+ok(!JSON.stringify(ds.d).includes("KEY"), "Upload-Adresse enthält den Schlüssel nicht");
+ok((await call("/api/datei-start?groesse=10&typ=text%2Fhtml", { method: "POST" })).r.status === 415, "Direkt-Upload: HTML abgelehnt");
+ok((await call("/api/datei-start?groesse=2000000000&typ=video%2Fmp4", { method: "POST" })).r.status === 413, "Direkt-Upload: über 1 GB abgelehnt");
+ok((await call("/api/datei-start?groesse=0&typ=video%2Fmp4", { method: "POST" })).r.status === 400, "Direkt-Upload: leer abgelehnt");
+
 // Rezept: erst warten, dann fertig
 const datei = up.d.datei;
 const auftrag = { method: "POST", headers: { "content-type": "application/json" } };
@@ -104,6 +112,13 @@ ok(r.zutaten[3].einheit === "Zehe" && r.zutaten[3].menge_bis === 3 && r.zutaten[
 ok(r.zutaten[4].einheit === "" && r.zutaten[4].gruppe === "Für die Sauce", "unbekannte Einheit verworfen, Gruppe bleibt");
 ok(r.schritte.length === 2, "leere Schritte weg");
 ok(r.quelle === "https://www.facebook.com/share/r/abc", "erster Link wird Quelle");
+
+// KI-Fehler kommt im Strom als {fehler}, nicht als Absturz
+const echtFetch = globalThis.fetch;
+globalThis.fetch = async (u, o) => String(u).includes(":generateContent") ? Response.json({ error: { message: "Kontingent" } }, { status: 429 }) : echtFetch(u, o);
+const kf = await call("/api/rezept", { ...auftrag, body: JSON.stringify({ text: "Rezepttext" }) });
+ok(kf.d?.fehler?.includes("Kontingent") && !kf.d.rezept, "Gemini-Fehler kommt als Fehlertext an");
+globalThis.fetch = echtFetch;
 
 // Tagesgrenze
 const env2 = { ...env, DB: d1() };

@@ -116,18 +116,42 @@ async function tabellen(db){
 }
 
 /* ---------- Gemini ---------- */
-async function hochladen(env, request, name){
-  const len = Number(request.headers.get("content-length"));
-  const mime = (request.headers.get("content-type") || "").split(";")[0].trim();
-  if(!(len > 0)) return fehler("Leere Datei.", 400);
-  if(len > MAX_BYTES) return fehler("Datei zu groß (über 95 MB). Bildschirmaufnahme kürzer machen.", 413);
-  if(!/^(image\/|video\/|application\/pdf$|audio\/)/.test(mime)) return fehler("Diese Dateiart geht nicht: " + (mime || "unbekannt"), 415);
+const DATEIART = /^(image\/|video\/|application\/pdf$|audio\/)/;
+const MAX_DIREKT = 1024 * 1024 * 1024;   // direkt vom Handy zu Gemini: bis 1 GB
+
+async function uploadSitzung(env, len, mime, name){
   const start = await fetch(GEMINI + "/upload/v1beta/files", { method: "POST", headers: {
     "x-goog-api-key": env.GEMINI_KEY, "X-Goog-Upload-Protocol": "resumable", "X-Goog-Upload-Command": "start",
     "X-Goog-Upload-Header-Content-Length": String(len), "X-Goog-Upload-Header-Content-Type": mime,
     "content-type": "application/json" }, body: JSON.stringify({ file: { display_name: str(name, 100) || "rezept" } }) });
   const url = start.headers.get("x-goog-upload-url");
-  if(!start.ok || !url) return fehler("Gemini nimmt keine Datei an (" + start.status + "): " + (await start.text()).slice(0, 300), 502);
+  if(!start.ok || !url) return { fehler: "Gemini nimmt keine Datei an (" + start.status + "): " + (await start.text()).slice(0, 300) };
+  return { url };
+}
+
+/* Bevorzugt: das Handy lädt selbst zu Gemini hoch (Google erlaubt das per CORS). Der Worker
+   holt nur die Upload-Adresse; sie enthält eine Sitzungsnummer, nicht den Schlüssel. So hängt
+   ein langes Video nicht an Cloudflares 100-s-Grenze (Fehler 524) und nicht an 100 MB. */
+async function uploadStarten(env, url){
+  const len = Number(url.searchParams.get("groesse"));
+  const mime = str(url.searchParams.get("typ"), 100);
+  if(!(len > 0)) return fehler("Leere Datei.", 400);
+  if(len > MAX_DIREKT) return fehler("Datei zu groß (über 1 GB).", 413);
+  if(!DATEIART.test(mime)) return fehler("Diese Dateiart geht nicht: " + (mime || "unbekannt"), 415);
+  const r = await uploadSitzung(env, len, mime, url.searchParams.get("name"));
+  return r.fehler ? fehler(r.fehler, 502) : json({ url: r.url });
+}
+
+/* Rückfall: durch den Worker durchgereicht (falls das direkte Hochladen scheitert). */
+async function hochladen(env, request, name){
+  const len = Number(request.headers.get("content-length"));
+  const mime = (request.headers.get("content-type") || "").split(";")[0].trim();
+  if(!(len > 0)) return fehler("Leere Datei.", 400);
+  if(len > MAX_BYTES) return fehler("Datei zu groß (über 95 MB). Bildschirmaufnahme kürzer machen.", 413);
+  if(!DATEIART.test(mime)) return fehler("Diese Dateiart geht nicht: " + (mime || "unbekannt"), 415);
+  const sitzung = await uploadSitzung(env, len, mime, name);
+  if(sitzung.fehler) return fehler(sitzung.fehler, 502);
+  const url = sitzung.url;
   let body = request.body;
   /* Durchreichen ohne Zwischenspeicher; die Länge muss Gemini vorher kennen. */
   if(typeof FixedLengthStream === "function"){
@@ -140,7 +164,7 @@ async function hochladen(env, request, name){
   return json({ datei: { name: r.file.name, uri: r.file.uri, mime: r.file.mimeType || mime } });
 }
 
-async function rezeptMachen(env, request){
+async function rezeptMachen(env, request, ctx){
   const e = await request.json().catch(() => null);
   if(!e) return fehler("Kein gültiger Auftrag.", 400);
   const dateien = (Array.isArray(e.dateien) ? e.dateien : []).slice(0, 10)
@@ -172,19 +196,37 @@ async function rezeptMachen(env, request){
   parts.push({ text: AUFTRAG + (text ? "\n\nText vom Nutzer (Beschreibung, Link oder Rezept):\n" + text : "") });
 
   const modell = str(env.MODELL, 80) || "gemini-flash-latest";
+  /* Die KI braucht bei Videos gern über eine Minute. Cloudflare bricht nach 100 s ohne
+     Antwort ab (524). Darum geht die Antwort sofort los und bekommt alle 10 s ein Leerzeichen
+     als Lebenszeichen; das Rezept (oder {fehler}) folgt am Ende. JSON verträgt Leerzeichen davor. */
+  const { readable, writable } = new TransformStream();
+  const w = writable.getWriter(), enc = new TextEncoder();
+  const takt = setInterval(() => { w.write(enc.encode(" ")).catch(() => {}); }, 10000);
+  const arbeit = (async () => {
+    let aus;
+    try { aus = await generieren(env, modell, parts, text); }
+    catch(err){ aus = { fehler: "Fehler im Worker: " + String(err?.message || err).slice(0, 300) }; }
+    clearInterval(takt);
+    try { await w.write(enc.encode(JSON.stringify(aus))); await w.close(); } catch {}
+  })();
+  if(ctx?.waitUntil) ctx.waitUntil(arbeit);
+  return new Response(readable, { headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
+}
+
+async function generieren(env, modell, parts, text){
   const g = await fetch(GEMINI + "/v1beta/models/" + encodeURIComponent(modell) + ":generateContent", {
     method: "POST", headers: { "x-goog-api-key": env.GEMINI_KEY, "content-type": "application/json" },
     body: JSON.stringify({ contents: [{ role: "user", parts }],
       generationConfig: { temperature: 0.2, responseMimeType: "application/json", responseSchema: SCHEMA } }) });
   const a = await g.json().catch(() => null);
-  if(!g.ok) return fehler("Gemini-Fehler (" + g.status + "): " + str(a?.error?.message, 300), 502);
+  if(!g.ok) return { fehler: "Gemini-Fehler (" + g.status + "): " + str(a?.error?.message, 300) };
   const roh = a?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("") || "";
-  let o; try { o = JSON.parse(roh); } catch { return fehler("Gemini hat kein lesbares Rezept geliefert.", 502); }
+  let o; try { o = JSON.parse(roh); } catch { return { fehler: "Gemini hat kein lesbares Rezept geliefert." }; }
   const rezept = saeubern(o);
-  if(!rezept) return fehler("Gemini hat kein lesbares Rezept geliefert.", 502);
+  if(!rezept) return { fehler: "Gemini hat kein lesbares Rezept geliefert." };
   const quelle = text.match(/https?:\/\/\S+/);
   if(quelle && !rezept.quelle) rezept.quelle = quelle[0].slice(0, 500);
-  return json({ rezept, modell });
+  return { rezept, modell };
 }
 
 /* ---------- Bring! ----------
@@ -248,7 +290,7 @@ async function rezepte(env, request, id){
 
 /* ---------- Eingang ---------- */
 export default {
-  async fetch(request, env){
+  async fetch(request, env, ctx){
     const url = new URL(request.url);
     const basis = url.origin;
     const herkunft = request.headers.get("origin");
@@ -279,9 +321,10 @@ export default {
         if(env.DB) await tabellen(env.DB);
         return mit(json(r));
       }
-      if(!env.GEMINI_KEY && /^\/api\/(datei|rezept)$/.test(url.pathname)) return mit(fehler("Secret GEMINI_KEY fehlt im Worker.", 503));
+      if(!env.GEMINI_KEY && /^\/api\/(datei|datei-start|rezept)$/.test(url.pathname)) return mit(fehler("Secret GEMINI_KEY fehlt im Worker.", 503));
       if(url.pathname === "/api/datei" && request.method === "POST") return mit(await hochladen(env, request, url.searchParams.get("name")));
-      if(url.pathname === "/api/rezept" && request.method === "POST") return mit(await rezeptMachen(env, request));
+      if(url.pathname === "/api/datei-start" && request.method === "POST") return mit(await uploadStarten(env, url));
+      if(url.pathname === "/api/rezept" && request.method === "POST") return mit(await rezeptMachen(env, request, ctx));
       if(!env.DB) return mit(fehler("D1-Datenbank (Binding DB) fehlt im Worker.", 503));
       await tabellen(env.DB);
       if(url.pathname === "/api/bring" && request.method === "POST") return mit(await bringAnlegen(env, request, basis));
@@ -320,14 +363,21 @@ label.file{display:block;border:2px dashed var(--l);border-radius:12px;padding:1
 <div class="r"><button id="los">Rezept machen</button><span id="stand" class="s"></span></div></div>
 <div class="k" id="ergebnis" hidden></div>
 <div class="k"><b>Gespeichert</b><div id="liste" class="s">–</div></div>
-<div class="s" style="text-align:center">Fassung 08.11.2026 b</div>
+<div class="s" style="text-align:center">Fassung 08.11.2026 c</div>
 </main><script>
 const $=id=>document.getElementById(id);
 let CODE="";try{CODE=localStorage.getItem("recipes_code")||""}catch{}
 $("code").value=CODE;
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 async function api(pfad,opt={}){const r=await fetch(pfad,{...opt,headers:{"x-code":CODE,...(opt.headers||{})}});
- const d=await r.json().catch(()=>({fehler:"Antwort nicht lesbar ("+r.status+")"}));if(!r.ok&&r.status!==202)throw new Error(d.fehler||("Fehler "+r.status));return{status:r.status,d}}
+ const d=await r.json().catch(()=>({fehler:"Antwort nicht lesbar ("+r.status+")"}));if(d.fehler||(!r.ok&&r.status!==202))throw new Error(d.fehler||("Fehler "+r.status));return{status:r.status,d}}
+async function hoch(f){const typ=f.type||"application/octet-stream";
+ try{const{d}=await api("/api/datei-start?name="+encodeURIComponent(f.name)+"&groesse="+f.size+"&typ="+encodeURIComponent(typ),{method:"POST"});
+  const r=await fetch(d.url,{method:"POST",headers:{"X-Goog-Upload-Command":"upload, finalize","X-Goog-Upload-Offset":"0"},body:f});
+  const j=await r.json().catch(()=>null);if(!r.ok||!j?.file?.uri)throw new Error("Google: "+r.status);
+  return{name:j.file.name,uri:j.file.uri,mime:j.file.mimeType||typ}}
+ catch(e){if(f.size>95*1048576)throw new Error("Hochladen: "+e.message);
+  const{d}=await api("/api/datei?name="+encodeURIComponent(f.name),{method:"POST",headers:{"content-type":typ},body:f});return d.datei}}
 $("codeOk").onclick=async()=>{CODE=$("code").value.trim();try{localStorage.setItem("recipes_code",CODE)}catch{}
  try{const{d}=await api("/api/pruefen");$("codeS").innerHTML="✓ Code stimmt · Gemini: "+(d.gemini?"✓":"✗ ("+(d.geminiFehler||"Schlüssel fehlt")+")")+" · Datenbank: "+(d.db?"✓":"✗")+" · Modell: "+esc(d.modell);laden()}
  catch(e){$("codeS").innerHTML='<span class="f">'+esc(e.message)+"</span>"}};
@@ -337,12 +387,12 @@ let R=null,P=0;
 $("los").onclick=async()=>{const files=[...$("datei").files],text=$("text").value.trim();
  if(!files.length&&!text){$("stand").textContent="Erst eine Datei wählen oder Text einfügen.";return}
  $("los").disabled=true;const dateien=[];
- try{for(const[i,f]of files.entries()){$("stand").textContent="Lade hoch "+(i+1)+"/"+files.length+" …";
-   const{d}=await api("/api/datei?name="+encodeURIComponent(f.name),{method:"POST",headers:{"content-type":f.type||"application/octet-stream"},body:f});dateien.push(d.datei)}
+ try{for(const[i,f]of files.entries()){$("stand").textContent="Lade hoch "+(i+1)+"/"+files.length+" ("+(f.size/1048576).toFixed(0)+" MB) …";
+   dateien.push(await hoch(f))}
   const t0=Date.now();
   for(;;){$("stand").textContent="KI schaut sich das an … "+Math.round((Date.now()-t0)/1000)+" s";
    const{status,d}=await api("/api/rezept",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({dateien,text})});
-   if(status===202){if(Date.now()-t0>180000)throw new Error("Gemini braucht zu lange für das Video.");await warte(3000);continue}
+   if(status===202||d.warten){if(Date.now()-t0>180000)throw new Error("Gemini braucht zu lange für das Video.");await warte(3000);continue}
    R={...d.rezept,id:null};P=R.portionen||2;$("stand").textContent="Fertig ("+Math.round((Date.now()-t0)/1000)+" s, "+esc(d.modell)+")";zeigen();break}}
  catch(e){$("stand").innerHTML='<span class="f">'+esc(e.message)+"</span>"}
  $("los").disabled=false};

@@ -1107,10 +1107,14 @@ Bildschirmaufnahme). Erstes Rezept: ein Facebook-Reel, in dem nur gesprochen wir
 `MODELL`, Standard `gemini-flash-latest` (Alias, wandert mit). Auftrag `AUFTRAG` + `responseSchema`:
 **Mengen nie erfinden** (`menge: null` + `hinweis`), Gesprochenes zählt, US-Maße umrechnen, Gang aus `GAENGE`,
 Einheit aus `EINHEITEN`. `saeubern()` prüft jede KI-Antwort und jedes gespeicherte Rezept.
-**Ablauf:** Browser lädt jede Datei einzeln über den Worker hoch (`POST /api/datei`, Gemini Files API
-resumable, durchgereicht per `FixedLengthStream`, max. 95 MB wegen Cloudflare-Grenze 100 MB), dann
-`POST /api/rezept` mit Dateien und/oder Text; solange Gemini ein Video verarbeitet → **202**, der Browser
-fragt alle 3 s neu (nicht im Worker warten: Abruf-Grenze je Aufruf). YouTube-Links im Text gehen als Video an
+**Ablauf:** Je Datei holt der Browser beim Worker nur eine Upload-Adresse (`POST /api/datei-start`, Gemini
+Files API resumable; die Adresse trägt eine Sitzungsnummer, nicht den Schlüssel) und lädt **selbst direkt zu
+Google** hoch (Google erlaubt CORS, am 08.11. per Preflight geprüft; bis 1 GB). Anlass: **Fehler 524** beim
+ersten echten Reel (Cloudflare bricht nach 100 s ohne Antwort ab). Rückfall bis 95 MB: durch den Worker
+(`POST /api/datei`, `FixedLengthStream`). Dann `POST /api/rezept`; solange Gemini ein Video verarbeitet →
+**202**, der Browser fragt alle 3 s neu. Die KI-Antwort selbst geht **als Strom** zurück: sofort Kopfzeilen,
+alle 10 s ein Leerzeichen, am Ende das JSON (`{rezept}` oder `{fehler}`, dann mit Status 200) — sonst 524 bei
+langer KI-Zeit. YouTube-Links im Text gehen als Video an
 Gemini. Höchstens 30 Importe je Tag (`importe`). Zugang nur mit `x-code` = Secret `FAMILIEN_CODE`; CORS nur
 für `https://strakekine.github.io`.
 **Bring!:** `POST /api/bring` legt die Liste 24 h als öffentliche Seite `/bring/<id>` mit schema.org/Recipe ab

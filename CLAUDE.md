@@ -26,7 +26,7 @@ Acht voneinander unabhängige Dinge (Übersicht für Menschen: `README.md`) lieg
   Anstellgut-Fütterung, laufender Teig mit echten Zeiten. Einzeldatei. Details unten.
 - **`vokabeln.html`** — Französisch-Vokabeltrainer für Emil und Leo (jeder sein iPhone).
   Lektionen kommen aus eingescannten PDFs, die Claude abtippt. Einzeldatei. Details unten.
-- **Recipes** (`tools/rezepte-worker.js`, App folgt als `rezepte.html`) — Rezepte aus PDF,
+- **`rezepte.html`** „Recipes“ (+ Worker `tools/rezepte-worker.js`) — Rezepte aus PDF,
   Screenshot, Foto oder Reel (Bildschirmaufnahme mit Ton) per KI auseinandernehmen, Personen
   umrechnen, Einkaufsliste nach Bring!. Details unten.
 - **`pine/`** — TradingView Pine-Script-Indikatoren. Eigener Kontext, eigene Regeln:
@@ -1092,7 +1092,7 @@ verketten, das hat einmal einen roten Test verschluckt):
   einem Wegwerf-Skript.
 - `node test/vokabeln-sprechen.mjs` — Spracherkennung mit iOS-Attrappe (siehe Sprechen).
 
-## Recipes (`tools/rezepte-worker.js`) — Stand und Regeln
+## Recipes (`rezepte.html` + `tools/rezepte-worker.js`) — Stand und Regeln
 
 Nutzer: Laurent (Familie). Name vom Nutzer: „Recipes“ (zuerst „Recipies“ geschrieben, auf seinen Wunsch korrigiert).
 **Kern, vom Nutzer so festgelegt (08.11.2026):** PDF, Screenshot/Foto oder Reel einsetzen → Standardrezept;
@@ -1139,13 +1139,29 @@ für `https://strakekine.github.io`.
 und gibt den Deeplink `api.getbring.com/rest/bringrecipes/deeplink?url=…&source=web` zurück (Bring!s Import
 für Rezeptseiten, Doku von 2020/2022). **Noch nie echt ausprobiert** — Bring! ist in der Claude-Umgebung
 gesperrt; erster Test vom iPhone über die Testseite. Klappt es nicht: Erinnerungen per Kurzbefehl.
-**Testseite:** `GET /` des Workers (Code, Datei/Text → Rezept, Personen ±, Speichern, Bring!), bis
-`rezepte.html` steht. Fassung unten auf der Seite.
+**Testseite:** `GET /` des Workers (Code, Datei/Text → Rezept, Personen ±, Speichern, Bring!) — bleibt als Notzugang.
+**App `rezepte.html`** (08.11.2026, Fassung „08.11.2026 a“; `FASSUNG` bei jeder Änderung hochzählen), Einzeldatei auf
+GitHub Pages, spricht `WORKER` (`recipes.rjtp6r9s9h.workers.dev`) mit `x-code` an (CORS nur für strakekine.github.io —
+darum lädt der Browser-Test die Seite unter dieser Adresse). Zwei Reiter **Rezepte** (Liste mit Suche über Titel und
+Zutaten, „+ Rezept“ = Datei/Text → KI → **Vorschau im Bearbeiten-Formular, erst dann speichern**, „Von Hand eintippen“)
+und **Einkauf**. Rezept-Ansicht: Personen ±, Zutaten (ohne Menge gelb mit „?“), Schritte, Notiz, „▶ Original ansehen“,
+„🛒 Auf die Einkaufsliste“, „Direkt in Bring!“, Bearbeiten, Löschen. **Bearbeiten als Text**: eine Zutat je Zeile
+(`zeileLesen`: „200 g Mehl“, „2–3 Zehen Knoblauch“, „1 1/2 EL Öl“, „½ TL“, „Salz (nach Gefühl)“), „## Name“ = Gruppe;
+der Gang bleibt von der KI, neue Zutaten rät `gangRaten`. Mengen: `mengeText` (Personen-Faktor, Prise/Msp skalieren
+nicht, ab 100 g/ml auf 5er, ab 1000 → kg/l, Stückiges auf ½). **Einkaufsliste nur im Handy** (`recipes_einkauf`;
+geteilt wird über Bring!): `einkaufDazu` zählt gleiche Zutat + Einheitenfamilie (g/kg, ml/l) zusammen, ohne Menge →
+„(+ etwas)“, merkt die Rezepte, nach Gängen sortiert; „Hab ich immer da“ (`recipes_vorrat`, Standard Salz, Pfeffer, Öl,
+Olivenöl, Wasser, Zucker; ganze Wörter, „Öl“ trifft nicht „Olivenöl“) bleibt weg. Rezepte liegen auf dem Server, Kopie
+für offline in `recipes_rezepte`; Code in `recipes_code`. iPhone-Regeln der Pizza-App; Suche liegt außerhalb der neu
+gebauten Liste.
 **Einrichtung (Nutzer):** Worker bei Cloudflare, Secrets `GEMINI_KEY` (aistudio.google.com) und
 `FAMILIEN_CODE`, D1-Binding `DB` (Tabellen legt der Worker an). Stand 08.11.2026: **vom Nutzer eingerichtet**
 (`recipes.rjtp6r9s9h.workers.dev`), Gemini-Schlüssel beginnt mit `AQ.` (neues Format, funktioniert mit
 `x-goog-api-key`), Direkt-Upload eines 50-MB-Reels geklappt. **Erstes echtes Rezept am 08.11. um 21:50 mit Fassung g angekommen**
 (gekürzte .mov-Aufnahme des Facebook-Reels): „Croissant Mozzarella-Sandwich“, 9 Zutaten, 5 Schritte, nur das Croissant mit
 Menge — der Koch nennt keine Mengen, also alles gelb statt erfunden, wie gewollt. Bring!-Test steht noch aus.
-**Testen:** `node test/rezepte-worker.mjs` (Gemini nachgebaut, D1 über `node:sqlite`): Zugang, Upload-Kopfzeilen,
-202, Säubern, Tagesgrenze, Speichern, Bring!-Seite. Gegenprobe gemacht.
+**Testen** (jeder mit eigenem Rückgabewert): `node test/rezepte-worker.mjs` (Gemini nachgebaut, D1 über `node:sqlite`:
+Zugang, Upload, 202, Säubern, Tagesgrenze, Speichern, Bring!-Seite, Modellwahl, Abholen), `node test/rezepte.mjs` (Logik
+der App, schneidet `Logik`…`Oberfläche` aus) und `node --no-warnings test/rezepte-oberflaeche.mjs` (Browser, 390 px, gegen
+den echten Worker-Code: Code, KI → Vorschau → Speichern, Korrektur, Personen, Einkauf, Bring!, Neuladen, Suche,
+Löschen; `BILDER=<ordner>` speichert Bildschirmfotos). Gegenproben gemacht.

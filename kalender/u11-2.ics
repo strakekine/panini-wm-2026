@@ -94,9 +94,9 @@ END:VEVENT
 BEGIN:VEVENT
 UID:flf-6687085@fc-koeppchen
 DTSTAMP:20260701T000000Z
-DTSTART:20261128T230001Z
-DTEND:20261129T003001Z
-SUMMARY:⚽ Daring Echternach II – Koeppchen POU 2 · Uhrzeit offen
+DTSTART:20261129T093000Z
+DTEND:20261129T110000Z
+SUMMARY:⚽ Daring Echternach II – Koeppchen POU 2
 LOCATION:Terrain Breil (Echternach\, synth.)
 DESCRIPTION:U11 Poussins S7 Tour 1\, Spieltag 8\n\n⚠️ Dieser Kalender z
  ieht um und wird nur noch bis Ende 2026 aktualisiert. Bitte neu abonnieren
@@ -126,10 +126,10 @@ DESCRIPTION:⚠️ Dieser Kalender zieht um und wird nur noch bis Ende 2026
  ach diesen alten Kalender löschen.
 END:VEVENT
 BEGIN:VEVENT
-UID:umzug-20261128@fc-koeppchen
+UID:umzug-20261129@fc-koeppchen
 DTSTAMP:20261030T000000Z
-DTSTART;VALUE=DATE:20261128
-DTEND;VALUE=DATE:20261129
+DTSTART;VALUE=DATE:20261129
+DTEND;VALUE=DATE:20261130
 SUMMARY:⚠️ FC Koeppchen: Kalender bitte neu abonnieren
 DESCRIPTION:⚠️ Dieser Kalender zieht um und wird nur noch bis Ende 2026
   aktualisiert. Bitte neu abonnieren: App öffnen (https://fckoeppchen.gith

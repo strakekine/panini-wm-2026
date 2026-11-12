@@ -118,9 +118,9 @@ END:VEVENT
 BEGIN:VEVENT
 UID:flf-6716085@fc-koeppchen
 DTSTAMP:20260701T000000Z
-DTSTART:20261127T230001Z
-DTEND:20261128T003001Z
-SUMMARY:⚽ Koeppchen PUP 1 – US Moutfort-Medingen I · Uhrzeit offen
+DTSTART:20261128T140000Z
+DTEND:20261128T153000Z
+SUMMARY:⚽ Koeppchen PUP 1 – US Moutfort-Medingen I
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:U9 Pupilles S6 Tour 1\, Spieltag 8\n\n⚠️ Dieser Kalender zi
  eht um und wird nur noch bis Ende 2026 aktualisiert. Bitte neu abonnieren:
@@ -150,10 +150,10 @@ DESCRIPTION:⚠️ Dieser Kalender zieht um und wird nur noch bis Ende 2026
  ach diesen alten Kalender löschen.
 END:VEVENT
 BEGIN:VEVENT
-UID:umzug-20261127@fc-koeppchen
+UID:umzug-20261128@fc-koeppchen
 DTSTAMP:20261030T000000Z
-DTSTART;VALUE=DATE:20261127
-DTEND;VALUE=DATE:20261128
+DTSTART;VALUE=DATE:20261128
+DTEND;VALUE=DATE:20261129
 SUMMARY:⚠️ FC Koeppchen: Kalender bitte neu abonnieren
 DESCRIPTION:⚠️ Dieser Kalender zieht um und wird nur noch bis Ende 2026
   aktualisiert. Bitte neu abonnieren: App öffnen (https://fckoeppchen.gith

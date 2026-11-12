@@ -127,9 +127,9 @@ END:VEVENT
 BEGIN:VEVENT
 UID:flf-6345031@fc-koeppchen
 DTSTAMP:20260701T000000Z
-DTSTART:20261127T230001Z
-DTEND:20261128T004501Z
-SUMMARY:⚽ Koeppchen MIN 1 – Union Remich/Bous I · Uhrzeit offen
+DTSTART:20261128T153000Z
+DTEND:20261128T171500Z
+SUMMARY:⚽ Koeppchen MIN 1 – Union Remich/Bous I
 LOCATION:Am Ga (Wormeldange\, synth.)
 DESCRIPTION:U13 Minimes Cl3 S2 Phase 2\, Spieltag 3\n\n⚠️ Dieser Kalend
  er zieht um und wird nur noch bis Ende 2026 aktualisiert. Bitte neu abonni
@@ -186,10 +186,10 @@ DESCRIPTION:⚠️ Dieser Kalender zieht um und wird nur noch bis Ende 2026
  ach diesen alten Kalender löschen.
 END:VEVENT
 BEGIN:VEVENT
-UID:umzug-20261127@fc-koeppchen
+UID:umzug-20261128@fc-koeppchen
 DTSTAMP:20261030T000000Z
-DTSTART;VALUE=DATE:20261127
-DTEND;VALUE=DATE:20261128
+DTSTART;VALUE=DATE:20261128
+DTEND;VALUE=DATE:20261129
 SUMMARY:⚠️ FC Koeppchen: Kalender bitte neu abonnieren
 DESCRIPTION:⚠️ Dieser Kalender zieht um und wird nur noch bis Ende 2026
   aktualisiert. Bitte neu abonnieren: App öffnen (https://fckoeppchen.gith

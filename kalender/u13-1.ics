@@ -138,6 +138,18 @@ DESCRIPTION:U13 Minimes Cl3 S2 Phase 2\, Spieltag 3\n\n⚠️ Dieser Kalend
  hen.
 END:VEVENT
 BEGIN:VEVENT
+UID:flf-8000000006@fc-koeppchen
+DTSTAMP:20260701T000000Z
+DTSTART:20261129T083000Z
+DTEND:20261129T101500Z
+SUMMARY:⚽ Hallenturnier: FC Longwy – Koeppchen MIN 1
+LOCATION:Longwy
+DESCRIPTION:Vom Trainer eingetragen\n\n⚠️ Dieser Kalender zieht um und 
+ wird nur noch bis Ende 2026 aktualisiert. Bitte neu abonnieren: App öffne
+ n (https://fckoeppchen.github.io/)\, Mannschaft antippen\, „📅 … im 
+ Kalender abonnieren“. Danach diesen alten Kalender löschen.
+END:VEVENT
+BEGIN:VEVENT
 UID:flf-6345043@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261204T230001Z

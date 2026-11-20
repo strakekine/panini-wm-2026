@@ -598,6 +598,11 @@ function absorb(steps, done, target){
   }
 }
 
+/* Auffrischen nötig? Nach Kalendertagen wie die Anzeige „Tag 7": erst ab Tag 8 beim Ansetzen.
+   Vorher in Stunden (> 7 × 24 h) — das widersprach am Fütterungstag dem Hinweis „nimm den Rest
+   vom Reduzieren, dann sparst Du das Auffrischen" (20.11.: gefüttert 13.11., Auffrischen um 16:34). */
+function needsRefresh(fed, sourStart){ return !!fed && starterDays(fed, sourStart) > REFRESH_DAYS; }
+
 /* Vorschau eines Plans: entscheidet, ob vorher aufgefrischt werden muss. Gemessen wird
    am Zeitpunkt des Sauerteig-Ansatzes, nicht an heute. fed = letzte Fütterung (ms) oder null.
    sel = übernommener Planvorschlag {refresh, ds}: dessen Dauern und Auffrisch-Entscheidung gelten. */
@@ -613,7 +618,7 @@ function planFor(tpl, flour, start, fed, sel){
   let tl = timeline(steps, [], start);
   const si = steps.findIndex(s => s.sour);
   let refresh = false;
-  if(si >= 0 && fed) refresh = tl[si].t - fed > REFRESH_DAYS*DAY;
+  if(si >= 0 && fed) refresh = needsRefresh(fed, tl[si].t);
   if(refresh){ steps = makeSteps(tpl, flour, true); tl = timeline(steps, [], start); }
   return { steps, tl, refresh };
 }
@@ -696,10 +701,10 @@ function feasibleEnds(tpl, flour, endLo, endHi, fed, week, now){
   const out = [], step = 30*60e3;
   for(let e = Math.floor(endHi / step) * step; e >= endLo; e -= step){
     let sc = scheduleBack(plain, e, isB, now, 2500), steps = plain;
-    if(sc && withRef && sc.t[si] - fed > REFRESH_DAYS*DAY) sc = null;
+    if(sc && withRef && needsRefresh(fed, sc.t[si])) sc = null;
     if(!sc && withRef){
       sc = scheduleBack(withRef, e, isB, now, 2500); steps = withRef;
-      if(sc && sc.t[si+1] - fed <= REFRESH_DAYS*DAY) sc = null;
+      if(sc && !needsRefresh(fed, sc.t[si+1])) sc = null;
     }
     if(sc) out.push({ steps, t:sc.t, d:sc.d, end:e, refresh:steps === withRef });
   }

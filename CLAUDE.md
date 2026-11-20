@@ -780,7 +780,8 @@ aus den echten Zeiten im Verlauf, nicht aus Konstanten.
 reduzieren + 50 g Roggenvollkorn + 50 g Wasser, 2–3 h warm, dann Kühlschrank). Anstellgut =
 10 % des Sauerteigmehls. Sauerteigmehl ≈ 20 % des Gesamtmehls bei Weizen (Roggenbrote mehr,
 das Rezept gewinnt). Liegt die Fütterung beim **Ansetzen** (nicht heute) mehr als 7 Tage
-zurück, wird vorher aufgefrischt (4–8 h); das Auffrischen zählt als Fütterung. Küche ≈ 24 °C,
+zurück — gezählt in **Kalendertagen** wie die Anzeige „Tag 7“, also erst ab Tag 8 (`needsRefresh`;
+in Stunden gezählt widersprach es am Fütterungstag dem Hinweis „nimm den Rest“) —, wird vorher aufgefrischt (4–8 h); das Auffrischen zählt als Fütterung. Küche ≈ 24 °C,
 Backofen Ober-/Unterhitze mit Gusseisentopf, Kneter Halo Core. Arbeit inkl. Weg: Mo/Di/Do
 7–16, Mi/Fr 7–13; Schlaf 21–6 (Ausgangswert `WEEK`, einstellbar unter „Meine Woche“). Brot darf bis ~24 h vor dem Essen
 fertig sein; je Rezept als Essfenster `eat:[min,max]` h nach dem Backen (Roggen frühestens 24 h).

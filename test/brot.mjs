@@ -68,6 +68,9 @@ nah(M.totals(M.tplById("hefe").steps).hyd, 0.68, "hefe: Hydration 68 %");
   ok(!M.planFor(w, 500, start, null).refresh, "ohne Fütterungsdatum kein Auffrischen");
   ok(!M.planFor(w, 500, start, start - 6*DAY).refresh, "6 Tage: direkt aus dem Kühlschrank");
   ok(!M.planFor(w, 500, start, start - 7*DAY).refresh, "genau 7 Tage: noch ohne Auffrischen");
+  /* Der Fall vom 20.11.: gefüttert Fr 13.11. mittags, Ansetzen Fr 20.11. 16:34 = Tag 7 → kein Auffrischen */
+  ok(!M.planFor(w, 500, at(2026, 11, 20, 16, 34), at(2026, 11, 13, 12)).refresh, "Tag 7 am Nachmittag (über 7 × 24 h): noch ohne Auffrischen");
+  ok(M.planFor(w, 500, at(2026, 11, 21, 7), at(2026, 11, 13, 22)).refresh, "Tag 8 früh (unter 8 × 24 h): auffrischen");
   const p = M.planFor(w, 500, start, start - 8*DAY);
   ok(p.refresh && p.steps[0].refresh && p.steps[1].sour, "8 Tage: Auffrischen vor dem Sauerteig");
   nah(p.tl[1].t - p.tl[0].t, 6*H, "Auffrischen 4–8 h, Mitte 6 h");

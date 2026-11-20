@@ -608,10 +608,14 @@ function needsRefresh(fed, sourStart){ return !!fed && starterDays(fed, sourStar
    sel = übernommener Planvorschlag {refresh, ds}: dessen Dauern und Auffrisch-Entscheidung gelten. */
 function planFor(tpl, flour, start, fed, sel){
   if(sel){
-    const steps = makeSteps(tpl, flour, sel.refresh);
-    if(Array.isArray(sel.ds) && sel.ds.length === steps.length){
-      steps.forEach((st, i) => { if(i < steps.length - 1) st.p = sel.ds[i]; });
-      return { steps, tl:timeline(steps, [], start), refresh:sel.refresh, sel:true };
+    let refresh = sel.refresh, ds = sel.ds;
+    /* Der übernommene Plan wollte auffrischen, nötig ist es inzwischen nicht mehr (gerade gefüttert,
+       oder der Plan stammt aus der alten Stundenrechnung): Auffrischen samt seiner Dauer streichen. */
+    if(refresh && Array.isArray(ds) && fed && !needsRefresh(fed, start)){ refresh = false; ds = ds.slice(1); }
+    const steps = makeSteps(tpl, flour, refresh);
+    if(Array.isArray(ds) && ds.length === steps.length){
+      steps.forEach((st, i) => { if(i < steps.length - 1) st.p = ds[i]; });
+      return { steps, tl:timeline(steps, [], start), refresh, sel:true };
     }
   }
   let steps = makeSteps(tpl, flour, false);

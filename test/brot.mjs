@@ -71,6 +71,11 @@ nah(M.totals(M.tplById("hefe").steps).hyd, 0.68, "hefe: Hydration 68 %");
   /* Der Fall vom 20.11.: gefüttert Fr 13.11. mittags, Ansetzen Fr 20.11. 16:34 = Tag 7 → kein Auffrischen */
   ok(!M.planFor(w, 500, at(2026, 11, 20, 16, 34), at(2026, 11, 13, 12)).refresh, "Tag 7 am Nachmittag (über 7 × 24 h): noch ohne Auffrischen");
   ok(M.planFor(w, 500, at(2026, 11, 21, 7), at(2026, 11, 13, 22)).refresh, "Tag 8 früh (unter 8 × 24 h): auffrischen");
+  /* Übernommener Plan mit Auffrischen, danach gefüttert: Auffrischen fällt weg, die übrigen Dauern bleiben */
+  const mitRef = M.makeSteps(w, 500, true), dsRef = mitRef.map(s => s.h[0]);
+  const pz = M.planFor(w, 500, at(2026, 11, 20, 18), at(2026, 11, 20, 17), { refresh:true, ds:dsRef });
+  ok(!pz.refresh && pz.steps[0].sour && pz.steps[0].p === dsRef[1], "übernommener Plan: nach dem Füttern ohne Auffrischen, Dauern verschoben");
+  ok(M.planFor(w, 500, at(2026, 11, 22, 18), at(2026, 11, 13, 17), { refresh:true, ds:dsRef }).refresh, "übernommener Plan: Auffrischen bleibt, wenn es wirklich nötig ist");
   const p = M.planFor(w, 500, start, start - 8*DAY);
   ok(p.refresh && p.steps[0].refresh && p.steps[1].sour, "8 Tage: Auffrischen vor dem Sauerteig");
   nah(p.tl[1].t - p.tl[0].t, 6*H, "Auffrischen 4–8 h, Mitte 6 h");

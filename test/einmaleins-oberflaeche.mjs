@@ -202,6 +202,9 @@ await pg.click('[data-spiel="memory"]');
 ok(await pg.locator("#stufenKnoepfe button").count() === 3 && await pg.locator('#stufenKnoepfe button.an[data-stufewahl="mittel"]').count() === 1, "Stufenwahl mit gemerkter Stufe");
 await pg.click('[data-stufewahl="leicht"]');
 ok(await pg.evaluate(() => G.mkarten.length) === 8 && await pg.evaluate(() => S.stufen.memory) === "leicht", "Memory leicht: 4 Paare");
+/* Rechnungs- und Ergebniskarten gleich groß beschriftet (Anlass: Klasse „aufgabe“ zog die riesige Aufgabenschrift) */
+const groessen = await pg.evaluate(() => { G.offen = G.mkarten.map((_, i) => i); memoryMalen(); return [...document.querySelectorAll(".memkarte")].map(b => getComputedStyle(b).fontSize); });
+ok(new Set(groessen).size === 1, "alle Memory-Karten gleiche Schrift: " + [...new Set(groessen)].join(", "));
 await pg.evaluate(() => spielAbbrechen());
 await pg.click('[data-spiel="memory"]'); await pg.click('[data-stufewahl="schwer"]');
 ok(await pg.evaluate(() => G.mkarten.length) === 16, "Memory schwer: 8 Paare");

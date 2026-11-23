@@ -134,6 +134,7 @@ for(let x = 0; x < 30; x++){
   const mk = M.memoryKarten(M.cardsFor("mix", [2,3,4], 10), rnd);
   const erg = mk.filter(k => k.art === "ergebnis").map(k => k.text);
   if(mk.length !== 12 || new Set(erg).size !== 6){ ok(false, "Memory: 12 Karten, 6 verschiedene Ergebnisse"); break; }
+  if(mk.filter(k => k.art === "aufgabe").length !== 6){ ok(false, "Memory: genau halb Rechnungen, halb Ergebnisse"); break; }
 }
 ok(M.memoryKarten(M.cardsFor("mal", [1], 3), rnd).length === 6, "Memory mit wenigen Karten: weniger Paare");
 ok(M.memoryKarotten(6, 6) === 9 && M.memoryKarotten(6, 11) === 7 && M.memoryKarotten(6, 20) === 5, "Memory-Karotten");

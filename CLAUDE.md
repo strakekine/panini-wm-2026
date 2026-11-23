@@ -942,6 +942,15 @@ zum Anziehen, mehrere Mini-Spiele, Sammelbares sind die üblichen Antreiber):
   Spielende, beim Abbrechen, Füttern, Kaufen; das vergibt auch **Abzeichen** (`ABZEICHEN`, 17 Stück, `abzeichenNeu`,
   Kennzahlen aus `statistik()`, Speicher `_abz`, Zähler `_stat`). Hinweise außerhalb der Ergebnisseite als `toast`
   (oben, `pointer-events:none` — unten verdeckte er die Knöpfe).
+**Fassung e** (vom Nutzer): **Stalltiere** (`TIERE`: Küken 30, Huhn 40, Hase 50, Katze 60, Igel 70, Schaf 90, Hund 100;
+Laden-Karte „Für den Stall“, `tierKaufen`, einmal gekauft immer da) wohnen in der Szene (`tiereSVG`, Plätze `TIER_ORT`;
+Schaf hinten am Zaun vor dem Pferd gezeichnet, die anderen vorne), Schwanz/Ohren bewegen sich, hüpfen bei „froh“ mit;
+Abzeichen „Tierfreund“. **Schwierigkeit je Spiel** (`SCHWIERIG`, Fenster `#stufeWahl` vor jedem Spiel der Spielwiese,
+gemerkt in `S.stufen`): Karotten ×1 / ×1,5 / ×2 (`mitFaktor`). Rennen: Wirbelwind 7 / 5 / 3,5 s je Antwort (`RENN_MS`;
+das Heuballen-Tempo spielt dort keine Rolle mehr). Wahr oder falsch: falsches Ergebnis am weitesten / zufällig / am
+knappsten daneben. Memory: 4 / 6 / 8 Paare (`MEM_PAARE`, Raster passt sich der Höhe an). Rekorde und deren Abzeichen
+zählen bei Wahr/falsch erst ab Mittel, beim Memory nur mit 6 Paaren. **Achtung Klassennamen:** `.aufgabe` ist die
+große Aufgabenschrift — Memory-Karten heißen darum `m-aufgabe`/`m-ergebnis` (vorher waren manche Rückseiten riesig).
 **Speicher:** `einmaleins_v1` (+ `_p`, `_days`, `_stars`, `_shop`, `_med`, `_exp`, `_dirty`, `_snooze`),
 Sicherung als Datei über `navigator.share`, Erinnerung nach einer Woche ungesichert.
 **Fassung** `FASSUNG` unten im Startbild, bei jeder Änderung hochzählen.

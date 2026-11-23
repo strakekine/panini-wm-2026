@@ -148,8 +148,8 @@ ok(await pg.evaluate(() => SHOP.kwear.includes("reithelm") && !SHOP.kwear.includ
 await pg.click("#ladenZu");
 
 /* Pferderennen gewinnen */
-await pg.evaluate(() => { RENN_MS[S.tempo] = 60000; });
-await pg.click('[data-spiel="rennen"]');
+await pg.evaluate(() => { RENN_MS.mittel = 60000; });
+await pg.click('[data-spiel="rennen"]'); await pg.click('[data-stufewahl="mittel"]');
 for(let x = 0; x < 30 && await view() === "spiel"; x++){
   await pg.waitForFunction(() => !G || G.ende || (G.aktiv && !G.lock));
   if(await view() !== "spiel") break;
@@ -164,15 +164,15 @@ ok(await pg.evaluate(() => STAT.siege === 1 && !!ABZ.sieg1), "Sieg gezählt, Abz
 await pg.click("#ergZurueck");
 
 /* Pferderennen verlieren: Gegner sehr schnell */
-await pg.evaluate(() => { RENN_MS[S.tempo] = 30; });
-await pg.click('[data-spiel="rennen"]');
+await pg.evaluate(() => { RENN_MS.mittel = 30; });
+await pg.click('[data-spiel="rennen"]'); await pg.click('[data-stufewahl="mittel"]');
 await pg.waitForFunction(() => VIEW === "ergebnis", null, { timeout:4000 });
 ok((await pg.textContent("#ergText")).includes("Wirbelwind war diesmal schneller"), "Rennen verloren");
-await pg.evaluate(() => { RENN_MS[S.tempo] = 5000; });
+await pg.evaluate(() => { RENN_MS.mittel = 5000; });
 await pg.click("#ergZurueck");
 
 /* Wahr oder falsch: richtige Antworten geben Punkte, Ende nach Ablauf */
-await pg.click('[data-spiel="blitz"]');
+await pg.click('[data-spiel="blitz"]'); await pg.click('[data-stufewahl="mittel"]');
 for(let x = 0; x < 5; x++){
   await pg.waitForFunction(() => G && !G.lock);
   const wahr = await pg.evaluate(() => G.aussage.wahr);
@@ -186,7 +186,7 @@ ok((await pg.textContent("#ergText")).includes("5 Punkte"), "Ergebnis 5 Punkte")
 await pg.click("#ergZurueck");
 
 /* Memory lösen (Paare aus der App, kein Wissen über den Inhalt) */
-await pg.click('[data-spiel="memory"]');
+await pg.click('[data-spiel="memory"]'); await pg.click('[data-stufewahl="mittel"]');
 const paare = await pg.evaluate(() => { const m = {}; G.mkarten.forEach((k, i) => (m[k.paar] = m[k.paar] || []).push(i)); return Object.values(m); });
 ok(paare.length === 6 && paare.every(p => p.length === 2), "6 Paare");
 for(const [i, j] of paare){
@@ -196,6 +196,30 @@ await pg.waitForFunction(() => VIEW === "ergebnis", null, { timeout:3000 });
 ok(await pg.evaluate(() => STAT.memoryBest === 6 && !!ABZ.memory), "Memory in 6 Zügen, Abzeichen Gedächtnis-Ass");
 ok(await pg.evaluate(() => TQ.fertig.includes("memory")), "Tagesaufgabe Memory erledigt");
 await pg.click("#ergZurueck");
+
+/* Schwierigkeit: Auswahl merkt sich die Stufe, Memory leicht = 4 Paare, schwer = 8 */
+await pg.click('[data-spiel="memory"]');
+ok(await pg.locator("#stufenKnoepfe button").count() === 3 && await pg.locator('#stufenKnoepfe button.an[data-stufewahl="mittel"]').count() === 1, "Stufenwahl mit gemerkter Stufe");
+await pg.click('[data-stufewahl="leicht"]');
+ok(await pg.evaluate(() => G.mkarten.length) === 8 && await pg.evaluate(() => S.stufen.memory) === "leicht", "Memory leicht: 4 Paare");
+await pg.evaluate(() => spielAbbrechen());
+await pg.click('[data-spiel="memory"]'); await pg.click('[data-stufewahl="schwer"]');
+ok(await pg.evaluate(() => G.mkarten.length) === 16, "Memory schwer: 8 Paare");
+const paare8 = await pg.evaluate(() => { const m = {}; G.mkarten.forEach((k, i) => (m[k.paar] = m[k.paar] || []).push(i)); return Object.values(m); });
+for(const [i, j] of paare8){ await pg.click(`[data-mem="${i}"]`); await pg.click(`[data-mem="${j}"]`); }
+await pg.waitForFunction(() => VIEW === "ergebnis", null, { timeout:3000 });
+ok(await pg.evaluate(() => G.karotten) === 18 && (await pg.textContent("#ergText")).includes("×2"), "schwer: Karotten ×2 (9 → 18)");
+await pg.click("#ergZurueck");
+
+/* Stalltiere: kaufen, erscheinen in der Szene */
+await pg.evaluate(() => { SHOP.k = 100; persist(); });
+await pg.click("#zumLaden");
+await pg.click('[data-tkaufen="katze"]');
+ok(await pg.evaluate(() => SHOP.owned.includes("katze") && SHOP.k === 40), "Katze gekauft");
+ok(await pg.locator("#ladenPferd .tier").count() === 1, "Katze wohnt in der Szene");
+ok(await pg.locator('[data-tkaufen="hund"]').isDisabled(), "Hund zu teuer");
+await pg.click("#ladenZu");
+ok(await pg.locator("#homePferd .tier").count() === 1, "Katze auch im Startbild");
 
 /* Name tippen: Tastatur darf nicht wegklappen (Feld wird nicht neu gebaut) */
 await pg.evaluate(() => { document.getElementById("einst").open = true; });

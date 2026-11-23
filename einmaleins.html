@@ -50,6 +50,13 @@
   .feier.an{display:flex}
   .feier .karte{max-width:420px;width:100%;text-align:center;animation:medaille .6s ease}
   .feier h2{font-size:26px;margin:4px 0 8px}
+  .stufenwahl{display:grid;gap:10px;margin:10px 0}
+  .stufenwahl button{border:2px solid var(--linie);background:#fff;border-radius:18px;padding:12px 14px;text-align:left;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;box-shadow:0 3px 0 var(--linie)}
+  .stufenwahl button i{font-style:normal;font-size:34px}
+  .stufenwahl button b{display:block;font-size:20px}
+  .stufenwahl button span{font-size:14px;color:var(--muted)}
+  .stufenwahl button em{font-style:normal;font-weight:900;color:#e2731f;font-size:18px;white-space:nowrap}
+  .stufenwahl button.an{border-color:#f29b1d;background:#fff6e8}
   .ware .lieb{font-size:12px;color:#e2731f;font-weight:800}
   .spiele{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
   @media (max-width:560px){ .spiele{grid-template-columns:1fr} }
@@ -86,12 +93,12 @@
   .renner.gegner{transition:none}
   .renner svg{width:100%;height:100%;display:block;overflow:visible}
   .renner.hops svg{animation:huepfen .4s ease}
-  .memgrid{position:absolute;inset:2% 3%;grid-template-columns:repeat(4,1fr);gap:clamp(8px,1.6vw,14px);align-content:center}
+  .memgrid{position:absolute;top:2%;bottom:2%;left:50%;transform:translateX(-50%);width:94%;grid-template-columns:repeat(4,1fr);gap:clamp(8px,1.6vw,14px);align-content:center}
   .memkarte{aspect-ratio:1.15;border:0;border-radius:16px;font-size:clamp(20px,4.6vw,38px);font-weight:900;box-shadow:0 4px 0 rgba(0,0,0,.14);
     background:repeating-linear-gradient(100deg,transparent 0 9px,rgba(160,110,20,.18) 9px 11px),linear-gradient(var(--heu),var(--heu2))}
   .memkarte .mz{display:inline-block;width:1.4em;height:1.4em;line-height:1.4em;border-radius:50%;background:rgba(255,248,225,.85);color:#b5763c}
   .memkarte.offen{background:#fff;color:var(--text)}
-  .memkarte.offen.ergebnis{background:#e7f2ff;color:#2f6fc0}
+  .memkarte.offen.m-ergebnis{background:#e7f2ff;color:#2f6fc0}
   .memkarte.gefunden{background:#dff5d8 !important;color:#2d7a3e !important}
   .blitzpad{grid-template-columns:1fr 1fr;gap:14px;max-width:600px;width:100%;margin:0 auto;padding:10px 16px 20px}
   .blitzpad button{border:0;border-radius:22px;font-size:26px;font-weight:900;color:#fff;padding:28px 0;box-shadow:0 5px 0 rgba(0,0,0,.2)}
@@ -221,6 +228,10 @@
   .pferd.froh .k-arm-r{transform:rotate(-150deg)}
   .pferd.froh .kind-hops{animation:huepfen .55s ease 2}
   .pferd.traurig .k-kopf{transform:rotate(-8deg) translateY(2px)}
+  .tier{transform-box:fill-box;transform-origin:50% 100%}
+  .pferd.froh .tier{animation:huepfen .5s ease 2}
+  .tier-schwanz{transform-box:fill-box;transform-origin:0% 100%;animation:wedeln 1.3s ease-in-out infinite}
+  .tier-ohr{transform-box:fill-box;transform-origin:30% 100%;animation:wedeln 3.4s ease-in-out infinite}
   .pferd .pf{animation:atmen 3.2s ease-in-out infinite;transform-box:view-box;transform-origin:110px 180px}
   .pferd .schweif{animation:wedeln 2.6s ease-in-out infinite;transform-box:view-box;transform-origin:52px 104px}
   .pferd .auge{animation:blinzeln 5s infinite;transform-box:view-box;transform-origin:163px 55px}
@@ -294,7 +305,7 @@
       <button class="spielknopf" data-spiel="blitz"><b>⚡</b>Wahr oder falsch?<small>60 Sekunden — stimmt das?</small></button>
       <button class="spielknopf" data-spiel="memory"><b>🧠</b>Memory<small>Finde Aufgabe und Ergebnis</small></button>
     </div>
-    <p class="klein">Die Spiele üben mit den Reihen von „Was üben wir?“ und bringen Karotten. Sicher ⭐ werden Aufgaben aber nur bei Heuballen und Rechnen.</p>
+    <p class="klein">Vor jedem Spiel wählst du, wie schwer: 🌱 Leicht, 🌿 Mittel (🥕 ×1,5) oder 🌳 Schwer (🥕 ×2). Die Spiele üben mit den Reihen von „Was üben wir?“. Sicher ⭐ werden Aufgaben aber nur bei Heuballen und Rechnen.</p>
   </div>
 
   <div class="karte">
@@ -422,12 +433,24 @@
     <p class="klein">Pro Platz (Kopf, Oberteil, Unterteil, Schuhe, Extra) trägst du ein Teil — Neues ersetzt das alte, das alte bleibt deins.</p>
   </div>
   <div class="karte">
+    <h2>Für den Stall 🐾</h2>
+    <div class="waren" id="tiere"></div>
+    <p class="klein">Wer gekauft ist, wohnt für immer mit auf der Wiese — und freut sich mit, wenn du richtig rechnest.</p>
+  </div>
+  <div class="karte">
     <h2>Für dein Pferd 🎀</h2>
     <div class="waren" id="waren"></div>
   </div>
 </div></section>
 
 <div class="toast" id="toast"></div>
+
+<!-- Schwierigkeit wählen -->
+<div class="feier" id="stufeWahl"><div class="karte">
+  <h2 id="stufeTitel"></h2>
+  <div class="stufenwahl" id="stufenKnoepfe"></div>
+  <p><button class="knopf" id="stufeZu">Abbrechen</button></p>
+</div></div>
 
 <!-- Feier beim Wachsen -->
 <div class="feier" id="feier"><div class="karte">
@@ -689,19 +712,44 @@ function kindKaufen(shop, id){
   return kindAnziehen({ ...shop, k:shop.k - k.preis, owned:[...shop.owned, id] }, id);
 }
 
+/* ----- Stalltiere (vom Nutzer, Fassung e): wohnen mit auf der Wiese, einmal kaufen, immer da ----- */
+const TIERE = [
+  { id:"kueken", name:"Küken",  preis:30,  bild:"🐤" },
+  { id:"huhn",   name:"Huhn",   preis:40,  bild:"🐔" },
+  { id:"hase",   name:"Hase",   preis:50,  bild:"🐇" },
+  { id:"katze",  name:"Katze",  preis:60,  bild:"🐈" },
+  { id:"igel",   name:"Igel",   preis:70,  bild:"🦔" },
+  { id:"schaf",  name:"Schaf",  preis:90,  bild:"🐑" },
+  { id:"hund",   name:"Hund",   preis:100, bild:"🐕" },
+];
+function tierKaufen(shop, id){
+  const t = TIERE.find(x => x.id === id);
+  if(!t || shop.owned.includes(id) || shop.k < t.preis) return shop;
+  return { ...shop, k:shop.k - t.preis, owned:[...shop.owned, id] };
+}
+
 /* ----- Weitere Spiele (vom Nutzer, Fassung d). Sie üben mit den gewählten Reihen, bringen Karotten,
    ändern aber den Karteikasten NICHT — der bleibt bei Heuballen und Rechnen (dort wird gemessen). ----- */
 /* Pferderennen: 12 richtige Antworten bis ins Ziel; das Gegnerpferd braucht je nach Tempo so lange
    wie 12 Antworten zu je RENN_MS. Rennen-Antworten zählen für den Lerntag (selbst eingetippt). */
-const RENN_ZIEL = 12, RENN_MS = { gemuetlich:7000, normal:5000, schnell:3500 };
+/* Schwierigkeit (vom Nutzer, Fassung e): je Spiel wählbar, schwerer = mehr Karotten */
+const SCHWIERIG = {
+  leicht:{ name:"Leicht", bild:"🌱", faktor:1 },
+  mittel:{ name:"Mittel", bild:"🌿", faktor:1.5 },
+  schwer:{ name:"Schwer", bild:"🌳", faktor:2 },
+};
+function mitFaktor(n, stufe){ return Math.round(n * (SCHWIERIG[stufe] || SCHWIERIG.mittel).faktor); }
+const RENN_ZIEL = 12, RENN_MS = { leicht:7000, mittel:5000, schwer:3500 };
+const MEM_PAARE = { leicht:4, mittel:6, schwer:8 };
 function rennKarotten(richtig, sieg){ return Math.min(RENN_ZIEL, richtig) + (sieg ? 5 : 0); }
 /* Wahr oder falsch: 60 Sekunden, Punkte = richtig − falsch (Raten lohnt nicht). Zählt NICHT für den
    Lerntag — mit Raten wäre er in einer Minute voll. */
 const BLITZ_MS = 60000;
-function blitzAussage(c, rnd = Math.random){
+/* Leicht: das falsche Ergebnis liegt am weitesten daneben, Schwer: am knappsten (z. B. ±1, Nachbar in der Reihe) */
+function blitzAussage(c, rnd = Math.random, stufe = "mittel"){
   const a = frage(c).a, wahr = rnd() < 0.5;
-  const falsch = auswahl(c, rnd).filter(x => x !== a);
-  const zeigt = wahr ? a : falsch[Math.floor(rnd() * falsch.length)];
+  const falsch = auswahl(c, rnd).filter(x => x !== a).sort((x, y) => Math.abs(x - a) - Math.abs(y - a));
+  const zeigt = wahr ? a : stufe === "schwer" ? falsch[0] : stufe === "leicht" ? falsch[falsch.length - 1] : falsch[Math.floor(rnd() * falsch.length)];
   return { text:frage(c).text + " = " + zeigt, wahr, loesung:loesung(c) };
 }
 function blitzPunkte(richtig, falsch){ return Math.max(0, richtig - falsch); }
@@ -766,12 +814,13 @@ const ABZEICHEN = [
   { id:"gross",      bild:"🏆", name:"Großes Pferd",      text:"Dein Pferd ist ausgewachsen",          test:st => st.stufe >= 4 },
   { id:"sieg1",      bild:"🏇", name:"Rennsieger",        text:"Ein Pferderennen gewonnen",            test:st => st.siege >= 1 },
   { id:"sieg10",     bild:"🏁", name:"Rennchampion",      text:"10 Pferderennen gewonnen",             test:st => st.siege >= 10 },
-  { id:"memory",     bild:"🧠", name:"Gedächtnis-Ass",    text:"Memory in höchstens 9 Zügen",          test:st => st.memoryBest > 0 && st.memoryBest <= 9 },
-  { id:"blitz",      bild:"⚡", name:"Blitzschnell",      text:"20 Punkte bei Wahr oder falsch",       test:st => st.blitzBest >= 20 },
+  { id:"memory",     bild:"🧠", name:"Gedächtnis-Ass",    text:"Memory mit 6 Paaren in höchstens 9 Zügen",          test:st => st.memoryBest > 0 && st.memoryBest <= 9 },
+  { id:"blitz",      bild:"⚡", name:"Blitzschnell",      text:"20 Punkte bei Wahr oder falsch (ab Mittel)",       test:st => st.blitzBest >= 20 },
   { id:"stern",      bild:"🌟", name:"Wochenstern",       text:"5 Lerntage in einer Woche",            test:st => st.sterne >= 1 },
   { id:"fleissig",   bild:"💯", name:"Fleißig",           text:"500 Aufgaben richtig gelöst",          test:st => st.richtig >= 500 },
   { id:"reiter",     bild:"⛑️", name:"Reiter-Outfit",     text:"Reithelm, Reithose und Reitstiefel",   test:st => st.reiterOutfit },
   { id:"tagesheld",  bild:"✅", name:"Tagesheld",         text:"Alle drei Tagesaufgaben an einem Tag",  test:st => st.tageshelden >= 1 },
+  { id:"tierfreund", bild:"🐾", name:"Tierfreund",        text:"Alle Stalltiere wohnen bei dir",        test:st => st.tiere >= TIERE.length },
 ];
 function abzeichenNeu(hat, st){ return ABZEICHEN.filter(a => !hat[a.id] && a.test(st)).map(a => a.id); }
 
@@ -780,7 +829,7 @@ function needBackup(dirty, snooze, now){ return !!dirty && now - dirty >= 7 * DA
 
 /* ===================== Oberfläche ===================== */
 /* Fassung — bei JEDER Änderung hochzählen (am iPad läuft nach einem Push oft noch die alte Datei). */
-const FASSUNG = "23.11.2026 d";
+const FASSUNG = "23.11.2026 e";
 const KEY = "einmaleins_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
@@ -799,6 +848,7 @@ function sanitize(x){
     op:["mal", "geteilt", "mix"].includes(x.op) ? x.op : "mal",
     rows, max, tempo:TEMPO[x.tempo] ? x.tempo : "normal", ton:x.ton !== false,
     kette:x.kette === "einzeln" ? "einzeln" : "mehr",
+    stufen:Object.fromEntries(["rennen", "blitz", "memory"].map(k => [k, x.stufen && SCHWIERIG[x.stufen[k]] ? x.stufen[k] : "mittel"])),
     haut:HAUT[x.haut] ? x.haut : "hell", haar:HAARFARBE[x.haar] ? x.haar : "braun",
     frisur:FRISUREN[x.frisur] ? x.frisur : "zopf", shirt:SHIRTS[x.shirt] ? x.shirt : "blau",
     tafelOp:x.tafelOp === "d" ? "d" : "m",
@@ -816,7 +866,7 @@ function sanitizeP(x){
 }
 function sanitizeShop(x){
   x = x && typeof x === "object" ? x : {};
-  const ids = [...WAREN, ...KLEIDUNG].map(w => w.id), kids = KLEIDUNG.map(w => w.id);
+  const ids = [...WAREN, ...KLEIDUNG, ...TIERE].map(w => w.id), kids = KLEIDUNG.map(w => w.id);
   const owned = Array.isArray(x.owned) ? [...new Set(x.owned.filter(i => ids.includes(i)))] : [];
   return { k:Math.max(0, x.k | 0), owned,
     wear:Array.isArray(x.wear) ? [...new Set(x.wear.filter(i => owned.includes(i) && !kids.includes(i)))] : [],
@@ -957,11 +1007,43 @@ function kindSVG(look, kw){
     ${an("schal") ? `<path d="M-12 -91 Q0 -85 12 -91 L12 -85 Q0 -79 -12 -85 Z" fill="#ef5b5b"/><rect x="5" y="-87" width="6" height="15" rx="2" fill="#e04848"/>` : ""}
   </g>`;
 }
+/* Stalltiere: Ursprung unten in der Mitte, etwa 20–30 hoch. Das Schaf steht hinten am Zaun (vor dem Pferd
+   gezeichnet), die anderen vorne in einer Reihe. */
+const TIER_ORT = { schaf:[166, 171, .9, "hinten"], hase:[18, 197, 1], igel:[82, 197, 1], kueken:[112, 197, 1], huhn:[142, 197, 1], katze:[198, 197, 1], hund:[228, 197, 1] };
+function tierSVG(id){
+  const auge = (x, y) => `<circle cx="${x}" cy="${y}" r="1.4" fill="#2a1a12"/>`;
+  switch(id){
+    case "kueken": return `<path d="M-3 0 v-3 M2 0 v-3" stroke="#e08a1e" stroke-width="1.4"/><circle cx="0" cy="-8" r="7" fill="#ffd84d"/><circle cx="4" cy="-16" r="5" fill="#ffd84d"/><path d="M8.5 -16.5 L12.5 -15 L8.5 -13.5 Z" fill="#f39a2b"/>${auge(5, -17)}<path d="M-6 -9 q3 -3 6 0" stroke="#f0c030" stroke-width="1.2" fill="none"/>`;
+    case "huhn": return `<path d="M-3 0 v-4 M3 0 v-4" stroke="#e08a1e" stroke-width="1.6"/><path d="M-10 -14 C -17 -20 -17 -10 -12 -8 Z" fill="#e9e3dc"/><ellipse cx="0" cy="-10" rx="11" ry="8.5" fill="#fff"/><circle cx="9" cy="-20" r="5.5" fill="#fff"/>
+      <circle cx="7.5" cy="-26" r="2.4" fill="#ef4b4b"/><circle cx="10.8" cy="-25.6" r="2.2" fill="#ef4b4b"/><ellipse cx="13" cy="-16" rx="1.6" ry="2.4" fill="#ef4b4b"/><path d="M14 -21 L18 -19.5 L14 -18 Z" fill="#f39a2b"/>${auge(10, -21)}<path d="M-5 -11 q5 -4 9 0" stroke="#e5ddd3" stroke-width="1.4" fill="none"/>`;
+    case "hase": return `<ellipse cx="-10" cy="-9" rx="3.6" ry="3.6" fill="#fff"/><ellipse cx="0" cy="-8.5" rx="10" ry="8.5" fill="#efebe7"/><g class="tier-ohr"><ellipse cx="4.5" cy="-30" rx="2.6" ry="7.5" fill="#efebe7"/><ellipse cx="4.5" cy="-30" rx="1.2" ry="5.5" fill="#f7b7c3"/><ellipse cx="9.5" cy="-29" rx="2.6" ry="7.5" fill="#efebe7" transform="rotate(14 9.5 -29)"/></g>
+      <circle cx="7" cy="-18" r="6.5" fill="#efebe7"/>${auge(9, -19)}<circle cx="13" cy="-16.5" r="1.2" fill="#f28aa0"/><ellipse cx="2" cy="-1" rx="4" ry="1.6" fill="#e2ddd8"/>`;
+    case "katze": return `<g class="tier-schwanz"><path d="M6 -3 C 16 -4 17 -14 12 -19" stroke="#e8923a" stroke-width="3.2" fill="none" stroke-linecap="round"/></g><ellipse cx="0" cy="-10" rx="8" ry="10" fill="#f2a24a"/><path d="M-4 -14 q4 2 8 0 M-5 -9 q5 2 10 0" stroke="#d9822c" stroke-width="1.3" fill="none"/>
+      <path d="M-6.5 -27 L-5 -35 L-1 -29 Z M6.5 -27 L5 -35 L1 -29 Z" fill="#f2a24a"/><circle cx="0" cy="-24" r="7" fill="#f2a24a"/>${auge(-2.8, -25)}${auge(2.8, -25)}<path d="M-1 -22 h2 l-1 1.2 z" fill="#e2687a"/>
+      <path d="M-3 -21.5 h-6 M-3 -20.5 l-5 1.5 M3 -21.5 h6 M3 -20.5 l5 1.5" stroke="#8a5a2b" stroke-width=".6"/><ellipse cx="-3.5" cy="-1" rx="2.6" ry="1.6" fill="#fbe1c4"/><ellipse cx="3.5" cy="-1" rx="2.6" ry="1.6" fill="#fbe1c4"/>`;
+    case "igel": return `<path d="M-13 -1 L-15 -6 L-11 -7 L-13 -12 L-8 -11 L-8 -16 L-3 -13 L-1 -18 L2 -14 L6 -17 L7 -12 L11 -12 L10 -7 L13 -5 L12 -1 Z" fill="#7a5233"/><ellipse cx="-1" cy="-6" rx="11" ry="6" fill="#8d6240"/>
+      <path d="M8 -9 C 14 -9 17 -5 18 -3 C 15 -1 10 -1 7 -2 Z" fill="#e6c7a1"/><circle cx="18" cy="-3.2" r="1.3" fill="#2a1a12"/>${auge(11, -6)}<path d="M-4 0 v-2 M4 0 v-2" stroke="#4a3426" stroke-width="1.6"/>`;
+    case "schaf": return `<path d="M-7 0 v-6 M-2 0 v-6 M4 0 v-6 M8 0 v-6" stroke="#3a302c" stroke-width="2.4" stroke-linecap="round"/>
+      ${[[-9, -12], [-3, -16], [4, -16], [9, -12], [-6, -8], [2, -8], [8, -8], [0, -12]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="6" fill="#fbf8f2"/>`).join("")}
+      <ellipse cx="14" cy="-14" rx="4.6" ry="5.6" fill="#3a302c"/><ellipse cx="10.5" cy="-17" rx="2.6" ry="1.3" fill="#3a302c" transform="rotate(-25 10.5 -17)"/><circle cx="15.5" cy="-15" r="1" fill="#fff"/><circle cx="12" cy="-20" r="3" fill="#fbf8f2"/>`;
+    case "hund": return `<g class="tier-schwanz"><path d="M7 -4 C 13 -6 15 -11 14 -15" stroke="#9b6534" stroke-width="3.4" fill="none" stroke-linecap="round"/></g><ellipse cx="0" cy="-11" rx="9" ry="11" fill="#b07a45"/><ellipse cx="0" cy="-8" rx="5" ry="6.5" fill="#e8c9a3"/>
+      <rect x="-6" y="-21" width="12" height="3" rx="1.5" fill="#ef4b4b"/><circle cx="0" cy="-27" r="7.5" fill="#b07a45"/><ellipse cx="-7.5" cy="-25" rx="3" ry="6" fill="#7a4f2a" transform="rotate(12 -7.5 -25)"/><ellipse cx="7.5" cy="-25" rx="3" ry="6" fill="#7a4f2a" transform="rotate(-12 7.5 -25)"/>
+      <ellipse cx="0" cy="-23" rx="4.2" ry="3.2" fill="#e8c9a3"/><ellipse cx="0" cy="-24.6" rx="1.6" ry="1.1" fill="#2a1a12"/>${auge(-3, -28.5)}${auge(3, -28.5)}<path d="M-1.3 -21.3 q1.3 3 2.6 0 Z" fill="#f28aa0"/>
+      <ellipse cx="-4" cy="-1" rx="3" ry="1.8" fill="#9b6534"/><ellipse cx="4" cy="-1" rx="3" ry="1.8" fill="#9b6534"/>`;
+  }
+  return "";
+}
+function tiereSVG(owned, hinten){
+  return TIERE.filter(t => owned.includes(t.id) && (TIER_ORT[t.id][3] === "hinten") === hinten).map((t, i) => {
+    const [x, y, sk] = TIER_ORT[t.id];
+    return `<g transform="translate(${x} ${y}) scale(${sk})"><g class="tier" style="animation-delay:${(i * 0.12).toFixed(2)}s">${tierSVG(t.id)}</g></g>`;
+  }).join("");
+}
 /* Szene: Hintergrund über 300 breit, Pferd links (eigene viewBox), Kind rechts — beide wachsen mit */
 function pferdMalen(el, laune){
   const st = stufeVon(PF.w);
   const pf = pferdSVG(S.fell, SHOP.wear, st, false).replace('<svg viewBox="0 0 220 200"', '<svg x="0" y="0" width="220" height="200" viewBox="0 0 220 200" overflow="visible"');
-  el.innerHTML = `<svg viewBox="0 0 300 200" aria-hidden="true">${szeneSVG(st, 300)}${pf}<g transform="translate(262 186) scale(${KIND_GR[st]})"><g class="kind">${kindSVG(S, SHOP.kwear)}</g></g></svg>`;
+  el.innerHTML = `<svg viewBox="0 0 300 200" aria-hidden="true">${szeneSVG(st, 300)}${tiereSVG(SHOP.owned, true)}${pf}<g transform="translate(262 186) scale(${KIND_GR[st]})"><g class="kind">${kindSVG(S, SHOP.kwear)}</g></g>${tiereSVG(SHOP.owned, false)}</svg>`;
   el.className = "pferd" + (laune ? " " + laune : "");
 }
 let LAUNE_T = 0;
@@ -1281,6 +1363,12 @@ function renderLaden(){
       : `<button class="knopf${SHOP.k >= w.preis ? " voll" : ""}" data-kkaufen="${w.id}" ${SHOP.k >= w.preis ? "" : "disabled"}>🥕 ${w.preis}</button>`;
     return `<div class="ware${traegt ? " getragen" : ""}"><div class="bild">${w.bild}</div><b>${w.name}</b>${knopf}</div>`;
   }).join("");
+  $("tiere").innerHTML = TIERE.map(t => {
+    const hat = SHOP.owned.includes(t.id);
+    const knopf = hat ? `<button class="knopf" disabled>wohnt bei dir ✓</button>`
+      : `<button class="knopf${SHOP.k >= t.preis ? " voll" : ""}" data-tkaufen="${t.id}" ${SHOP.k >= t.preis ? "" : "disabled"}>🥕 ${t.preis}</button>`;
+    return `<div class="ware${hat ? " getragen" : ""}"><div class="bild">${t.bild}</div><b>${t.name}</b>${knopf}</div>`;
+  }).join("");
   const stufe = stufeVon(PF.w);
   $("waren").innerHTML = WAREN.map(w => {
     const hat = SHOP.owned.includes(w.id), traegt = SHOP.wear.includes(w.id);
@@ -1345,6 +1433,7 @@ function statistik(){
   for(let r = 1; r <= 12; r++){ let alle = true; for(let k = 1; k <= 10; k++){ const p = P["m:" + k + ":" + r]; if(!p || p.f !== 4) alle = false; } if(alle) reihe++; }
   return { medaillen:MED.gold + MED.silber + MED.bronze, gold:MED.gold, sicherM:sicher("m"), sicherD:sicher("d"), reiheSicher:reihe,
     stufe:stufeVon(PF.w), siege:STAT.siege, memoryBest:STAT.memoryBest, blitzBest:STAT.blitzBest, sterne:STARS.w.length,
+    tiere:TIERE.filter(t => SHOP.owned.includes(t.id)).length,
     richtig:STAT.richtig, reiterOutfit:["reithelm", "reithose", "reitstiefel"].every(i => SHOP.owned.includes(i)), tageshelden:STAT.tageshelden };
 }
 /* Ereignisse an die Tagesaufgaben melden, Karotten gutschreiben, neue Abzeichen vergeben.
@@ -1372,6 +1461,20 @@ function toast(zeilen){
 }
 
 /* ----- Spielwiese: Pferderennen, Wahr oder falsch, Memory ----- */
+const SPIEL_NAME = { rennen:"🏇 Pferderennen", blitz:"⚡ Wahr oder falsch?", memory:"🧠 Memory" };
+const STUFE_TEXT = {
+  rennen:{ leicht:"Wirbelwind trabt gemütlich", mittel:"Wirbelwind galoppiert", schwer:"Wirbelwind fliegt nur so dahin!" },
+  blitz:{ leicht:"Falsche Ergebnisse liegen weit daneben", mittel:"Mal weit, mal knapp daneben", schwer:"Falsche Ergebnisse sind ganz knapp daneben" },
+  memory:{ leicht:"4 Paare", mittel:"6 Paare", schwer:"8 Paare" },
+};
+let STUFE_FUER = null;
+function stufeWaehlen(art){
+  STUFE_FUER = art;
+  $("stufeTitel").textContent = SPIEL_NAME[art] + " — wie schwer?";
+  $("stufenKnoepfe").innerHTML = Object.entries(SCHWIERIG).map(([k, d]) => `<button data-stufewahl="${k}" class="${S.stufen[art] === k ? "an" : ""}">
+    <i>${d.bild}</i><div><b>${d.name}</b><span>${STUFE_TEXT[art][k]}</span></div><em>🥕 ×${String(d.faktor).replace(".", ",")}</em></button>`).join("");
+  $("stufeWahl").classList.add("an");
+}
 function setSpielArt(art){ const sp = $("spiel"); ["rechnen", "rennen", "blitz", "memory"].forEach(k => sp.classList.toggle(k, art === k)); }
 function aufgabenFolge(){ return levelBauen(G.karten, P, Date.now(), Math.min(40, G.karten.length), Math.random, 40); }
 function miniStart(art){
@@ -1380,7 +1483,7 @@ function miniStart(art){
   cancelAnimationFrame(RAF); clearTimeout(WEITER_T);
   setSpielArt(art);
   $("reihen").innerHTML = ""; $("bahn").innerHTML = ""; $("memory").innerHTML = "";
-  G = { art, mini:true, karten, karotten:0, richtig:0, falsch:0, lock:false, eingabe:"", versucht:new Set(),
+  G = { art, mini:true, stufe:S.stufen[art] || "mittel", karten, karotten:0, richtig:0, falsch:0, lock:false, eingabe:"", versucht:new Set(),
         tagVorher:dayDone(DAYS[dayKey(Date.now())]), sterneVorher:STARS.w.length };
   zeige("spiel");
   pferdMalen($("spPferd"));
@@ -1393,7 +1496,7 @@ function zeigeErgebnis(emoji, laune_, zeilen, ereignisse){
   G.ende = true;
   STARS = sterneNachtragen(STARS, DAYS);
   SHOP = { ...SHOP, k:SHOP.k + G.karotten };
-  zeilen.push(`🥕 +${G.karotten} Karotten`);
+  zeilen.push(`🥕 +${G.karotten} Karotten` + (G.stufe && G.stufe !== "leicht" ? ` (${SCHWIERIG[G.stufe].bild} ${SCHWIERIG[G.stufe].name}: ×${String(SCHWIERIG[G.stufe].faktor).replace(".", ",")})` : ""));
   const tagNeu = !G.tagVorher && dayDone(DAYS[dayKey(Date.now())]), sternNeu = STARS.w.length > G.sterneVorher;
   if(tagNeu) zeilen.push(`📅 Lerntag geschafft!`);
   if(sternNeu) zeilen.push(`🌟 Wochenstern verdient!`);
@@ -1410,7 +1513,7 @@ function zeigeErgebnis(emoji, laune_, zeilen, ereignisse){
 /* Pferderennen */
 function rennerPos(el, p){ el.style.left = `calc((100% - min(28%, 170px) - 30px) * ${Math.max(0, Math.min(1, p))})`; }
 function rennenStart(){
-  G.queue = aufgabenFolge(); G.pos = 0; G.gegner = 0; G.gegnerMs = RENN_MS[S.tempo] * RENN_ZIEL; G.letzt = performance.now();
+  G.queue = aufgabenFolge(); G.pos = 0; G.gegner = 0; G.gegnerMs = RENN_MS[G.stufe] * RENN_ZIEL; G.letzt = performance.now();
   const gegnerFell = S.fell === "schimmel" ? "rappe" : "schimmel";
   $("bahn").innerHTML = `<div class="spur"><span class="name">${esc(pferdName())}</span><div class="ziel"></div><div class="renner" id="rennerIch">${pferdSVG(S.fell, SHOP.wear, stufeVon(PF.w), false)}</div></div>
     <div class="spur"><span class="name">Wirbelwind 💨</span><div class="ziel"></div><div class="renner gegner" id="rennerGegner">${pferdSVG(gegnerFell, [], 3, false)}</div></div>`;
@@ -1456,10 +1559,10 @@ function rennenAntwort(wert){
 }
 function rennenEnde(sieg){
   if(G.ende) return;
-  G.karotten = rennKarotten(G.richtig, sieg);
+  G.karotten = mitFaktor(rennKarotten(G.richtig, sieg), G.stufe);
   STAT.richtig += G.richtig; if(sieg) STAT.siege++;
   const z = [sieg ? `<b>Gewonnen!</b> ${esc(pferdName())} war schneller als Wirbelwind 🏆` : `Knapp! Wirbelwind war diesmal schneller. ${esc(pferdName())} hat ${G.pos} von ${RENN_ZIEL} geschafft.`];
-  if(!sieg) z.push(`<span class="klein">Tipp: Mit „Gemütlich“ läuft Wirbelwind langsamer.</span>`);
+  if(!sieg && G.stufe !== "leicht") z.push(`<span class="klein">Tipp: Auf „Leicht“ trabt Wirbelwind gemütlicher.</span>`);
   zeigeErgebnis(sieg ? "🏆" : "🐎", sieg ? "froh" : null, z, [["richtig", G.richtig], ["rennen_sieg", sieg ? 1 : 0]]);
 }
 
@@ -1469,7 +1572,7 @@ function blitzKopf(){ $("herzen").textContent = "⏱ " + Math.max(0, Math.ceil((
 function blitzAufgabe(){
   if(!G || G.ende) return;
   if(!G.queue.length) G.queue = aufgabenFolge();
-  G.aussage = blitzAussage(G.queue.shift()); G.lock = false;
+  G.aussage = blitzAussage(G.queue.shift(), Math.random, G.stufe); G.lock = false;
   const a = $("aufgabe"); a.className = "aufgabe"; a.textContent = G.aussage.text;
   blitzKopf();
 }
@@ -1493,23 +1596,27 @@ function blitzAntwort(ja){
 function blitzEnde(){
   if(G.ende) return;
   const punkte = blitzPunkte(G.richtig, G.falsch);
-  G.karotten = blitzKarotten(punkte);
-  const rekord = punkte > STAT.blitzBest; STAT.blitzBest = Math.max(STAT.blitzBest, punkte);
+  G.karotten = mitFaktor(blitzKarotten(punkte), G.stufe);
+  /* Rekord und Abzeichen erst ab Mittel — auf Leicht sind die falschen Ergebnisse zu leicht zu erkennen */
+  const zaehlt = G.stufe !== "leicht", rekord = zaehlt && punkte > STAT.blitzBest;
+  if(zaehlt) STAT.blitzBest = Math.max(STAT.blitzBest, punkte);
   zeigeErgebnis(punkte >= 15 ? "⚡" : "⏱", punkte >= 10 ? "froh" : null,
-    [`<b>${punkte} Punkte</b> · ${G.richtig} richtig, ${G.falsch} falsch` + (rekord && punkte > 0 ? ` — neuer Rekord! 🎉` : ` (Rekord: ${STAT.blitzBest})`),
+    [`<b>${punkte} Punkte</b> · ${G.richtig} richtig, ${G.falsch} falsch` + (rekord && punkte > 0 ? ` — neuer Rekord! 🎉` : zaehlt ? ` (Rekord: ${STAT.blitzBest})` : ""),
      `<span class="klein">Jede falsche Antwort zieht einen Punkt ab — Raten lohnt sich nicht.</span>`], [["blitz", punkte]]);
 }
 
 /* Memory */
 function memoryStart(){
-  G.mkarten = memoryKarten(G.karten); G.offen = []; G.gefunden = new Set(); G.zuege = 0;
+  G.mkarten = memoryKarten(G.karten, Math.random, MEM_PAARE[G.stufe]); G.offen = [];
+  const reihen = Math.ceil(G.mkarten.length / 4);
+  $("memory").style.width = `min(94%, calc((100vh - 230px) / ${reihen} * 4.3))`; G.gefunden = new Set(); G.zuege = 0;
   const a = $("aufgabe"); a.className = "aufgabe"; a.textContent = "Finde die Paare!";
   memoryMalen(); $("herzen").textContent = "🧠 0 Züge";
 }
 function memoryMalen(){
   $("memory").innerHTML = G.mkarten.map((k, i) => {
     const gef = G.gefunden.has(k.paar), offen = gef || G.offen.includes(i);
-    return `<button class="memkarte ${k.art}${offen ? " offen" : ""}${gef ? " gefunden" : ""}" data-mem="${i}">${offen ? esc(k.text) : `<span class="mz">?</span>`}</button>`;
+    return `<button class="memkarte m-${k.art}${offen ? " offen" : ""}${gef ? " gefunden" : ""}" data-mem="${i}">${offen ? esc(k.text) : `<span class="mz">?</span>`}</button>`;
   }).join("");
 }
 function memoryTipp(i){
@@ -1531,10 +1638,11 @@ function memoryTipp(i){
 function memoryEnde(){
   if(G.ende) return;
   const paare = G.mkarten.length / 2;
-  G.karotten = memoryKarotten(paare, G.zuege);
-  const rekord = !STAT.memoryBest || G.zuege < STAT.memoryBest;
+  G.karotten = mitFaktor(memoryKarotten(paare, G.zuege), G.stufe);
+  /* Rekord (und Abzeichen „Gedächtnis-Ass“) nur mit 6 Paaren — sonst wären 4 Paare leichter, 8 unfair */
+  const zaehlt = paare === 6, rekord = zaehlt && (!STAT.memoryBest || G.zuege < STAT.memoryBest);
   if(rekord) STAT.memoryBest = G.zuege;
-  zeigeErgebnis("🧠", "froh", [`<b>Alle ${paare} Paare gefunden</b> in ${G.zuege} Zügen` + (rekord ? " — neuer Rekord! 🎉" : ` (Rekord: ${STAT.memoryBest})`)], [["memory", 1]]);
+  zeigeErgebnis("🧠", "froh", [`<b>Alle ${paare} Paare gefunden</b> in ${G.zuege} Zügen` + (rekord ? " — neuer Rekord! 🎉" : zaehlt && STAT.memoryBest ? ` (Rekord: ${STAT.memoryBest})` : "")], [["memory", 1]]);
 }
 
 /* ----- Erster Start ----- */
@@ -1614,6 +1722,7 @@ $("memory").addEventListener("click", e => { const b = e.target.closest("[data-m
 $("ergNochmal").onclick = () => spielStart(G ? G.art : "kisten");
 $("ergZurueck").onclick = () => { G = null; renderHome(); zeige("home"); };
 $("ergFuettern").onclick = () => { G = null; renderLaden(); zeige("laden"); };
+$("stufeZu").onclick = () => $("stufeWahl").classList.remove("an");
 $("feierZu").onclick = () => { $("feier").classList.remove("an"); renderLaden(); };
 $("zumLaden").onclick = () => { renderLaden(); zeige("laden"); };
 $("ladenZu").onclick = () => { renderHome(); zeige("home"); };
@@ -1664,12 +1773,19 @@ document.addEventListener("click", e => {
   else if(d.tafel){ S.tafelOp = d.tafel; }
   else if(d.fell){ S.fell = d.fell; persist(); if(VIEW === "start") renderStart(); else renderHome(); return; }
   else if(d.futter){ futterGeben(d.futter); return; }
-  else if(d.spiel){ spielStart(d.spiel); return; }
+  else if(d.spiel){ stufeWaehlen(d.spiel); return; }
+  else if(d.stufewahl){ S.stufen[STUFE_FUER] = d.stufewahl; persist(); $("stufeWahl").classList.remove("an"); spielStart(STUFE_FUER); return; }
   else if(d.haut || d.haar || d.frisur || d.shirt){
     if(d.haut) S.haut = d.haut; if(d.haar) S.haar = d.haar; if(d.frisur) S.frisur = d.frisur; if(d.shirt) S.shirt = d.shirt;
     persist(); if(VIEW === "start") renderStart(); else renderHome(); return;
   }
   else if(d.kkaufen){ SHOP = kindKaufen(SHOP, d.kkaufen); persist(); markDirty(); renderLaden(); laune($("ladenPferd"), "froh"); ton("medaille"); toast(belohnen([])); return; }
+  else if(d.tkaufen){
+    const t = TIERE.find(x => x.id === d.tkaufen), vorher = SHOP.owned.length;
+    SHOP = tierKaufen(SHOP, d.tkaufen); persist(); markDirty(); renderLaden();
+    if(SHOP.owned.length > vorher){ laune($("ladenPferd"), "froh"); ton("medaille"); toast([`🐾 ${t.name === "Igel" || t.name === "Hund" || t.name === "Hase" ? "Der" : t.name === "Schaf" || t.name === "Huhn" || t.name === "Küken" ? "Das" : "Die"} ${t.name} wohnt jetzt bei dir!`, ...belohnen([])]); }
+    return;
+  }
   else if(d.kanziehen){ SHOP = kindAnziehen(SHOP, d.kanziehen); persist(); renderLaden(); laune($("ladenPferd"), "froh"); return; }
   else if(d.kablegen){ SHOP = kindAblegen(SHOP, d.kablegen); persist(); renderLaden(); return; }
   else if(d.kaufen){ const w = WAREN.find(x => x.id === d.kaufen); SHOP = kaufen(SHOP, d.kaufen, stufeVon(PF.w)); persist(); markDirty(); renderLaden(); laune($("ladenPferd"), "froh"); if(w) ton("medaille"); return; }

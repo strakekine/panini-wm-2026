@@ -15,7 +15,7 @@ const M = new Function(quelle + `
            sanitizeStars, sterneNachtragen, sterneStand, papaCode, WAREN, kaufen, anziehen, ablegen, needBackup,
            STUFEN, FUTTER, stufeVon, ausgewachsen, naechsteStufe, fuettern, wachsStart,
            KLEIDUNG, kindKaufen, kindAnziehen, kindAblegen, blitzAussage, blitzPunkte, blitzKarotten, memoryKarten, memoryKarotten,
-           rennKarotten, RENN_ZIEL, QUESTS, tagesQuests, questStand, questMelden, ABZEICHEN, abzeichenNeu };`)();
+           rennKarotten, RENN_ZIEL, mitFaktor, MEM_PAARE, TIERE, tierKaufen, QUESTS, tagesQuests, questStand, questMelden, ABZEICHEN, abzeichenNeu };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text){ n++; if(!bed){ fehler++; console.log("✗ " + text); } }
@@ -139,6 +139,23 @@ ok(M.memoryKarten(M.cardsFor("mal", [1], 3), rnd).length === 6, "Memory mit weni
 ok(M.memoryKarotten(6, 6) === 9 && M.memoryKarotten(6, 11) === 7 && M.memoryKarotten(6, 20) === 5, "Memory-Karotten");
 ok(M.rennKarotten(14, true) === 17 && M.rennKarotten(5, false) === 5, "Rennen-Karotten");
 
+/* --- Schwierigkeit --- */
+ok(M.mitFaktor(9, "leicht") === 9 && M.mitFaktor(9, "mittel") === 14 && M.mitFaktor(9, "schwer") === 18, "Karotten-Faktor 1 / 1,5 / 2");
+let knapp = 0, weit = 0, n2 = 0;
+for(const c of M.cardsFor("mal", [3,4,6,7,8,9], 10)){
+  for(const [st, add] of [["schwer", d => knapp += d], ["leicht", d => weit += d]]){
+    for(let x = 0; x < 6; x++){ const a = M.blitzAussage(c, rnd, st); if(!a.wahr){ add(Math.abs(+a.text.split("= ")[1] - M.frage(c).a)); if(st === "schwer") n2++; } }
+  }
+}
+ok(knapp / n2 < 3 && weit > knapp * 2, "Wahr/falsch schwer = knapp daneben, leicht = weit daneben");
+ok(M.memoryKarten(M.cardsFor("mal", [6,7,8], 10), rnd, M.MEM_PAARE.schwer).length === 16, "Memory schwer: 16 Karten");
+
+/* --- Stalltiere --- */
+let ts = M.tierKaufen({ k:60, owned:[], wear:[], kwear:[] }, "katze");
+ok(ts.k === 0 && ts.owned.includes("katze"), "Katze kaufen");
+ok(M.tierKaufen(ts, "katze") === ts, "nicht doppelt kaufen");
+ok(M.abzeichenNeu({}, { ...{ medaillen:0, gold:0, sicherM:0, sicherD:0, reiheSicher:0, stufe:0, siege:0, memoryBest:0, blitzBest:0, sterne:0, richtig:0, reiterOutfit:false, tageshelden:0 }, tiere:M.TIERE.length }).includes("tierfreund"), "Tierfreund bei allen Tieren");
+
 /* --- Tagesaufgaben --- */
 const t1 = M.tagesQuests("2026-11-23"), t2 = M.tagesQuests("2026-11-23"), t3 = M.tagesQuests("2026-11-24");
 ok(t1.length === 3 && t1.map(q => q.id).join() === t2.map(q => q.id).join(), "Tagesaufgaben: drei, am selben Tag gleich");
@@ -155,7 +172,7 @@ ok(!M.questMelden(r2.q, heute, "memory", 1).bonus, "Bonus nur einmal");
 ok(M.questStand(r2.q, "2026-11-24").fertig.length === 0, "neuer Tag, neue Liste");
 
 /* --- Abzeichen --- */
-const st0 = { medaillen:0, gold:0, sicherM:0, sicherD:0, reiheSicher:0, stufe:0, siege:0, memoryBest:0, blitzBest:0, sterne:0, richtig:0, reiterOutfit:false, tageshelden:0 };
+const st0 = { medaillen:0, gold:0, sicherM:0, sicherD:0, reiheSicher:0, stufe:0, siege:0, memoryBest:0, blitzBest:0, sterne:0, richtig:0, reiterOutfit:false, tageshelden:0, tiere:0 };
 ok(M.abzeichenNeu({}, st0).length === 0, "am Anfang keine Abzeichen");
 ok(M.abzeichenNeu({}, { ...st0, medaillen:1, stufe:3 }).join() === "medaille1,jaehrling,pony", "Medaille, Jährling, Pony");
 ok(M.abzeichenNeu({ medaille1:1 }, { ...st0, medaillen:5 }).length === 0, "einmal verdient, nicht doppelt");

@@ -951,6 +951,9 @@ das Heuballen-Tempo spielt dort keine Rolle mehr). Wahr oder falsch: falsches Er
 knappsten daneben. Memory: 4 / 6 / 8 Paare (`MEM_PAARE`, Raster passt sich der Höhe an). Rekorde und deren Abzeichen
 zählen bei Wahr/falsch erst ab Mittel, beim Memory nur mit 6 Paaren. **Achtung Klassennamen:** `.aufgabe` ist die
 große Aufgabenschrift — Memory-Karten heißen darum `m-aufgabe`/`m-ergebnis` (vorher waren manche Rückseiten riesig).
+**Home-Bildschirm-Symbol** (Fassung f, vom Nutzer: „witzig, mit Pferd und 1×1“): „Professor-Pferd“ — Pferdekopf aus `pferdSVG` (froh) mit
+Brille und Doktorhut, darüber „1×1“; als PNG 180×180 eingebettet (`apple-touch-icon`). Zwei Varianten verworfen: nur Brille, Karotte im Maul.
+iOS übernimmt ein neues Symbol nur beim **neuen Anlegen** auf dem Home-Bildschirm.
 **Speicher:** `einmaleins_v1` (+ `_p`, `_days`, `_stars`, `_shop`, `_med`, `_exp`, `_dirty`, `_snooze`),
 Sicherung als Datei über `navigator.share`, Erinnerung nach einer Woche ungesichert.
 **Fassung** `FASSUNG` unten im Startbild, bei jeder Änderung hochzählen.

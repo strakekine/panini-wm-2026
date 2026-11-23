@@ -176,6 +176,20 @@ DESCRIPTION:U13 Minimes Cl3 S2 Phase 2\, Spieltag 5\n\n⚠️ Dieser Kalend
  hen.
 END:VEVENT
 BEGIN:VEVENT
+UID:flf-72027010313@fc-koeppchen
+DTSTAMP:20260701T000000Z
+DTSTART:20270103T130000Z
+DTEND:20270103T160000Z
+SUMMARY:⚽ Koeppchen MIN · LALUX Indoor in Rosport
+LOCATION:Rosport
+DESCRIPTION:LALUX Indoor Cup\, 1. Runde\, Gruppe K\nMit Victoria Rosport\, 
+ US Sandweiler\, Swift Hesperange\, FC Les Aiglons Dalheim\, Avenir Beggen\
+ n\n⚠️ Dieser Kalender zieht um und wird nur noch bis Ende 2026 aktuali
+ siert. Bitte neu abonnieren: App öffnen (https://fckoeppchen.github.io/)\
+ , Mannschaft antippen\, „📅 … im Kalender abonnieren“. Danach dies
+ en alten Kalender löschen.
+END:VEVENT
+BEGIN:VEVENT
 UID:umzug-20261128@fc-koeppchen
 DTSTAMP:20261030T000000Z
 DTSTART;VALUE=DATE:20261128

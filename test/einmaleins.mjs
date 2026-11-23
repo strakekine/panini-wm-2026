@@ -13,7 +13,9 @@ const M = new Function(quelle + `
   return { DAY, FACH, KISTEN_MAX, SCHNELL_MS, startOfDay, cardsFor, cardFromId, frage, loesung, grade, levelBauen,
            faelligZahl, auswahl, medaille, stufe, dayKey, dayDone, countDay, weekStatus, pruneDays, sternWochen,
            sanitizeStars, sterneNachtragen, sterneStand, papaCode, WAREN, kaufen, anziehen, ablegen, needBackup,
-           STUFEN, FUTTER, stufeVon, ausgewachsen, naechsteStufe, fuettern, wachsStart };`)();
+           STUFEN, FUTTER, stufeVon, ausgewachsen, naechsteStufe, fuettern, wachsStart,
+           KLEIDUNG, kindKaufen, kindAnziehen, kindAblegen, blitzAussage, blitzPunkte, blitzKarotten, memoryKarten, memoryKarotten,
+           rennKarotten, RENN_ZIEL, QUESTS, tagesQuests, questStand, questMelden, ABZEICHEN, abzeichenNeu };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text){ n++; if(!bed){ fehler++; console.log("✗ " + text); } }
@@ -109,6 +111,55 @@ ok(r.pf.w === 800 && r.aufgestiegen === 4, "Wachstum gedeckelt bei Großes Pferd
 ok(M.naechsteStufe(50).bis === "junges Pony" && M.naechsteStufe(50).hat === 10 && M.naechsteStufe(800) === null, "Fortschritt zur nächsten Stufe");
 ok(M.wachsStart({ owned:["schleife","halstuch"] }) === 80 && M.wachsStart({ owned:M.WAREN.map(w => w.id) }) === 160, "Einstieg: Ausgegebenes zählt, höchstens Junges Pony");
 ok(M.kaufen({ k:999, owned:[], wear:[] }, "sattel", 2).owned.length === 0 && M.kaufen({ k:999, owned:[], wear:[] }, "sattel", 3).owned.includes("sattel"), "Sattel erst ab Pony");
+
+/* --- Kleidung fürs Kind --- */
+let ks = { k:100, owned:[], wear:[], kwear:[] };
+ks = M.kindKaufen(ks, "muetze"); ks = M.kindKaufen(ks, "reithelm");
+ok(ks.k === 10 && ks.kwear.length === 1 && ks.kwear[0] === "reithelm" && ks.owned.includes("muetze"), "gleicher Platz: Reithelm ersetzt Mütze");
+ks = M.kindAnziehen(ks, "muetze"); ok(ks.kwear.join() === "muetze", "wieder Mütze anziehen");
+ok(M.kindKaufen({ k:10, owned:[], wear:[], kwear:[] }, "haarreif").owned.length === 0, "zu teuer → nichts");
+ok(M.kindAblegen(ks, "muetze").kwear.length === 0, "ausziehen");
+ok(new Set(M.KLEIDUNG.map(k => k.id)).size === M.KLEIDUNG.length, "Kleidungs-ids eindeutig");
+
+/* --- Spiele --- */
+let wahr = 0;
+for(const c of M.cardsFor("mix", [1,2,3,4,5,6,7,8,9,10], 10)){
+  const a = M.blitzAussage(c, rnd), soll = M.frage(c).a, zeigt = +a.text.split("= ")[1];
+  if((zeigt === soll) !== a.wahr){ ok(false, "Wahr/falsch stimmt nicht für " + c.id + ": " + a.text); break; }
+  if(a.wahr) wahr++;
+}
+ok(wahr > 60 && wahr < 140, "Wahr/falsch etwa halb-halb (" + wahr + " von 200)");
+ok(M.blitzPunkte(10, 4) === 6 && M.blitzPunkte(2, 5) === 0 && M.blitzKarotten(30) === 12, "Punkte und Karotten bei Wahr oder falsch");
+for(let x = 0; x < 30; x++){
+  const mk = M.memoryKarten(M.cardsFor("mix", [2,3,4], 10), rnd);
+  const erg = mk.filter(k => k.art === "ergebnis").map(k => k.text);
+  if(mk.length !== 12 || new Set(erg).size !== 6){ ok(false, "Memory: 12 Karten, 6 verschiedene Ergebnisse"); break; }
+}
+ok(M.memoryKarten(M.cardsFor("mal", [1], 3), rnd).length === 6, "Memory mit wenigen Karten: weniger Paare");
+ok(M.memoryKarotten(6, 6) === 9 && M.memoryKarotten(6, 11) === 7 && M.memoryKarotten(6, 20) === 5, "Memory-Karotten");
+ok(M.rennKarotten(14, true) === 17 && M.rennKarotten(5, false) === 5, "Rennen-Karotten");
+
+/* --- Tagesaufgaben --- */
+const t1 = M.tagesQuests("2026-11-23"), t2 = M.tagesQuests("2026-11-23"), t3 = M.tagesQuests("2026-11-24");
+ok(t1.length === 3 && t1.map(q => q.id).join() === t2.map(q => q.id).join(), "Tagesaufgaben: drei, am selben Tag gleich");
+ok(t1.map(q => q.id).join() !== t3.map(q => q.id).join() || M.tagesQuests("2026-11-25").map(q => q.id).join() !== t1.map(q => q.id).join(), "an anderen Tagen andere");
+ok(Array.from({ length:30 }, (_, i) => M.tagesQuests("2026-12-" + String(i + 1).padStart(2, "0"), true)).every(l => !l.some(q => q.typ === "fuettern")), "ausgewachsen: nie Füttern");
+const heute = M.QUESTS.filter(q => ["richtig", "blitz", "memory"].includes(q.id));
+let q = M.questStand(null, "2026-11-23");
+let r2 = M.questMelden(q, heute, "richtig", 20); ok(r2.neu.length === 0 && r2.q.fort.richtig === 20, "Aufgabe zählt hoch");
+r2 = M.questMelden(r2.q, heute, "richtig", 6); ok(r2.neu.length === 1, "25 richtig erreicht");
+r2 = M.questMelden(r2.q, heute, "blitz", 8); r2 = M.questMelden(r2.q, heute, "blitz", 5); ok(r2.q.fort.blitz === 8 && !r2.neu.length, "Wahr/falsch zählt den besten Wert, nicht die Summe");
+r2 = M.questMelden(r2.q, heute, "blitz", 13); ok(r2.neu.length === 1 && !r2.bonus, "12 Punkte geschafft");
+r2 = M.questMelden(r2.q, heute, "memory", 1); ok(r2.bonus, "alle drei → Bonus");
+ok(!M.questMelden(r2.q, heute, "memory", 1).bonus, "Bonus nur einmal");
+ok(M.questStand(r2.q, "2026-11-24").fertig.length === 0, "neuer Tag, neue Liste");
+
+/* --- Abzeichen --- */
+const st0 = { medaillen:0, gold:0, sicherM:0, sicherD:0, reiheSicher:0, stufe:0, siege:0, memoryBest:0, blitzBest:0, sterne:0, richtig:0, reiterOutfit:false, tageshelden:0 };
+ok(M.abzeichenNeu({}, st0).length === 0, "am Anfang keine Abzeichen");
+ok(M.abzeichenNeu({}, { ...st0, medaillen:1, stufe:3 }).join() === "medaille1,jaehrling,pony", "Medaille, Jährling, Pony");
+ok(M.abzeichenNeu({ medaille1:1 }, { ...st0, medaillen:5 }).length === 0, "einmal verdient, nicht doppelt");
+ok(new Set(M.ABZEICHEN.map(a => a.id)).size === M.ABZEICHEN.length, "Abzeichen-ids eindeutig");
 
 /* --- Sicherung --- */
 ok(M.needBackup(jetzt - 8 * D, null, jetzt) && !M.needBackup(jetzt - 2 * D, null, jetzt) && !M.needBackup(null, null, jetzt), "Sicherungs-Erinnerung");

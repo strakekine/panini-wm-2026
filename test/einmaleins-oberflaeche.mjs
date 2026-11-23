@@ -21,8 +21,14 @@ ok(await view() === "start", "erster Start zeigt die Begrüßung");
 await pg.type("#startName", "Fleur"); await pg.type("#startKind", "Mia");
 await pg.click('#startFell [data-fell="schimmel"]');
 ok(await pg.inputValue("#startName") === "Fleur", "Fellwahl lässt den getippten Namen stehen");
+await pg.click('#startLook [data-frisur="locken"]');
+ok(await pg.evaluate(() => S.frisur) === "locken" && await pg.inputValue("#startName") === "Fleur", "Aussehen wählen lässt den Namen stehen");
 await pg.click("#startLos");
 ok(await view() === "home", "danach Startbild");
+/* feste Tagesaufgaben, damit der Test nicht vom Datum abhängt */
+await pg.evaluate(() => { TQ = { tag:dayKey(Date.now()), fort:{}, fertig:[], bonus:false, ids:["level2", "richtig", "memory"] }; persist(); renderHome(); });
+ok(await pg.locator("#quests .quest").count() === 3, "drei Tagesaufgaben");
+ok(await pg.locator("#homePferd .kind").count() === 1, "Kind steht neben dem Pferd");
 ok((await pg.textContent("#blase")).includes("Fleur"), "Pferd spricht mit seinem Namen");
 
 /* Heuballen: ein Level fehlerfrei durchspielen */
@@ -132,6 +138,64 @@ for(let x = 0; x < 2; x++){
 }
 await pg.click("#spielZu");
 ok(await pg.evaluate(() => VIEW) === "home" && await pg.evaluate(() => SHOP.k) === k0 + 2, "abgebrochen: 2 verdiente Karotten bleiben");
+
+/* Kleidung fürs Kind: kaufen zieht an, gleicher Platz ersetzt */
+await pg.evaluate(() => { SHOP.k = 200; persist(); });
+await pg.click("#zumLaden");
+await pg.click('[data-kkaufen="muetze"]');
+await pg.click('[data-kkaufen="reithelm"]');
+ok(await pg.evaluate(() => SHOP.kwear.includes("reithelm") && !SHOP.kwear.includes("muetze") && SHOP.owned.includes("muetze") && SHOP.k === 110), "Kopf: Reithelm ersetzt Mütze, Mütze bleibt im Besitz");
+await pg.click("#ladenZu");
+
+/* Pferderennen gewinnen */
+await pg.evaluate(() => { RENN_MS[S.tempo] = 60000; });
+await pg.click('[data-spiel="rennen"]');
+for(let x = 0; x < 30 && await view() === "spiel"; x++){
+  await pg.waitForFunction(() => !G || G.ende || (G.aktiv && !G.lock));
+  if(await view() !== "spiel") break;
+  const a = await pg.evaluate(() => frage(G.aktiv.c).a);
+  for(const z of String(a)) await pg.click(`#tasten [data-k="${z}"]`);
+  await pg.click('#tasten [data-k="ok"]');
+  await pg.waitForFunction(() => !G || G.ende || G.lock);
+}
+await pg.waitForFunction(() => VIEW === "ergebnis", null, { timeout:3000 });
+ok((await pg.textContent("#ergText")).includes("Gewonnen"), "Rennen gewonnen");
+ok(await pg.evaluate(() => STAT.siege === 1 && !!ABZ.sieg1), "Sieg gezählt, Abzeichen Rennsieger");
+await pg.click("#ergZurueck");
+
+/* Pferderennen verlieren: Gegner sehr schnell */
+await pg.evaluate(() => { RENN_MS[S.tempo] = 30; });
+await pg.click('[data-spiel="rennen"]');
+await pg.waitForFunction(() => VIEW === "ergebnis", null, { timeout:4000 });
+ok((await pg.textContent("#ergText")).includes("Wirbelwind war diesmal schneller"), "Rennen verloren");
+await pg.evaluate(() => { RENN_MS[S.tempo] = 5000; });
+await pg.click("#ergZurueck");
+
+/* Wahr oder falsch: richtige Antworten geben Punkte, Ende nach Ablauf */
+await pg.click('[data-spiel="blitz"]');
+for(let x = 0; x < 5; x++){
+  await pg.waitForFunction(() => G && !G.lock);
+  const wahr = await pg.evaluate(() => G.aussage.wahr);
+  await pg.locator(wahr ? "#blitzJa" : "#blitzNein").dispatchEvent("pointerdown");
+  await pg.waitForFunction(() => G.lock);
+}
+ok(await pg.evaluate(() => G.richtig === 5 && G.falsch === 0), "Wahr oder falsch: 5 richtig");
+await pg.evaluate(() => { G.endeT = performance.now(); });
+await pg.waitForFunction(() => VIEW === "ergebnis", null, { timeout:3000 });
+ok((await pg.textContent("#ergText")).includes("5 Punkte"), "Ergebnis 5 Punkte");
+await pg.click("#ergZurueck");
+
+/* Memory lösen (Paare aus der App, kein Wissen über den Inhalt) */
+await pg.click('[data-spiel="memory"]');
+const paare = await pg.evaluate(() => { const m = {}; G.mkarten.forEach((k, i) => (m[k.paar] = m[k.paar] || []).push(i)); return Object.values(m); });
+ok(paare.length === 6 && paare.every(p => p.length === 2), "6 Paare");
+for(const [i, j] of paare){
+  await pg.click(`[data-mem="${i}"]`); await pg.click(`[data-mem="${j}"]`);
+}
+await pg.waitForFunction(() => VIEW === "ergebnis", null, { timeout:3000 });
+ok(await pg.evaluate(() => STAT.memoryBest === 6 && !!ABZ.memory), "Memory in 6 Zügen, Abzeichen Gedächtnis-Ass");
+ok(await pg.evaluate(() => TQ.fertig.includes("memory")), "Tagesaufgabe Memory erledigt");
+await pg.click("#ergZurueck");
 
 /* Name tippen: Tastatur darf nicht wegklappen (Feld wird nicht neu gebaut) */
 await pg.evaluate(() => { document.getElementById("einst").open = true; });

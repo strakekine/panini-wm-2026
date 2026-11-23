@@ -924,12 +924,30 @@ gespielt hat: Ausgegebenes im Laden zählt als Wachstum, höchstens bis junges P
 verloren. Speicher `_pf` = `{w, lieb, liebBekannt}`, in der Sicherung mit drin. Startbild zeigt Stufe + Balken
 und „Psst … Appetit“, Ergebnisseite „🍎 Jetzt füttern“, sobald das billigste Futter bezahlbar ist.
 **Abbrechen mit ✕ behält die schon verdienten Karotten** (vorher gingen sie verloren), nur ohne Medaille.
+**Großer Ausbau, Fassung d** (vom Nutzer, 23.11.2026: „ruhig komplex, zur Motivation“; kurze Recherche: Spielfigur
+zum Anziehen, mehrere Mini-Spiele, Sammelbares sind die üblichen Antreiber):
+- **Das Kind** (`kindSVG`, von vorn, ~130 hoch) steht rechts neben dem Pferd. `pferdMalen` baut die Szene 300 breit:
+  Hintergrund `szeneSVG(st, 300)`, Pferd als verschachteltes `<svg>` (eigene viewBox 220×200), Kind mit `KIND_GR[stufe]`
+  — **wächst mit dem Pferd**. Aussehen beim ersten Start und in den Einstellungen (`S.haut/haar/frisur/shirt`, `lookHtml`).
+  Arme hoch bei „froh“, Kopf runter bei „traurig“ (CSS mit `transform-box:fill-box`). CSS gilt nur für `.pferd > svg`
+  (sonst zieht `width:100%` das verschachtelte Pferd-SVG auf die ganze Breite).
+- **Kleidung** (`KLEIDUNG`, Laden-Karte „Für dich“): je `platz` (kopf/oben/unten/fuss/extra) ein Teil, Neues ersetzt
+  das alte, Besitz bleibt (`kindKaufen`, `kindAnziehen`, `SHOP.kwear`).
+- **Spielwiese** (`miniStart`, gleiche Spielansicht, Klasse am `#spiel`): **Pferderennen** (12 richtige bis ins Ziel,
+  Gegner „Wirbelwind“ braucht 12 × `RENN_MS[tempo]`, steht während der Rückmeldung; Antworten zählen für den Lerntag),
+  **Wahr oder falsch** (60 s, Punkte = richtig − falsch, zählt NICHT für den Lerntag — Raten), **Memory** (6 Paare,
+  Ergebnisse verschieden). **Keins davon ändert den Karteikasten** — „sicher“ bleibt bei Heuballen/Rechnen.
+- **Tagesaufgaben** (`QUESTS`, `tagesQuests(Datum)` deterministisch, drei je Tag, `TQ.ids` beim ersten Aufruf des Tages
+  festgehalten — ausgewachsen ohne „Füttern“): je 10 🥕, alle drei +10. Gemeldet über `belohnen([[typ, n]])` am
+  Spielende, beim Abbrechen, Füttern, Kaufen; das vergibt auch **Abzeichen** (`ABZEICHEN`, 17 Stück, `abzeichenNeu`,
+  Kennzahlen aus `statistik()`, Speicher `_abz`, Zähler `_stat`). Hinweise außerhalb der Ergebnisseite als `toast`
+  (oben, `pointer-events:none` — unten verdeckte er die Knöpfe).
 **Speicher:** `einmaleins_v1` (+ `_p`, `_days`, `_stars`, `_shop`, `_med`, `_exp`, `_dirty`, `_snooze`),
 Sicherung als Datei über `navigator.share`, Erinnerung nach einer Woche ungesichert.
 **Fassung** `FASSUNG` unten im Startbild, bei jeder Änderung hochzählen.
 **Testen:** `node test/einmaleins.mjs` (Logik zwischen `Logik`…`Oberfläche`, Gegenprobe gemacht) und
-`node test/einmaleins-oberflaeche.mjs` (Browser, 820×1180: Levels beider Arten, Herzen, Tafel,
-Laden, Füttern mit Aufstieg, Abbrechen behält Karotten, zwei Reihen/nur unterste zählt, Fokus beim Namen, Neuladen, Papa-Code). **Am iPad noch nicht ausprobiert.**
+`node test/einmaleins-oberflaeche.mjs` (Browser, 820×1180, Tagesaufgaben im Test fest gesetzt: Levels beider Arten,
+Herzen, Tafel, Aussehen, Kleidung, Rennen gewinnen/verlieren, Wahr oder falsch, Memory, Laden, Füttern mit Aufstieg, Abbrechen behält Karotten, zwei Reihen/nur unterste zählt, Fokus beim Namen, Neuladen, Papa-Code). **Am iPad noch nicht ausprobiert.**
 
 ## Vokabeltrainer (`vokabeln.html`) — Stand und Regeln
 

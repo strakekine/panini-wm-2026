@@ -41,7 +41,7 @@
   .stall{display:grid;grid-template-columns:minmax(180px,1fr) 1.2fr;gap:10px;align-items:center}
   @media (max-width:560px){ .stall{grid-template-columns:1fr} }
   .stallbild{background:linear-gradient(#d9f2ff 0 62%,var(--wiese) 62%);border-radius:18px;padding:6px 6px 0;min-height:180px;display:flex;align-items:flex-end;justify-content:center}
-  .stallbild .pferd{width:100%;max-width:290px}
+  .stallbild .pferd{width:100%;max-width:420px}
   .blase{position:relative;background:#fff;border:2px solid var(--linie);border-radius:18px;padding:14px 16px;font-size:18px;line-height:1.35}
   .blase b{color:#e2731f}
   .wachs{margin:10px 0 0;font-size:15px;font-weight:700}
@@ -51,6 +51,53 @@
   .feier .karte{max-width:420px;width:100%;text-align:center;animation:medaille .6s ease}
   .feier h2{font-size:26px;margin:4px 0 8px}
   .ware .lieb{font-size:12px;color:#e2731f;font-weight:800}
+  .spiele{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media (max-width:560px){ .spiele{grid-template-columns:1fr} }
+  .spielknopf{border:2px solid var(--linie);background:#fff;border-radius:18px;padding:12px 10px;font-weight:900;font-size:18px;box-shadow:0 3px 0 var(--linie);text-align:center}
+  .spielknopf b{display:block;font-size:38px;line-height:1.2}
+  .spielknopf small{display:block;font-weight:600;font-size:13px;color:var(--muted);margin-top:3px}
+  .spielknopf:active{transform:translateY(2px)}
+  .quest{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--linie)}
+  .quest > span:first-child{font-size:22px}
+  .quest b{font-size:16px}
+  .quest .balken{height:8px;margin-top:4px}
+  .quest.ok b{color:#2d7a3e}
+  .abz{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;margin-top:12px}
+  .abz div{border:2px solid var(--linie);border-radius:14px;padding:8px 4px;text-align:center;font-size:12px;font-weight:700;background:#fff}
+  .abz div i{display:block;font-style:normal;font-size:30px}
+  .abz div.nein{opacity:.45;filter:grayscale(1);font-weight:600}
+  .chip.farbe{width:44px;min-width:44px;height:44px;border-radius:50%;padding:0}
+  .chip.farbe.an{outline:4px solid #f29b1d;outline-offset:2px}
+  .toast{position:fixed;left:50%;top:70px;transform:translateX(-50%) translateY(-20px);opacity:0;pointer-events:none;background:#fff;border:2px solid #ffd3a3;border-radius:18px;padding:12px 18px;
+    font-weight:700;font-size:16px;box-shadow:0 6px 20px rgba(0,0,0,.15);z-index:60;transition:transform .35s ease,opacity .35s ease;max-width:calc(100% - 32px)}
+  .toast.an{transform:translateX(-50%) translateY(0);opacity:1}
+  #bahn,#memory,.blitzpad{display:none}
+  #spiel.rennen #bahn{display:block}
+  #spiel.rennen .pad{display:block}
+  #spiel.rennen #reihen,#spiel.rennen .wiese,#spiel.memory #reihen,#spiel.memory .wiese,#spiel.blitz #reihen{display:none}
+  #spiel.blitz .wiese{height:100%;background:linear-gradient(transparent 55%,var(--wiese) 55%)}
+  #spiel.blitz .blitzpad{display:grid}
+  #spiel.memory #memory{display:grid}
+  #bahn{position:absolute;inset:3% 3%}
+  .spur{position:relative;height:44%;margin-bottom:4%;border-radius:18px;background:repeating-linear-gradient(90deg,#d2ab6f 0 46px,#c79f63 46px 92px);box-shadow:inset 0 -6px 0 rgba(0,0,0,.08)}
+  .spur .ziel{position:absolute;right:8px;top:6px;bottom:6px;width:16px;border-radius:4px;background:repeating-linear-gradient(#222 0 10px,#fff 10px 20px)}
+  .spur .name{position:absolute;left:12px;top:8px;font-weight:900;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.45);z-index:2}
+  .renner{position:absolute;left:0;bottom:4px;width:min(28%,170px);height:88%;transition:left .35s ease}
+  .renner.gegner{transition:none}
+  .renner svg{width:100%;height:100%;display:block;overflow:visible}
+  .renner.hops svg{animation:huepfen .4s ease}
+  .memgrid{position:absolute;inset:2% 3%;grid-template-columns:repeat(4,1fr);gap:clamp(8px,1.6vw,14px);align-content:center}
+  .memkarte{aspect-ratio:1.15;border:0;border-radius:16px;font-size:clamp(20px,4.6vw,38px);font-weight:900;box-shadow:0 4px 0 rgba(0,0,0,.14);
+    background:repeating-linear-gradient(100deg,transparent 0 9px,rgba(160,110,20,.18) 9px 11px),linear-gradient(var(--heu),var(--heu2))}
+  .memkarte .mz{display:inline-block;width:1.4em;height:1.4em;line-height:1.4em;border-radius:50%;background:rgba(255,248,225,.85);color:#b5763c}
+  .memkarte.offen{background:#fff;color:var(--text)}
+  .memkarte.offen.ergebnis{background:#e7f2ff;color:#2f6fc0}
+  .memkarte.gefunden{background:#dff5d8 !important;color:#2d7a3e !important}
+  .blitzpad{grid-template-columns:1fr 1fr;gap:14px;max-width:600px;width:100%;margin:0 auto;padding:10px 16px 20px}
+  .blitzpad button{border:0;border-radius:22px;font-size:26px;font-weight:900;color:#fff;padding:28px 0;box-shadow:0 5px 0 rgba(0,0,0,.2)}
+  .blitzpad .ja{background:var(--gruen)} .blitzpad .nein{background:var(--rot)}
+  .blitzpad button:active{transform:translateY(3px)}
+  #spiel{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
   .karotten{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:18px;background:#fff1e0;border:2px solid #ffd3a3;border-radius:999px;padding:6px 14px}
 
   /* große Knöpfe */
@@ -130,7 +177,7 @@
       radial-gradient(ellipse at 50% 0,var(--wiese) 60%,transparent 61%) 0 -30px/100% 80px no-repeat,
       linear-gradient(var(--wiese),var(--wiese2));pointer-events:none;display:flex;align-items:flex-end;justify-content:center}
   #spiel.rechnen .wiese{height:100%;background:linear-gradient(transparent 55%,var(--wiese) 55%)}
-  .wiese .pferd{height:96%;max-width:80%;aspect-ratio:1.1}
+  .wiese .pferd{height:96%;max-width:94%;aspect-ratio:1.5}
   .plus{position:absolute;font-size:28px;font-weight:900;color:#e2731f;pointer-events:none;animation:hoch 1s ease forwards;z-index:5}
   @keyframes hoch{to{transform:translateY(-70px);opacity:0}}
   .pad{display:none;max-width:460px;width:100%;margin:0 auto;padding:8px 14px 14px}
@@ -166,7 +213,14 @@
   .ware.getragen{border-color:var(--gruen);background:#effbe9}
 
   /* Pferd */
-  .pferd svg{display:block;width:100%;height:100%;overflow:visible}
+  .pferd > svg{display:block;width:100%;height:100%;overflow:visible}
+  .kind .k-arm{transform-box:fill-box;transform-origin:50% 6%;transition:transform .3s ease}
+  .kind .k-kopf{transform-box:fill-box;transform-origin:50% 100%;transition:transform .3s ease}
+  .kind .k-augen{transform-box:fill-box;transform-origin:50% 50%;animation:blinzeln 4.3s infinite}
+  .pferd.froh .k-arm-l{transform:rotate(150deg)}
+  .pferd.froh .k-arm-r{transform:rotate(-150deg)}
+  .pferd.froh .kind-hops{animation:huepfen .55s ease 2}
+  .pferd.traurig .k-kopf{transform:rotate(-8deg) translateY(2px)}
   .pferd .pf{animation:atmen 3.2s ease-in-out infinite;transform-box:view-box;transform-origin:110px 180px}
   .pferd .schweif{animation:wedeln 2.6s ease-in-out infinite;transform-box:view-box;transform-origin:52px 104px}
   .pferd .auge{animation:blinzeln 5s infinite;transform-box:view-box;transform-origin:163px 55px}
@@ -193,13 +247,15 @@
   <h1>EINMALEINS</h1>
   <div class="karte">
     <h2>Hallo! Ich bin dein Pferd 🐴</h2>
-    <div class="stallbild" style="max-width:340px;margin:0 auto 12px"><div class="pferd" id="startPferd"></div></div>
+    <div class="stallbild" style="max-width:440px;margin:0 auto 12px"><div class="pferd" id="startPferd"></div></div>
     <div class="feldname">Wie soll ich heißen?</div>
     <input class="eingabe" id="startName" maxlength="20" placeholder="z. B. Fleur" autocomplete="off" autocorrect="off">
     <div class="feldname">Wie heißt du?</div>
     <input class="eingabe" id="startKind" maxlength="20" placeholder="Dein Name" autocomplete="off" autocorrect="off">
     <div class="feldname">Welche Farbe habe ich?</div>
     <div class="chips" id="startFell"></div>
+    <h2 style="margin-top:18px">Und so siehst du aus 🙂</h2>
+    <div id="startLook"></div>
     <p><button class="gross g-heu" id="startLos" style="width:100%">LOS GEHT'S!</button></p>
   </div>
 </div></section>
@@ -224,6 +280,21 @@
   <div class="los">
     <button class="gross g-heu" id="losKisten">🌾 HEUBALLEN<small>Tippe die richtige Antwort, bevor sie landet</small></button>
     <button class="gross g-rechnen" id="losRechnen">✏️ RECHNEN<small>Ergebnis selbst eintippen</small></button>
+  </div>
+
+  <div class="karte">
+    <h2>Heute zu tun ✅</h2>
+    <div id="quests"></div>
+  </div>
+
+  <div class="karte">
+    <h2>Spielwiese 🎪</h2>
+    <div class="spiele">
+      <button class="spielknopf" data-spiel="rennen"><b>🏇</b>Pferderennen<small>Rechne schneller als das andere Pferd</small></button>
+      <button class="spielknopf" data-spiel="blitz"><b>⚡</b>Wahr oder falsch?<small>60 Sekunden — stimmt das?</small></button>
+      <button class="spielknopf" data-spiel="memory"><b>🧠</b>Memory<small>Finde Aufgabe und Ergebnis</small></button>
+    </div>
+    <p class="klein">Die Spiele üben mit den Reihen von „Was üben wir?“ und bringen Karotten. Sicher ⭐ werden Aufgaben aber nur bei Heuballen und Rechnen.</p>
   </div>
 
   <div class="karte">
@@ -262,8 +333,9 @@
   </div>
 
   <div class="karte">
-    <h2>Medaillen</h2>
+    <h2>Medaillen &amp; Abzeichen</h2>
     <div id="medaillen" style="font-size:22px;font-weight:800"></div>
+    <div class="abz" id="abzeichen"></div>
   </div>
 
   <div class="karte">
@@ -275,6 +347,7 @@
       <input class="eingabe" id="setKind" maxlength="20" autocomplete="off" autocorrect="off">
       <div class="feldname">Fellfarbe</div>
       <div class="chips" id="setFell"></div>
+      <div id="setLook"></div>
       <label class="zeile"><input type="checkbox" id="setMax" style="width:24px;height:24px"> Auch 11er- und 12er-Reihe</label>
       <label class="zeile"><input type="checkbox" id="setTon" style="width:24px;height:24px"> Töne</label>
       <div class="feldname">Sicherung</div>
@@ -299,6 +372,8 @@
   <div class="aufgabe" id="aufgabe"></div>
   <div class="feld" id="feld">
     <div id="reihen"></div>
+    <div id="bahn"></div>
+    <div id="memory" class="memgrid"></div>
     <div class="wiese" id="wiese"><div class="pferd" id="spPferd"></div></div>
   </div>
   <div class="pad">
@@ -310,13 +385,14 @@
       <button data-k="weg" class="weg">⌫</button><button data-k="0">0</button><button data-k="ok" class="ok">✓</button>
     </div>
   </div>
+  <div class="blitzpad"><button class="ja" id="blitzJa">✓ Stimmt</button><button class="nein" id="blitzNein">✗ Stimmt nicht</button></div>
 </section>
 
 <!-- Ergebnis -->
 <section class="view" id="ergebnis"><div class="wrap">
   <div class="karte">
     <div class="medaille" id="ergMedaille"></div>
-    <div class="erg-pferd"><div class="pferd" id="ergPferd"></div></div>
+    <div class="erg-pferd" style="max-width:420px"><div class="pferd" id="ergPferd"></div></div>
     <div class="erg-text" id="ergText"></div>
     <div class="los">
       <button class="gross g-heu" id="ergNochmal">NOCHMAL</button>
@@ -331,7 +407,7 @@
   <h1>LADEN</h1>
   <p class="reihe2"><span class="karotten" id="ladenKarotten"></span><button class="knopf" id="ladenZu">← Zurück zum Stall</button></p>
   <div class="karte">
-    <div class="stallbild" style="max-width:360px;margin:0 auto"><div class="pferd" id="ladenPferd"></div></div>
+    <div class="stallbild" style="max-width:460px;margin:0 auto"><div class="pferd" id="ladenPferd"></div></div>
   </div>
   <div class="karte">
     <h2>Futter — damit ich groß werde 🌱</h2>
@@ -341,14 +417,21 @@
       Ich werde nie hungrig und nie kleiner — jedes Futter lässt mich ein Stück wachsen. Eins davon ist mein Lieblingsfutter, findest du heraus, welches?</p>
   </div>
   <div class="karte">
-    <h2>Zubehör 🎀</h2>
+    <h2>Für dich 👕</h2>
+    <div class="waren" id="kleidung"></div>
+    <p class="klein">Pro Platz (Kopf, Oberteil, Unterteil, Schuhe, Extra) trägst du ein Teil — Neues ersetzt das alte, das alte bleibt deins.</p>
+  </div>
+  <div class="karte">
+    <h2>Für dein Pferd 🎀</h2>
     <div class="waren" id="waren"></div>
   </div>
 </div></section>
 
+<div class="toast" id="toast"></div>
+
 <!-- Feier beim Wachsen -->
 <div class="feier" id="feier"><div class="karte">
-  <div class="stallbild" style="max-width:320px;margin:0 auto"><div class="pferd" id="feierPferd"></div></div>
+  <div class="stallbild" style="max-width:400px;margin:0 auto"><div class="pferd" id="feierPferd"></div></div>
   <h2 id="feierTitel"></h2><p id="feierText" style="font-size:18px"></p>
   <p><button class="gross g-heu" id="feierZu" style="width:100%">JUHU!</button></p>
 </div></div>
@@ -571,12 +654,133 @@ function fuettern(shop, pf, id){
    zählt als Futter, höchstens bis „Junges Pony“. */
 function wachsStart(shop){ return Math.min(STUFEN[2].ab, shop.owned.reduce((a, id) => a + ((WAREN.find(w => w.id === id) || {}).preis || 0), 0)); }
 
+/* ----- Das Kind (vom Nutzer, Fassung d): Spielfigur neben dem Pferd, wächst mit, lässt sich anziehen ----- */
+const HAUT = { hell:"#f6d3b8", mittel:"#e3ac85", braun:"#b97b52", dunkel:"#7d4f33" };
+const HAARFARBE = { blond:"#e8c35a", hellbraun:"#a8743f", braun:"#6e4022", schwarz:"#2a1d18", rot:"#c4552c" };
+const FRISUREN = { kurz:"Kurz", locken:"Locken", lang:"Lang", zopf:"Pferdeschwanz", zoepfe:"Zwei Zöpfe" };
+const SHIRTS = { rot:"#ef5b5b", blau:"#4a90e2", gruen:"#3fb56b", gelb:"#f6c22f", lila:"#9b6bdf", rosa:"#ff8fc7" };
+/* platz: je Platz trägt das Kind nur ein Teil (kopf, oben, unten, fuss, extra) */
+const KLEIDUNG = [
+  { id:"muetze",      name:"Mütze",            preis:30,  bild:"🧢", platz:"kopf" },
+  { id:"schal",       name:"Schal",            preis:30,  bild:"🧣", platz:"extra" },
+  { id:"turnschuhe",  name:"Turnschuhe",       preis:40,  bild:"👟", platz:"fuss" },
+  { id:"reithose",    name:"Reithose",         preis:50,  bild:"👖", platz:"unten" },
+  { id:"rock",        name:"Rock",             preis:50,  bild:"👗", platz:"unten" },
+  { id:"reithelm",    name:"Reithelm",         preis:60,  bild:"⛑️", platz:"kopf" },
+  { id:"herzbrille",  name:"Herzbrille",       preis:60,  bild:"💗", platz:"extra" },
+  { id:"glitzershirt",name:"Glitzer-Shirt",    preis:70,  bild:"✨", platz:"oben" },
+  { id:"reitstiefel", name:"Reitstiefel",      preis:70,  bild:"👢", platz:"fuss" },
+  { id:"reitjacke",   name:"Reitjacke",        preis:90,  bild:"🧥", platz:"oben" },
+  { id:"cowboyhut",   name:"Cowboyhut",        preis:90,  bild:"🤠", platz:"kopf" },
+  { id:"regenbogen_k",name:"Regenbogen-Pulli", preis:120, bild:"🌈", platz:"oben" },
+  { id:"haarreif",    name:"Glitzer-Haarreif", preis:150, bild:"👑", platz:"kopf" },
+];
+const KIND_GR = [0.82, 0.87, 0.92, 0.96, 1];   /* wächst mit dem Pferd */
+function kindAnziehen(shop, id){
+  const k = KLEIDUNG.find(x => x.id === id);
+  if(!k || !shop.owned.includes(id)) return shop;
+  const platz = shop.kwear.filter(x => (KLEIDUNG.find(y => y.id === x) || {}).platz !== k.platz);
+  return { ...shop, kwear:[...platz, id] };
+}
+function kindAblegen(shop, id){ return { ...shop, kwear:shop.kwear.filter(x => x !== id) }; }
+function kindKaufen(shop, id){
+  const k = KLEIDUNG.find(x => x.id === id);
+  if(!k || shop.owned.includes(id) || shop.k < k.preis) return shop;
+  return kindAnziehen({ ...shop, k:shop.k - k.preis, owned:[...shop.owned, id] }, id);
+}
+
+/* ----- Weitere Spiele (vom Nutzer, Fassung d). Sie üben mit den gewählten Reihen, bringen Karotten,
+   ändern aber den Karteikasten NICHT — der bleibt bei Heuballen und Rechnen (dort wird gemessen). ----- */
+/* Pferderennen: 12 richtige Antworten bis ins Ziel; das Gegnerpferd braucht je nach Tempo so lange
+   wie 12 Antworten zu je RENN_MS. Rennen-Antworten zählen für den Lerntag (selbst eingetippt). */
+const RENN_ZIEL = 12, RENN_MS = { gemuetlich:7000, normal:5000, schnell:3500 };
+function rennKarotten(richtig, sieg){ return Math.min(RENN_ZIEL, richtig) + (sieg ? 5 : 0); }
+/* Wahr oder falsch: 60 Sekunden, Punkte = richtig − falsch (Raten lohnt nicht). Zählt NICHT für den
+   Lerntag — mit Raten wäre er in einer Minute voll. */
+const BLITZ_MS = 60000;
+function blitzAussage(c, rnd = Math.random){
+  const a = frage(c).a, wahr = rnd() < 0.5;
+  const falsch = auswahl(c, rnd).filter(x => x !== a);
+  const zeigt = wahr ? a : falsch[Math.floor(rnd() * falsch.length)];
+  return { text:frage(c).text + " = " + zeigt, wahr, loesung:loesung(c) };
+}
+function blitzPunkte(richtig, falsch){ return Math.max(0, richtig - falsch); }
+function blitzKarotten(punkte){ return Math.min(12, Math.floor(punkte / 2)); }
+/* Memory: 6 Paare Aufgabe ↔ Ergebnis, Ergebnisse alle verschieden (sonst gäbe es zwei passende Karten) */
+function memoryKarten(cards, rnd = Math.random, paare = 6){
+  const gewaehlt = [], ergebnisse = new Set();
+  for(const c of mischen(cards, rnd)){
+    const f = frage(c);
+    if(ergebnisse.has(f.a)) continue;
+    ergebnisse.add(f.a); gewaehlt.push(c);
+    if(gewaehlt.length >= paare) break;
+  }
+  const karten = [];
+  gewaehlt.forEach((c, i) => { const f = frage(c); karten.push({ paar:i, text:f.text, art:"aufgabe" }, { paar:i, text:String(f.a), art:"ergebnis" }); });
+  return mischen(karten, rnd);
+}
+function memoryKarotten(paare, zuege){ return 5 + (zuege <= paare + 3 ? 4 : zuege <= paare + 6 ? 2 : 0); }
+
+/* ----- Tagesaufgaben: jeden Tag drei, für alle gleich ausgewählt nach dem Datum ----- */
+const QUESTS = [
+  { id:"level2",   text:"Spiele 2 Level Heuballen oder Rechnen", ziel:2,  typ:"level" },
+  { id:"medaille", text:"Hol eine Silber- oder Goldmedaille",    ziel:1,  typ:"medaille_sg" },
+  { id:"richtig",  text:"Löse 25 Aufgaben richtig",              ziel:25, typ:"richtig" },
+  { id:"rennen",   text:"Gewinne ein Pferderennen",              ziel:1,  typ:"rennen_sieg" },
+  { id:"blitz",    text:"Schaffe 12 Punkte bei Wahr oder falsch", ziel:12, typ:"blitz", max:true },
+  { id:"memory",   text:"Spiele ein Memory fertig",              ziel:1,  typ:"memory" },
+  { id:"fuettern", text:"Füttere dein Pferd",                    ziel:1,  typ:"fuettern" },
+  { id:"rechnen",  text:"Spiele ein Level RECHNEN",              ziel:1,  typ:"rechnen_level" },
+];
+const QUEST_KAROTTEN = 10, QUEST_BONUS = 10;
+function tagesQuests(k, ohneFuttern){
+  let h = 0; for(const ch of k) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const rnd = () => (h = (h * 1103515245 + 12345) >>> 0) / 4294967296;
+  return mischen(QUESTS.filter(q => !(ohneFuttern && q.typ === "fuettern")), rnd).slice(0, 3);
+}
+function questStand(q, k){ return q && q.tag === k ? q : { tag:k, fort:{}, fertig:[], bonus:false }; }
+/* Ereignis melden: zählt bei passenden offenen Aufgaben hoch (bei max: bester Wert). Gibt die neu
+   geschafften zurück und ob jetzt alle drei geschafft sind (Bonus, nur einmal). */
+function questMelden(q, heute, typ, n = 1){
+  const out = { ...q, fort:{ ...q.fort }, fertig:[...q.fertig] }, neu = [];
+  for(const t of heute){
+    if(t.typ !== typ || out.fertig.includes(t.id)) continue;
+    out.fort[t.id] = t.max ? Math.max(out.fort[t.id] || 0, n) : (out.fort[t.id] || 0) + n;
+    if(out.fort[t.id] >= t.ziel){ out.fertig.push(t.id); neu.push(t); }
+  }
+  let bonus = false;
+  if(neu.length && !out.bonus && heute.every(t => out.fertig.includes(t.id))){ out.bonus = true; bonus = true; }
+  return { q:out, neu, bonus };
+}
+
+/* ----- Abzeichen: einmal verdient, für immer. st = Kennzahlen aus der Oberfläche. ----- */
+const ABZEICHEN = [
+  { id:"medaille1",  bild:"🎖️", name:"Erste Medaille",   text:"Ein Level geschafft",                 test:st => st.medaillen >= 1 },
+  { id:"gold10",     bild:"🥇", name:"Goldsammler",      text:"10 Goldmedaillen",                    test:st => st.gold >= 10 },
+  { id:"reihe",      bild:"📗", name:"Erste Reihe sicher", text:"Alle Mal-Aufgaben einer Reihe sicher", test:st => st.reiheSicher >= 1 },
+  { id:"halb",       bild:"⭐", name:"Halbe Tafel",       text:"50 Mal-Aufgaben sicher",               test:st => st.sicherM >= 50 },
+  { id:"ganz",       bild:"🌟", name:"Ganze Tafel",       text:"Alle 100 Mal-Aufgaben sicher",         test:st => st.sicherM >= 100 },
+  { id:"geteilt",    bild:"➗", name:"Geteilt-Profi",     text:"50 Geteilt-Aufgaben sicher",           test:st => st.sicherD >= 50 },
+  { id:"jaehrling",  bild:"🐴", name:"Jährling",          text:"Dein Pferd ist ein Jährling",          test:st => st.stufe >= 1 },
+  { id:"pony",       bild:"🐎", name:"Pony",              text:"Dein Pferd ist ein Pony",              test:st => st.stufe >= 3 },
+  { id:"gross",      bild:"🏆", name:"Großes Pferd",      text:"Dein Pferd ist ausgewachsen",          test:st => st.stufe >= 4 },
+  { id:"sieg1",      bild:"🏇", name:"Rennsieger",        text:"Ein Pferderennen gewonnen",            test:st => st.siege >= 1 },
+  { id:"sieg10",     bild:"🏁", name:"Rennchampion",      text:"10 Pferderennen gewonnen",             test:st => st.siege >= 10 },
+  { id:"memory",     bild:"🧠", name:"Gedächtnis-Ass",    text:"Memory in höchstens 9 Zügen",          test:st => st.memoryBest > 0 && st.memoryBest <= 9 },
+  { id:"blitz",      bild:"⚡", name:"Blitzschnell",      text:"20 Punkte bei Wahr oder falsch",       test:st => st.blitzBest >= 20 },
+  { id:"stern",      bild:"🌟", name:"Wochenstern",       text:"5 Lerntage in einer Woche",            test:st => st.sterne >= 1 },
+  { id:"fleissig",   bild:"💯", name:"Fleißig",           text:"500 Aufgaben richtig gelöst",          test:st => st.richtig >= 500 },
+  { id:"reiter",     bild:"⛑️", name:"Reiter-Outfit",     text:"Reithelm, Reithose und Reitstiefel",   test:st => st.reiterOutfit },
+  { id:"tagesheld",  bild:"✅", name:"Tagesheld",         text:"Alle drei Tagesaufgaben an einem Tag",  test:st => st.tageshelden >= 1 },
+];
+function abzeichenNeu(hat, st){ return ABZEICHEN.filter(a => !hat[a.id] && a.test(st)).map(a => a.id); }
+
 /* Sicherungs-Erinnerung: erste ungesicherte Antwort älter als eine Woche */
 function needBackup(dirty, snooze, now){ return !!dirty && now - dirty >= 7 * DAY && !(snooze && snooze > now); }
 
 /* ===================== Oberfläche ===================== */
 /* Fassung — bei JEDER Änderung hochzählen (am iPad läuft nach einem Push oft noch die alte Datei). */
-const FASSUNG = "23.11.2026 c";
+const FASSUNG = "23.11.2026 d";
 const KEY = "einmaleins_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
@@ -595,6 +799,8 @@ function sanitize(x){
     op:["mal", "geteilt", "mix"].includes(x.op) ? x.op : "mal",
     rows, max, tempo:TEMPO[x.tempo] ? x.tempo : "normal", ton:x.ton !== false,
     kette:x.kette === "einzeln" ? "einzeln" : "mehr",
+    haut:HAUT[x.haut] ? x.haut : "hell", haar:HAARFARBE[x.haar] ? x.haar : "braun",
+    frisur:FRISUREN[x.frisur] ? x.frisur : "zopf", shirt:SHIRTS[x.shirt] ? x.shirt : "blau",
     tafelOp:x.tafelOp === "d" ? "d" : "m",
   };
 }
@@ -610,9 +816,11 @@ function sanitizeP(x){
 }
 function sanitizeShop(x){
   x = x && typeof x === "object" ? x : {};
-  const ids = WAREN.map(w => w.id);
+  const ids = [...WAREN, ...KLEIDUNG].map(w => w.id), kids = KLEIDUNG.map(w => w.id);
   const owned = Array.isArray(x.owned) ? [...new Set(x.owned.filter(i => ids.includes(i)))] : [];
-  return { k:Math.max(0, x.k | 0), owned, wear:Array.isArray(x.wear) ? [...new Set(x.wear.filter(i => owned.includes(i)))] : [] };
+  return { k:Math.max(0, x.k | 0), owned,
+    wear:Array.isArray(x.wear) ? [...new Set(x.wear.filter(i => owned.includes(i) && !kids.includes(i)))] : [],
+    kwear:Array.isArray(x.kwear) ? [...new Set(x.kwear.filter(i => owned.includes(i) && kids.includes(i)))] : [] };
 }
 function sanitizeMed(x){ x = x || {}; return { gold:x.gold | 0, silber:x.silber | 0, bronze:x.bronze | 0, reihen:x.reihen && typeof x.reihen === "object" ? x.reihen : {} }; }
 
@@ -623,21 +831,26 @@ function sanitizePf(x, shop){
   return { w:Math.max(0, Math.min(STUFEN[STUFEN.length - 1].ab, +x.w || 0)), lieb:FUTTER.some(f => f.id === x.lieb) ? x.lieb : "apfel", liebBekannt:!!x.liebBekannt };
 }
 let PF = sanitizePf(lsGet("_pf", null), SHOP);
-function persist(){ lsSet("", S); lsSet("_p", P); lsSet("_days", DAYS); lsSet("_stars", STARS); lsSet("_shop", SHOP); lsSet("_med", MED); lsSet("_pf", { w:PF.w, lieb:PF.lieb, liebBekannt:PF.liebBekannt }); }
+function sanitizeStat(x){ x = x || {}; return { siege:x.siege | 0, blitzBest:x.blitzBest | 0, memoryBest:x.memoryBest | 0, richtig:x.richtig | 0, tageshelden:x.tageshelden | 0 }; }
+let STAT = sanitizeStat(lsGet("_stat", null)), ABZ = lsGet("_abz", null) || {}, TQ = lsGet("_tq", null);
+function persist(){ lsSet("", S); lsSet("_p", P); lsSet("_days", DAYS); lsSet("_stars", STARS); lsSet("_shop", SHOP); lsSet("_med", MED); lsSet("_pf", { w:PF.w, lieb:PF.lieb, liebBekannt:PF.liebBekannt });
+  lsSet("_stat", STAT); lsSet("_abz", ABZ); lsSet("_tq", TQ); }
 function markDirty(){ if(!lsGet("_dirty", null)) lsSet("_dirty", Date.now()); }
 const pferdName = () => S.pferd || "Dein Pferd";
 
 /* ----- Pferd (SVG) ----- */
 let PF_N = 0;
 /* Hintergrund wächst mit: Zaun (Jährling), Blumen (junges Pony), Stall (Pony), Schleife am Zaun (großes Pferd) */
-function szeneSVG(st){
+function szeneSVG(st, breite = 220){
   let s = "";
   if(st >= 3) s += `<g><rect x="2" y="98" width="46" height="64" fill="#c9483a"/><path d="M-2 100 L25 74 L52 100 Z" fill="#8a2f26"/>
     <rect x="15" y="122" width="20" height="40" fill="#fff4e0"/><path d="M15 122 L35 162 M35 122 L15 162" stroke="#c9483a" stroke-width="3"/></g>`;
-  if(st >= 1) s += `<g fill="#d4a06a"><rect x="52" y="130" width="5" height="40" rx="2"/><rect x="100" y="130" width="5" height="40" rx="2"/><rect x="148" y="130" width="5" height="40" rx="2"/><rect x="196" y="130" width="5" height="40" rx="2"/>
-    <rect x="50" y="138" width="170" height="5" rx="2"/><rect x="50" y="153" width="170" height="5" rx="2"/></g>`;
+  if(st >= 1){
+    let pf = ""; for(let x = 52; x < breite - 4; x += 48) pf += `<rect x="${x}" y="130" width="5" height="40" rx="2"/>`;
+    s += `<g fill="#d4a06a">${pf}<rect x="50" y="138" width="${breite - 50}" height="5" rx="2"/><rect x="50" y="153" width="${breite - 50}" height="5" rx="2"/></g>`;
+  }
   if(st >= 4) s += `<g><path d="M193 140 l-5 18 l6 -4 l3 7 z M203 140 l5 18 l-6 -4 l-3 7 z" fill="#4a90e2"/><circle cx="198" cy="136" r="9" fill="#4a90e2" stroke="#ffd84d" stroke-width="2.5"/><text x="198" y="140" font-size="10" text-anchor="middle" fill="#fff" font-weight="900">1</text></g>`;
-  if(st >= 2) s += `<g><circle cx="16" cy="190" r="3.5" fill="#ff8fc7"/><circle cx="30" cy="194" r="3" fill="#fff"/><circle cx="196" cy="191" r="3.5" fill="#ffe066"/><circle cx="210" cy="195" r="3" fill="#9ad0ff"/><circle cx="180" cy="196" r="2.6" fill="#fff"/></g>`;
+  if(st >= 2) s += `<g><circle cx="16" cy="190" r="3.5" fill="#ff8fc7"/><circle cx="30" cy="194" r="3" fill="#fff"/><circle cx="196" cy="191" r="3.5" fill="#ffe066"/><circle cx="210" cy="195" r="3" fill="#9ad0ff"/><circle cx="180" cy="196" r="2.6" fill="#fff"/>${breite > 220 ? `<circle cx="244" cy="195" r="3" fill="#ff8fc7"/><circle cx="290" cy="191" r="3.5" fill="#fff"/>` : ""}</g>`;
   return s;
 }
 function pferdSVG(fellId, wear, stufe = 4, szene = true){
@@ -692,8 +905,63 @@ function pferdSVG(fellId, wear, stufe = 4, szene = true){
     </g></g>
   </g></g></g></svg>`;
 }
+/* Das Kind: von vorn, Ursprung unten in der Mitte, etwa 130 hoch. Teile mit Klassen für die Laune
+   (dieselben m-froh/m-traurig wie beim Pferd, dazu Arme hoch beim Freuen). */
+let KD_N = 0;
+function kindSVG(look, kw){
+  const id = "kd" + (++KD_N), an = x => kw.includes(x);
+  const haut = HAUT[look.haut] || HAUT.hell, haar = HAARFARBE[look.haar] || HAARFARBE.braun;
+  const oben = an("reitjacke") ? "#2f4a7a" : an("glitzershirt") ? "#ff7fbf" : an("regenbogen_k") ? `url(#${id}rb)` : (SHIRTS[look.shirt] || SHIRTS.blau);
+  const hose = an("reithose") ? "#efe8da" : "#3b5b8f", beine = an("rock") ? "#f6b8d4" : hose;
+  const aermel = an("reitjacke") || an("regenbogen_k") ? 28 : 13;
+  const arm = (x, cls) => `<g class="k-arm ${cls}"><rect x="${x}" y="-86" width="8" height="33" rx="4" fill="${haut}"/><rect x="${x}" y="-86" width="8" height="${aermel}" rx="4" fill="${oben}"/><circle cx="${x + 4}" cy="-52" r="4.6" fill="${haut}"/></g>`;
+  let hinten = "";
+  if(look.frisur === "lang") hinten = `<path d="M-19 -114 C -24 -96 -23 -84 -17 -75 L 17 -75 C 23 -84 24 -96 19 -114 Z" fill="${haar}"/>`;
+  if(look.frisur === "zopf") hinten = `<ellipse cx="22" cy="-99" rx="6" ry="15" fill="${haar}" transform="rotate(-14 22 -99)"/><circle cx="17" cy="-114" r="3.2" fill="#ff5fa2"/>`;
+  if(look.frisur === "zoepfe") hinten = `<ellipse cx="-21" cy="-95" rx="5" ry="14" fill="${haar}"/><ellipse cx="21" cy="-95" rx="5" ry="14" fill="${haar}"/><circle cx="-20" cy="-108" r="3" fill="#ff5fa2"/><circle cx="20" cy="-108" r="3" fill="#ff5fa2"/>`;
+  const vorne = look.frisur === "locken"
+    ? [[-16,-113,6.5],[-11,-123,6.5],[-3,-127,6.5],[5,-127,6.5],[12,-123,6.5],[17,-113,6.5],[-19,-104,4],[19,-104,4]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${haar}"/>`).join("")
+    : `<path d="M-18 -107 C -20 -131 20 -131 18 -107 C 15 -116 8 -120 1 -116 C -5 -121 -13 -117 -18 -107 Z" fill="${haar}"/>`;
+  const schuhe = an("reitstiefel") ? `<rect x="-13" y="-27" width="12" height="26" rx="3" fill="#1f1a17"/><rect x="1" y="-27" width="12" height="26" rx="3" fill="#1f1a17"/><rect x="-14" y="-4" width="14" height="4" rx="2" fill="#000"/><rect x="0" y="-4" width="14" height="4" rx="2" fill="#000"/>`
+    : an("turnschuhe") ? `<rect x="-15" y="-9" width="14" height="9" rx="4" fill="#fff" stroke="#ddd"/><rect x="1" y="-9" width="14" height="9" rx="4" fill="#fff" stroke="#ddd"/><path d="M-12 -5 h8 M4 -5 h8" stroke="#ef5b5b" stroke-width="2"/>`
+    : `<rect x="-14" y="-8" width="13" height="8" rx="4" fill="#6b4226"/><rect x="1" y="-8" width="13" height="8" rx="4" fill="#6b4226"/>`;
+  const kopfding = an("muetze") ? `<path d="M-18 -118 C -18 -138 18 -138 18 -118 Z" fill="#4a90e2"/><circle cx="0" cy="-136" r="2.2" fill="#2f6fc0"/><path d="M-17 -120 Q0 -115 17 -120 L18 -117 Q0 -111 -18 -117 Z" fill="#2f6fc0"/>`
+    : an("reithelm") ? `<path d="M-19 -117 C -19 -141 19 -141 19 -117 Z" fill="#26221f"/><path d="M-18 -119 Q0 -114 18 -119 L19 -116 Q0 -110 -19 -116 Z" fill="#111"/><path d="M-18 -114 Q-16 -97 -6 -94 M18 -114 Q16 -97 6 -94" stroke="#444" stroke-width="1.5" fill="none"/>`
+    : an("cowboyhut") ? `<path d="M-14 -121 C -14 -141 14 -141 14 -121 Z" fill="#a06a35"/><ellipse cx="0" cy="-120" rx="28" ry="5" fill="#8a5a2b"/><rect x="-14" y="-126" width="28" height="3" fill="#5a3a1a"/>`
+    : an("haarreif") ? `<path d="M-17 -117 Q0 -134 17 -117" stroke="#ffc531" stroke-width="3.5" fill="none"/><circle cx="0" cy="-129" r="3.2" fill="#ff5fa2"/><circle cx="-9" cy="-125" r="2.2" fill="#9ad0ff"/><circle cx="9" cy="-125" r="2.2" fill="#9ad0ff"/>` : "";
+  return `<defs><linearGradient id="${id}rb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6b6b"/><stop offset=".2" stop-color="#ff6b6b"/><stop offset=".2" stop-color="#ffb347"/><stop offset=".4" stop-color="#ffb347"/><stop offset=".4" stop-color="#ffe066"/><stop offset=".6" stop-color="#ffe066"/><stop offset=".6" stop-color="#6bd47a"/><stop offset=".8" stop-color="#6bd47a"/><stop offset=".8" stop-color="#5aa9f0"/><stop offset="1" stop-color="#5aa9f0"/></linearGradient></defs>
+  <ellipse cx="0" cy="0" rx="20" ry="3.5" fill="rgba(0,0,0,.12)"/>
+  <g class="kind-hops">
+    <rect x="-12" y="-48" width="10" height="44" rx="4" fill="${beine}"/><rect x="2" y="-48" width="10" height="44" rx="4" fill="${beine}"/>
+    ${schuhe}
+    <rect x="-16" y="-54" width="32" height="10" rx="4" fill="${hose}"/>
+    ${an("rock") ? `<path d="M-17 -55 L-23 -33 Q0 -29 23 -33 L17 -55 Z" fill="#a66bd6"/>` : ""}
+    ${hinten}
+    ${arm(-25, "k-arm-l")}${arm(17, "k-arm-r")}
+    <rect x="-17" y="-89" width="34" height="42" rx="9" fill="${oben}"/>
+    ${an("reitjacke") ? `<path d="M-7 -89 L0 -79 L7 -89 Z" fill="#fff"/><circle cx="0" cy="-70" r="1.6" fill="#ffd84d"/><circle cx="0" cy="-61" r="1.6" fill="#ffd84d"/>` : ""}
+    ${an("glitzershirt") ? `<circle cx="-8" cy="-78" r="1.6" fill="#fff"/><circle cx="6" cy="-72" r="1.8" fill="#fff"/><circle cx="-3" cy="-62" r="1.4" fill="#fff"/><circle cx="9" cy="-58" r="1.3" fill="#fff"/><path d="M-1 -84 l1.5 3 3 1.5 -3 1.5 -1.5 3 -1.5 -3 -3 -1.5 3 -1.5z" fill="#fff8a8"/>` : ""}
+    <g class="k-kopf">
+      <rect x="-4" y="-95" width="8" height="8" fill="${haut}"/>
+      <circle cx="-17" cy="-109" r="3.6" fill="${haut}"/><circle cx="17" cy="-109" r="3.6" fill="${haut}"/>
+      <circle cx="0" cy="-110" r="17" fill="${haut}"/>
+      <g class="k-augen"><ellipse cx="-6" cy="-109" rx="2.4" ry="3" fill="#2a1a12"/><ellipse cx="6" cy="-109" rx="2.4" ry="3" fill="#2a1a12"/><circle cx="-5.2" cy="-110.2" r=".9" fill="#fff"/><circle cx="6.8" cy="-110.2" r=".9" fill="#fff"/></g>
+      <ellipse cx="-11" cy="-103" rx="3" ry="1.9" fill="#ff8a8a" opacity=".45"/><ellipse cx="11" cy="-103" rx="3" ry="1.9" fill="#ff8a8a" opacity=".45"/>
+      <path class="m-normal" d="M-5 -102 Q0 -98 5 -102" stroke="#7a3b2e" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <path class="m-froh" d="M-6 -103 Q0 -94 6 -103 Z" fill="#7a2e2e"/>
+      <path class="m-traurig" d="M-5 -99 Q0 -103 5 -99" stroke="#7a3b2e" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      ${vorne}
+      ${an("herzbrille") ? `<circle cx="-6" cy="-109" r="5.5" fill="#ff8fc7" fill-opacity=".35" stroke="#ff4f9a" stroke-width="1.8"/><circle cx="6" cy="-109" r="5.5" fill="#ff8fc7" fill-opacity=".35" stroke="#ff4f9a" stroke-width="1.8"/><path d="M-0.5 -109 h1" stroke="#ff4f9a" stroke-width="1.8"/>` : ""}
+      ${kopfding}
+    </g>
+    ${an("schal") ? `<path d="M-12 -91 Q0 -85 12 -91 L12 -85 Q0 -79 -12 -85 Z" fill="#ef5b5b"/><rect x="5" y="-87" width="6" height="15" rx="2" fill="#e04848"/>` : ""}
+  </g>`;
+}
+/* Szene: Hintergrund über 300 breit, Pferd links (eigene viewBox), Kind rechts — beide wachsen mit */
 function pferdMalen(el, laune){
-  el.innerHTML = pferdSVG(S.fell, SHOP.wear, stufeVon(PF.w));
+  const st = stufeVon(PF.w);
+  const pf = pferdSVG(S.fell, SHOP.wear, st, false).replace('<svg viewBox="0 0 220 200"', '<svg x="0" y="0" width="220" height="200" viewBox="0 0 220 200" overflow="visible"');
+  el.innerHTML = `<svg viewBox="0 0 300 200" aria-hidden="true">${szeneSVG(st, 300)}${pf}<g transform="translate(262 186) scale(${KIND_GR[st]})"><g class="kind">${kindSVG(S, SHOP.kwear)}</g></g></svg>`;
   el.className = "pferd" + (laune ? " " + laune : "");
 }
 let LAUNE_T = 0;
@@ -771,10 +1039,13 @@ function renderHome(){
 
   renderTafel();
   $("medaillen").textContent = "🥇 " + MED.gold + "   🥈 " + MED.silber + "   🥉 " + MED.bronze;
+  $("abzeichen").innerHTML = ABZEICHEN.map(a => `<div class="${ABZ[a.id] ? "" : "nein"}" title="${esc(a.text)}"><i>${a.bild}</i>${esc(a.name)}${ABZ[a.id] ? "" : `<br><span class="klein">${esc(a.text)}</span>`}</div>`).join("");
+  renderQuests();
 
   const b = $("einst");
   if(!fokusIn(b)){ $("setName").value = S.pferd; $("setKind").value = S.kind; }
   $("setFell").innerHTML = fellChips();
+  $("setLook").innerHTML = lookHtml();
   $("setMax").checked = S.max === 12; $("setTon").checked = S.ton;
   const exp = lsGet("_exp", null);
   $("backupNote").textContent = (exp ? "Letzte Sicherung: " + new Date(exp).toLocaleDateString("de-DE") + ". " : "Noch nie gesichert. ") +
@@ -783,6 +1054,13 @@ function renderHome(){
     ? `<div class="hinweis">💾 Zeit für eine Sicherung — sonst ist der Lernstand weg, wenn das iPad aufgeräumt wird.
        <p class="reihe2"><button class="knopf voll" data-act="sichern">JETZT SICHERN</button><button class="knopf" data-act="spaeter">Später</button></p></div>` : "";
   $("fassung").textContent = "Fassung " + FASSUNG;
+}
+function lookHtml(){
+  const farbe = (attr, liste, akt) => Object.entries(liste).map(([k, c]) => `<button class="chip farbe${akt === k ? " an" : ""}" data-${attr}="${k}" style="background:${c}" aria-label="${k}"></button>`).join("");
+  return `<div class="feldname">Haut</div><div class="chips">${farbe("haut", HAUT, S.haut)}</div>
+    <div class="feldname">Haarfarbe</div><div class="chips">${farbe("haar", HAARFARBE, S.haar)}</div>
+    <div class="feldname">Frisur</div><div class="chips">${Object.entries(FRISUREN).map(([k, t]) => `<button class="chip${S.frisur === k ? " an" : ""}" data-frisur="${k}">${t}</button>`).join("")}</div>
+    <div class="feldname">T-Shirt</div><div class="chips">${farbe("shirt", SHIRTS, S.shirt)}</div>`;
 }
 function fellChips(){ return Object.entries(FELLE).map(([k, f]) => `<button class="chip${S.fell === k ? " an" : ""}" data-fell="${k}">${f.name}</button>`).join(""); }
 
@@ -808,6 +1086,7 @@ function renderTafel(){
 /* ----- Spiel ----- */
 let G = null, RAF = 0, WEITER_T = 0;
 function spielStart(art){
+  if(art === "rennen" || art === "blitz" || art === "memory") return miniStart(art);
   const karten = aktuelleKarten();
   if(!karten.length){ alert("Bitte mindestens eine Reihe auswählen."); return; }
   const level = levelBauen(karten, P, Date.now(), 10);
@@ -815,8 +1094,8 @@ function spielStart(art){
         versucht:new Set(), aktiv:null, lock:false, eingabe:"", fallMs:TEMPO[S.tempo].ms, rows:[], kette:S.kette,
         sicherVorher:sicherZahl(), tagVorher:dayDone(DAYS[dayKey(Date.now())]), sterneVorher:STARS.w.length,
         reihen:S.rows.slice(), op:S.op };
-  $("spiel").classList.toggle("rechnen", art === "rechnen");
-  $("reihen").innerHTML = "";
+  setSpielArt(art);
+  $("reihen").innerHTML = ""; $("bahn").innerHTML = ""; $("memory").innerHTML = "";
   zeige("spiel");
   pferdMalen($("spPferd"));
   ton("start");
@@ -927,9 +1206,9 @@ function plusEins(){
   setTimeout(() => el.remove(), 1000);
 }
 function taste(k){
-  if(!G || G.art !== "rechnen" || G.lock) return;
+  if(!G || (G.art !== "rechnen" && G.art !== "rennen") || G.lock || G.ende) return;
   if(k === "weg") G.eingabe = G.eingabe.slice(0, -1);
-  else if(k === "ok"){ if(G.eingabe) antwort(+G.eingabe); return; }
+  else if(k === "ok"){ if(G.eingabe) (G.art === "rennen" ? rennenAntwort : antwort)(+G.eingabe); return; }
   else if(G.eingabe.length < 3) G.eingabe += k;
   $("anzeige").textContent = G.eingabe;
 }
@@ -958,10 +1237,12 @@ function spielEnde(){
   else zeilen.push(`Oh, keine Herzen mehr! ${esc(pferdName())} ist müde. Probier's gleich nochmal — vielleicht mit „Gemütlich“?`);
   zeilen.push(`🥕 +${G.karotten + bonus} Karotten` + (bonus ? ` (davon ${bonus} für die Medaille)` : ""));
   if(neuSicher > 0) zeilen.push(`⭐ ${neuSicher} ${neuSicher === 1 ? "Aufgabe" : "Aufgaben"} jetzt sicher`);
-  if(G.art === "kisten" && !med) {}
   if(tagNeu) zeilen.push(`📅 Lerntag geschafft!`);
   if(sternNeu) zeilen.push(`🌟 Wochenstern verdient!`);
   if(G.art === "kisten" && Object.values(P).some(p => p.wt)) zeilen.push(`<span class="klein">Tipp: Beim RECHNEN werden Aufgaben richtig „sicher“ ⭐</span>`);
+  STAT.richtig += G.karotten;
+  zeilen.push(...belohnen([["richtig", G.karotten], ["level", fertig ? 1 : 0], ["rechnen_level", fertig && G.art === "rechnen" ? 1 : 0],
+    ["medaille_sg", med === "gold" || med === "silber" ? 1 : 0]]));
   $("ergText").innerHTML = zeilen.map(z => `<p>${z}</p>`).join("");
   if(med || sternNeu) ton("medaille");
   $("ergFuettern").style.display = !ausgewachsen(PF.w) && SHOP.k >= Math.min(...FUTTER.map(f => f.preis)) ? "" : "none";
@@ -971,9 +1252,12 @@ function spielEnde(){
 function spielAbbrechen(){
   if(!G) return;
   cancelAnimationFrame(RAF); clearTimeout(WEITER_T);
-  $("reihen").innerHTML = "";
+  $("reihen").innerHTML = ""; $("bahn").innerHTML = ""; $("memory").innerHTML = "";
   /* Verdiente Karotten bleiben, auch ohne Levelende (nur keine Medaille) */
   SHOP = { ...SHOP, k:SHOP.k + G.karotten };
+  const richtig = G.art === "rennen" ? G.richtig : G.mini ? 0 : G.karotten;
+  STAT.richtig += richtig;
+  toast(belohnen([["richtig", richtig]]));
   STARS = sterneNachtragen(STARS, DAYS);
   G = null; persist(); renderHome(); zeige("home");
 }
@@ -989,6 +1273,13 @@ function renderLaden(){
     return `<div class="ware"><div class="bild">${f.bild}</div><b>${f.name}</b>
       <div class="klein">+${Math.round(f.wachs * (lieb ? LIEB_FAKTOR : 1))} 🌱</div>${lieb ? `<div class="lieb">❤️ Lieblingsfutter</div>` : ""}
       <button class="knopf${kann ? " voll" : ""}" data-futter="${f.id}" ${kann ? "" : "disabled"}>${gross ? "satt & groß" : "Füttern · 🥕 " + f.preis}</button></div>`;
+  }).join("");
+  $("kleidung").innerHTML = KLEIDUNG.map(w => {
+    const hat = SHOP.owned.includes(w.id), traegt = SHOP.kwear.includes(w.id);
+    const knopf = traegt ? `<button class="knopf" data-kablegen="${w.id}">Ausziehen</button>`
+      : hat ? `<button class="knopf voll" data-kanziehen="${w.id}">Anziehen</button>`
+      : `<button class="knopf${SHOP.k >= w.preis ? " voll" : ""}" data-kkaufen="${w.id}" ${SHOP.k >= w.preis ? "" : "disabled"}>🥕 ${w.preis}</button>`;
+    return `<div class="ware${traegt ? " getragen" : ""}"><div class="bild">${w.bild}</div><b>${w.name}</b>${knopf}</div>`;
   }).join("");
   const stufe = stufeVon(PF.w);
   $("waren").innerHTML = WAREN.map(w => {
@@ -1029,11 +1320,225 @@ function futterGeben(id){
   el.style.left = "55%"; el.style.top = "20%"; pf.parentElement.style.position = "relative"; pf.parentElement.appendChild(el);
   setTimeout(() => el.remove(), 1000);
   ton("ok");
+  toast(belohnen([["fuettern", 1]]));
+  renderLaden();
   if(r.aufgestiegen != null) setTimeout(() => feiern(r.aufgestiegen), 700);
 }
 
+/* ----- Tagesaufgaben und Abzeichen ----- */
+function heuteQuests(){
+  const k = dayKey(Date.now());
+  if(!TQ || TQ.tag !== k || !Array.isArray(TQ.ids)) TQ = { ...questStand(null, k), ids:tagesQuests(k, ausgewachsen(PF.w)).map(q => q.id) };
+  return TQ.ids.map(id => QUESTS.find(q => q.id === id)).filter(Boolean);
+}
+function renderQuests(){
+  const heute = heuteQuests();
+  $("quests").innerHTML = heute.map(t => {
+    const f = Math.min(t.ziel, TQ.fort[t.id] || 0), ok = TQ.fertig.includes(t.id);
+    return `<div class="quest${ok ? " ok" : ""}"><span>${ok ? "✅" : "⬜"}</span><div><b>${esc(t.text)}</b><div class="balken"><b style="width:${Math.round(100 * f / t.ziel)}%"></b></div></div>
+      <span class="klein">${ok ? "+" + QUEST_KAROTTEN + " 🥕" : f + " / " + t.ziel}</span></div>`;
+  }).join("") + `<p class="klein">Jede Aufgabe bringt ${QUEST_KAROTTEN} 🥕, alle drei zusammen noch ${QUEST_BONUS} 🥕 extra. Morgen gibt es neue.</p>`;
+}
+function statistik(){
+  const e = Object.entries(P), sicher = o => e.filter(([k, p]) => k[0] === o && p.f === 4).length;
+  let reihe = 0;
+  for(let r = 1; r <= 12; r++){ let alle = true; for(let k = 1; k <= 10; k++){ const p = P["m:" + k + ":" + r]; if(!p || p.f !== 4) alle = false; } if(alle) reihe++; }
+  return { medaillen:MED.gold + MED.silber + MED.bronze, gold:MED.gold, sicherM:sicher("m"), sicherD:sicher("d"), reiheSicher:reihe,
+    stufe:stufeVon(PF.w), siege:STAT.siege, memoryBest:STAT.memoryBest, blitzBest:STAT.blitzBest, sterne:STARS.w.length,
+    richtig:STAT.richtig, reiterOutfit:["reithelm", "reithose", "reitstiefel"].every(i => SHOP.owned.includes(i)), tageshelden:STAT.tageshelden };
+}
+/* Ereignisse an die Tagesaufgaben melden, Karotten gutschreiben, neue Abzeichen vergeben.
+   Gibt Textzeilen für Ergebnisseite oder Hinweis zurück. */
+function belohnen(ereignisse){
+  const zeilen = [], heute = heuteQuests();
+  for(const [typ, n] of ereignisse){
+    if(!n) continue;
+    const r = questMelden(TQ, heute, typ, n); TQ = r.q;
+    for(const t of r.neu){ SHOP = { ...SHOP, k:SHOP.k + QUEST_KAROTTEN }; zeilen.push(`✅ Tagesaufgabe geschafft: ${esc(t.text)} · +${QUEST_KAROTTEN} 🥕`); }
+    if(r.bonus){ SHOP = { ...SHOP, k:SHOP.k + QUEST_BONUS }; STAT.tageshelden++; zeilen.push(`🎉 Alle drei Tagesaufgaben geschafft! +${QUEST_BONUS} 🥕`); }
+  }
+  for(const id of abzeichenNeu(ABZ, statistik())){
+    ABZ[id] = Date.now(); const a = ABZEICHEN.find(x => x.id === id);
+    zeilen.push(`🏅 Neues Abzeichen: ${a.bild} <b>${esc(a.name)}</b>`);
+  }
+  persist();
+  return zeilen;
+}
+let TOAST_T = 0;
+function toast(zeilen){
+  if(!zeilen.length) return;
+  const el = $("toast"); el.innerHTML = zeilen.join("<br>"); el.classList.add("an");
+  clearTimeout(TOAST_T); TOAST_T = setTimeout(() => el.classList.remove("an"), 4000);
+}
+
+/* ----- Spielwiese: Pferderennen, Wahr oder falsch, Memory ----- */
+function setSpielArt(art){ const sp = $("spiel"); ["rechnen", "rennen", "blitz", "memory"].forEach(k => sp.classList.toggle(k, art === k)); }
+function aufgabenFolge(){ return levelBauen(G.karten, P, Date.now(), Math.min(40, G.karten.length), Math.random, 40); }
+function miniStart(art){
+  const karten = aktuelleKarten();
+  if(!karten.length){ alert("Bitte mindestens eine Reihe auswählen."); return; }
+  cancelAnimationFrame(RAF); clearTimeout(WEITER_T);
+  setSpielArt(art);
+  $("reihen").innerHTML = ""; $("bahn").innerHTML = ""; $("memory").innerHTML = "";
+  G = { art, mini:true, karten, karotten:0, richtig:0, falsch:0, lock:false, eingabe:"", versucht:new Set(),
+        tagVorher:dayDone(DAYS[dayKey(Date.now())]), sterneVorher:STARS.w.length };
+  zeige("spiel");
+  pferdMalen($("spPferd"));
+  $("punkte").innerHTML = ""; $("spKarotten").textContent = "🥕 " + SHOP.k;
+  ton("start");
+  if(art === "rennen") rennenStart(); else if(art === "blitz") blitzStart(); else memoryStart();
+}
+function zeigeErgebnis(emoji, laune_, zeilen, ereignisse){
+  cancelAnimationFrame(RAF); clearTimeout(WEITER_T);
+  G.ende = true;
+  STARS = sterneNachtragen(STARS, DAYS);
+  SHOP = { ...SHOP, k:SHOP.k + G.karotten };
+  zeilen.push(`🥕 +${G.karotten} Karotten`);
+  const tagNeu = !G.tagVorher && dayDone(DAYS[dayKey(Date.now())]), sternNeu = STARS.w.length > G.sterneVorher;
+  if(tagNeu) zeilen.push(`📅 Lerntag geschafft!`);
+  if(sternNeu) zeilen.push(`🌟 Wochenstern verdient!`);
+  zeilen.push(...belohnen(ereignisse));
+  $("ergMedaille").textContent = emoji;
+  pferdMalen($("ergPferd"), laune_);
+  $("ergText").innerHTML = zeilen.map(z => `<p>${z}</p>`).join("");
+  $("ergFuettern").style.display = !ausgewachsen(PF.w) && SHOP.k >= Math.min(...FUTTER.map(f => f.preis)) ? "" : "none";
+  if(laune_ === "froh") ton("medaille");
+  persist();
+  zeige("ergebnis");
+}
+
+/* Pferderennen */
+function rennerPos(el, p){ el.style.left = `calc((100% - min(28%, 170px) - 30px) * ${Math.max(0, Math.min(1, p))})`; }
+function rennenStart(){
+  G.queue = aufgabenFolge(); G.pos = 0; G.gegner = 0; G.gegnerMs = RENN_MS[S.tempo] * RENN_ZIEL; G.letzt = performance.now();
+  const gegnerFell = S.fell === "schimmel" ? "rappe" : "schimmel";
+  $("bahn").innerHTML = `<div class="spur"><span class="name">${esc(pferdName())}</span><div class="ziel"></div><div class="renner" id="rennerIch">${pferdSVG(S.fell, SHOP.wear, stufeVon(PF.w), false)}</div></div>
+    <div class="spur"><span class="name">Wirbelwind 💨</span><div class="ziel"></div><div class="renner gegner" id="rennerGegner">${pferdSVG(gegnerFell, [], 3, false)}</div></div>`;
+  rennerPos($("rennerIch"), 0); rennerPos($("rennerGegner"), 0);
+  rennenAufgabe();
+  RAF = requestAnimationFrame(rennenLauf);
+}
+function rennKopf(){ $("herzen").textContent = "🏇 " + G.pos + " / " + RENN_ZIEL; $("spKarotten").textContent = "🥕 " + (SHOP.k + G.karotten); }
+function rennenAufgabe(){
+  if(!G || G.ende) return;
+  if(!G.queue.length) G.queue = aufgabenFolge();
+  const c = G.queue.shift();
+  G.aktiv = { c, t0:performance.now() }; G.lock = false; G.eingabe = "";
+  const a = $("aufgabe"); a.className = "aufgabe"; a.textContent = frage(c).text + " = ?";
+  const an = $("anzeige"); an.className = "anzeige"; an.textContent = "";
+  rennKopf();
+}
+function rennenLauf(){
+  RAF = 0;
+  if(!G || G.art !== "rennen" || G.ende) return;
+  const now = performance.now();
+  if(!G.lock && !G.pause) G.gegner += (now - G.letzt) / G.gegnerMs;   /* während der Rückmeldung steht auch der Gegner */
+  G.letzt = now;
+  rennerPos($("rennerGegner"), G.gegner);
+  if(G.gegner >= 1){ rennenEnde(false); return; }
+  RAF = requestAnimationFrame(rennenLauf);
+}
+function rennenAntwort(wert){
+  if(!G || G.art !== "rennen" || G.lock || G.ende) return;
+  G.lock = true;
+  const c = G.aktiv.c, f = frage(c), ok = wert === f.a, now = Date.now();
+  if(!G.versucht.has(c.id)){ G.versucht.add(c.id); DAYS[dayKey(now)] = countDay(DAYS[dayKey(now)], ok); markDirty(); }
+  const auf = $("aufgabe");
+  if(ok){
+    G.pos++; G.richtig++; G.karotten = Math.min(RENN_ZIEL, G.richtig); ton("ok");
+    const r = $("rennerIch"); r.classList.remove("hops"); void r.offsetWidth; r.classList.add("hops");
+  } else { G.falsch++; G.queue.push(c); ton("falsch"); }
+  auf.className = "aufgabe " + (ok ? "gruen" : "rot"); auf.textContent = loesung(c);
+  $("anzeige").className = "anzeige " + (ok ? "gruen" : "rot");
+  rennerPos($("rennerIch"), G.pos / RENN_ZIEL); rennKopf(); persist();
+  if(G.pos >= RENN_ZIEL){ WEITER_T = setTimeout(() => rennenEnde(true), 500); return; }
+  WEITER_T = setTimeout(rennenAufgabe, ok ? 350 : 1500);
+}
+function rennenEnde(sieg){
+  if(G.ende) return;
+  G.karotten = rennKarotten(G.richtig, sieg);
+  STAT.richtig += G.richtig; if(sieg) STAT.siege++;
+  const z = [sieg ? `<b>Gewonnen!</b> ${esc(pferdName())} war schneller als Wirbelwind 🏆` : `Knapp! Wirbelwind war diesmal schneller. ${esc(pferdName())} hat ${G.pos} von ${RENN_ZIEL} geschafft.`];
+  if(!sieg) z.push(`<span class="klein">Tipp: Mit „Gemütlich“ läuft Wirbelwind langsamer.</span>`);
+  zeigeErgebnis(sieg ? "🏆" : "🐎", sieg ? "froh" : null, z, [["richtig", G.richtig], ["rennen_sieg", sieg ? 1 : 0]]);
+}
+
+/* Wahr oder falsch */
+function blitzStart(){ G.endeT = performance.now() + BLITZ_MS; G.queue = aufgabenFolge(); blitzAufgabe(); RAF = requestAnimationFrame(blitzTakt); }
+function blitzKopf(){ $("herzen").textContent = "⏱ " + Math.max(0, Math.ceil((G.endeT - performance.now()) / 1000)) + " s · " + blitzPunkte(G.richtig, G.falsch) + " Punkte"; }
+function blitzAufgabe(){
+  if(!G || G.ende) return;
+  if(!G.queue.length) G.queue = aufgabenFolge();
+  G.aussage = blitzAussage(G.queue.shift()); G.lock = false;
+  const a = $("aufgabe"); a.className = "aufgabe"; a.textContent = G.aussage.text;
+  blitzKopf();
+}
+function blitzTakt(){
+  RAF = 0;
+  if(!G || G.art !== "blitz" || G.ende || G.pause) return;
+  blitzKopf();
+  if(performance.now() >= G.endeT){ blitzEnde(); return; }
+  RAF = requestAnimationFrame(blitzTakt);
+}
+function blitzAntwort(ja){
+  if(!G || G.art !== "blitz" || G.lock || G.ende) return;
+  G.lock = true;
+  const ok = ja === G.aussage.wahr, auf = $("aufgabe"), pf = $("spPferd");
+  if(ok){ G.richtig++; ton("ok"); laune(pf, "froh", 500); } else { G.falsch++; ton("falsch"); laune(pf, "traurig", 900); }
+  auf.className = "aufgabe " + (ok ? "gruen" : "rot");
+  auf.textContent = (G.aussage.wahr ? "Stimmt: " : "Stimmt nicht: ") + G.aussage.loesung;
+  blitzKopf();
+  WEITER_T = setTimeout(blitzAufgabe, ok ? 450 : 1300);
+}
+function blitzEnde(){
+  if(G.ende) return;
+  const punkte = blitzPunkte(G.richtig, G.falsch);
+  G.karotten = blitzKarotten(punkte);
+  const rekord = punkte > STAT.blitzBest; STAT.blitzBest = Math.max(STAT.blitzBest, punkte);
+  zeigeErgebnis(punkte >= 15 ? "⚡" : "⏱", punkte >= 10 ? "froh" : null,
+    [`<b>${punkte} Punkte</b> · ${G.richtig} richtig, ${G.falsch} falsch` + (rekord && punkte > 0 ? ` — neuer Rekord! 🎉` : ` (Rekord: ${STAT.blitzBest})`),
+     `<span class="klein">Jede falsche Antwort zieht einen Punkt ab — Raten lohnt sich nicht.</span>`], [["blitz", punkte]]);
+}
+
+/* Memory */
+function memoryStart(){
+  G.mkarten = memoryKarten(G.karten); G.offen = []; G.gefunden = new Set(); G.zuege = 0;
+  const a = $("aufgabe"); a.className = "aufgabe"; a.textContent = "Finde die Paare!";
+  memoryMalen(); $("herzen").textContent = "🧠 0 Züge";
+}
+function memoryMalen(){
+  $("memory").innerHTML = G.mkarten.map((k, i) => {
+    const gef = G.gefunden.has(k.paar), offen = gef || G.offen.includes(i);
+    return `<button class="memkarte ${k.art}${offen ? " offen" : ""}${gef ? " gefunden" : ""}" data-mem="${i}">${offen ? esc(k.text) : `<span class="mz">?</span>`}</button>`;
+  }).join("");
+}
+function memoryTipp(i){
+  if(!G || G.art !== "memory" || G.lock || G.ende) return;
+  const k = G.mkarten[i];
+  if(G.gefunden.has(k.paar) || G.offen.includes(i)) return;
+  G.offen.push(i); memoryMalen();
+  if(G.offen.length < 2) return;
+  G.zuege++; $("herzen").textContent = "🧠 " + G.zuege + " Züge";
+  const [a, b] = G.offen.map(j => G.mkarten[j]);
+  if(a.paar === b.paar){
+    G.gefunden.add(a.paar); G.offen = []; ton("ok"); memoryMalen();
+    if(G.gefunden.size === G.mkarten.length / 2) WEITER_T = setTimeout(memoryEnde, 600);
+  } else {
+    G.lock = true;
+    WEITER_T = setTimeout(() => { G.offen = []; G.lock = false; memoryMalen(); }, 1000);
+  }
+}
+function memoryEnde(){
+  if(G.ende) return;
+  const paare = G.mkarten.length / 2;
+  G.karotten = memoryKarotten(paare, G.zuege);
+  const rekord = !STAT.memoryBest || G.zuege < STAT.memoryBest;
+  if(rekord) STAT.memoryBest = G.zuege;
+  zeigeErgebnis("🧠", "froh", [`<b>Alle ${paare} Paare gefunden</b> in ${G.zuege} Zügen` + (rekord ? " — neuer Rekord! 🎉" : ` (Rekord: ${STAT.memoryBest})`)], [["memory", 1]]);
+}
+
 /* ----- Erster Start ----- */
-function renderStart(){ pferdMalen($("startPferd")); $("startFell").innerHTML = fellChips(); }
+function renderStart(){ pferdMalen($("startPferd")); $("startFell").innerHTML = fellChips(); $("startLook").innerHTML = lookHtml(); }
 
 /* ----- Sterne einlösen, Papa-Knopf ----- */
 function einloesen(){
@@ -1070,7 +1575,7 @@ function titelTipp(){
 
 /* ----- Sicherung ----- */
 async function sichern(btn){
-  const d = { app:"einmaleins", v:1, exported:new Date().toISOString(), state:S, p:P, days:DAYS, stars:STARS, shop:SHOP, med:MED, pf:{ w:PF.w, lieb:PF.lieb, liebBekannt:PF.liebBekannt } };
+  const d = { app:"einmaleins", v:1, exported:new Date().toISOString(), state:S, p:P, days:DAYS, stars:STARS, shop:SHOP, med:MED, pf:{ w:PF.w, lieb:PF.lieb, liebBekannt:PF.liebBekannt }, stat:STAT, abz:ABZ, tq:TQ };
   const text = JSON.stringify(d);
   const name = "einmaleins-" + (S.kind ? S.kind.toLowerCase().replace(/[^a-z0-9äöü]+/g, "") + "-" : "") + new Date().toISOString().slice(0, 10) + ".json";
   const fertig = () => { lsSet("_exp", d.exported); lsSet("_dirty", null); lsSet("_snooze", null); renderHome(); };
@@ -1092,6 +1597,7 @@ function wiederherstellen(text){
   if(!confirm("Sicherung vom " + String(d.exported || "?").slice(0, 10) + " laden?\n" + Object.keys(p).length + " geübte Aufgaben.\nDas ersetzt den Lernstand auf diesem iPad.")) return;
   S = sanitize(d.state); P = p; DAYS = pruneDays(d.days && typeof d.days === "object" ? d.days : {}, Date.now());
   STARS = sterneNachtragen(sanitizeStars(d.stars), DAYS); SHOP = sanitizeShop(d.shop); MED = sanitizeMed(d.med); PF = sanitizePf(d.pf, SHOP);
+  STAT = sanitizeStat(d.stat); ABZ = d.abz && typeof d.abz === "object" ? d.abz : {}; TQ = d.tq || null;
   if(d.exported) lsSet("_exp", d.exported);
   lsSet("_dirty", null); lsSet("_snooze", null);
   persist(); renderHome(); zeige(S.pferd ? "home" : "start");
@@ -1101,7 +1607,10 @@ function wiederherstellen(text){
 $("title").addEventListener("click", titelTipp);
 $("losKisten").onclick = () => spielStart("kisten");
 $("losRechnen").onclick = () => spielStart("rechnen");
-$("spielZu").onclick = () => { if(G && (G.geschafft === 0 || confirm("Level beenden? Was du schon beantwortet hast, bleibt gespeichert."))) spielAbbrechen(); };
+$("spielZu").onclick = () => { if(G && ((!G.mini && G.geschafft === 0) || confirm(G.mini ? "Spiel beenden?" : "Level beenden? Was du schon beantwortet hast, bleibt gespeichert."))) spielAbbrechen(); };
+$("blitzJa").addEventListener("pointerdown", () => blitzAntwort(true));
+$("blitzNein").addEventListener("pointerdown", () => blitzAntwort(false));
+$("memory").addEventListener("click", e => { const b = e.target.closest("[data-mem]"); if(b) memoryTipp(+b.dataset.mem); });
 $("ergNochmal").onclick = () => spielStart(G ? G.art : "kisten");
 $("ergZurueck").onclick = () => { G = null; renderHome(); zeige("home"); };
 $("ergFuettern").onclick = () => { G = null; renderLaden(); zeige("laden"); };
@@ -1131,7 +1640,7 @@ $("reihen").addEventListener("pointerdown", e => {
   if(b && G && G.aktiv && b.closest(".reihe") === G.aktiv.el) antwort(+b.dataset.wert);   /* nur die unterste Reihe */
 });
 document.addEventListener("keydown", e => {
-  if(VIEW !== "spiel" || !G || G.art !== "rechnen") return;
+  if(VIEW !== "spiel" || !G || (G.art !== "rechnen" && G.art !== "rennen")) return;
   if(/^\d$/.test(e.key)) taste(e.key); else if(e.key === "Backspace") taste("weg"); else if(e.key === "Enter") taste("ok");
 });
 document.addEventListener("click", e => {
@@ -1155,6 +1664,14 @@ document.addEventListener("click", e => {
   else if(d.tafel){ S.tafelOp = d.tafel; }
   else if(d.fell){ S.fell = d.fell; persist(); if(VIEW === "start") renderStart(); else renderHome(); return; }
   else if(d.futter){ futterGeben(d.futter); return; }
+  else if(d.spiel){ spielStart(d.spiel); return; }
+  else if(d.haut || d.haar || d.frisur || d.shirt){
+    if(d.haut) S.haut = d.haut; if(d.haar) S.haar = d.haar; if(d.frisur) S.frisur = d.frisur; if(d.shirt) S.shirt = d.shirt;
+    persist(); if(VIEW === "start") renderStart(); else renderHome(); return;
+  }
+  else if(d.kkaufen){ SHOP = kindKaufen(SHOP, d.kkaufen); persist(); markDirty(); renderLaden(); laune($("ladenPferd"), "froh"); ton("medaille"); toast(belohnen([])); return; }
+  else if(d.kanziehen){ SHOP = kindAnziehen(SHOP, d.kanziehen); persist(); renderLaden(); laune($("ladenPferd"), "froh"); return; }
+  else if(d.kablegen){ SHOP = kindAblegen(SHOP, d.kablegen); persist(); renderLaden(); return; }
   else if(d.kaufen){ const w = WAREN.find(x => x.id === d.kaufen); SHOP = kaufen(SHOP, d.kaufen, stufeVon(PF.w)); persist(); markDirty(); renderLaden(); laune($("ladenPferd"), "froh"); if(w) ton("medaille"); return; }
   else if(d.anziehen){ SHOP = anziehen(SHOP, d.anziehen); persist(); renderLaden(); laune($("ladenPferd"), "froh"); return; }
   else if(d.ablegen){ SHOP = ablegen(SHOP, d.ablegen); persist(); renderLaden(); return; }
@@ -1165,6 +1682,15 @@ document.addEventListener("click", e => {
 });
 /* Im Hintergrund anhalten: die Ballen fallen nicht weiter, während das iPad gesperrt ist */
 document.addEventListener("visibilitychange", () => {
+  if(G && VIEW === "spiel" && !G.ende && (G.art === "rennen" || G.art === "blitz")){
+    if(document.hidden){ G.pause = performance.now(); cancelAnimationFrame(RAF); RAF = 0; }
+    else if(G.pause){
+      const d = performance.now() - G.pause; G.pause = 0;
+      if(G.art === "blitz"){ G.endeT += d; RAF = requestAnimationFrame(blitzTakt); }
+      else { G.letzt = performance.now(); RAF = requestAnimationFrame(rennenLauf); }
+    }
+    return;
+  }
   if(!G || VIEW !== "spiel" || G.art !== "kisten" || !G.aktiv) { if(!document.hidden && VIEW === "home") renderHome(); return; }
   if(document.hidden){ G.pause = performance.now(); cancelAnimationFrame(RAF); RAF = 0; }
   else if(G.pause){ const d = performance.now() - G.pause; for(const r of G.rows) r.t0 += d; G.aktiv.aktivAb += d; if(G.lockAt) G.lockAt += d; G.pause = 0; if(!G.lock) RAF = requestAnimationFrame(fallen); }

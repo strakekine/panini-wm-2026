@@ -873,7 +873,8 @@ Kalender, Küchenmodus (erledigt). **Am iPhone noch nicht ausprobiert** — Stan
 Gebaut am 23.11.2026 auf Wunsch des Nutzers für ein **9-jähriges Kind am iPad** (iOS, Safari /
 Home-Bildschirm). **Nur Mal und Geteilt** (vom Nutzer), Reihen 1–10, 11/12 zuschaltbar. Die Figur ist
 ein **herzliches Pferd** (vom Nutzer gewünscht), eigenes SVG (`pferdSVG`), Name und Fellfarbe wählt
-das Kind beim ersten Start. Vorbild war die App „1x1 Einmaleins Übungen Mathe“ (Artie PRO, Kominak
+das Kind beim ersten Start. **Stil flach, ohne Konturen** — am 23.11. vier Stile gezeigt (flach, Comic mit
+Konturen, Kawaii, halbrealistisch), vom Nutzer „A behalten“. Vorbild war die App „1x1 Einmaleins Übungen Mathe“ (Artie PRO, Kominak
 Studio: herabsinkende Antwortkisten, drei Leben, Levels, Bronze/Silber/Gold) — **Spielidee
 übernommen, Figur, Namen und Aussehen nicht**. Kein 3D/AR. Hell und warm (Himmel, Wiese, Heu).
 Die iPhone-Regeln der Pizza-App gelten.

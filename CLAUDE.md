@@ -870,6 +870,11 @@ Kalender, Küchenmodus (erledigt). **Am iPhone noch nicht ausprobiert** — Stan
 
 ## Einmaleins (`einmaleins.html`) — Stand und Regeln
 
+**Liegt nur vorläufig hier** (vom Nutzer, 23.11.2026): soll später in ein eigenes Repo `strakekine/einmaleins`
+(als `index.html`, mit eigenem README/CLAUDE.md und den beiden Tests) umziehen, sobald der Nutzer es angelegt hat;
+danach hier wie beim Fußball eine Umzugsseite oder löschen — Lernstand liegt in localStorage je Herkunft, bei
+`strakekine.github.io` bleibt die Herkunft gleich, der Pfad ändert sich nur → Lernstand bleibt erhalten.
+
 Gebaut am 23.11.2026 auf Wunsch des Nutzers für ein **9-jähriges Kind am iPad** (iOS, Safari /
 Home-Bildschirm). **Nur Mal und Geteilt** (vom Nutzer), Reihen 1–10, 11/12 zuschaltbar. Die Figur ist
 ein **herzliches Pferd** (vom Nutzer gewünscht), eigenes SVG (`pferdSVG`), Name und Fellfarbe wählt

@@ -1,6 +1,6 @@
 # panini-wm-2026
 
-Sieben voneinander unabhängige Dinge (Übersicht für Menschen: `README.md`) liegen in diesem Repo, alle auf `main`:
+Acht voneinander unabhängige Dinge (Übersicht für Menschen: `README.md`) liegen in diesem Repo, alle auf `main`:
 
 - **`panini*.html`** — Sticker-Tracker für die Panini WM 2026 (Emil, Leo, generisch).
   Reine Einzeldatei-Webapps, kein Build, kein Framework.
@@ -26,6 +26,8 @@ Sieben voneinander unabhängige Dinge (Übersicht für Menschen: `README.md`) li
   Anstellgut-Fütterung, laufender Teig mit echten Zeiten. Einzeldatei. Details unten.
 - **`vokabeln.html`** — Französisch-Vokabeltrainer für Emil und Leo (jeder sein iPhone).
   Lektionen kommen aus eingescannten PDFs, die Claude abtippt. Einzeldatei. Details unten.
+- **`einmaleins.html`** — Einmaleins-Trainer (Mal und Geteilt) mit einem Pferd für ein
+  9-jähriges Kind am iPad. Einzeldatei. Details unten.
 - **`pine/`** — TradingView Pine-Script-Indikatoren. Eigener Kontext, eigene Regeln:
   siehe **`pine/CLAUDE.md`**, bevor dort etwas geändert wird.
 - **`fussball.html`** — „FC Koeppchen“: Tabelle, Ergebnisse und nächste Spiele der Jugend
@@ -865,6 +867,45 @@ Laib wird auf den Gusseisentopf übersetzt — Buns, Brötchen, Baguettes, Kaste
 die erste Fassung der Anleitung hat auch Buns in den Topf geschickt);
 3. Rückwärtsplanung auf die Essenszeit mit Wochenplan (erledigt); 4. Lernen aus echten Zeiten,
 Kalender, Küchenmodus (erledigt). **Am iPhone noch nicht ausprobiert** — Stand 11.10.2026.
+
+## Einmaleins (`einmaleins.html`) — Stand und Regeln
+
+Gebaut am 23.11.2026 auf Wunsch des Nutzers für ein **9-jähriges Kind am iPad** (iOS, Safari /
+Home-Bildschirm). **Nur Mal und Geteilt** (vom Nutzer), Reihen 1–10, 11/12 zuschaltbar. Die Figur ist
+ein **herzliches Pferd** (vom Nutzer gewünscht), eigenes SVG (`pferdSVG`), Name und Fellfarbe wählt
+das Kind beim ersten Start. Vorbild war die App „1x1 Einmaleins Übungen Mathe“ (Artie PRO, Kominak
+Studio: herabsinkende Antwortkisten, drei Leben, Levels, Bronze/Silber/Gold) — **Spielidee
+übernommen, Figur, Namen und Aussehen nicht**. Kein 3D/AR. Hell und warm (Himmel, Wiese, Heu).
+Die iPhone-Regeln der Pizza-App gelten.
+
+**Zwei Spielarten:** HEUBALLEN — vier Ballen mit Antworten sinken auf das Pferd, richtige antippen
+(`pointerdown`), drei Herzen, Landen = Fehler, Tempo Gemütlich/Normal/Schnell = 12/9/6 s Fallzeit.
+RECHNEN — Ergebnis über eigenes Ziffernfeld (keine iOS-Tastatur), ✓ zum Abschicken (kein
+automatisches Abschicken nach der Stellenzahl, das verriete die Länge), keine Herzen. Level = 10
+Aufgaben (`levelBauen`: fällige zuerst, niedrigstes Fach zuerst, höchstens 4 neue). Falsch → Lösung
+1,9 s sichtbar, Aufgabe kommt drei später wieder; bewertet wird nur der erste Versuch.
+
+**Karteikasten** (`grade`): Fächer 0–4, `FACH = [1,1,2,4,7]` Tage. Falsch → Fach 0 (oder 1, wenn
+schon einmal 2+), morgen, rot (`bad`). **Heuballen sind Auswahl, darum höchstens Fach 3**; „sicher“
+(Fach 4) nur beim RECHNEN in ≤ 6 s (`SCHNELL_MS`), langsam getippt ebenfalls höchstens 3. Gedeckelt →
+Marke `wt`; schnell getippt springt eine `wt`-Karte sofort auf 4, auch wenn nicht fällig. Richtig
+bei nicht fälligen Karten ändert sonst nichts (wie im Vokabeltrainer). Karten-id `m|d:k:r`
+(k · r bzw. (k·r) : r, r = Reihe) — **nie umbenennen**, daran hängt der Lernstand.
+**Medaille** (`medaille`): Gold = fehlerfrei und flott (Heuballen: Schnitt ≤ halbe Fallzeit;
+Rechnen ≤ 5 s), Silber = ≤ 1 Fehler, Bronze = geschafft, ohne Herzen keine. Wurde eine Reihe allein
+gespielt, steht ihre beste Medaille an der Reihe.
+**Tafel** 10×10 (bzw. 12×12), Mal/Geteilt umschaltbar, Farbe je Fach (`stufe`), Zeilenkopf = nur diese Reihe.
+**Motivation:** Karotten (1 je erster richtiger Antwort, Medaille +3/6/10) für den **Laden**
+(`WAREN`: Schleife, Halstuch, Blumenkranz, Mähnen rosa/Regenbogen — nur eine gleichzeitig —,
+Decke, Brille, Sattel, Krone). Lerntag = 30 erste Antworten, davon 20 richtig; 5 Lerntage Mo–So =
+Wochenstern, einlösen per `prompt()` (wie Vokabeltrainer). **Papa-Geheimknopf:** 5× in 3 s auf
+„EINMALEINS“ → Code STERN, TAG oder KAROTTEN (+50). Töne per WebAudio, abschaltbar.
+**Speicher:** `einmaleins_v1` (+ `_p`, `_days`, `_stars`, `_shop`, `_med`, `_exp`, `_dirty`, `_snooze`),
+Sicherung als Datei über `navigator.share`, Erinnerung nach einer Woche ungesichert.
+**Fassung** `FASSUNG` unten im Startbild, bei jeder Änderung hochzählen.
+**Testen:** `node test/einmaleins.mjs` (Logik zwischen `Logik`…`Oberfläche`, Gegenprobe gemacht) und
+`node test/einmaleins-oberflaeche.mjs` (Browser, 820×1180: Levels beider Arten, Herzen, Tafel,
+Laden, Fokus beim Namen, Neuladen, Papa-Code). **Am iPad noch nicht ausprobiert.**
 
 ## Vokabeltrainer (`vokabeln.html`) — Stand und Regeln
 

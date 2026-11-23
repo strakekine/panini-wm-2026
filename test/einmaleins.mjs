@@ -1,0 +1,102 @@
+/* Prüft die Logik in einmaleins.html: Karten, Karteikasten, Level, Heuballen, Medaillen,
+   Lerntag/Sterne, Laden.  Aufruf:  node test/einmaleins.mjs   Rückgabewert 1 bei Abweichung. */
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const hier = path.dirname(fileURLToPath(import.meta.url));
+const src = fs.readFileSync(path.join(hier, "..", "einmaleins.html"), "utf8");
+const i = src.indexOf("===== Logik"), j = src.indexOf("===== Oberfläche");
+if(i < 0 || j < 0) throw new Error("Abschnittsmarken Logik/Oberfläche nicht gefunden");
+const quelle = src.slice(src.lastIndexOf("/*", i), src.lastIndexOf("/*", j));
+const M = new Function(quelle + `
+  return { DAY, FACH, KISTEN_MAX, SCHNELL_MS, startOfDay, cardsFor, cardFromId, frage, loesung, grade, levelBauen,
+           faelligZahl, auswahl, medaille, stufe, dayKey, dayDone, countDay, weekStatus, pruneDays, sternWochen,
+           sanitizeStars, sterneNachtragen, sterneStand, papaCode, WAREN, kaufen, anziehen, ablegen, needBackup };`)();
+
+let fehler = 0, n = 0;
+function ok(bed, text){ n++; if(!bed){ fehler++; console.log("✗ " + text); } }
+const D = M.DAY, jetzt = new Date(2026, 10, 23, 15, 0).getTime(), heute0 = M.startOfDay(jetzt);
+let s = 1; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+
+/* --- Karten und Fragen --- */
+ok(M.cardsFor("mal", [1,2,3,4,5,6,7,8,9,10], 10).length === 100, "100 Mal-Aufgaben bis 10·10");
+ok(M.cardsFor("mix", [7], 10).length === 20, "7er-Reihe gemischt = 20");
+ok(M.cardsFor("geteilt", [3], 12).length === 12, "3er-Reihe geteilt bis 12");
+ok(M.frage({ o:"m", k:7, r:8 }).text === "7 · 8" && M.frage({ o:"m", k:7, r:8 }).a === 56, "7 · 8 = 56");
+ok(M.frage({ o:"d", k:7, r:8 }).text === "56 : 8" && M.frage({ o:"d", k:7, r:8 }).a === 7, "56 : 8 = 7");
+ok(M.loesung(M.cardFromId("d:6:9")) === "54 : 9 = 6", "Lösungstext Geteilt");
+
+/* --- Karteikasten --- */
+let p = M.grade(undefined, true, "rechnen", 3000, jetzt);
+ok(p.f === 1 && p.due === heute0 + D, "neu richtig → Fach 1, morgen");
+p = M.grade({ f:3, due:jetzt - 1, hi:3, n:5 }, true, "kisten", 1000, jetzt);
+ok(p.f === 3 && p.wt === 1, "Heuballen bringen höchstens Fach 3 (Marke wt)");
+p = M.grade({ f:3, due:jetzt - 1, hi:3, n:5 }, true, "rechnen", 9000, jetzt);
+ok(p.f === 3 && p.wt === 1, "langsam getippt bleibt Fach 3");
+p = M.grade({ f:3, due:jetzt - 1, hi:3, n:5 }, true, "rechnen", 4000, jetzt);
+ok(p.f === 4 && !p.wt && p.due === heute0 + 7 * D, "schnell getippt → sicher, 7 Tage");
+p = M.grade({ f:3, due:jetzt + 3 * D, hi:3, n:5, wt:1 }, true, "rechnen", 4000, jetzt);
+ok(p.f === 4, "wt-Karte schnell getippt → sofort sicher, auch nicht fällig");
+p = M.grade({ f:2, due:jetzt + 3 * D, hi:2, n:5 }, true, "rechnen", 2000, jetzt);
+ok(p.f === 2 && p.due === jetzt + 3 * D, "richtig, aber nicht fällig → nichts ändert sich");
+p = M.grade({ f:4, due:jetzt + 3 * D, hi:4, n:5 }, false, "kisten", 0, jetzt);
+ok(p.f === 1 && p.bad === 1 && p.due === heute0 + D, "falsch nach Fach 2+ → Fach 1, morgen, rot");
+p = M.grade({ f:1, due:jetzt, hi:1, n:2 }, false, "rechnen", 0, jetzt);
+ok(p.f === 0, "falsch, nie über Fach 1 → Fach 0");
+ok(!M.grade({ f:1, due:jetzt, hi:1, n:2, bad:1 }, true, "kisten", 0, jetzt).bad, "richtig nimmt die rote Marke weg");
+
+/* --- Level --- */
+const karten = M.cardsFor("mal", [1,2,3,4,5,6,7,8,9,10], 10);
+let L = M.levelBauen(karten, {}, jetzt, 10, rnd);
+ok(L.length === 10 && new Set(L.map(c => c.id)).size === 10, "Level: 10 verschiedene Aufgaben");
+const P = {};
+karten.slice(0, 30).forEach((c, x) => P[c.id] = { f:x % 4, due:x < 6 ? jetzt - 1 : jetzt + 2 * D, hi:x % 4, n:1 });
+L = M.levelBauen(karten, P, jetzt, 10, rnd, 4);
+ok(L.filter(c => P[c.id] && P[c.id].due <= jetzt).length === 6, "alle 6 fälligen im Level");
+ok(L.filter(c => !P[c.id]).length === 4, "höchstens 4 neue, wenn es Bekanntes gibt");
+ok(M.levelBauen(M.cardsFor("mal", [1], 10).slice(0, 3), {}, jetzt, 10, rnd).length === 3, "weniger Karten als 10 → kürzeres Level");
+ok(M.faelligZahl(karten, P, jetzt) === 76, "fällig = 6 fällige + 70 neue");
+
+/* --- Heuballen: vier verschiedene, positive, genau eine richtig --- */
+for(const c of M.cardsFor("mix", [1,2,3,4,5,6,7,8,9,10,11,12], 12)){
+  const a = M.auswahl(c, rnd), r = M.frage(c).a;
+  if(!(a.length === 4 && new Set(a).size === 4 && a.every(x => x > 0) && a.filter(x => x === r).length === 1)){ ok(false, "Heuballen für " + c.id + ": " + a); break; }
+}
+ok(true, "Heuballen geprüft");
+
+/* --- Medaillen --- */
+ok(M.medaille({ fertig:true, fehler:0, schnitt:3000, art:"kisten", fallMs:9000 }) === "gold", "Gold");
+ok(M.medaille({ fertig:true, fehler:0, schnitt:6000, art:"kisten", fallMs:9000 }) === "silber", "fehlerfrei aber langsam → Silber");
+ok(M.medaille({ fertig:true, fehler:2, schnitt:2000, art:"rechnen" }) === "bronze", "2 Fehler → Bronze");
+ok(M.medaille({ fertig:false, fehler:3, schnitt:2000, art:"kisten", fallMs:9000 }) === null, "ohne Herzen keine Medaille");
+
+/* --- Tafel --- */
+ok(M.stufe(undefined) === "neu" && M.stufe({ f:4 }) === "gruen" && M.stufe({ f:4, bad:1 }) === "rot", "Tafelfarben");
+
+/* --- Lerntag und Sterne --- */
+let e; for(let x = 0; x < 30; x++) e = M.countDay(e, x < 19);
+ok(!M.dayDone(e), "30 Antworten, 19 richtig → noch kein Lerntag");
+e = M.countDay(e, true); ok(M.dayDone(e), "31 Antworten, 20 richtig → Lerntag");
+const days = {}; const mo = new Date(2026, 10, 16).getTime();
+for(let x = 0; x < 5; x++) days[M.dayKey(mo + x * D + 3600e3)] = { n:30, r:25 };
+ok(M.sternWochen(days).length === 1, "5 Lerntage → ein Wochenstern");
+let st = M.sterneNachtragen(M.sanitizeStars(null), days);
+st = { ...st, b:[1], red:[{ t:1, n:1, was:"Eis" }] };
+ok(M.sterneStand(st) === 1, "Sternstand: 1 Woche + 1 Bonus − 1 eingelöst");
+ok(M.papaCode(" stern ") === "stern" && M.papaCode("x") === null, "Papa-Codes");
+ok(M.weekStatus(days, jetzt).count === 0, "neue Woche beginnt bei 0");
+
+/* --- Laden --- */
+let sh = { k:120, owned:[], wear:[] };
+sh = M.kaufen(sh, "schleife"); ok(sh.k === 90 && sh.wear.includes("schleife"), "kaufen zieht ab und zieht an");
+sh = M.kaufen(sh, "krone"); ok(!sh.owned.includes("krone") && sh.k === 90, "zu teuer → nichts passiert");
+sh = { k:1000, owned:[], wear:[] }; sh = M.kaufen(sh, "rosa"); sh = M.kaufen(sh, "regenbogen");
+ok(sh.wear.includes("regenbogen") && !sh.wear.includes("rosa"), "nur eine Mähnenfarbe gleichzeitig");
+ok(!M.ablegen(sh, "regenbogen").wear.includes("regenbogen"), "ablegen");
+
+/* --- Sicherung --- */
+ok(M.needBackup(jetzt - 8 * D, null, jetzt) && !M.needBackup(jetzt - 2 * D, null, jetzt) && !M.needBackup(null, null, jetzt), "Sicherungs-Erinnerung");
+
+console.log((fehler ? "✗ " + fehler + " von " : "✓ alle ") + n + " Prüfungen" + (fehler ? " fehlgeschlagen" : " bestanden"));
+process.exit(fehler ? 1 : 0);

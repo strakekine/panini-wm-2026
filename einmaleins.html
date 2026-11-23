@@ -1,0 +1,998 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<!-- KEIN viewport-fit=cover — siehe CLAUDE.md, Abschnitt iPhone-Regeln der Pizza-App. -->
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Einmaleins</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Einmaleins">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#cfeeff">
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23ffb547'/><text x='50' y='67' font-size='46' font-weight='800' font-family='sans-serif' fill='%23fff' text-anchor='middle'>1×1</text></svg>">
+<style>
+  :root{
+    --himmel1:#bfe7ff; --himmel2:#eef9ff; --wiese:#8ccf63; --wiese2:#79bf52;
+    --text:#3b2a1c; --muted:#7c6a5a; --karte:#fffdf8; --linie:#ecdcc7;
+    --heu:#f4c94f; --heu2:#e0ac2c; --rosa:#ff7fae; --rot:#ef5b5b; --gruen:#3fb56b; --blau:#4a90e2;
+    --orange:#ffa94d; --gelb:#ffd84d; --hellgruen:#a8e07a;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;color:var(--text);background:var(--himmel2);
+    font-family:ui-rounded,"SF Pro Rounded","Nunito",system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+  body{background:linear-gradient(var(--himmel1),var(--himmel2) 320px) no-repeat,var(--himmel2);min-height:100vh}
+  button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
+  input{font:inherit}
+  .wrap{max-width:820px;margin:0 auto;padding:14px 16px 40px}
+  .view{display:none}
+  body[data-view="home"] #home, body[data-view="spiel"] #spiel, body[data-view="ergebnis"] #ergebnis,
+  body[data-view="laden"] #laden, body[data-view="start"] #start{display:block}
+
+  h1{margin:4px 0 0;font-size:34px;letter-spacing:1px;font-weight:900;color:#e2731f;text-shadow:0 2px 0 #fff;
+     touch-action:manipulation;user-select:none;-webkit-user-select:none}
+  .sub{color:var(--muted);font-size:15px;margin:2px 0 12px}
+  .karte{background:var(--karte);border:2px solid var(--linie);border-radius:22px;padding:16px;margin:14px 0;box-shadow:0 3px 0 var(--linie)}
+  .karte h2{margin:0 0 10px;font-size:20px}
+  .klein{font-size:14px;color:var(--muted)}
+  .reihe2{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+
+  /* Stall: Pferd mit Sprechblase */
+  .stall{display:grid;grid-template-columns:minmax(180px,1fr) 1.2fr;gap:10px;align-items:center}
+  @media (max-width:560px){ .stall{grid-template-columns:1fr} }
+  .stallbild{background:linear-gradient(#d9f2ff 0 62%,var(--wiese) 62%);border-radius:18px;padding:6px 6px 0;min-height:180px;display:flex;align-items:flex-end;justify-content:center}
+  .stallbild .pferd{width:100%;max-width:290px}
+  .blase{position:relative;background:#fff;border:2px solid var(--linie);border-radius:18px;padding:14px 16px;font-size:18px;line-height:1.35}
+  .blase b{color:#e2731f}
+  .karotten{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:18px;background:#fff1e0;border:2px solid #ffd3a3;border-radius:999px;padding:6px 14px}
+
+  /* große Knöpfe */
+  .los{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+  .gross{border:0;border-radius:22px;padding:18px 12px;font-size:22px;font-weight:900;color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.18);letter-spacing:.5px}
+  .gross small{display:block;font-size:14px;font-weight:600;opacity:.92;margin-top:4px;letter-spacing:0}
+  .gross:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.18)}
+  .g-heu{background:linear-gradient(#f7b733,#ef8f1f)}
+  .g-rechnen{background:linear-gradient(#5aa9f0,#3b7fd6)}
+  .knopf{border:2px solid var(--linie);background:#fff;border-radius:14px;padding:10px 14px;font-weight:700;font-size:16px}
+  .knopf.voll{background:var(--rosa);border-color:var(--rosa);color:#fff}
+  .knopf:disabled{opacity:.45}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{border:2px solid var(--linie);background:#fff;border-radius:14px;min-width:50px;padding:9px 12px;font-weight:800;font-size:18px}
+  .chip.an{background:#ffb547;border-color:#f29b1d;color:#fff}
+  .chip .med{font-size:12px;display:block;line-height:1;margin-top:2px}
+  .feldname{font-weight:800;margin:12px 0 6px;font-size:15px}
+
+  /* Woche */
+  .woche{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:8px 0}
+  .tag{text-align:center;border-radius:12px;padding:6px 0;background:#f4ece0;font-weight:800;font-size:14px;color:var(--muted)}
+  .tag i{display:block;font-style:normal;font-size:20px;line-height:1.2}
+  .tag.heute{outline:3px solid #ffb547}
+  .tag.ok{background:#dff5d8;color:#2d7a3e}
+  .balken{height:12px;border-radius:99px;background:#f1e6d6;overflow:hidden}
+  .balken b{display:block;height:100%;background:linear-gradient(90deg,#ffb547,#3fb56b)}
+
+  /* Tafel */
+  .tafel{display:grid;gap:3px;margin-top:8px}
+  .tafel div,.tafel button{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:clamp(10px,2.4vw,17px);border:0;padding:0}
+  .tafel .kopf{background:transparent;color:var(--muted)}
+  .tafel button.kopf{background:#fff3e2;color:#c76a18}
+  .s-neu{background:#efe9e1;color:#b3a594}
+  .s-rot{background:var(--rot);color:#fff}
+  .s-orange{background:var(--orange);color:#fff}
+  .s-gelb{background:var(--gelb);color:#6b5200}
+  .s-hellgruen{background:var(--hellgruen);color:#2c5d14}
+  .s-gruen{background:var(--gruen);color:#fff}
+  .legende{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:13px;color:var(--muted)}
+  .legende span{display:inline-flex;align-items:center;gap:5px}
+  .legende i{width:14px;height:14px;border-radius:4px;display:inline-block}
+
+  .hinweis{background:#fff4d6;border:2px solid #ffd77a;border-radius:16px;padding:12px 14px;margin:12px 0;font-size:16px}
+  details summary{font-weight:800;font-size:18px;cursor:pointer;padding:4px 0}
+  label.zeile{display:flex;align-items:center;gap:10px;margin:10px 0;font-size:16px}
+  .eingabe{border:2px solid var(--linie);border-radius:12px;padding:10px 12px;font-size:18px;width:100%;max-width:320px;background:#fff}
+  .fassung{text-align:center;color:var(--muted);font-size:12px;margin-top:20px}
+
+  /* Spiel */
+  #spiel{position:fixed;inset:0;background:linear-gradient(var(--himmel1),var(--himmel2));overflow:hidden}
+  body[data-view="spiel"] #spiel{display:flex;flex-direction:column}
+  .spkopf{display:flex;align-items:center;gap:10px;padding:10px 14px;max-width:820px;width:100%;margin:0 auto}
+  .zu{border:0;background:#fff;border-radius:50%;width:44px;height:44px;font-size:22px;font-weight:900;box-shadow:0 2px 0 var(--linie)}
+  .herzen{font-size:24px;letter-spacing:2px}
+  .punkte{display:flex;gap:5px;flex:1;justify-content:center;flex-wrap:wrap}
+  .punkte i{width:13px;height:13px;border-radius:50%;background:#fff;border:2px solid #d7c7b2}
+  .punkte i.ok{background:var(--gruen);border-color:var(--gruen)}
+  .spkopf .karotten{font-size:16px;padding:4px 10px}
+  .aufgabe{text-align:center;font-size:clamp(44px,9vw,72px);font-weight:900;padding:2px 10px 6px;min-height:1.3em;letter-spacing:1px}
+  .aufgabe.rot{color:var(--rot)}
+  .aufgabe.gruen{color:var(--gruen)}
+  .feld{position:relative;flex:1;width:100%;min-height:0}
+  .reihe{position:absolute;z-index:3;left:max(0px,calc(50% - 410px));right:max(0px,calc(50% - 410px));top:0;display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,2vw,18px);padding:0 clamp(10px,3vw,30px);will-change:transform}
+  .ballen{position:relative;aspect-ratio:1.25;border:0;border-radius:16px;font-size:clamp(28px,6vw,48px);font-weight:900;color:#5a3a0e;
+    background:repeating-linear-gradient(100deg,transparent 0 9px,rgba(160,110,20,.18) 9px 11px),linear-gradient(var(--heu),var(--heu2));
+    box-shadow:inset 0 -6px 0 rgba(150,95,10,.25),0 4px 0 rgba(0,0,0,.12)}
+  .ballen::before,.ballen::after{content:"";position:absolute;top:0;bottom:0;width:6px;background:#b5651d;opacity:.55}
+  .ballen::before{left:22%} .ballen::after{right:22%}
+  .ballen span{position:relative;z-index:1;background:rgba(255,248,225,.85);border-radius:12px;padding:0 10px}
+  .ballen.richtig{animation:pop .5s ease forwards}
+  .ballen.falsch{background:var(--rot);color:#fff;animation:wackeln .4s}
+  .ballen.zeigen{outline:5px solid var(--gruen);outline-offset:2px}
+  @keyframes pop{50%{transform:scale(1.18)}100%{transform:scale(.2) translateY(200px);opacity:0}}
+  @keyframes wackeln{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .wiese{position:absolute;left:0;right:0;bottom:0;height:38%;background:
+      radial-gradient(ellipse at 50% 0,var(--wiese) 60%,transparent 61%) 0 -30px/100% 80px no-repeat,
+      linear-gradient(var(--wiese),var(--wiese2));pointer-events:none;display:flex;align-items:flex-end;justify-content:center}
+  #spiel.rechnen .wiese{height:100%;background:linear-gradient(transparent 55%,var(--wiese) 55%)}
+  .wiese .pferd{height:96%;max-width:80%;aspect-ratio:1.1}
+  .plus{position:absolute;font-size:28px;font-weight:900;color:#e2731f;pointer-events:none;animation:hoch 1s ease forwards;z-index:5}
+  @keyframes hoch{to{transform:translateY(-70px);opacity:0}}
+  .pad{display:none;max-width:460px;width:100%;margin:0 auto;padding:8px 14px 14px}
+  #spiel.rechnen .pad{display:block}
+  #spiel.rechnen .reihe{display:none}
+  .anzeige{background:#fff;border:3px solid var(--linie);border-radius:18px;text-align:center;font-size:44px;font-weight:900;min-height:70px;line-height:64px;margin-bottom:10px}
+  .anzeige.rot{border-color:var(--rot);color:var(--rot)} .anzeige.gruen{border-color:var(--gruen);color:var(--gruen)}
+  .tasten{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .tasten button{border:0;background:#fff;border-radius:16px;font-size:30px;font-weight:900;padding:14px 0;box-shadow:0 4px 0 var(--linie)}
+  .tasten button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--linie)}
+  .tasten .ok{background:var(--gruen);color:#fff;box-shadow:0 4px 0 #2b8a4f}
+  .tasten .weg{background:#ffe3e3;color:var(--rot)}
+  @media (max-height:700px){ .tasten button{padding:9px 0;font-size:26px} .anzeige{min-height:56px;line-height:52px;font-size:36px} }
+
+  /* Ergebnis */
+  .medaille{font-size:110px;text-align:center;line-height:1.1;animation:medaille 0.8s ease}
+  @keyframes medaille{0%{transform:scale(0) rotate(-30deg)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+  .erg-text{text-align:center;font-size:20px;line-height:1.5}
+  .erg-text b{color:#e2731f}
+  .erg-pferd{max-width:280px;margin:0 auto}
+
+  /* Laden */
+  .waren{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .ware{border:2px solid var(--linie);background:#fff;border-radius:16px;padding:10px;text-align:center}
+  .ware .bild{font-size:40px}
+  .ware b{display:block;font-size:16px;margin:4px 0}
+  .ware .knopf{width:100%;margin-top:6px;font-size:14px;padding:8px}
+  .ware.getragen{border-color:var(--gruen);background:#effbe9}
+
+  /* Pferd */
+  .pferd svg{display:block;width:100%;height:100%;overflow:visible}
+  .pferd .pf{animation:atmen 3.2s ease-in-out infinite;transform-box:view-box;transform-origin:110px 180px}
+  .pferd .schweif{animation:wedeln 2.6s ease-in-out infinite;transform-box:view-box;transform-origin:52px 104px}
+  .pferd .auge{animation:blinzeln 5s infinite;transform-box:view-box;transform-origin:163px 55px}
+  .pferd .kopf{transition:transform .35s ease;transform-box:view-box;transform-origin:150px 80px}
+  .pferd .m-froh,.pferd .m-traurig{display:none}
+  .pferd.froh .m-normal,.pferd.traurig .m-normal{display:none}
+  .pferd.froh .m-froh{display:inline}
+  .pferd.traurig .m-traurig{display:inline}
+  .pferd.froh .pf{animation:huepfen .55s ease 2}
+  .pferd.traurig .kopf{transform:rotate(16deg)}
+  .pferd.traurig .auge{transform:scaleY(.55);animation:none}
+  .pferd.kauen .kopf{animation:nicken .5s ease 2}
+  @keyframes atmen{50%{transform:translateY(1.5px)}}
+  @keyframes wedeln{50%{transform:rotate(9deg)}}
+  @keyframes blinzeln{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
+  @keyframes huepfen{40%{transform:translateY(-22px) rotate(-3deg)}100%{transform:translateY(0)}}
+  @keyframes nicken{50%{transform:rotate(12deg)}}
+</style>
+</head>
+<body data-view="home">
+
+<!-- Erster Start: Pferd benennen -->
+<section class="view" id="start"><div class="wrap">
+  <h1>EINMALEINS</h1>
+  <div class="karte">
+    <h2>Hallo! Ich bin dein Pferd 🐴</h2>
+    <div class="stallbild" style="max-width:340px;margin:0 auto 12px"><div class="pferd" id="startPferd"></div></div>
+    <div class="feldname">Wie soll ich heißen?</div>
+    <input class="eingabe" id="startName" maxlength="20" placeholder="z. B. Fleur" autocomplete="off" autocorrect="off">
+    <div class="feldname">Wie heißt du?</div>
+    <input class="eingabe" id="startKind" maxlength="20" placeholder="Dein Name" autocomplete="off" autocorrect="off">
+    <div class="feldname">Welche Farbe habe ich?</div>
+    <div class="chips" id="startFell"></div>
+    <p><button class="gross g-heu" id="startLos" style="width:100%">LOS GEHT'S!</button></p>
+  </div>
+</div></section>
+
+<!-- Startbild -->
+<section class="view" id="home"><div class="wrap">
+  <h1 id="title">EINMALEINS</h1>
+  <div class="sub" id="homeSub"></div>
+  <div id="backupBox"></div>
+
+  <div class="karte">
+    <div class="stall">
+      <div class="stallbild"><div class="pferd" id="homePferd"></div></div>
+      <div>
+        <div class="blase" id="blase"></div>
+        <p class="reihe2"><span class="karotten" id="homeKarotten"></span><button class="knopf" id="zumLaden">🛍️ Laden</button></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="los">
+    <button class="gross g-heu" id="losKisten">🌾 HEUBALLEN<small>Tippe die richtige Antwort, bevor sie landet</small></button>
+    <button class="gross g-rechnen" id="losRechnen">✏️ RECHNEN<small>Ergebnis selbst eintippen</small></button>
+  </div>
+
+  <div class="karte">
+    <h2>Was üben wir?</h2>
+    <div class="chips" id="opChips"></div>
+    <div class="feldname">Reihen</div>
+    <div class="chips" id="reihenChips"></div>
+    <div class="feldname">Tempo der Heuballen</div>
+    <div class="chips" id="tempoChips"></div>
+    <p class="klein" id="auswahlInfo"></p>
+  </div>
+
+  <div class="karte">
+    <h2>Diese Woche</h2>
+    <div class="woche" id="woche"></div>
+    <div class="balken"><b id="tagBalken"></b></div>
+    <p class="klein" id="tagInfo"></p>
+    <p class="reihe2"><span style="font-size:20px;font-weight:800" id="sterneZahl"></span>
+      <button class="knopf" id="einloesen">EINLÖSEN</button></p>
+    <p class="klein">5 Lerntage in einer Woche (Montag bis Sonntag) = 1 Stern 🌟</p>
+    <div id="kontoauszug" class="klein"></div>
+  </div>
+
+  <div class="karte">
+    <h2>Meine Einmaleins-Tafel</h2>
+    <div class="chips" id="tafelOp"></div>
+    <div class="tafel" id="tafel"></div>
+    <div class="legende">
+      <span><i class="s-neu"></i>neu</span><span><i class="s-rot"></i>zuletzt falsch</span>
+      <span><i class="s-orange"></i>am Lernen</span><span><i class="s-gelb"></i>wird besser</span>
+      <span><i class="s-hellgruen"></i>gut</span><span><i class="s-gruen"></i>sicher ⭐</span>
+    </div>
+    <p class="klein" id="tafelInfo"></p>
+  </div>
+
+  <div class="karte">
+    <h2>Medaillen</h2>
+    <div id="medaillen" style="font-size:22px;font-weight:800"></div>
+  </div>
+
+  <div class="karte">
+    <details id="einst">
+      <summary>Einstellungen &amp; Sicherung</summary>
+      <div class="feldname">Name deines Pferds</div>
+      <input class="eingabe" id="setName" maxlength="20" autocomplete="off" autocorrect="off">
+      <div class="feldname">Dein Name</div>
+      <input class="eingabe" id="setKind" maxlength="20" autocomplete="off" autocorrect="off">
+      <div class="feldname">Fellfarbe</div>
+      <div class="chips" id="setFell"></div>
+      <label class="zeile"><input type="checkbox" id="setMax" style="width:24px;height:24px"> Auch 11er- und 12er-Reihe</label>
+      <label class="zeile"><input type="checkbox" id="setTon" style="width:24px;height:24px"> Töne</label>
+      <div class="feldname">Sicherung</div>
+      <p class="klein" id="backupNote"></p>
+      <p class="reihe2"><button class="knopf" id="sichern">SICHERN</button>
+        <button class="knopf" id="laden2">WIEDERHERSTELLEN</button>
+        <input type="file" id="ladenDatei" accept=".json,application/json" hidden></p>
+      <p><button class="knopf" id="loeschen" style="color:var(--rot)">Lernstand löschen</button></p>
+    </details>
+  </div>
+  <div class="fassung" id="fassung"></div>
+</div></section>
+
+<!-- Spiel -->
+<section class="view" id="spiel">
+  <div class="spkopf">
+    <button class="zu" id="spielZu" aria-label="Beenden">✕</button>
+    <span class="herzen" id="herzen"></span>
+    <div class="punkte" id="punkte"></div>
+    <span class="karotten" id="spKarotten"></span>
+  </div>
+  <div class="aufgabe" id="aufgabe"></div>
+  <div class="feld" id="feld">
+    <div class="reihe" id="reihe"></div>
+    <div class="wiese" id="wiese"><div class="pferd" id="spPferd"></div></div>
+  </div>
+  <div class="pad">
+    <div class="anzeige" id="anzeige"></div>
+    <div class="tasten" id="tasten">
+      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+      <button data-k="weg" class="weg">⌫</button><button data-k="0">0</button><button data-k="ok" class="ok">✓</button>
+    </div>
+  </div>
+</section>
+
+<!-- Ergebnis -->
+<section class="view" id="ergebnis"><div class="wrap">
+  <div class="karte">
+    <div class="medaille" id="ergMedaille"></div>
+    <div class="erg-pferd"><div class="pferd" id="ergPferd"></div></div>
+    <div class="erg-text" id="ergText"></div>
+    <div class="los">
+      <button class="gross g-heu" id="ergNochmal">NOCHMAL</button>
+      <button class="gross g-rechnen" id="ergZurueck">ZUM STALL</button>
+    </div>
+  </div>
+</div></section>
+
+<!-- Laden -->
+<section class="view" id="laden"><div class="wrap">
+  <h1>LADEN</h1>
+  <p class="reihe2"><span class="karotten" id="ladenKarotten"></span><button class="knopf" id="ladenZu">← Zurück zum Stall</button></p>
+  <div class="karte">
+    <div class="stallbild" style="max-width:360px;margin:0 auto"><div class="pferd" id="ladenPferd"></div></div>
+  </div>
+  <div class="karte">
+    <h2>Für Karotten 🥕</h2>
+    <p class="klein">Jede richtige Antwort beim ersten Versuch bringt eine Karotte, jede Medaille ein paar dazu.</p>
+    <div class="waren" id="waren"></div>
+  </div>
+</div></section>
+
+<script>
+/* ===================== Logik =====================
+   Kein DOM in diesem Block — test/einmaleins.mjs schneidet ihn aus und prüft ihn. */
+const DAY = 864e5;
+function startOfDay(t){ const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); }
+
+/* Karteikasten: Fächer 0–4, Abstand in Tagen ab Tagesbeginn. Fach 4 = „sicher“. */
+const FACH = [1, 1, 2, 4, 7];
+/* Heuballen sind Auswahl (man kann raten oder ausschließen): höchstens Fach 3.
+   „Sicher“ heißt: einmal schnell selbst ausgerechnet und eingetippt. */
+const KISTEN_MAX = 3, SCHNELL_MS = 6000;
+
+/* Karte: o = "m" (k · r) oder "d" ((k·r) : r), r = Reihe, k = 1…max */
+function cardsFor(op, rows, max){
+  const ops = op === "mix" ? ["m", "d"] : op === "geteilt" ? ["d"] : ["m"];
+  const out = [];
+  for(const r of rows) for(let k = 1; k <= max; k++) for(const o of ops) out.push({ id:o + ":" + k + ":" + r, o, k, r });
+  return out;
+}
+function cardFromId(id){ const [o, k, r] = id.split(":"); return { id, o, k:+k, r:+r }; }
+function frage(c){ return c.o === "m" ? { text:c.k + " · " + c.r, a:c.k * c.r } : { text:(c.k * c.r) + " : " + c.r, a:c.k }; }
+function loesung(c){ const f = frage(c); return f.text + " = " + f.a; }
+
+/* Bewertung einer ERSTEN Antwort. art = "kisten" | "rechnen", ms = Antwortzeit.
+   Falsch → Fach 0 (oder 1, wenn sie schon einmal Fach 2+ war), morgen wieder, Marke bad.
+   Richtig und fällig → ein Fach höher, gedeckelt (Heuballen / langsam getippt: Fach 3, Marke wt).
+   Richtig, aber nicht fällig → nichts, außer wt-Karte schnell getippt → gleich sicher. */
+function grade(p, ok, art, ms, now){
+  const alt = p || { f:0, due:0, hi:0, n:0 };
+  const out = { ...alt, n:(alt.n | 0) + 1 };
+  if(!ok){
+    out.f = (alt.hi | 0) >= 2 ? 1 : 0; out.due = startOfDay(now) + DAY; out.bad = 1; delete out.wt;
+    return out;
+  }
+  const schnellGetippt = art === "rechnen" && ms <= SCHNELL_MS;
+  const faellig = !p || p.due <= now;
+  if(!faellig){
+    if(alt.wt && schnellGetippt){ out.f = 4; out.hi = 4; out.due = startOfDay(now) + FACH[4] * DAY; delete out.wt; }
+    return out;
+  }
+  const will = Math.min(4, (alt.f | 0) + 1), deckel = schnellGetippt ? 4 : KISTEN_MAX;
+  out.f = Math.min(will, deckel);
+  out.hi = Math.max(alt.hi | 0, out.f);
+  out.due = startOfDay(now) + FACH[out.f] * DAY;
+  delete out.bad;
+  if(will > out.f) out.wt = 1; else delete out.wt;
+  return out;
+}
+
+function mischen(a, rnd){ a = a.slice(); for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+/* Ein Level: zuerst fällige (niedrigstes Fach zuerst), dazu höchstens maxNeu neue,
+   aufgefüllt mit noch nicht fälligen (wackeligste zuerst), dann neue. Reihenfolge gemischt. */
+function levelBauen(cards, P, now, n = 10, rnd = Math.random, maxNeu = 4){
+  const fach = c => P[c.id].f | 0;
+  const seen = cards.filter(c => P[c.id]);
+  const faellig = mischen(seen.filter(c => P[c.id].due <= now), rnd).sort((a, b) => fach(a) - fach(b));
+  const neu = mischen(cards.filter(c => !P[c.id]), rnd);
+  const rest = mischen(seen.filter(c => P[c.id].due > now), rnd).sort((a, b) => fach(a) - fach(b) || P[a.id].due - P[b.id].due);
+  const out = faellig.slice(0, n);
+  const nimm = (liste, bis) => { for(const c of liste){ if(out.length >= bis) break; if(!out.includes(c)) out.push(c); } };
+  nimm(neu, Math.min(n, out.length + maxNeu));
+  nimm(rest, n);
+  nimm(neu, n);
+  return mischen(out, rnd);
+}
+function faelligZahl(cards, P, now){ return cards.filter(c => !P[c.id] || P[c.id].due <= now).length; }
+
+/* Drei falsche Antworten für die Heuballen: naheliegende Verwechsler (Nachbar in der Reihe,
+   ±1, Reihe daneben, vertauschte Ziffern), nie doppelt, nie ≤ 0. */
+function auswahl(c, rnd = Math.random){
+  const a = frage(c).a, kand = [];
+  if(c.o === "m"){
+    kand.push((c.k + 1) * c.r, (c.k - 1) * c.r, c.k * (c.r + 1), c.k * (c.r - 1), a + 1, a - 1, a + 10, a - 10, a + 2);
+    const s = String(a); if(s.length === 2 && s[0] !== s[1]) kand.push(+(s[1] + s[0]));
+  } else {
+    kand.push(c.k + 1, c.k - 1, c.k + 2, c.k - 2, c.r === c.k ? c.k + 3 : c.r, c.k + 10);
+  }
+  const falsch = [];
+  for(const x of mischen(kand, rnd)) if(x > 0 && x !== a && !falsch.includes(x) && falsch.length < 3) falsch.push(x);
+  for(let x = a + 1; falsch.length < 3; x++) if(!falsch.includes(x)) falsch.push(x);
+  return mischen([a, ...falsch], rnd);
+}
+
+/* Medaille: Gold = fehlerfrei und flott, Silber = höchstens ein Fehler, Bronze = geschafft.
+   Heuballen: flott = im Schnitt in der ersten Hälfte der Fallzeit; Rechnen: ≤ 5 s. */
+function medaille(m){
+  if(!m.fertig) return null;
+  const flott = m.art === "kisten" ? m.schnitt <= m.fallMs * 0.5 : m.schnitt <= 5000;
+  if(m.fehler === 0 && flott) return "gold";
+  if(m.fehler <= 1) return "silber";
+  return "bronze";
+}
+const MED_KAROTTEN = { gold:10, silber:6, bronze:3 };
+
+/* Tafel-Farbe einer Karte */
+function stufe(p){
+  if(!p) return "neu";
+  if(p.bad) return "rot";
+  return ["orange", "orange", "gelb", "hellgruen", "gruen"][p.f | 0];
+}
+
+/* ----- Lerntag und Sterne (wie im Vokabeltrainer) -----
+   Lerntag = 30 erste Antworten, davon mindestens 20 richtig. 5 Lerntage Mo–So = 1 Stern. */
+const DAY_MIN = 30, DAY_RIGHT = 20, WEEK_GOAL = 5;
+function dayKey(t){ const d = new Date(t); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+const dayDone = e => !e ? false : e.g ? true : e.n >= DAY_MIN && e.r >= DAY_RIGHT;
+function countDay(e, ok){ const out = { n:(e ? e.n : 0) + 1, r:(e ? e.r : 0) + (ok ? 1 : 0) }; if(e && e.g) out.g = 1; return out; }
+function weekStatus(days, now){
+  const d = new Date(startOfDay(now)), wd = (d.getDay() + 6) % 7, cells = [], labels = ["Mo","Di","Mi","Do","Fr","Sa","So"];
+  for(let i = 0; i < 7; i++){
+    const t = new Date(d.getFullYear(), d.getMonth(), d.getDate() - wd + i).getTime();
+    cells.push({ label:labels[i], done:dayDone(days[dayKey(t)]), today:i === wd, future:i > wd });
+  }
+  return { cells, count:cells.filter(c => c.done).length };
+}
+function pruneDays(days, now){
+  const out = {}, min = dayKey(now - 60 * DAY);
+  for(const k in days) if(k >= min && days[k] && (days[k].n > 0 || days[k].g)){
+    out[k] = { n:days[k].n | 0, r:Math.min(days[k].r | 0, days[k].n | 0) };
+    if(days[k].g) out[k].g = 1;
+  }
+  return out;
+}
+function wochenStart(t){ const d = new Date(startOfDay(t)); return new Date(d.getFullYear(), d.getMonth(), d.getDate() - (d.getDay() + 6) % 7).getTime(); }
+function sternWochen(days){
+  const pro = {};
+  for(const k in days) if(dayDone(days[k])){
+    const [y, m, d] = k.split("-").map(Number), w = dayKey(wochenStart(new Date(y, m - 1, d).getTime()));
+    pro[w] = (pro[w] || 0) + 1;
+  }
+  return Object.keys(pro).filter(w => pro[w] >= WEEK_GOAL).sort();
+}
+function sanitizeStars(x){
+  const w = x && Array.isArray(x.w) ? [...new Set(x.w.filter(k => /^\d{4}-\d\d-\d\d$/.test(k)))].sort() : [];
+  const red = x && Array.isArray(x.red) ? x.red.filter(r => r && r.n > 0 && r.t > 0)
+    .map(r => ({ t:+r.t, n:Math.floor(r.n), was:String(r.was || "").slice(0, 80) })) : [];
+  const b = x && Array.isArray(x.b) ? x.b.filter(t => t > 0).map(Number) : [];
+  return { w, red, b };
+}
+function sterneNachtragen(stars, days){
+  const neu = sternWochen(days).filter(w => !stars.w.includes(w));
+  return neu.length ? { ...stars, w:[...stars.w, ...neu].sort() } : stars;
+}
+function sterneStand(stars){ return stars.w.length + stars.b.length - stars.red.reduce((a, r) => a + r.n, 0); }
+
+/* Papa-Geheimknopf: 5× schnell auf „EINMALEINS“. Codes im Klartext — eine Hürde, kein Schloss. */
+const PAPA_CODES = { STERN:"stern", TAG:"tag", KAROTTEN:"karotten" };
+function papaCode(e){ return PAPA_CODES[String(e || "").trim().toUpperCase()] || null; }
+
+/* Laden: Zubehör fürs Pferd */
+const WAREN = [
+  { id:"schleife",  name:"Schleife",          preis:30,  bild:"🎀" },
+  { id:"halstuch",  name:"Halstuch",          preis:50,  bild:"🧣" },
+  { id:"blumen",    name:"Blumenkranz",       preis:80,  bild:"🌼" },
+  { id:"rosa",      name:"Rosa Mähne",        preis:100, bild:"💗", maehne:true },
+  { id:"decke",     name:"Pferdedecke",       preis:120, bild:"🟦" },
+  { id:"brille",    name:"Sonnenbrille",      preis:160, bild:"🕶️" },
+  { id:"sattel",    name:"Sattel",            preis:200, bild:"🏇" },
+  { id:"krone",     name:"Krone",             preis:250, bild:"👑" },
+  { id:"regenbogen",name:"Regenbogen-Mähne",  preis:300, bild:"🌈", maehne:true },
+];
+function kaufen(shop, id){
+  const w = WAREN.find(x => x.id === id);
+  if(!w || shop.owned.includes(id) || shop.k < w.preis) return shop;
+  return anziehen({ ...shop, k:shop.k - w.preis, owned:[...shop.owned, id] }, id);
+}
+/* Anziehen: nur eine Mähnenfarbe gleichzeitig */
+function anziehen(shop, id){
+  if(!shop.owned.includes(id)) return shop;
+  const w = WAREN.find(x => x.id === id);
+  let wear = shop.wear.filter(x => x !== id);
+  if(w && w.maehne) wear = wear.filter(x => !(WAREN.find(y => y.id === x) || {}).maehne);
+  return { ...shop, wear:[...wear, id] };
+}
+function ablegen(shop, id){ return { ...shop, wear:shop.wear.filter(x => x !== id) }; }
+
+const FELLE = {
+  fuchs:    { name:"Fuchs",    fell:"#c97b44", dunkel:"#8f5129", maehne:"#6b3a1c", maul:"#f2d3b3" },
+  falbe:    { name:"Falbe",    fell:"#e3b866", dunkel:"#a97c37", maehne:"#4e3420", maul:"#f6e2bb" },
+  schimmel: { name:"Schimmel", fell:"#f1eeea", dunkel:"#bdb6ac", maehne:"#d6cfc6", maul:"#f7e4e0" },
+  rappe:    { name:"Rappe",    fell:"#433836", dunkel:"#272020", maehne:"#171212", maul:"#7a6a65" },
+};
+
+/* Sicherungs-Erinnerung: erste ungesicherte Antwort älter als eine Woche */
+function needBackup(dirty, snooze, now){ return !!dirty && now - dirty >= 7 * DAY && !(snooze && snooze > now); }
+
+/* ===================== Oberfläche ===================== */
+/* Fassung — bei JEDER Änderung hochzählen (am iPad läuft nach einem Push oft noch die alte Datei). */
+const FASSUNG = "23.11.2026 a";
+const KEY = "einmaleins_v1";
+const $ = id => document.getElementById(id);
+function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+function lsGet(k, d){ try { const v = localStorage.getItem(KEY + k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } }
+function lsSet(k, v){ try { if(v == null) localStorage.removeItem(KEY + k); else localStorage.setItem(KEY + k, JSON.stringify(v)); } catch(e){} }
+const TEMPO = { gemuetlich:{ name:"Gemütlich", ms:12000 }, normal:{ name:"Normal", ms:9000 }, schnell:{ name:"Schnell", ms:6000 } };
+
+function sanitize(x){
+  x = x && typeof x === "object" ? x : {};
+  const max = x.max === 12 ? 12 : 10;
+  let rows = Array.isArray(x.rows) ? [...new Set(x.rows.map(Number).filter(r => r >= 1 && r <= max))].sort((a, b) => a - b) : [];
+  if(!rows.length) rows = Array.from({ length:10 }, (_, i) => i + 1);
+  return {
+    pferd:String(x.pferd || "").slice(0, 20), kind:String(x.kind || "").slice(0, 20),
+    fell:FELLE[x.fell] ? x.fell : "fuchs",
+    op:["mal", "geteilt", "mix"].includes(x.op) ? x.op : "mal",
+    rows, max, tempo:TEMPO[x.tempo] ? x.tempo : "normal", ton:x.ton !== false,
+    tafelOp:x.tafelOp === "d" ? "d" : "m",
+  };
+}
+function sanitizeP(x){
+  const out = {};
+  if(x && typeof x === "object") for(const k in x){
+    const p = x[k]; if(!/^[md]:\d+:\d+$/.test(k) || !p) continue;
+    const q = { f:Math.max(0, Math.min(4, p.f | 0)), due:+p.due || 0, hi:Math.max(0, Math.min(4, p.hi | 0)), n:p.n | 0 };
+    if(p.bad) q.bad = 1; if(p.wt) q.wt = 1;
+    out[k] = q;
+  }
+  return out;
+}
+function sanitizeShop(x){
+  x = x && typeof x === "object" ? x : {};
+  const ids = WAREN.map(w => w.id);
+  const owned = Array.isArray(x.owned) ? [...new Set(x.owned.filter(i => ids.includes(i)))] : [];
+  return { k:Math.max(0, x.k | 0), owned, wear:Array.isArray(x.wear) ? [...new Set(x.wear.filter(i => owned.includes(i)))] : [] };
+}
+function sanitizeMed(x){ x = x || {}; return { gold:x.gold | 0, silber:x.silber | 0, bronze:x.bronze | 0, reihen:x.reihen && typeof x.reihen === "object" ? x.reihen : {} }; }
+
+let S = sanitize(lsGet("", null)), P = sanitizeP(lsGet("_p", {})), DAYS = pruneDays(lsGet("_days", {}) || {}, Date.now());
+let STARS = sterneNachtragen(sanitizeStars(lsGet("_stars", null)), DAYS), SHOP = sanitizeShop(lsGet("_shop", null)), MED = sanitizeMed(lsGet("_med", null));
+function persist(){ lsSet("", S); lsSet("_p", P); lsSet("_days", DAYS); lsSet("_stars", STARS); lsSet("_shop", SHOP); lsSet("_med", MED); }
+function markDirty(){ if(!lsGet("_dirty", null)) lsSet("_dirty", Date.now()); }
+const pferdName = () => S.pferd || "Dein Pferd";
+
+/* ----- Pferd (SVG) ----- */
+let PF_N = 0;
+function pferdSVG(fellId, wear){
+  const F = FELLE[fellId] || FELLE.fuchs, id = "pf" + (++PF_N), an = x => wear.includes(x);
+  const maehne = an("regenbogen") ? "url(#" + id + "rb)" : an("rosa") ? "#ff8fc7" : F.maehne;
+  const huf = "#4a3426";
+  return `<svg viewBox="0 0 220 200" aria-hidden="true"><defs>
+    <linearGradient id="${id}rb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff6b6b"/><stop offset=".25" stop-color="#ffb347"/>
+    <stop offset=".5" stop-color="#ffe066"/><stop offset=".7" stop-color="#6bd47a"/><stop offset=".85" stop-color="#5aa9f0"/><stop offset="1" stop-color="#b07cff"/></linearGradient></defs>
+  <ellipse cx="108" cy="186" rx="70" ry="7" fill="rgba(0,0,0,.12)"/>
+  <g class="pf">
+    <g class="schweif"><path d="M54 100 C 24 98 14 136 22 172 C 30 162 31 152 37 146 C 35 160 40 170 47 175 C 45 152 47 130 62 112 Z" fill="${maehne}"/></g>
+    <rect x="60" y="126" width="15" height="54" rx="7" fill="${F.dunkel}"/><rect x="59" y="172" width="17" height="11" rx="4" fill="${huf}"/>
+    <rect x="80" y="128" width="15" height="52" rx="7" fill="${F.fell}"/><rect x="79" y="172" width="17" height="11" rx="4" fill="${huf}"/>
+    <rect x="122" y="128" width="15" height="52" rx="7" fill="${F.dunkel}"/><rect x="121" y="172" width="17" height="11" rx="4" fill="${huf}"/>
+    <ellipse cx="102" cy="116" rx="58" ry="33" fill="${F.fell}"/>
+    <ellipse cx="104" cy="132" rx="38" ry="11" fill="#fff" opacity=".07"/>
+    <rect x="140" y="128" width="15" height="52" rx="7" fill="${F.fell}"/><rect x="139" y="172" width="17" height="11" rx="4" fill="${huf}"/>
+    ${an("decke") ? `<path d="M78 87 h46 a7 7 0 0 1 7 7 v30 a7 7 0 0 1 -7 7 h-46 a7 7 0 0 1 -7 -7 v-30 a7 7 0 0 1 7 -7z" fill="#4a90e2"/><path d="M71 118 h60 v5 h-60z" fill="#ffd84d"/>` : ""}
+    ${an("sattel") ? `<path d="M84 90 C 92 78 118 78 126 90 L122 101 C 112 96 98 96 88 101 Z" fill="#7a4520"/><path d="M84 90 C 86 86 90 84 94 84 L92 92 Z" fill="#5a3216"/><path d="M106 98 v20" stroke="#5a3216" stroke-width="2.5"/><rect x="101" y="117" width="10" height="5" rx="2" fill="#bbb"/>` : ""}
+    <path d="M130 110 C 134 84 142 66 152 52 L178 68 C 170 88 162 108 158 130 Z" fill="${F.fell}"/>
+    ${an("halstuch") ? `<path d="M131 98 C 142 104 152 108 163 108 L154 132 Z" fill="#ef5b5b"/><circle cx="148" cy="112" r="2.4" fill="#fff"/><circle cx="153" cy="120" r="2.2" fill="#fff"/><circle cx="142" cy="106" r="2" fill="#fff"/>` : ""}
+    <path d="M152 46 C 142 60 134 78 128 104 C 124 96 124 90 126 84 C 120 88 118 82 122 74 C 116 74 118 66 124 62 C 120 56 126 50 134 48 C 138 42 146 40 152 46 Z" fill="${maehne}"/>
+    <g class="kopf">
+      <path d="M154 40 L156 14 L170 36 Z" fill="${F.fell}"/><path d="M157 36 L158 21 L166 34 Z" fill="#f3b7a8"/>
+      <ellipse cx="168" cy="60" rx="27" ry="21" fill="${F.fell}" transform="rotate(30 168 60)"/>
+      <ellipse cx="185" cy="80" rx="17" ry="14" fill="${F.maul}"/>
+      <ellipse cx="193" cy="77" rx="2.6" ry="3.6" fill="${F.dunkel}"/>
+      <path class="m-normal" d="M179 89 Q186 93 193 88" stroke="${F.dunkel}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <path class="m-froh" d="M177 87 Q186 99 195 86 Z" fill="#7a2e2e"/><path class="m-froh" d="M181 92 Q186 96 191 92 Q186 90 181 92Z" fill="#ff8f8f"/>
+      <path class="m-traurig" d="M179 92 Q186 86 193 91" stroke="${F.dunkel}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <ellipse cx="177" cy="68" rx="5.5" ry="3.4" fill="#ff8a8a" opacity=".45"/>
+      <g class="auge"><ellipse cx="163" cy="56" rx="7.6" ry="9" fill="#2a1a12"/><ellipse cx="163.4" cy="57.5" rx="4.6" ry="5.4" fill="#5b3a22"/><circle cx="166" cy="52.2" r="3" fill="#fff"/><circle cx="160.8" cy="60" r="1.4" fill="#fff"/>
+        <path d="M156 53 q-3 -0.5 -5 -2.5 M156.6 50 q-2.6 -1.4 -3.6 -4" stroke="#2a1a12" stroke-width="1.5" fill="none" stroke-linecap="round"/></g>
+      <path d="M150 39 C 157 32 167 32 172 38 C 166 38 162 40 159 44 C 157 40 154 40 150 42 Z" fill="${maehne}"/>
+      ${an("brille") ? `<path d="M151 50 L144 46" stroke="#222" stroke-width="2.5"/><ellipse cx="164" cy="55" rx="12" ry="10" fill="#1f2a36" stroke="#111" stroke-width="2.5"/><path d="M158 50 l5 -3" stroke="#fff" stroke-width="2" opacity=".6" stroke-linecap="round"/>` : ""}
+      ${an("schleife") ? `<path d="M140 52 L130 44 L131 60 Z M140 52 L150 44 L149 60 Z" fill="#ff5fa2"/><circle cx="140" cy="52" r="4" fill="#ff8fc7"/>` : ""}
+      ${an("blumen") ? `<g><circle cx="150" cy="40" r="4" fill="#fff"/><circle cx="150" cy="40" r="1.8" fill="#ffc531"/>
+         <circle cx="160" cy="36" r="4" fill="#ff8fc7"/><circle cx="160" cy="36" r="1.8" fill="#ffc531"/>
+         <circle cx="171" cy="39" r="4" fill="#9ad0ff"/><circle cx="171" cy="39" r="1.8" fill="#ffc531"/>
+         <circle cx="144" cy="47" r="3.6" fill="#ffe066"/><circle cx="144" cy="47" r="1.6" fill="#ff8a3d"/></g>` : ""}
+      ${an("krone") ? `<path d="M162 32 L163 16 L170 25 L175 13 L180 25 L187 18 L186 34 Z" fill="#ffc531" stroke="#e09b00" stroke-width="1.5"/><circle cx="175" cy="27" r="2.3" fill="#ef5b5b"/>` : ""}
+    </g>
+  </g></svg>`;
+}
+function pferdMalen(el, laune){
+  el.innerHTML = pferdSVG(S.fell, SHOP.wear);
+  el.className = "pferd" + (laune ? " " + laune : "");
+}
+let LAUNE_T = 0;
+function laune(el, l, ms = 1200){
+  el.classList.remove("froh", "traurig", "kauen"); void el.offsetWidth;
+  if(l) el.classList.add(l);
+  clearTimeout(LAUNE_T); LAUNE_T = setTimeout(() => el.classList.remove("froh", "traurig", "kauen"), ms);
+}
+
+/* ----- Töne ----- */
+let AC = null;
+function ton(art){
+  if(!S.ton) return;
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    if(AC.state === "suspended") AC.resume();
+    const seq = { ok:[[660, .08], [990, .14]], falsch:[[200, .3]], medaille:[[523, .12], [659, .12], [784, .12], [1047, .3]], start:[[440, .06]] }[art];
+    let t = AC.currentTime;
+    for(const [f, d] of seq){
+      const o = AC.createOscillator(), g = AC.createGain();
+      o.type = art === "falsch" ? "triangle" : "sine"; o.frequency.value = f;
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.22, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+      o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d + .03); t += d;
+    }
+  } catch(e){}
+}
+
+/* ----- Ansichten ----- */
+let VIEW = "home";
+function zeige(v){ VIEW = v; document.body.dataset.view = v; window.scrollTo(0, 0); }
+function fokusIn(box){ const a = document.activeElement; return a && box.contains(a) && a.tagName === "INPUT"; }
+
+function aktuelleKarten(){ return cardsFor(S.op, S.rows, S.max); }
+function alleKarten(){ return cardsFor("mix", Array.from({ length:S.max }, (_, i) => i + 1), S.max); }
+function sicherZahl(){ return Object.values(P).filter(p => p.f === 4).length; }
+
+function renderHome(){
+  const now = Date.now(), karten = aktuelleKarten(), faellig = faelligZahl(karten, P, now);
+  const heute = DAYS[dayKey(now)] || { n:0, r:0 }, tagOk = dayDone(heute);
+  const neu = karten.filter(c => !P[c.id]).length, wieder = faellig - neu;
+  $("homeSub").textContent = (S.kind ? "Hallo " + S.kind + "! " : "") + "Heute mit " + pferdName() + " 🐴";
+  pferdMalen($("homePferd"));
+  const satz = tagOk ? `Lerntag geschafft! Ich bin richtig stolz auf dich 💛 Wir können trotzdem weiterspielen.`
+    : wieder ? `Heute wollen <b>${wieder}</b> Aufgaben wiederholt werden. Ich habe Hunger auf Heu! 🌾`
+    : neu ? `Es gibt noch <b>${neu}</b> neue Aufgaben zu entdecken. Komm, wir fangen an! 🌾`
+    : `Für heute ist alles erledigt! Lust auf eine Extrarunde?`;
+  $("blase").innerHTML = `<b>${esc(pferdName())}:</b> ${satz}`;
+  $("homeKarotten").textContent = "🥕 " + SHOP.k;
+
+  $("opChips").innerHTML = [["mal", "Mal ·"], ["geteilt", "Geteilt :"], ["mix", "Gemischt"]]
+    .map(([k, t]) => `<button class="chip${S.op === k ? " an" : ""}" data-op="${k}">${t}</button>`).join("");
+  const reihen = Array.from({ length:S.max }, (_, i) => i + 1);
+  const alle = reihen.every(r => S.rows.includes(r));
+  $("reihenChips").innerHTML = reihen.map(r => {
+    const m = MED.reihen[r];
+    return `<button class="chip${S.rows.includes(r) ? " an" : ""}" data-reihe="${r}">${r}${m ? `<span class="med">${{ gold:"🥇", silber:"🥈", bronze:"🥉" }[m]}</span>` : ""}</button>`;
+  }).join("") + `<button class="chip${alle ? " an" : ""}" data-reihe="alle">Alle</button>`;
+  $("tempoChips").innerHTML = Object.entries(TEMPO).map(([k, t]) => `<button class="chip${S.tempo === k ? " an" : ""}" data-tempo="${k}">${t.name}</button>`).join("");
+  $("auswahlInfo").textContent = karten.length + " Aufgaben ausgewählt, davon " + faellig + " heute dran. Eine Reihe allein antippen = nur diese Reihe; Medaille an der Reihe, wenn du sie allein gespielt hast.";
+
+  const w = weekStatus(DAYS, now);
+  $("woche").innerHTML = w.cells.map(c => `<div class="tag${c.today ? " heute" : ""}${c.done ? " ok" : ""}">${c.label}<i>${c.done ? "✅" : c.future ? "·" : "○"}</i></div>`).join("");
+  $("tagBalken").style.width = Math.min(100, 100 * Math.min(heute.n / DAY_MIN, heute.r / DAY_RIGHT)) + "%";
+  $("tagInfo").textContent = tagOk ? "Heute geschafft ✅ — " + w.count + " von 5 Lerntagen diese Woche."
+    : "Heute: " + heute.n + " von " + DAY_MIN + " Aufgaben, " + heute.r + " von " + DAY_RIGHT + " richtig. Diese Woche " + w.count + " von 5 Lerntagen.";
+  const stand = sterneStand(STARS);
+  $("sterneZahl").textContent = "🌟 " + stand + (stand === 1 ? " Stern" : " Sterne");
+  $("einloesen").disabled = stand <= 0;
+  $("kontoauszug").innerHTML = STARS.red.slice(-5).reverse().map(r => "– " + r.n + " ⭐ " + esc(r.was) + " (" + new Date(r.t).toLocaleDateString("de-DE") + ")").join("<br>");
+
+  renderTafel();
+  $("medaillen").textContent = "🥇 " + MED.gold + "   🥈 " + MED.silber + "   🥉 " + MED.bronze;
+
+  const b = $("einst");
+  if(!fokusIn(b)){ $("setName").value = S.pferd; $("setKind").value = S.kind; }
+  $("setFell").innerHTML = fellChips();
+  $("setMax").checked = S.max === 12; $("setTon").checked = S.ton;
+  const exp = lsGet("_exp", null);
+  $("backupNote").textContent = (exp ? "Letzte Sicherung: " + new Date(exp).toLocaleDateString("de-DE") + ". " : "Noch nie gesichert. ") +
+    "Der Lernstand liegt nur auf diesem iPad. Die Sicherung ist eine Datei, z. B. für iCloud Drive.";
+  $("backupBox").innerHTML = needBackup(lsGet("_dirty", null), lsGet("_snooze", null), now)
+    ? `<div class="hinweis">💾 Zeit für eine Sicherung — sonst ist der Lernstand weg, wenn das iPad aufgeräumt wird.
+       <p class="reihe2"><button class="knopf voll" data-act="sichern">JETZT SICHERN</button><button class="knopf" data-act="spaeter">Später</button></p></div>` : "";
+  $("fassung").textContent = "Fassung " + FASSUNG;
+}
+function fellChips(){ return Object.entries(FELLE).map(([k, f]) => `<button class="chip${S.fell === k ? " an" : ""}" data-fell="${k}">${f.name}</button>`).join(""); }
+
+function renderTafel(){
+  const o = S.tafelOp, n = S.max;
+  $("tafelOp").innerHTML = `<button class="chip${o === "m" ? " an" : ""}" data-tafel="m">Mal ·</button><button class="chip${o === "d" ? " an" : ""}" data-tafel="d">Geteilt :</button>`;
+  const t = $("tafel");
+  t.style.gridTemplateColumns = "repeat(" + (n + 1) + ",1fr)";
+  let h = `<div class="kopf">${o === "m" ? "·" : ":"}</div>`;
+  for(let k = 1; k <= n; k++) h += `<div class="kopf">${k}</div>`;
+  for(let r = 1; r <= n; r++){
+    h += `<button class="kopf" data-nurreihe="${r}" title="Nur die ${r}er-Reihe üben">${r}</button>`;
+    for(let k = 1; k <= n; k++){
+      const p = P[o + ":" + k + ":" + r];
+      h += `<div class="s-${stufe(p)}">${k * r}</div>`;
+    }
+  }
+  t.innerHTML = h;
+  const ges = n * n, sicher = Array.from({ length:n * n }, (_, i) => P[o + ":" + (i % n + 1) + ":" + (Math.floor(i / n) + 1)]).filter(p => p && p.f === 4).length;
+  $("tafelInfo").textContent = "⭐ " + sicher + " von " + ges + " sicher. Sicher wird eine Aufgabe nur beim RECHNEN — schnell und richtig selbst eingetippt. Zeilenkopf antippen = nur diese Reihe üben.";
+}
+
+/* ----- Spiel ----- */
+let G = null, RAF = 0, WEITER_T = 0;
+function spielStart(art){
+  const karten = aktuelleKarten();
+  if(!karten.length){ alert("Bitte mindestens eine Reihe auswählen."); return; }
+  const level = levelBauen(karten, P, Date.now(), 10);
+  G = { art, queue:level.slice(), total:level.length, geschafft:0, herzen:3, fehler:0, zeiten:[], karotten:0,
+        versucht:new Set(), aktiv:null, lock:false, eingabe:"", fallMs:TEMPO[S.tempo].ms,
+        sicherVorher:sicherZahl(), tagVorher:dayDone(DAYS[dayKey(Date.now())]), sterneVorher:STARS.w.length,
+        reihen:S.rows.slice(), op:S.op };
+  $("spiel").classList.toggle("rechnen", art === "rechnen");
+  zeige("spiel");
+  pferdMalen($("spPferd"));
+  ton("start");
+  naechste();
+}
+function kopfMalen(){
+  $("herzen").textContent = G.art === "kisten" ? "❤️".repeat(G.herzen) + "🤍".repeat(3 - G.herzen) : "";
+  $("punkte").innerHTML = Array.from({ length:G.total }, (_, i) => `<i class="${i < G.geschafft ? "ok" : ""}"></i>`).join("");
+  $("spKarotten").textContent = "🥕 " + (SHOP.k + G.karotten);
+}
+function naechste(){
+  cancelAnimationFrame(RAF); RAF = 0;
+  if(!G) return;
+  if(!G.queue.length || G.herzen <= 0){ spielEnde(); return; }
+  const c = G.queue.shift();
+  G.aktiv = { c, erst:!G.versucht.has(c.id), t0:performance.now() };
+  G.lock = false; G.eingabe = "";
+  const a = $("aufgabe"); a.className = "aufgabe"; a.textContent = frage(c).text + " = ?";
+  kopfMalen();
+  if(G.art === "kisten"){
+    const r = $("reihe");
+    r.innerHTML = auswahl(c).map(x => `<button class="ballen" data-wert="${x}"><span>${x}</span></button>`).join("");
+    r.style.transform = "translateY(0)";
+    RAF = requestAnimationFrame(fallen);
+  } else {
+    const an = $("anzeige"); an.className = "anzeige"; an.textContent = "";
+  }
+}
+function landeY(){ return Math.max(0, $("feld").clientHeight - $("wiese").offsetHeight * 0.55 - $("reihe").offsetHeight); }
+function fallen(){
+  RAF = 0;
+  if(!G || G.art !== "kisten" || !G.aktiv || G.lock || G.pause) return;
+  const p = (performance.now() - G.aktiv.t0) / G.fallMs;
+  $("reihe").style.transform = "translateY(" + (Math.min(1, p) * landeY()) + "px)";
+  if(p >= 1){ antwort(null); return; }
+  RAF = requestAnimationFrame(fallen);
+}
+/* Eine Antwort (null = Ballen gelandet). Bewertet wird nur der erste Versuch je Aufgabe;
+   falsch beantwortete kommen drei Aufgaben später wieder. */
+function antwort(wert){
+  if(!G || !G.aktiv || G.lock) return;
+  G.lock = true;
+  const { c, erst, t0 } = G.aktiv, f = frage(c), ms = performance.now() - t0, ok = wert === f.a, now = Date.now();
+  if(erst){
+    P[c.id] = grade(P[c.id], ok, G.art, ms, now);
+    DAYS[dayKey(now)] = countDay(DAYS[dayKey(now)], ok);
+    G.versucht.add(c.id);
+    if(ok) G.karotten++;
+    markDirty();
+  }
+  const pf = $("spPferd"), auf = $("aufgabe");
+  if(ok){
+    G.geschafft++; G.zeiten.push(ms);
+    ton("ok"); laune(pf, G.art === "kisten" ? "kauen" : "froh", 1100);
+    if(erst) plusEins();
+    auf.className = "aufgabe gruen"; auf.textContent = loesung(c);
+  } else {
+    G.fehler++;
+    if(G.art === "kisten") G.herzen--;
+    G.queue.splice(Math.min(3, G.queue.length), 0, c);
+    ton("falsch"); laune(pf, "traurig", 1600);
+    auf.className = "aufgabe rot"; auf.textContent = loesung(c);
+  }
+  if(G.art === "kisten"){
+    for(const b of $("reihe").querySelectorAll(".ballen")){
+      const w = +b.dataset.wert;
+      if(w === f.a) b.classList.add(ok ? "richtig" : "zeigen");
+      else if(w === wert) b.classList.add("falsch");
+    }
+  } else {
+    $("anzeige").className = "anzeige " + (ok ? "gruen" : "rot");
+  }
+  kopfMalen();
+  persist();
+  WEITER_T = setTimeout(naechste, ok ? 750 : 1900);
+}
+function plusEins(){
+  const el = document.createElement("div"); el.className = "plus"; el.textContent = "+1 🥕";
+  const w = $("wiese"); el.style.left = "58%"; el.style.top = "10%"; w.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
+function taste(k){
+  if(!G || G.art !== "rechnen" || G.lock) return;
+  if(k === "weg") G.eingabe = G.eingabe.slice(0, -1);
+  else if(k === "ok"){ if(G.eingabe) antwort(+G.eingabe); return; }
+  else if(G.eingabe.length < 3) G.eingabe += k;
+  $("anzeige").textContent = G.eingabe;
+}
+function spielEnde(){
+  cancelAnimationFrame(RAF); clearTimeout(WEITER_T);
+  const fertig = G.herzen > 0 && !G.queue.length;
+  const schnitt = G.zeiten.length ? G.zeiten.reduce((a, b) => a + b, 0) / G.zeiten.length : Infinity;
+  const med = medaille({ fertig, fehler:G.fehler, schnitt, art:G.art, fallMs:G.fallMs });
+  let bonus = 0;
+  if(med){
+    MED[med]++; bonus = MED_KAROTTEN[med];
+    if(G.reihen.length === 1){
+      const r = G.reihen[0], rang = { bronze:1, silber:2, gold:3 };
+      if(!MED.reihen[r] || rang[med] > rang[MED.reihen[r]]) MED.reihen[r] = med;
+    }
+  }
+  SHOP = { ...SHOP, k:SHOP.k + G.karotten + bonus };
+  STARS = sterneNachtragen(STARS, DAYS);
+  persist();
+  const neuSicher = sicherZahl() - G.sicherVorher, tagNeu = !G.tagVorher && dayDone(DAYS[dayKey(Date.now())]), sternNeu = STARS.w.length > G.sterneVorher;
+  $("ergMedaille").textContent = med ? { gold:"🥇", silber:"🥈", bronze:"🥉" }[med] : "😴";
+  pferdMalen($("ergPferd"), med ? "froh" : "traurig");
+  const zeilen = [];
+  if(med) zeilen.push(`<b>${{ gold:"Gold", silber:"Silber", bronze:"Bronze" }[med]}!</b> ${G.geschafft} Aufgaben geschafft, ${G.fehler ? G.fehler + (G.fehler === 1 ? " Fehler" : " Fehler") : "kein einziger Fehler"}.`);
+  else zeilen.push(`Oh, keine Herzen mehr! ${esc(pferdName())} ist müde. Probier's gleich nochmal — vielleicht mit „Gemütlich“?`);
+  zeilen.push(`🥕 +${G.karotten + bonus} Karotten` + (bonus ? ` (davon ${bonus} für die Medaille)` : ""));
+  if(neuSicher > 0) zeilen.push(`⭐ ${neuSicher} ${neuSicher === 1 ? "Aufgabe" : "Aufgaben"} jetzt sicher`);
+  if(G.art === "kisten" && !med) {}
+  if(tagNeu) zeilen.push(`📅 Lerntag geschafft!`);
+  if(sternNeu) zeilen.push(`🌟 Wochenstern verdient!`);
+  if(G.art === "kisten" && Object.values(P).some(p => p.wt)) zeilen.push(`<span class="klein">Tipp: Beim RECHNEN werden Aufgaben richtig „sicher“ ⭐</span>`);
+  $("ergText").innerHTML = zeilen.map(z => `<p>${z}</p>`).join("");
+  if(med || sternNeu) ton("medaille");
+  G.ende = true;
+  zeige("ergebnis");
+}
+function spielAbbrechen(){
+  if(!G) return;
+  cancelAnimationFrame(RAF); clearTimeout(WEITER_T);
+  G = null; persist(); renderHome(); zeige("home");
+}
+
+/* ----- Laden ----- */
+function renderLaden(){
+  $("ladenKarotten").textContent = "🥕 " + SHOP.k;
+  pferdMalen($("ladenPferd"));
+  $("waren").innerHTML = WAREN.map(w => {
+    const hat = SHOP.owned.includes(w.id), traegt = SHOP.wear.includes(w.id);
+    const knopf = traegt ? `<button class="knopf" data-ablegen="${w.id}">Ablegen</button>`
+      : hat ? `<button class="knopf voll" data-anziehen="${w.id}">Anziehen</button>`
+      : `<button class="knopf${SHOP.k >= w.preis ? " voll" : ""}" data-kaufen="${w.id}" ${SHOP.k >= w.preis ? "" : "disabled"}>🥕 ${w.preis}</button>`;
+    return `<div class="ware${traegt ? " getragen" : ""}"><div class="bild">${w.bild}</div><b>${w.name}</b>${knopf}</div>`;
+  }).join("");
+}
+
+/* ----- Erster Start ----- */
+function renderStart(){ pferdMalen($("startPferd")); $("startFell").innerHTML = fellChips(); }
+
+/* ----- Sterne einlösen, Papa-Knopf ----- */
+function einloesen(){
+  const stand = sterneStand(STARS); if(stand <= 0) return;
+  const a = prompt("Wie viele Sterne einlösen? (Du hast " + stand + ")", "1"); if(a == null) return;
+  const n = Math.floor(+a);
+  if(!(n > 0) || n > stand){ alert("Das geht nicht — du hast " + stand + "."); return; }
+  const was = prompt("Wofür? (z. B. Eis, 30 min Bildschirmzeit)", ""); if(was == null) return;
+  STARS = { ...STARS, red:[...STARS.red, { t:Date.now(), n, was:was.trim().slice(0, 80) }] };
+  persist(); markDirty(); renderHome();
+}
+let TITEL_TIPPS = [];
+function titelTipp(){
+  const now = Date.now();
+  TITEL_TIPPS = TITEL_TIPPS.filter(t => now - t < 3000).concat(now);
+  if(TITEL_TIPPS.length < 5) return;
+  TITEL_TIPPS = [];
+  const ein = prompt("Code:", ""); if(ein == null || !ein.trim()) return;
+  const was = papaCode(ein);
+  if(was === "stern"){ STARS = { ...STARS, b:[...STARS.b, Date.now()] }; alert("⭐ Ein Bonusstern ist gutgeschrieben."); }
+  else if(was === "karotten"){ SHOP = { ...SHOP, k:SHOP.k + 50 }; alert("🥕 50 Karotten sind gutgeschrieben."); }
+  else if(was === "tag"){
+    const labels = ["MO","DI","MI","DO","FR","SA","SO"], heute = (new Date().getDay() + 6) % 7;
+    const a = prompt("Welcher Tag dieser Woche soll als Lerntag zählen? (Mo bis heute)", "Heute"); if(a == null) return;
+    const s = String(a).trim().toUpperCase(), i = s.startsWith("HE") ? heute : labels.indexOf(s.slice(0, 2));
+    if(i < 0 || i > heute){ alert("Bitte einen Tag dieser Woche bis heute angeben (Mo, Di, …)."); return; }
+    const k = dayKey(wochenStart(Date.now()) + i * DAY + 12 * 3600e3);
+    const vorher = STARS.w.length;
+    DAYS = { ...DAYS, [k]:{ ...(DAYS[k] || { n:0, r:0 }), g:1 } }; STARS = sterneNachtragen(STARS, DAYS);
+    alert("📅 Der Tag zählt als Lerntag." + (STARS.w.length > vorher ? " Damit ist der Wochenstern verdient 🌟" : ""));
+  } else { alert("Diesen Code gibt es nicht."); return; }
+  persist(); markDirty(); renderHome();
+}
+
+/* ----- Sicherung ----- */
+async function sichern(btn){
+  const d = { app:"einmaleins", v:1, exported:new Date().toISOString(), state:S, p:P, days:DAYS, stars:STARS, shop:SHOP, med:MED };
+  const text = JSON.stringify(d);
+  const name = "einmaleins-" + (S.kind ? S.kind.toLowerCase().replace(/[^a-z0-9äöü]+/g, "") + "-" : "") + new Date().toISOString().slice(0, 10) + ".json";
+  const fertig = () => { lsSet("_exp", d.exported); lsSet("_dirty", null); lsSet("_snooze", null); renderHome(); };
+  try {
+    const file = new File([text], name, { type:"application/json" });
+    if(navigator.canShare && navigator.canShare({ files:[file] })){ await navigator.share({ files:[file], title:"Einmaleins-Sicherung" }); fertig(); return; }
+  } catch(e){ if(e && e.name === "AbortError") return; }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type:"application/json" }));
+  a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  if(btn) btn.textContent = "GESPEICHERT";
+  fertig();
+}
+function wiederherstellen(text){
+  let d = null; try { d = JSON.parse(text); } catch(e){}
+  if(!d || d.app !== "einmaleins"){ alert("Das ist keine Einmaleins-Sicherung."); return; }
+  const p = sanitizeP(d.p);
+  if(!confirm("Sicherung vom " + String(d.exported || "?").slice(0, 10) + " laden?\n" + Object.keys(p).length + " geübte Aufgaben.\nDas ersetzt den Lernstand auf diesem iPad.")) return;
+  S = sanitize(d.state); P = p; DAYS = pruneDays(d.days && typeof d.days === "object" ? d.days : {}, Date.now());
+  STARS = sterneNachtragen(sanitizeStars(d.stars), DAYS); SHOP = sanitizeShop(d.shop); MED = sanitizeMed(d.med);
+  if(d.exported) lsSet("_exp", d.exported);
+  lsSet("_dirty", null); lsSet("_snooze", null);
+  persist(); renderHome(); zeige(S.pferd ? "home" : "start");
+}
+
+/* ----- Ereignisse ----- */
+$("title").addEventListener("click", titelTipp);
+$("losKisten").onclick = () => spielStart("kisten");
+$("losRechnen").onclick = () => spielStart("rechnen");
+$("spielZu").onclick = () => { if(G && (G.geschafft === 0 || confirm("Level beenden? Was du schon beantwortet hast, bleibt gespeichert."))) spielAbbrechen(); };
+$("ergNochmal").onclick = () => spielStart(G ? G.art : "kisten");
+$("ergZurueck").onclick = () => { G = null; renderHome(); zeige("home"); };
+$("zumLaden").onclick = () => { renderLaden(); zeige("laden"); };
+$("ladenZu").onclick = () => { renderHome(); zeige("home"); };
+$("einloesen").onclick = einloesen;
+$("sichern").onclick = e => sichern(e.target);
+$("laden2").onclick = () => $("ladenDatei").click();
+$("ladenDatei").onchange = e => { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = () => wiederherstellen(r.result); r.readAsText(f); e.target.value = ""; };
+$("loeschen").onclick = () => {
+  if(!confirm("Wirklich den ganzen Lernstand löschen? Sterne, Karotten und das Zubehör bleiben.")) return;
+  P = {}; MED = sanitizeMed(null); persist(); renderHome();
+};
+$("setName").oninput = e => { S.pferd = e.target.value.trim().slice(0, 20); persist(); renderHome(); };
+$("setKind").oninput = e => { S.kind = e.target.value.trim().slice(0, 20); persist(); renderHome(); };
+$("setMax").onchange = e => { S.max = e.target.checked ? 12 : 10; S = sanitize({ ...S, rows:e.target.checked ? [...S.rows, ...(S.rows.length === 10 ? [11, 12] : [])] : S.rows }); persist(); renderHome(); };
+$("setTon").onchange = e => { S.ton = e.target.checked; persist(); };
+$("startLos").onclick = () => {
+  S.pferd = $("startName").value.trim().slice(0, 20) || "Fleur";
+  S.kind = $("startKind").value.trim().slice(0, 20);
+  persist(); renderHome(); zeige("home");
+};
+$("tasten").addEventListener("click", e => { const b = e.target.closest("button"); if(b) taste(b.dataset.k); });
+$("reihe").addEventListener("pointerdown", e => { const b = e.target.closest(".ballen"); if(b) antwort(+b.dataset.wert); });
+document.addEventListener("keydown", e => {
+  if(VIEW !== "spiel" || !G || G.art !== "rechnen") return;
+  if(/^\d$/.test(e.key)) taste(e.key); else if(e.key === "Backspace") taste("weg"); else if(e.key === "Enter") taste("ok");
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest("button"); if(!b) return;
+  const d = b.dataset;
+  if(d.op){ S.op = d.op; }
+  else if(d.reihe){
+    const alle = Array.from({ length:S.max }, (_, i) => i + 1);
+    if(d.reihe === "alle") S.rows = alle;
+    else {
+      const r = +d.reihe;
+      /* Sind alle an, macht das Antippen einer Reihe sie zur einzigen — so übt man eine Reihe mit einem Tipp */
+      if(S.rows.length === alle.length) S.rows = [r];
+      else if(S.rows.includes(r)) S.rows = S.rows.length > 1 ? S.rows.filter(x => x !== r) : S.rows;
+      else S.rows = [...S.rows, r].sort((a, b) => a - b);
+    }
+  }
+  else if(d.nurreihe){ S.rows = [+d.nurreihe]; S.tafelOp === "d" && S.op === "mal" && (S.op = "geteilt"); persist(); renderHome(); $("reihenChips").scrollIntoView({ behavior:"smooth", block:"center" }); return; }
+  else if(d.tempo){ S.tempo = d.tempo; }
+  else if(d.tafel){ S.tafelOp = d.tafel; }
+  else if(d.fell){ S.fell = d.fell; persist(); if(VIEW === "start") renderStart(); else renderHome(); return; }
+  else if(d.kaufen){ const w = WAREN.find(x => x.id === d.kaufen); SHOP = kaufen(SHOP, d.kaufen); persist(); markDirty(); renderLaden(); laune($("ladenPferd"), "froh"); if(w) ton("medaille"); return; }
+  else if(d.anziehen){ SHOP = anziehen(SHOP, d.anziehen); persist(); renderLaden(); laune($("ladenPferd"), "froh"); return; }
+  else if(d.ablegen){ SHOP = ablegen(SHOP, d.ablegen); persist(); renderLaden(); return; }
+  else if(d.act === "sichern"){ sichern(b); return; }
+  else if(d.act === "spaeter"){ lsSet("_snooze", Date.now() + 3 * DAY); renderHome(); return; }
+  else return;
+  persist(); if(VIEW === "home") renderHome();
+});
+/* Im Hintergrund anhalten: die Ballen fallen nicht weiter, während das iPad gesperrt ist */
+document.addEventListener("visibilitychange", () => {
+  if(!G || VIEW !== "spiel" || G.art !== "kisten" || !G.aktiv) { if(!document.hidden && VIEW === "home") renderHome(); return; }
+  if(document.hidden){ G.pause = performance.now(); cancelAnimationFrame(RAF); RAF = 0; }
+  else if(G.pause){ G.aktiv.t0 += performance.now() - G.pause; G.pause = 0; if(!G.lock) RAF = requestAnimationFrame(fallen); }
+});
+
+if(S.pferd){ renderHome(); zeige("home"); } else { renderStart(); zeige("start"); }
+</script>
+</body>
+</html>

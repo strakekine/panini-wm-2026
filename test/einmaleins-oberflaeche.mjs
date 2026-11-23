@@ -97,6 +97,33 @@ ok(await pg.evaluate(() => SHOP.k) === 70 && await pg.evaluate(() => SHOP.wear.i
 ok(await pg.locator('[data-kaufen="krone"]').isDisabled(), "zu teure Krone nicht kaufbar");
 await pg.click("#ladenZu");
 
+/* Füttern: Fohlen wächst, Feier beim Aufstieg */
+ok(await pg.evaluate(() => stufeVon(PF.w)) === 0, "neues Pferd ist ein Fohlen");
+await pg.evaluate(() => { SHOP.k = 60; PF.w = 30; PF.lieb = "zucker"; persist(); renderHome(); });
+await pg.click("#zumLaden");
+await pg.click('[data-futter="apfel"]');
+await pg.waitForSelector("#feier.an", { timeout:3000 });
+ok((await pg.textContent("#feierTitel")).includes("Jährling"), "Feier: jetzt ein Jährling");
+await pg.click("#feierZu");
+ok(await pg.evaluate(() => SHOP.k === 50 && PF.w === 41), "Apfel kostet 10 Karotten, gibt 11 Wachstum");
+await pg.evaluate(() => { PF.w = 800; persist(); renderLaden(); });
+ok(await pg.locator('[data-futter="heu"]').isDisabled(), "ausgewachsen: kein Futter mehr");
+await pg.evaluate(() => { PF.w = 41; persist(); });
+await pg.click("#ladenZu");
+
+/* Abbrechen behält die verdienten Karotten */
+const k0 = await pg.evaluate(() => SHOP.k);
+await pg.click("#losRechnen");
+for(let x = 0; x < 2; x++){
+  await pg.waitForFunction(() => G && G.aktiv && !G.lock);
+  const a = await pg.evaluate(() => frage(G.aktiv.c).a);
+  for(const z of String(a)) await pg.click(`#tasten [data-k="${z}"]`);
+  await pg.click('#tasten [data-k="ok"]');
+  await pg.waitForFunction(() => G.lock);
+}
+await pg.click("#spielZu");
+ok(await pg.evaluate(() => VIEW) === "home" && await pg.evaluate(() => SHOP.k) === k0 + 2, "abgebrochen: 2 verdiente Karotten bleiben");
+
 /* Name tippen: Tastatur darf nicht wegklappen (Feld wird nicht neu gebaut) */
 await pg.evaluate(() => { document.getElementById("einst").open = true; });
 await pg.fill("#setName", ""); await pg.type("#setName", "Stella");
@@ -105,6 +132,7 @@ ok(await pg.evaluate(() => document.activeElement.id) === "setName" && await pg.
 /* Neuladen behält alles */
 await pg.reload();
 ok(await view() === "home", "nach Neuladen Startbild");
+ok(await pg.evaluate(() => PF.w === 41), "Wachstum gespeichert");
 ok(await pg.evaluate(() => S.pferd === "Stella" && SHOP.wear.includes("schleife") && Object.keys(P).length >= 10 && MED.gold + MED.silber >= 2), "Lernstand, Pferd, Zubehör, Medaillen gespeichert");
 
 /* Papa-Knopf: Code KAROTTEN */

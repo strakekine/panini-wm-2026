@@ -44,6 +44,13 @@
   .stallbild .pferd{width:100%;max-width:290px}
   .blase{position:relative;background:#fff;border:2px solid var(--linie);border-radius:18px;padding:14px 16px;font-size:18px;line-height:1.35}
   .blase b{color:#e2731f}
+  .wachs{margin:10px 0 0;font-size:15px;font-weight:700}
+  .wachs .balken{margin-top:5px}
+  .feier{position:fixed;inset:0;z-index:50;background:rgba(40,25,10,.45);display:none;align-items:center;justify-content:center;padding:16px}
+  .feier.an{display:flex}
+  .feier .karte{max-width:420px;width:100%;text-align:center;animation:medaille .6s ease}
+  .feier h2{font-size:26px;margin:4px 0 8px}
+  .ware .lieb{font-size:12px;color:#e2731f;font-weight:800}
   .karotten{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:18px;background:#fff1e0;border:2px solid #ffd3a3;border-radius:999px;padding:6px 14px}
 
   /* große Knöpfe */
@@ -203,7 +210,8 @@
       <div class="stallbild"><div class="pferd" id="homePferd"></div></div>
       <div>
         <div class="blase" id="blase"></div>
-        <p class="reihe2"><span class="karotten" id="homeKarotten"></span><button class="knopf" id="zumLaden">🛍️ Laden</button></p>
+        <div id="wachsBox" class="wachs"></div>
+        <p class="reihe2"><span class="karotten" id="homeKarotten"></span><button class="knopf voll" id="zumLaden">🍎 Füttern &amp; Laden</button></p>
       </div>
     </div>
   </div>
@@ -307,6 +315,7 @@
       <button class="gross g-heu" id="ergNochmal">NOCHMAL</button>
       <button class="gross g-rechnen" id="ergZurueck">ZUM STALL</button>
     </div>
+    <p style="text-align:center"><button class="knopf voll" id="ergFuettern">🍎 Jetzt füttern</button></p>
   </div>
 </div></section>
 
@@ -318,11 +327,24 @@
     <div class="stallbild" style="max-width:360px;margin:0 auto"><div class="pferd" id="ladenPferd"></div></div>
   </div>
   <div class="karte">
-    <h2>Für Karotten 🥕</h2>
-    <p class="klein">Jede richtige Antwort beim ersten Versuch bringt eine Karotte, jede Medaille ein paar dazu.</p>
+    <h2>Futter — damit ich groß werde 🌱</h2>
+    <div id="ladenWachs" class="wachs"></div>
+    <div class="waren" id="futter" style="margin-top:10px"></div>
+    <p class="klein">Karotten gibt es fürs Üben: jede richtige Antwort beim ersten Versuch eine, jede Medaille ein paar dazu.
+      Ich werde nie hungrig und nie kleiner — jedes Futter lässt mich ein Stück wachsen. Eins davon ist mein Lieblingsfutter, findest du heraus, welches?</p>
+  </div>
+  <div class="karte">
+    <h2>Zubehör 🎀</h2>
     <div class="waren" id="waren"></div>
   </div>
 </div></section>
+
+<!-- Feier beim Wachsen -->
+<div class="feier" id="feier"><div class="karte">
+  <div class="stallbild" style="max-width:320px;margin:0 auto"><div class="pferd" id="feierPferd"></div></div>
+  <h2 id="feierTitel"></h2><p id="feierText" style="font-size:18px"></p>
+  <p><button class="gross g-heu" id="feierZu" style="width:100%">JUHU!</button></p>
+</div></div>
 
 <script>
 /* ===================== Logik =====================
@@ -481,13 +503,13 @@ const WAREN = [
   { id:"rosa",      name:"Rosa Mähne",        preis:100, bild:"💗", maehne:true },
   { id:"decke",     name:"Pferdedecke",       preis:120, bild:"🟦" },
   { id:"brille",    name:"Sonnenbrille",      preis:160, bild:"🕶️" },
-  { id:"sattel",    name:"Sattel",            preis:200, bild:"🏇" },
+  { id:"sattel",    name:"Sattel",            preis:200, bild:"🏇", ab:3 },   /* ein Fohlen trägt keinen Sattel */
   { id:"krone",     name:"Krone",             preis:250, bild:"👑" },
   { id:"regenbogen",name:"Regenbogen-Mähne",  preis:300, bild:"🌈", maehne:true },
 ];
-function kaufen(shop, id){
+function kaufen(shop, id, stufe = 4){
   const w = WAREN.find(x => x.id === id);
-  if(!w || shop.owned.includes(id) || shop.k < w.preis) return shop;
+  if(!w || shop.owned.includes(id) || shop.k < w.preis || (w.ab || 0) > stufe) return shop;
   return anziehen({ ...shop, k:shop.k - w.preis, owned:[...shop.owned, id] }, id);
 }
 /* Anziehen: nur eine Mähnenfarbe gleichzeitig */
@@ -507,12 +529,47 @@ const FELLE = {
   rappe:    { name:"Rappe",    fell:"#433836", dunkel:"#272020", maehne:"#171212", maul:"#7a6a65" },
 };
 
+/* ----- Wachsen (vom Nutzer, 23.11.2026: „Tamagotchi“, aber nur wachsen) -----
+   Das Pferd beginnt als Fohlen und wächst mit Futter, das das Kind für Karotten kauft.
+   Bewusst KEIN Hunger und kein Verfall: Pausen bestrafen nie, das Pferd schrumpft nie.
+   pf = { w: Wachstumspunkte, lieb: Lieblingsfutter (id), liebBekannt: schon entdeckt }. */
+const STUFEN = [
+  { name:"Fohlen", ab:0 }, { name:"Jährling", ab:40 }, { name:"junges Pony", ab:160 },
+  { name:"Pony", ab:400 }, { name:"großes Pferd", ab:800 },
+];
+const FUTTER = [
+  { id:"heu",    name:"Heu",         preis:4,  wachs:4,  bild:"🌿" },
+  { id:"apfel",  name:"Apfel",       preis:10, wachs:11, bild:"🍎" },
+  { id:"hafer",  name:"Hafer",       preis:20, wachs:24, bild:"🌾" },
+  { id:"zucker", name:"Zuckerstück", preis:35, wachs:45, bild:"🧊" },
+];
+const LIEB_FAKTOR = 1.5;
+function stufeVon(w){ let i = 0; STUFEN.forEach((st, j) => { if(w >= st.ab) i = j; }); return i; }
+function ausgewachsen(w){ return stufeVon(w) === STUFEN.length - 1; }
+/* Fortschritt zur nächsten Stufe: { von, bis, hat, braucht } */
+function naechsteStufe(w){
+  const i = stufeVon(w); if(i === STUFEN.length - 1) return null;
+  return { von:STUFEN[i].name, bis:STUFEN[i + 1].name, hat:w - STUFEN[i].ab, braucht:STUFEN[i + 1].ab - STUFEN[i].ab };
+}
+/* Füttern: zieht den Preis ab, gibt Wachstum (Lieblingsfutter × 1,5). null = geht nicht. */
+function fuettern(shop, pf, id){
+  const f = FUTTER.find(x => x.id === id);
+  if(!f || shop.k < f.preis || ausgewachsen(pf.w)) return null;
+  const lieb = pf.lieb === id, plus = Math.round(f.wachs * (lieb ? LIEB_FAKTOR : 1));
+  const vorher = stufeVon(pf.w), w = Math.min(STUFEN[STUFEN.length - 1].ab, pf.w + plus);
+  return { shop:{ ...shop, k:shop.k - f.preis }, pf:{ ...pf, w, liebBekannt:pf.liebBekannt || lieb }, plus, lieb,
+           aufgestiegen:stufeVon(w) > vorher ? stufeVon(w) : null };
+}
+/* Wer schon vor dem Wachsen gespielt hat, verliert nichts: Was im Laden ausgegeben wurde,
+   zählt als Futter, höchstens bis „Junges Pony“. */
+function wachsStart(shop){ return Math.min(STUFEN[2].ab, shop.owned.reduce((a, id) => a + ((WAREN.find(w => w.id === id) || {}).preis || 0), 0)); }
+
 /* Sicherungs-Erinnerung: erste ungesicherte Antwort älter als eine Woche */
 function needBackup(dirty, snooze, now){ return !!dirty && now - dirty >= 7 * DAY && !(snooze && snooze > now); }
 
 /* ===================== Oberfläche ===================== */
 /* Fassung — bei JEDER Änderung hochzählen (am iPad läuft nach einem Push oft noch die alte Datei). */
-const FASSUNG = "23.11.2026 a";
+const FASSUNG = "23.11.2026 b";
 const KEY = "einmaleins_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
@@ -553,34 +610,59 @@ function sanitizeMed(x){ x = x || {}; return { gold:x.gold | 0, silber:x.silber 
 
 let S = sanitize(lsGet("", null)), P = sanitizeP(lsGet("_p", {})), DAYS = pruneDays(lsGet("_days", {}) || {}, Date.now());
 let STARS = sterneNachtragen(sanitizeStars(lsGet("_stars", null)), DAYS), SHOP = sanitizeShop(lsGet("_shop", null)), MED = sanitizeMed(lsGet("_med", null));
-function persist(){ lsSet("", S); lsSet("_p", P); lsSet("_days", DAYS); lsSet("_stars", STARS); lsSet("_shop", SHOP); lsSet("_med", MED); }
+function sanitizePf(x, shop){
+  if(!x || typeof x !== "object") return { w:wachsStart(shop), lieb:FUTTER[Math.floor(Math.random() * FUTTER.length)].id, liebBekannt:false };
+  return { w:Math.max(0, Math.min(STUFEN[STUFEN.length - 1].ab, +x.w || 0)), lieb:FUTTER.some(f => f.id === x.lieb) ? x.lieb : "apfel", liebBekannt:!!x.liebBekannt };
+}
+let PF = sanitizePf(lsGet("_pf", null), SHOP);
+function persist(){ lsSet("", S); lsSet("_p", P); lsSet("_days", DAYS); lsSet("_stars", STARS); lsSet("_shop", SHOP); lsSet("_med", MED); lsSet("_pf", { w:PF.w, lieb:PF.lieb, liebBekannt:PF.liebBekannt }); }
 function markDirty(){ if(!lsGet("_dirty", null)) lsSet("_dirty", Date.now()); }
 const pferdName = () => S.pferd || "Dein Pferd";
 
 /* ----- Pferd (SVG) ----- */
 let PF_N = 0;
-function pferdSVG(fellId, wear){
+/* Hintergrund wächst mit: Zaun (Jährling), Blumen (junges Pony), Stall (Pony), Schleife am Zaun (großes Pferd) */
+function szeneSVG(st){
+  let s = "";
+  if(st >= 3) s += `<g><rect x="2" y="98" width="46" height="64" fill="#c9483a"/><path d="M-2 100 L25 74 L52 100 Z" fill="#8a2f26"/>
+    <rect x="15" y="122" width="20" height="40" fill="#fff4e0"/><path d="M15 122 L35 162 M35 122 L15 162" stroke="#c9483a" stroke-width="3"/></g>`;
+  if(st >= 1) s += `<g fill="#d4a06a"><rect x="52" y="130" width="5" height="40" rx="2"/><rect x="100" y="130" width="5" height="40" rx="2"/><rect x="148" y="130" width="5" height="40" rx="2"/><rect x="196" y="130" width="5" height="40" rx="2"/>
+    <rect x="50" y="138" width="170" height="5" rx="2"/><rect x="50" y="153" width="170" height="5" rx="2"/></g>`;
+  if(st >= 4) s += `<g><path d="M193 140 l-5 18 l6 -4 l3 7 z M203 140 l5 18 l-6 -4 l-3 7 z" fill="#4a90e2"/><circle cx="198" cy="136" r="9" fill="#4a90e2" stroke="#ffd84d" stroke-width="2.5"/><text x="198" y="140" font-size="10" text-anchor="middle" fill="#fff" font-weight="900">1</text></g>`;
+  if(st >= 2) s += `<g><circle cx="16" cy="190" r="3.5" fill="#ff8fc7"/><circle cx="30" cy="194" r="3" fill="#fff"/><circle cx="196" cy="191" r="3.5" fill="#ffe066"/><circle cx="210" cy="195" r="3" fill="#9ad0ff"/><circle cx="180" cy="196" r="2.6" fill="#fff"/></g>`;
+  return s;
+}
+function pferdSVG(fellId, wear, stufe = 4, szene = true){
   const F = FELLE[fellId] || FELLE.fuchs, id = "pf" + (++PF_N), an = x => wear.includes(x);
+  /* Fohlen: kleiner, großer Kopf, lange dünne Beine, Stummelmähne, kurzer Schweif */
+  const st = Math.max(0, Math.min(4, stufe | 0));
+  const GR = [0.56, 0.68, 0.8, 0.9, 1][st], KOPF = [1.38, 1.24, 1.12, 1.05, 1][st], DY = [16, 11, 7, 3, 0][st];
+  const BW = [11, 12, 13, 14, 15][st], SCHW = [0.45, 0.62, 0.8, 0.92, 1][st];
+  const hoch = `transform="translate(0 ${-DY})"`;
+  const bein = (x, y, h, farbe) => { const bx = x + (15 - BW) / 2;
+    return `<rect x="${bx}" y="${y - DY}" width="${BW}" height="${h + DY}" rx="${BW / 2}" fill="${farbe}"/><rect x="${bx - 1}" y="172" width="${BW + 2}" height="11" rx="4" fill="#4a3426"/>`; };
   const maehne = an("regenbogen") ? "url(#" + id + "rb)" : an("rosa") ? "#ff8fc7" : F.maehne;
   const huf = "#4a3426";
   return `<svg viewBox="0 0 220 200" aria-hidden="true"><defs>
     <linearGradient id="${id}rb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff6b6b"/><stop offset=".25" stop-color="#ffb347"/>
     <stop offset=".5" stop-color="#ffe066"/><stop offset=".7" stop-color="#6bd47a"/><stop offset=".85" stop-color="#5aa9f0"/><stop offset="1" stop-color="#b07cff"/></linearGradient></defs>
+  ${szene ? szeneSVG(st) : ""}
+  <g transform="translate(110 184) scale(${GR}) translate(-110 -184)">
   <ellipse cx="108" cy="186" rx="70" ry="7" fill="rgba(0,0,0,.12)"/>
   <g class="pf">
-    <g class="schweif"><path d="M54 100 C 24 98 14 136 22 172 C 30 162 31 152 37 146 C 35 160 40 170 47 175 C 45 152 47 130 62 112 Z" fill="${maehne}"/></g>
-    <rect x="60" y="126" width="15" height="54" rx="7" fill="${F.dunkel}"/><rect x="59" y="172" width="17" height="11" rx="4" fill="${huf}"/>
-    <rect x="80" y="128" width="15" height="52" rx="7" fill="${F.fell}"/><rect x="79" y="172" width="17" height="11" rx="4" fill="${huf}"/>
-    <rect x="122" y="128" width="15" height="52" rx="7" fill="${F.dunkel}"/><rect x="121" y="172" width="17" height="11" rx="4" fill="${huf}"/>
-    <ellipse cx="102" cy="116" rx="58" ry="33" fill="${F.fell}"/>
-    <ellipse cx="104" cy="132" rx="38" ry="11" fill="#fff" opacity=".07"/>
-    <rect x="140" y="128" width="15" height="52" rx="7" fill="${F.fell}"/><rect x="139" y="172" width="17" height="11" rx="4" fill="${huf}"/>
+    <g ${hoch}><g transform="translate(56 104) scale(${SCHW}) translate(-56 -104)"><g class="schweif"><path d="M54 100 C 24 98 14 136 22 172 C 30 162 31 152 37 146 C 35 160 40 170 47 175 C 45 152 47 130 62 112 Z" fill="${maehne}"/></g></g></g>
+    ${bein(60, 126, 54, F.dunkel)}${bein(80, 128, 52, F.fell)}${bein(122, 128, 52, F.dunkel)}
+    <g ${hoch}><ellipse cx="102" cy="116" rx="58" ry="33" fill="${F.fell}"/>
+    <ellipse cx="104" cy="132" rx="38" ry="11" fill="#fff" opacity=".07"/></g>
+    ${bein(140, 128, 52, F.fell)}
+    <g ${hoch}>
     ${an("decke") ? `<path d="M78 87 h46 a7 7 0 0 1 7 7 v30 a7 7 0 0 1 -7 7 h-46 a7 7 0 0 1 -7 -7 v-30 a7 7 0 0 1 7 -7z" fill="#4a90e2"/><path d="M71 118 h60 v5 h-60z" fill="#ffd84d"/>` : ""}
     ${an("sattel") ? `<path d="M84 90 C 92 78 118 78 126 90 L122 101 C 112 96 98 96 88 101 Z" fill="#7a4520"/><path d="M84 90 C 86 86 90 84 94 84 L92 92 Z" fill="#5a3216"/><path d="M106 98 v20" stroke="#5a3216" stroke-width="2.5"/><rect x="101" y="117" width="10" height="5" rx="2" fill="#bbb"/>` : ""}
     <path d="M130 110 C 134 84 142 66 152 52 L178 68 C 170 88 162 108 158 130 Z" fill="${F.fell}"/>
     ${an("halstuch") ? `<path d="M131 98 C 142 104 152 108 163 108 L154 132 Z" fill="#ef5b5b"/><circle cx="148" cy="112" r="2.4" fill="#fff"/><circle cx="153" cy="120" r="2.2" fill="#fff"/><circle cx="142" cy="106" r="2" fill="#fff"/>` : ""}
-    <path d="M152 46 C 142 60 134 78 128 104 C 124 96 124 90 126 84 C 120 88 118 82 122 74 C 116 74 118 66 124 62 C 120 56 126 50 134 48 C 138 42 146 40 152 46 Z" fill="${maehne}"/>
-    <g class="kopf">
+    ${st >= 2 ? `<path d="M152 46 C 142 60 134 78 128 104 C 124 96 124 90 126 84 C 120 88 118 82 122 74 C 116 74 118 66 124 62 C 120 56 126 50 134 48 C 138 42 146 40 152 46 Z" fill="${maehne}"/>`
+      : `<path d="M152 46 C 145 56 139 70 134 92 C 132 86 132 82 134 78 C 130 78 130 72 134 68 C 131 64 134 58 139 56 C 142 50 147 46 152 46 Z" fill="${maehne}"/>`}
+    <g transform="translate(152 70) scale(${KOPF}) translate(-152 -70)"><g class="kopf">
       <path d="M154 40 L156 14 L170 36 Z" fill="${F.fell}"/><path d="M157 36 L158 21 L166 34 Z" fill="#f3b7a8"/>
       <ellipse cx="168" cy="60" rx="27" ry="21" fill="${F.fell}" transform="rotate(30 168 60)"/>
       <ellipse cx="185" cy="80" rx="17" ry="14" fill="${F.maul}"/>
@@ -599,11 +681,11 @@ function pferdSVG(fellId, wear){
          <circle cx="171" cy="39" r="4" fill="#9ad0ff"/><circle cx="171" cy="39" r="1.8" fill="#ffc531"/>
          <circle cx="144" cy="47" r="3.6" fill="#ffe066"/><circle cx="144" cy="47" r="1.6" fill="#ff8a3d"/></g>` : ""}
       ${an("krone") ? `<path d="M162 32 L163 16 L170 25 L175 13 L180 25 L187 18 L186 34 Z" fill="#ffc531" stroke="#e09b00" stroke-width="1.5"/><circle cx="175" cy="27" r="2.3" fill="#ef5b5b"/>` : ""}
-    </g>
-  </g></svg>`;
+    </g></g>
+  </g></g></g></svg>`;
 }
 function pferdMalen(el, laune){
-  el.innerHTML = pferdSVG(S.fell, SHOP.wear);
+  el.innerHTML = pferdSVG(S.fell, SHOP.wear, stufeVon(PF.w));
   el.className = "pferd" + (laune ? " " + laune : "");
 }
 let LAUNE_T = 0;
@@ -652,6 +734,9 @@ function renderHome(){
     : `Für heute ist alles erledigt! Lust auf eine Extrarunde?`;
   $("blase").innerHTML = `<b>${esc(pferdName())}:</b> ${satz}`;
   $("homeKarotten").textContent = "🥕 " + SHOP.k;
+  $("wachsBox").innerHTML = wachsHtml();
+  if(!ausgewachsen(PF.w) && SHOP.k >= Math.min(...FUTTER.map(f => f.preis)))
+    $("blase").innerHTML += `<br><span class="klein">Psst … ich hätte Appetit auf etwas Leckeres! Schau mal unter <b>Füttern</b> 🍎</span>`;
 
   $("opChips").innerHTML = [["mal", "Mal ·"], ["geteilt", "Geteilt :"], ["mix", "Gemischt"]]
     .map(([k, t]) => `<button class="chip${S.op === k ? " an" : ""}" data-op="${k}">${t}</button>`).join("");
@@ -839,12 +924,16 @@ function spielEnde(){
   if(G.art === "kisten" && Object.values(P).some(p => p.wt)) zeilen.push(`<span class="klein">Tipp: Beim RECHNEN werden Aufgaben richtig „sicher“ ⭐</span>`);
   $("ergText").innerHTML = zeilen.map(z => `<p>${z}</p>`).join("");
   if(med || sternNeu) ton("medaille");
+  $("ergFuettern").style.display = !ausgewachsen(PF.w) && SHOP.k >= Math.min(...FUTTER.map(f => f.preis)) ? "" : "none";
   G.ende = true;
   zeige("ergebnis");
 }
 function spielAbbrechen(){
   if(!G) return;
   cancelAnimationFrame(RAF); clearTimeout(WEITER_T);
+  /* Verdiente Karotten bleiben, auch ohne Levelende (nur keine Medaille) */
+  SHOP = { ...SHOP, k:SHOP.k + G.karotten };
+  STARS = sterneNachtragen(STARS, DAYS);
   G = null; persist(); renderHome(); zeige("home");
 }
 
@@ -852,13 +941,54 @@ function spielAbbrechen(){
 function renderLaden(){
   $("ladenKarotten").textContent = "🥕 " + SHOP.k;
   pferdMalen($("ladenPferd"));
+  $("ladenWachs").innerHTML = wachsHtml();
+  const gross = ausgewachsen(PF.w);
+  $("futter").innerHTML = FUTTER.map(f => {
+    const kann = !gross && SHOP.k >= f.preis, lieb = PF.liebBekannt && PF.lieb === f.id;
+    return `<div class="ware"><div class="bild">${f.bild}</div><b>${f.name}</b>
+      <div class="klein">+${Math.round(f.wachs * (lieb ? LIEB_FAKTOR : 1))} 🌱</div>${lieb ? `<div class="lieb">❤️ Lieblingsfutter</div>` : ""}
+      <button class="knopf${kann ? " voll" : ""}" data-futter="${f.id}" ${kann ? "" : "disabled"}>${gross ? "satt & groß" : "Füttern · 🥕 " + f.preis}</button></div>`;
+  }).join("");
+  const stufe = stufeVon(PF.w);
   $("waren").innerHTML = WAREN.map(w => {
     const hat = SHOP.owned.includes(w.id), traegt = SHOP.wear.includes(w.id);
+    if(!hat && (w.ab || 0) > stufe) return `<div class="ware"><div class="bild" style="opacity:.4">${w.bild}</div><b>${w.name}</b><button class="knopf" disabled>🔒 ab ${STUFEN[w.ab].name}</button></div>`;
     const knopf = traegt ? `<button class="knopf" data-ablegen="${w.id}">Ablegen</button>`
       : hat ? `<button class="knopf voll" data-anziehen="${w.id}">Anziehen</button>`
       : `<button class="knopf${SHOP.k >= w.preis ? " voll" : ""}" data-kaufen="${w.id}" ${SHOP.k >= w.preis ? "" : "disabled"}>🥕 ${w.preis}</button>`;
     return `<div class="ware${traegt ? " getragen" : ""}"><div class="bild">${w.bild}</div><b>${w.name}</b>${knopf}</div>`;
   }).join("");
+}
+
+function wachsHtml(){
+  const n = naechsteStufe(PF.w), name = esc(pferdName());
+  if(!n) return `🏆 ${name} ist ein <b>${STUFEN[STUFEN.length - 1].name}</b> — ganz ausgewachsen!`;
+  return `🐴 ${name} ist ein <b>${n.von}</b> · noch ${n.braucht - n.hat} 🌱 bis ${n.bis}
+    <div class="balken"><b style="width:${Math.round(100 * n.hat / n.braucht)}%"></b></div>`;
+}
+const STUFEN_TEXT = [
+  "", "Schau, meine Beine sind schon viel kräftiger! Und wir haben einen Zaun bekommen.",
+  "Meine Mähne wird richtig lang! Und auf der Wiese blühen Blumen.",
+  "Ich bin ein richtiges Pony! Jetzt habe ich einen Stall — und im Laden gibt es einen Sattel.",
+  "Ich bin groß! Danke, dass du dich so toll um mich gekümmert hast 💛",
+];
+function feiern(st){
+  pferdMalen($("feierPferd"), "froh");
+  $("feierTitel").textContent = "🎉 " + pferdName() + " ist jetzt ein " + STUFEN[st].name + "!";
+  $("feierText").textContent = STUFEN_TEXT[st] || "";
+  $("feier").classList.add("an");
+  ton("medaille");
+}
+function futterGeben(id){
+  const r = fuettern(SHOP, PF, id); if(!r) return;
+  SHOP = r.shop; PF = r.pf; persist(); markDirty();
+  renderLaden();
+  const pf = $("ladenPferd"); laune(pf, "kauen", 1100);
+  const el = document.createElement("div"); el.className = "plus"; el.textContent = "+" + r.plus + " 🌱" + (r.lieb ? " ❤️" : "");
+  el.style.left = "55%"; el.style.top = "20%"; pf.parentElement.style.position = "relative"; pf.parentElement.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+  ton("ok");
+  if(r.aufgestiegen != null) setTimeout(() => feiern(r.aufgestiegen), 700);
 }
 
 /* ----- Erster Start ----- */
@@ -899,7 +1029,7 @@ function titelTipp(){
 
 /* ----- Sicherung ----- */
 async function sichern(btn){
-  const d = { app:"einmaleins", v:1, exported:new Date().toISOString(), state:S, p:P, days:DAYS, stars:STARS, shop:SHOP, med:MED };
+  const d = { app:"einmaleins", v:1, exported:new Date().toISOString(), state:S, p:P, days:DAYS, stars:STARS, shop:SHOP, med:MED, pf:{ w:PF.w, lieb:PF.lieb, liebBekannt:PF.liebBekannt } };
   const text = JSON.stringify(d);
   const name = "einmaleins-" + (S.kind ? S.kind.toLowerCase().replace(/[^a-z0-9äöü]+/g, "") + "-" : "") + new Date().toISOString().slice(0, 10) + ".json";
   const fertig = () => { lsSet("_exp", d.exported); lsSet("_dirty", null); lsSet("_snooze", null); renderHome(); };
@@ -920,7 +1050,7 @@ function wiederherstellen(text){
   const p = sanitizeP(d.p);
   if(!confirm("Sicherung vom " + String(d.exported || "?").slice(0, 10) + " laden?\n" + Object.keys(p).length + " geübte Aufgaben.\nDas ersetzt den Lernstand auf diesem iPad.")) return;
   S = sanitize(d.state); P = p; DAYS = pruneDays(d.days && typeof d.days === "object" ? d.days : {}, Date.now());
-  STARS = sterneNachtragen(sanitizeStars(d.stars), DAYS); SHOP = sanitizeShop(d.shop); MED = sanitizeMed(d.med);
+  STARS = sterneNachtragen(sanitizeStars(d.stars), DAYS); SHOP = sanitizeShop(d.shop); MED = sanitizeMed(d.med); PF = sanitizePf(d.pf, SHOP);
   if(d.exported) lsSet("_exp", d.exported);
   lsSet("_dirty", null); lsSet("_snooze", null);
   persist(); renderHome(); zeige(S.pferd ? "home" : "start");
@@ -933,6 +1063,8 @@ $("losRechnen").onclick = () => spielStart("rechnen");
 $("spielZu").onclick = () => { if(G && (G.geschafft === 0 || confirm("Level beenden? Was du schon beantwortet hast, bleibt gespeichert."))) spielAbbrechen(); };
 $("ergNochmal").onclick = () => spielStart(G ? G.art : "kisten");
 $("ergZurueck").onclick = () => { G = null; renderHome(); zeige("home"); };
+$("ergFuettern").onclick = () => { G = null; renderLaden(); zeige("laden"); };
+$("feierZu").onclick = () => { $("feier").classList.remove("an"); renderLaden(); };
 $("zumLaden").onclick = () => { renderLaden(); zeige("laden"); };
 $("ladenZu").onclick = () => { renderHome(); zeige("home"); };
 $("einloesen").onclick = einloesen;
@@ -977,7 +1109,8 @@ document.addEventListener("click", e => {
   else if(d.tempo){ S.tempo = d.tempo; }
   else if(d.tafel){ S.tafelOp = d.tafel; }
   else if(d.fell){ S.fell = d.fell; persist(); if(VIEW === "start") renderStart(); else renderHome(); return; }
-  else if(d.kaufen){ const w = WAREN.find(x => x.id === d.kaufen); SHOP = kaufen(SHOP, d.kaufen); persist(); markDirty(); renderLaden(); laune($("ladenPferd"), "froh"); if(w) ton("medaille"); return; }
+  else if(d.futter){ futterGeben(d.futter); return; }
+  else if(d.kaufen){ const w = WAREN.find(x => x.id === d.kaufen); SHOP = kaufen(SHOP, d.kaufen, stufeVon(PF.w)); persist(); markDirty(); renderLaden(); laune($("ladenPferd"), "froh"); if(w) ton("medaille"); return; }
   else if(d.anziehen){ SHOP = anziehen(SHOP, d.anziehen); persist(); renderLaden(); laune($("ladenPferd"), "froh"); return; }
   else if(d.ablegen){ SHOP = ablegen(SHOP, d.ablegen); persist(); renderLaden(); return; }
   else if(d.act === "sichern"){ sichern(b); return; }

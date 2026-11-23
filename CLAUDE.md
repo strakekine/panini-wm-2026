@@ -906,12 +906,26 @@ gespielt, steht ihre beste Medaille an der Reihe.
 Decke, Brille, Sattel, Krone). Lerntag = 30 erste Antworten, davon 20 richtig; 5 Lerntage Mo–So =
 Wochenstern, einlösen per `prompt()` (wie Vokabeltrainer). **Papa-Geheimknopf:** 5× in 3 s auf
 „EINMALEINS“ → Code STERN, TAG oder KAROTTEN (+50). Töne per WebAudio, abschaltbar.
+**Wachsen** (vom Nutzer, 23.11.2026, Fassung b: „Tamagotchi“ — Claude riet von Hunger/Verfall ab, Nutzer
+einverstanden): Pferd beginnt als **Fohlen** und wächst mit Futter für Karotten (`FUTTER`: Heu 4→4, Apfel 10→11,
+Hafer 20→24, Zuckerstück 35→45 🌱; ein zufälliges **Lieblingsfutter** je Pferd ×1,5, wird beim ersten Füttern
+entdeckt und dann markiert). `STUFEN`: Fohlen 0, Jährling 40, junges Pony 160, Pony 400, großes Pferd 800
+(`stufeVon`, `fuettern`, `naechsteStufe`). **Nie Hunger, nie kleiner**, ausgewachsen = kein Futter mehr. Zielgröße:
+in etwa 6–8 Wochen normalen Übens groß, wenn auch im Laden gekauft wird. `pferdSVG(fell, wear, stufe, szene)`:
+Größe, Kopf, Beinlänge/-dicke, Mähne (Stummel bis Jährling), Schweif je Stufe; Hintergrund wächst mit
+(`szeneSVG`: Zaun, Blumen, Stall, Siegerschleife). CSS-Animationen sitzen auf inneren Gruppen, die Stufen-
+Transformationen auf äußeren Wrappern (sonst überschreibt CSS-`transform` das SVG-Attribut). Aufstieg →
+Feier-Fenster (`#feier`). **Sattel erst ab Pony** (`WAREN.ab`, ein Fohlen trägt keinen Sattel). Wer vorher schon
+gespielt hat: Ausgegebenes im Laden zählt als Wachstum, höchstens bis junges Pony (`wachsStart`), nichts geht
+verloren. Speicher `_pf` = `{w, lieb, liebBekannt}`, in der Sicherung mit drin. Startbild zeigt Stufe + Balken
+und „Psst … Appetit“, Ergebnisseite „🍎 Jetzt füttern“, sobald das billigste Futter bezahlbar ist.
+**Abbrechen mit ✕ behält die schon verdienten Karotten** (vorher gingen sie verloren), nur ohne Medaille.
 **Speicher:** `einmaleins_v1` (+ `_p`, `_days`, `_stars`, `_shop`, `_med`, `_exp`, `_dirty`, `_snooze`),
 Sicherung als Datei über `navigator.share`, Erinnerung nach einer Woche ungesichert.
 **Fassung** `FASSUNG` unten im Startbild, bei jeder Änderung hochzählen.
 **Testen:** `node test/einmaleins.mjs` (Logik zwischen `Logik`…`Oberfläche`, Gegenprobe gemacht) und
 `node test/einmaleins-oberflaeche.mjs` (Browser, 820×1180: Levels beider Arten, Herzen, Tafel,
-Laden, Fokus beim Namen, Neuladen, Papa-Code). **Am iPad noch nicht ausprobiert.**
+Laden, Füttern mit Aufstieg, Abbrechen behält Karotten, Fokus beim Namen, Neuladen, Papa-Code). **Am iPad noch nicht ausprobiert.**
 
 ## Vokabeltrainer (`vokabeln.html`) — Stand und Regeln
 

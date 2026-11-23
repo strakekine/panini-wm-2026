@@ -12,7 +12,8 @@ const quelle = src.slice(src.lastIndexOf("/*", i), src.lastIndexOf("/*", j));
 const M = new Function(quelle + `
   return { DAY, FACH, KISTEN_MAX, SCHNELL_MS, startOfDay, cardsFor, cardFromId, frage, loesung, grade, levelBauen,
            faelligZahl, auswahl, medaille, stufe, dayKey, dayDone, countDay, weekStatus, pruneDays, sternWochen,
-           sanitizeStars, sterneNachtragen, sterneStand, papaCode, WAREN, kaufen, anziehen, ablegen, needBackup };`)();
+           sanitizeStars, sterneNachtragen, sterneStand, papaCode, WAREN, kaufen, anziehen, ablegen, needBackup,
+           STUFEN, FUTTER, stufeVon, ausgewachsen, naechsteStufe, fuettern, wachsStart };`)();
 
 let fehler = 0, n = 0;
 function ok(bed, text){ n++; if(!bed){ fehler++; console.log("✗ " + text); } }
@@ -94,6 +95,20 @@ sh = M.kaufen(sh, "krone"); ok(!sh.owned.includes("krone") && sh.k === 90, "zu t
 sh = { k:1000, owned:[], wear:[] }; sh = M.kaufen(sh, "rosa"); sh = M.kaufen(sh, "regenbogen");
 ok(sh.wear.includes("regenbogen") && !sh.wear.includes("rosa"), "nur eine Mähnenfarbe gleichzeitig");
 ok(!M.ablegen(sh, "regenbogen").wear.includes("regenbogen"), "ablegen");
+
+/* --- Wachsen --- */
+ok(M.stufeVon(0) === 0 && M.stufeVon(39) === 0 && M.stufeVon(40) === 1 && M.stufeVon(800) === 4, "Stufengrenzen");
+let r = M.fuettern({ k:10, owned:[], wear:[] }, { w:35, lieb:"hafer" }, "apfel");
+ok(r && r.shop.k === 0 && r.pf.w === 46 && r.aufgestiegen === 1, "Apfel: −10 Karotten, +11, Aufstieg zum Jährling");
+ok(M.fuettern({ k:9, owned:[], wear:[] }, { w:0, lieb:"heu" }, "apfel") === null, "zu wenig Karotten → kein Füttern");
+r = M.fuettern({ k:20, owned:[], wear:[] }, { w:0, lieb:"hafer" }, "hafer");
+ok(r.plus === 36 && r.lieb && r.pf.liebBekannt, "Lieblingsfutter × 1,5 und entdeckt");
+ok(M.fuettern({ k:999, owned:[], wear:[] }, { w:800, lieb:"heu" }, "heu") === null, "ausgewachsen → kein Füttern mehr");
+r = M.fuettern({ k:999, owned:[], wear:[] }, { w:790, lieb:"x" }, "zucker");
+ok(r.pf.w === 800 && r.aufgestiegen === 4, "Wachstum gedeckelt bei Großes Pferd");
+ok(M.naechsteStufe(50).bis === "junges Pony" && M.naechsteStufe(50).hat === 10 && M.naechsteStufe(800) === null, "Fortschritt zur nächsten Stufe");
+ok(M.wachsStart({ owned:["schleife","halstuch"] }) === 80 && M.wachsStart({ owned:M.WAREN.map(w => w.id) }) === 160, "Einstieg: Ausgegebenes zählt, höchstens Junges Pony");
+ok(M.kaufen({ k:999, owned:[], wear:[] }, "sattel", 2).owned.length === 0 && M.kaufen({ k:999, owned:[], wear:[] }, "sattel", 3).owned.includes("sattel"), "Sattel erst ab Pony");
 
 /* --- Sicherung --- */
 ok(M.needBackup(jetzt - 8 * D, null, jetzt) && !M.needBackup(jetzt - 2 * D, null, jetzt) && !M.needBackup(null, null, jetzt), "Sicherungs-Erinnerung");

@@ -33,12 +33,21 @@ const kisten = async (falschBei = []) => {
     await pg.waitForFunction(() => !G || G.ende || (G.aktiv && !G.lock));
     if(await view() !== "spiel") break;
     const { a, erst } = await pg.evaluate(() => ({ a:frage(G.aktiv.c).a, erst:G.aktiv.erst }));
-    const sel = erst && falschBei.includes(i) ? `.ballen:not([data-wert="${a}"])` : `.ballen[data-wert="${a}"]`;
+    const sel = erst && falschBei.includes(i) ? `.reihe.aktiv .ballen:not([data-wert="${a}"])` : `.reihe.aktiv .ballen[data-wert="${a}"]`;
     await pg.locator(sel).first().dispatchEvent("pointerdown");
     await pg.waitForFunction(() => !G || G.ende || G.lock);
   }
 };
 await pg.click("#losKisten");
+/* Hintereinander: nach der halben Fallzeit kommt eine zweite Reihe, getippt zählt nur die unterste */
+await pg.evaluate(() => { G.fallMs = 2000; });
+await pg.waitForFunction(() => G.rows.length === 2, null, { timeout:4000 });
+ok(await pg.locator("#reihen .reihe").count() === 2 && await pg.locator("#reihen .reihe.aktiv").count() === 1, "zwei Reihen, eine davon aktiv");
+const obenRichtig = await pg.evaluate(() => frage(G.rows[1].c).a);
+await pg.evaluate(() => { G.fallMs = 60000; });
+const vorTipp = await pg.evaluate(() => G.geschafft + G.fehler);
+await pg.locator(`#reihen .reihe:not(.aktiv) .ballen[data-wert="${obenRichtig}"]`).dispatchEvent("pointerdown");
+ok(await pg.evaluate(() => G.geschafft + G.fehler) === vorTipp, "Tippen auf die obere Reihe zählt nicht");
 await kisten();
 ok(await view() === "ergebnis", "Level endet mit Ergebnis");
 ok(/Gold|Silber/.test(await pg.textContent("#ergText")), "fehlerfrei → Gold oder Silber");
@@ -52,7 +61,7 @@ await pg.click('#tempoChips [data-tempo="schnell"]');
 await pg.evaluate(() => { TEMPO.schnell.ms = 600; });
 await pg.click("#losKisten");
 await pg.waitForFunction(() => G && G.herzen < 3, null, { timeout:5000 });
-ok(await pg.evaluate(() => G.queue.length) === 10, "gelandete Aufgabe kommt wieder in die Reihe");
+ok(await pg.evaluate(() => G.queue.some(c => c.id === G.aktiv.c.id)), "gelandete Aufgabe kommt wieder in die Reihe");
 await pg.waitForFunction(() => VIEW === "ergebnis", null, { timeout:15000 });
 ok((await pg.textContent("#ergText")).includes("keine Herzen"), "ohne Herzen: Level verloren, keine Medaille");
 await pg.evaluate(() => { TEMPO.schnell.ms = 6000; });

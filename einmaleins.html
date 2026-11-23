@@ -136,6 +136,11 @@
   .pad{display:none;max-width:460px;width:100%;margin:0 auto;padding:8px 14px 14px}
   #spiel.rechnen .pad{display:block}
   #spiel.rechnen .reihe{display:none}
+  .reihe .schild{grid-column:1/-1;justify-self:center;background:#b5763c;color:#fff;font-weight:900;font-size:clamp(18px,3.4vw,26px);
+    padding:2px 16px;border-radius:10px;box-shadow:0 3px 0 #8a5528;margin-bottom:2px}
+  .reihe:not(.aktiv){opacity:.82}
+  .reihe:not(.aktiv) .ballen{pointer-events:none;filter:saturate(.75)}
+  .reihe.aktiv .schild{background:#e2731f;box-shadow:0 3px 0 #a9520f}
   .anzeige{background:#fff;border:3px solid var(--linie);border-radius:18px;text-align:center;font-size:44px;font-weight:900;min-height:70px;line-height:64px;margin-bottom:10px}
   .anzeige.rot{border-color:var(--rot);color:var(--rot)} .anzeige.gruen{border-color:var(--gruen);color:var(--gruen)}
   .tasten{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
@@ -228,6 +233,8 @@
     <div class="chips" id="reihenChips"></div>
     <div class="feldname">Tempo der Heuballen</div>
     <div class="chips" id="tempoChips"></div>
+    <div class="feldname">Heuballen kommen</div>
+    <div class="chips" id="ketteChips"></div>
     <p class="klein" id="auswahlInfo"></p>
   </div>
 
@@ -291,7 +298,7 @@
   </div>
   <div class="aufgabe" id="aufgabe"></div>
   <div class="feld" id="feld">
-    <div class="reihe" id="reihe"></div>
+    <div id="reihen"></div>
     <div class="wiese" id="wiese"><div class="pferd" id="spPferd"></div></div>
   </div>
   <div class="pad">
@@ -569,7 +576,7 @@ function needBackup(dirty, snooze, now){ return !!dirty && now - dirty >= 7 * DA
 
 /* ===================== Oberfläche ===================== */
 /* Fassung — bei JEDER Änderung hochzählen (am iPad läuft nach einem Push oft noch die alte Datei). */
-const FASSUNG = "23.11.2026 b";
+const FASSUNG = "23.11.2026 c";
 const KEY = "einmaleins_v1";
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
@@ -587,6 +594,7 @@ function sanitize(x){
     fell:FELLE[x.fell] ? x.fell : "fuchs",
     op:["mal", "geteilt", "mix"].includes(x.op) ? x.op : "mal",
     rows, max, tempo:TEMPO[x.tempo] ? x.tempo : "normal", ton:x.ton !== false,
+    kette:x.kette === "einzeln" ? "einzeln" : "mehr",
     tafelOp:x.tafelOp === "d" ? "d" : "m",
   };
 }
@@ -746,6 +754,8 @@ function renderHome(){
     const m = MED.reihen[r];
     return `<button class="chip${S.rows.includes(r) ? " an" : ""}" data-reihe="${r}">${r}${m ? `<span class="med">${{ gold:"🥇", silber:"🥈", bronze:"🥉" }[m]}</span>` : ""}</button>`;
   }).join("") + `<button class="chip${alle ? " an" : ""}" data-reihe="alle">Alle</button>`;
+  $("ketteChips").innerHTML = [["mehr", "Hintereinander"], ["einzeln", "Einzeln"]]
+    .map(([k, t]) => `<button class="chip${S.kette === k ? " an" : ""}" data-kette="${k}">${t}</button>`).join("");
   $("tempoChips").innerHTML = Object.entries(TEMPO).map(([k, t]) => `<button class="chip${S.tempo === k ? " an" : ""}" data-tempo="${k}">${t.name}</button>`).join("");
   $("auswahlInfo").textContent = karten.length + " Aufgaben ausgewählt, davon " + faellig + " heute dran. Eine Reihe allein antippen = nur diese Reihe; Medaille an der Reihe, wenn du sie allein gespielt hast.";
 
@@ -802,10 +812,11 @@ function spielStart(art){
   if(!karten.length){ alert("Bitte mindestens eine Reihe auswählen."); return; }
   const level = levelBauen(karten, P, Date.now(), 10);
   G = { art, queue:level.slice(), total:level.length, geschafft:0, herzen:3, fehler:0, zeiten:[], karotten:0,
-        versucht:new Set(), aktiv:null, lock:false, eingabe:"", fallMs:TEMPO[S.tempo].ms,
+        versucht:new Set(), aktiv:null, lock:false, eingabe:"", fallMs:TEMPO[S.tempo].ms, rows:[], kette:S.kette,
         sicherVorher:sicherZahl(), tagVorher:dayDone(DAYS[dayKey(Date.now())]), sterneVorher:STARS.w.length,
         reihen:S.rows.slice(), op:S.op };
   $("spiel").classList.toggle("rechnen", art === "rechnen");
+  $("reihen").innerHTML = "";
   zeige("spiel");
   pferdMalen($("spPferd"));
   ton("start");
@@ -819,36 +830,64 @@ function kopfMalen(){
 function naechste(){
   cancelAnimationFrame(RAF); RAF = 0;
   if(!G) return;
+  if(G.art === "kisten") return naechsteReihe();
   if(!G.queue.length || G.herzen <= 0){ spielEnde(); return; }
   const c = G.queue.shift();
-  G.aktiv = { c, erst:!G.versucht.has(c.id), t0:performance.now() };
+  G.aktiv = { c, erst:!G.versucht.has(c.id), t0:performance.now(), aktivAb:performance.now() };
   G.lock = false; G.eingabe = "";
   const a = $("aufgabe"); a.className = "aufgabe"; a.textContent = frage(c).text + " = ?";
   kopfMalen();
-  if(G.art === "kisten"){
-    const r = $("reihe");
-    r.innerHTML = auswahl(c).map(x => `<button class="ballen" data-wert="${x}"><span>${x}</span></button>`).join("");
-    r.style.transform = "translateY(0)";
-    RAF = requestAnimationFrame(fallen);
-  } else {
-    const an = $("anzeige"); an.className = "anzeige"; an.textContent = "";
-  }
+  const an = $("anzeige"); an.className = "anzeige"; an.textContent = "";
 }
-function landeY(){ return Math.max(0, $("feld").clientHeight - $("wiese").offsetHeight * 0.55 - $("reihe").offsetHeight); }
+/* Heuballen: Reihen kommen hintereinander (vom Nutzer, Fassung c). Die nächste Reihe startet,
+   sobald die jüngste die halbe Strecke gefallen ist (höchstens 3 gleichzeitig) — „Einzeln“
+   wartet wie früher, bis die vorige weg ist. Geantwortet wird immer auf die UNTERSTE Reihe;
+   die Antwortzeit zählt ab da, wo sie unterste wurde. Während der Rückmeldung stehen alle still. */
+function neueReihe(){
+  if(!G.queue.length) return null;
+  const c = G.queue.shift(), el = document.createElement("div");
+  el.className = "reihe";
+  el.innerHTML = `<div class="schild">${frage(c).text}</div>` + auswahl(c).map(x => `<button class="ballen" data-wert="${x}"><span>${x}</span></button>`).join("");
+  $("reihen").appendChild(el);
+  const r = { c, erst:!G.versucht.has(c.id), t0:performance.now(), el };
+  G.rows.push(r);
+  return r;
+}
+function naechsteReihe(){
+  const now = performance.now();
+  if(G.lockAt){ for(const r of G.rows) r.t0 += now - G.lockAt; G.lockAt = 0; }   /* Stillstand nachholen */
+  if(G.aktiv && G.rows[0] === G.aktiv){ G.rows.shift().el.remove(); }
+  if(G.herzen <= 0 || (!G.rows.length && !G.queue.length)){ spielEnde(); return; }
+  if(!G.rows.length) neueReihe();
+  G.aktiv = G.rows[0];
+  G.aktiv.aktivAb = now;
+  G.aktiv.erst = !G.versucht.has(G.aktiv.c.id);
+  G.aktiv.el.classList.add("aktiv");
+  G.lock = false;
+  const a = $("aufgabe"); a.className = "aufgabe"; a.textContent = frage(G.aktiv.c).text + " = ?";
+  kopfMalen();
+  RAF = requestAnimationFrame(fallen);
+}
+function landeY(el){ return Math.max(0, $("feld").clientHeight - $("wiese").offsetHeight * 0.55 - el.offsetHeight); }
 function fallen(){
   RAF = 0;
   if(!G || G.art !== "kisten" || !G.aktiv || G.lock || G.pause) return;
-  const p = (performance.now() - G.aktiv.t0) / G.fallMs;
-  $("reihe").style.transform = "translateY(" + (Math.min(1, p) * landeY()) + "px)";
-  if(p >= 1){ antwort(null); return; }
+  const now = performance.now();
+  const juengste = G.rows[G.rows.length - 1];
+  if(G.kette === "mehr" && G.rows.length < 3 && (now - juengste.t0) / G.fallMs >= 0.5) neueReihe();
+  for(const r of G.rows){
+    const p = Math.min(1, (now - r.t0) / G.fallMs);
+    r.el.style.transform = "translateY(" + (p * landeY(r.el)) + "px)";
+  }
+  if((now - G.aktiv.t0) / G.fallMs >= 1){ antwort(null); return; }
   RAF = requestAnimationFrame(fallen);
 }
 /* Eine Antwort (null = Ballen gelandet). Bewertet wird nur der erste Versuch je Aufgabe;
    falsch beantwortete kommen drei Aufgaben später wieder. */
 function antwort(wert){
   if(!G || !G.aktiv || G.lock) return;
-  G.lock = true;
-  const { c, erst, t0 } = G.aktiv, f = frage(c), ms = performance.now() - t0, ok = wert === f.a, now = Date.now();
+  G.lock = true; G.lockAt = performance.now();
+  const { c, erst, aktivAb } = G.aktiv, f = frage(c), ms = performance.now() - aktivAb, ok = wert === f.a, now = Date.now();
   if(erst){
     P[c.id] = grade(P[c.id], ok, G.art, ms, now);
     DAYS[dayKey(now)] = countDay(DAYS[dayKey(now)], ok);
@@ -870,7 +909,7 @@ function antwort(wert){
     auf.className = "aufgabe rot"; auf.textContent = loesung(c);
   }
   if(G.art === "kisten"){
-    for(const b of $("reihe").querySelectorAll(".ballen")){
+    for(const b of G.aktiv.el.querySelectorAll(".ballen")){
       const w = +b.dataset.wert;
       if(w === f.a) b.classList.add(ok ? "richtig" : "zeigen");
       else if(w === wert) b.classList.add("falsch");
@@ -896,6 +935,7 @@ function taste(k){
 }
 function spielEnde(){
   cancelAnimationFrame(RAF); clearTimeout(WEITER_T);
+  $("reihen").innerHTML = "";
   const fertig = G.herzen > 0 && !G.queue.length;
   const schnitt = G.zeiten.length ? G.zeiten.reduce((a, b) => a + b, 0) / G.zeiten.length : Infinity;
   const med = medaille({ fertig, fehler:G.fehler, schnitt, art:G.art, fallMs:G.fallMs });
@@ -931,6 +971,7 @@ function spielEnde(){
 function spielAbbrechen(){
   if(!G) return;
   cancelAnimationFrame(RAF); clearTimeout(WEITER_T);
+  $("reihen").innerHTML = "";
   /* Verdiente Karotten bleiben, auch ohne Levelende (nur keine Medaille) */
   SHOP = { ...SHOP, k:SHOP.k + G.karotten };
   STARS = sterneNachtragen(STARS, DAYS);
@@ -1085,7 +1126,10 @@ $("startLos").onclick = () => {
   persist(); renderHome(); zeige("home");
 };
 $("tasten").addEventListener("click", e => { const b = e.target.closest("button"); if(b) taste(b.dataset.k); });
-$("reihe").addEventListener("pointerdown", e => { const b = e.target.closest(".ballen"); if(b) antwort(+b.dataset.wert); });
+$("reihen").addEventListener("pointerdown", e => {
+  const b = e.target.closest(".ballen");
+  if(b && G && G.aktiv && b.closest(".reihe") === G.aktiv.el) antwort(+b.dataset.wert);   /* nur die unterste Reihe */
+});
 document.addEventListener("keydown", e => {
   if(VIEW !== "spiel" || !G || G.art !== "rechnen") return;
   if(/^\d$/.test(e.key)) taste(e.key); else if(e.key === "Backspace") taste("weg"); else if(e.key === "Enter") taste("ok");
@@ -1107,6 +1151,7 @@ document.addEventListener("click", e => {
   }
   else if(d.nurreihe){ S.rows = [+d.nurreihe]; S.tafelOp === "d" && S.op === "mal" && (S.op = "geteilt"); persist(); renderHome(); $("reihenChips").scrollIntoView({ behavior:"smooth", block:"center" }); return; }
   else if(d.tempo){ S.tempo = d.tempo; }
+  else if(d.kette){ S.kette = d.kette; }
   else if(d.tafel){ S.tafelOp = d.tafel; }
   else if(d.fell){ S.fell = d.fell; persist(); if(VIEW === "start") renderStart(); else renderHome(); return; }
   else if(d.futter){ futterGeben(d.futter); return; }
@@ -1122,7 +1167,7 @@ document.addEventListener("click", e => {
 document.addEventListener("visibilitychange", () => {
   if(!G || VIEW !== "spiel" || G.art !== "kisten" || !G.aktiv) { if(!document.hidden && VIEW === "home") renderHome(); return; }
   if(document.hidden){ G.pause = performance.now(); cancelAnimationFrame(RAF); RAF = 0; }
-  else if(G.pause){ G.aktiv.t0 += performance.now() - G.pause; G.pause = 0; if(!G.lock) RAF = requestAnimationFrame(fallen); }
+  else if(G.pause){ const d = performance.now() - G.pause; for(const r of G.rows) r.t0 += d; G.aktiv.aktivAb += d; if(G.lockAt) G.lockAt += d; G.pause = 0; if(!G.lock) RAF = requestAnimationFrame(fallen); }
 });
 
 if(S.pferd){ renderHome(); zeige("home"); } else { renderStart(); zeige("start"); }

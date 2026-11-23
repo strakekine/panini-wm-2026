@@ -886,6 +886,10 @@ Die iPhone-Regeln der Pizza-App gelten.
 
 **Zwei Spielarten:** HEUBALLEN — vier Ballen mit Antworten sinken auf das Pferd, richtige antippen
 (`pointerdown`), drei Herzen, Landen = Fehler, Tempo Gemütlich/Normal/Schnell = 12/9/6 s Fallzeit.
+**Reihen hintereinander** (vom Nutzer, Fassung c, Vorgabe; umschaltbar „Einzeln“, `S.kette`): die nächste Reihe
+startet, sobald die jüngste die halbe Strecke gefallen ist (höchstens 3, `G.rows`); jede Reihe trägt ihre Aufgabe
+auf einem Schild, **geantwortet wird nur auf die unterste** (`.reihe.aktiv`, Tippen oben zählt nicht), Antwortzeit
+ab da, wo sie unterste wurde (`aktivAb`); während der Rückmeldung stehen alle still (`lockAt`).
 RECHNEN — Ergebnis über eigenes Ziffernfeld (keine iOS-Tastatur), ✓ zum Abschicken (kein
 automatisches Abschicken nach der Stellenzahl, das verriete die Länge), keine Herzen. Level = 10
 Aufgaben (`levelBauen`: fällige zuerst, niedrigstes Fach zuerst, höchstens 4 neue). Falsch → Lösung
@@ -925,7 +929,7 @@ Sicherung als Datei über `navigator.share`, Erinnerung nach einer Woche ungesic
 **Fassung** `FASSUNG` unten im Startbild, bei jeder Änderung hochzählen.
 **Testen:** `node test/einmaleins.mjs` (Logik zwischen `Logik`…`Oberfläche`, Gegenprobe gemacht) und
 `node test/einmaleins-oberflaeche.mjs` (Browser, 820×1180: Levels beider Arten, Herzen, Tafel,
-Laden, Füttern mit Aufstieg, Abbrechen behält Karotten, Fokus beim Namen, Neuladen, Papa-Code). **Am iPad noch nicht ausprobiert.**
+Laden, Füttern mit Aufstieg, Abbrechen behält Karotten, zwei Reihen/nur unterste zählt, Fokus beim Namen, Neuladen, Papa-Code). **Am iPad noch nicht ausprobiert.**
 
 ## Vokabeltrainer (`vokabeln.html`) — Stand und Regeln
 

@@ -11,7 +11,7 @@ in dieser Liste.
 | **Teigplaner** — Pizzateig-Rechner und Gärplaner | `pizza.html` | [öffnen](https://strakekine.github.io/panini-wm-2026/pizza.html) |
 | **Brotplaner** — Backvorgang, Anstellgut, Rückwärtsplanung | `brot.html` | [öffnen](https://strakekine.github.io/panini-wm-2026/brot.html) |
 | **Vokabeltrainer** — Französisch für Emil und Leo | `vokabeln.html` | [öffnen](https://strakekine.github.io/panini-wm-2026/vokabeln.html) |
-| **Einmaleins** — Mal und Geteilt üben mit einem Pferd, Heuballen-Spiel, Karteikasten | `einmaleins.html` | [öffnen](https://strakekine.github.io/panini-wm-2026/einmaleins.html) |
+| **Einmaleins** — umgezogen ins eigene Repo [strakekine/einmaleins](https://github.com/strakekine/einmaleins) | `einmaleins.html` = Umzugsseite | [neue App](https://strakekine.github.io/einmaleins/) |
 | **FC Koeppchen** — Spiele, Tabellen, Kalender, Liveticker, automatisch von der FLF | `fussball.html` | [öffnen](https://strakekine.github.io/panini-wm-2026/fussball.html) |
 | **Pine-Script-Indikatoren** für TradingView | `pine/` | siehe [`pine/README.md`](pine/README.md) |
 
@@ -41,8 +41,6 @@ node test/brot.mjs
 node test/vokabeln.mjs
 node test/vokabeln-oberflaeche.mjs   # Browser (Playwright)
 node test/vokabeln-sprechen.mjs      # Browser (Playwright)
-node test/einmaleins.mjs
-node test/einmaleins-oberflaeche.mjs # Browser (Playwright)
 ```
 
 Stand und Regeln jeder App, samt der Entscheidungen dahinter, stehen in [`CLAUDE.md`](CLAUDE.md).

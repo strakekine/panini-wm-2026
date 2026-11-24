@@ -148,7 +148,7 @@ UID:flf-1011085@fc-koeppchen
 DTSTAMP:20260701T000000Z
 DTSTART:20261123T190000Z
 DTEND:20261123T210000Z
-SUMMARY:⚽ Résidence Walferdange I – Koeppchen Seniors 2
+SUMMARY:⚽ Résidence Walferdange I – Koeppchen Seniors 2 5:4
 LOCATION:Terrain 2 (Walferdange\, synth.)
 DESCRIPTION:Réserves Classe 1\, Spieltag 8\n\n⚠️ Dieser Kalender zieht
   um und wird nur noch bis Ende 2026 aktualisiert. Bitte neu abonnieren: Ap
@@ -324,17 +324,6 @@ DESCRIPTION:Réserves Classe 1\, Spieltag 22\n\n⚠️ Dieser Kalender zieh
  📅 … im Kalender abonnieren“. Danach diesen alten Kalender löschen.
 END:VEVENT
 BEGIN:VEVENT
-UID:umzug-20261123@fc-koeppchen
-DTSTAMP:20261030T000000Z
-DTSTART;VALUE=DATE:20261123
-DTEND;VALUE=DATE:20261124
-SUMMARY:⚠️ FC Koeppchen: Kalender bitte neu abonnieren
-DESCRIPTION:⚠️ Dieser Kalender zieht um und wird nur noch bis Ende 2026
-  aktualisiert. Bitte neu abonnieren: App öffnen (https://fckoeppchen.gith
- ub.io/)\, Mannschaft antippen\, „📅 … im Kalender abonnieren“. Dan
- ach diesen alten Kalender löschen.
-END:VEVENT
-BEGIN:VEVENT
 UID:umzug-20261130@fc-koeppchen
 DTSTAMP:20261030T000000Z
 DTSTART;VALUE=DATE:20261130
@@ -350,6 +339,17 @@ UID:umzug-20261207@fc-koeppchen
 DTSTAMP:20261030T000000Z
 DTSTART;VALUE=DATE:20261207
 DTEND;VALUE=DATE:20261208
+SUMMARY:⚠️ FC Koeppchen: Kalender bitte neu abonnieren
+DESCRIPTION:⚠️ Dieser Kalender zieht um und wird nur noch bis Ende 2026
+  aktualisiert. Bitte neu abonnieren: App öffnen (https://fckoeppchen.gith
+ ub.io/)\, Mannschaft antippen\, „📅 … im Kalender abonnieren“. Dan
+ ach diesen alten Kalender löschen.
+END:VEVENT
+BEGIN:VEVENT
+UID:umzug-20270222@fc-koeppchen
+DTSTAMP:20261030T000000Z
+DTSTART;VALUE=DATE:20270222
+DTEND;VALUE=DATE:20270223
 SUMMARY:⚠️ FC Koeppchen: Kalender bitte neu abonnieren
 DESCRIPTION:⚠️ Dieser Kalender zieht um und wird nur noch bis Ende 2026
   aktualisiert. Bitte neu abonnieren: App öffnen (https://fckoeppchen.gith
